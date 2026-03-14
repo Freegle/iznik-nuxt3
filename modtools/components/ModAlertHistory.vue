@@ -1,5 +1,8 @@
 <template>
-  <b-row v-if="alert">
+  <!--  <div>-->
+  <!--    Alert {{ JSON.stringify(alert) }}-->
+  <!--  </div>-->
+  <b-row>
     <b-col cols="6" lg="2">
       {{ datetimeshort(alert.created) }}
     </b-col>
@@ -22,32 +25,27 @@
     </b-col>
     <ModAlertHistoryDetailsModal
       v-if="showDetails"
-      :id="alertid"
+      :id="alert.id"
       ref="detailsModal"
       @hidden="showDetails = false"
     />
     <ModAlertHistoryStatsModal
       v-if="showStats"
-      :id="alertid"
+      :id="alert.id"
       ref="statsModal"
       @hidden="showStats = false"
     />
   </b-row>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
-import { useAlertStore } from '~/stores/alert'
+import { ref } from 'vue'
 
-const alertStore = useAlertStore()
-
-const props = defineProps({
-  alertid: {
-    type: Number,
+defineProps({
+  alert: {
+    type: Object,
     required: true,
   },
 })
-
-const alert = computed(() => alertStore.get(props.alertid))
 
 const showDetails = ref(false)
 const showStats = ref(false)

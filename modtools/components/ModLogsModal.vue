@@ -16,7 +16,7 @@
             Some old logs are removed to save space: login/logout after 1 year,
             bounces over 90 days, logs about deleted messages, deleted users.
           </p>
-          <ModLog v-for="log in logs" :key="'log-' + log.id" :logid="log.id" />
+          <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
         <infinite-loading
           :distance="200"
@@ -30,9 +30,7 @@
       </template>
 
       <template #footer>
-        <b-button variant="primary" :disabled="busy" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="primary" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </div>

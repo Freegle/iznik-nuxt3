@@ -114,6 +114,7 @@ const mockNuxtApp = {
 // Mock useRuntimeConfig
 ;(globalThis as Record<string, unknown>).useRuntimeConfig = () => ({
   public: {
+    APIv1: 'http://apiv1.localhost',
     APIv2: 'http://apiv2.localhost',
     USER_SITE: '',
     GOOGLE_MAPS_KEY: 'test-key',

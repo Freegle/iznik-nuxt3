@@ -14,57 +14,44 @@ vi.mock('#app', () => ({
   }),
 }))
 
-vi.mock('~/modtools/composables/useModMe', () => ({
-  useModMe: () => ({
-    checkWork: vi.fn(),
-  }),
-}))
-
-const validGiftaid = {
-  id: 123,
-  userid: 456,
-  fullname: 'John Smith',
-  homeaddress: '123 Test Street\nTest City',
-  housenameornumber: '123',
-  postcode: 'AB1 2CD',
-  timestamp: '2024-01-01T12:00:00Z',
-  period: '2024',
-  donations: 50,
-  email: 'test@example.com',
-}
-
-const invalidGiftaid = {
-  id: 789,
-  userid: 999,
-  fullname: 'NoLastName',
-  homeaddress: '456 Bad Street',
-  housenameornumber: '',
-  postcode: 'Invalid',
-  timestamp: '2024-01-01T12:00:00Z',
-  period: '2024',
-  donations: null,
-  email: null,
-}
-
-const mockGiftAidStore = {
-  byId: vi.fn(),
-  add: vi.fn(),
-}
-
-vi.mock('~/modtools/stores/giftaid', () => ({
-  useGiftAidStore: () => mockGiftAidStore,
-}))
-
 config.global.mocks = {
   ...config.global.mocks,
   timeago: vi.fn(() => '2 days ago'),
 }
 
 describe('ModGiftAid', () => {
-  function mountComponent(props = {}, storeItem = validGiftaid) {
-    mockGiftAidStore.byId.mockReturnValue(storeItem)
+  const validGiftaid = {
+    id: 123,
+    userid: 456,
+    fullname: 'John Smith',
+    homeaddress: '123 Test Street\nTest City',
+    housenameornumber: '123',
+    postcode: 'AB1 2CD',
+    timestamp: '2024-01-01T12:00:00Z',
+    period: '2024',
+    donations: 50,
+    email: [
+      { email: 'test@example.com', ourdomain: false, preferred: true },
+      { email: 'other@freegle.org', ourdomain: true, preferred: false },
+    ],
+  }
+
+  const invalidGiftaid = {
+    id: 789,
+    userid: 999,
+    fullname: 'NoLastName',
+    homeaddress: '456 Bad Street',
+    housenameornumber: '',
+    postcode: 'Invalid',
+    timestamp: '2024-01-01T12:00:00Z',
+    period: '2024',
+    donations: null,
+    email: null,
+  }
+
+  function mountComponent(props = {}) {
     return mount(ModGiftAid, {
-      props: { giftaidid: storeItem.id, ...props },
+      props: { giftaid: validGiftaid, ...props },
       global: {
         mocks: {
           timeago: vi.fn(() => '2 days ago'),
@@ -130,10 +117,7 @@ describe('ModGiftAid', () => {
     })
 
     it('shows danger notice when no donations found', async () => {
-      const wrapper = mountComponent(
-        { giftaidid: invalidGiftaid.id },
-        invalidGiftaid
-      )
+      const wrapper = mountComponent({ giftaid: invalidGiftaid })
       await wrapper.vm.$nextTick()
       const dangerNotice = wrapper.find('.notice.danger')
       expect(dangerNotice.exists()).toBe(true)
@@ -165,10 +149,7 @@ describe('ModGiftAid', () => {
       })
 
       it('returns true when name has no space', async () => {
-        const wrapper = mountComponent(
-          { giftaidid: invalidGiftaid.id },
-          invalidGiftaid
-        )
+        const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.nameInvalid).toBe(true)
       })
@@ -189,24 +170,21 @@ describe('ModGiftAid', () => {
       })
 
       it('returns true when postcode has no space', async () => {
-        const wrapper = mountComponent(
-          { giftaidid: invalidGiftaid.id },
-          invalidGiftaid
-        )
+        const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.postcodeInvalid).toBe(true)
       })
 
       it('returns true when postcode is empty', async () => {
         const giftaid = { ...validGiftaid, postcode: '' }
-        const wrapper = mountComponent({ giftaidid: giftaid.id }, giftaid)
+        const wrapper = mountComponent({ giftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.postcodeInvalid).toBe(true)
       })
 
       it('returns true when postcode is null', async () => {
         const giftaid = { ...validGiftaid, postcode: null }
-        const wrapper = mountComponent({ giftaidid: giftaid.id }, giftaid)
+        const wrapper = mountComponent({ giftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.postcodeInvalid).toBe(true)
       })
@@ -220,34 +198,53 @@ describe('ModGiftAid', () => {
       })
 
       it('returns true when housenameornumber is empty', async () => {
-        const wrapper = mountComponent(
-          { giftaidid: invalidGiftaid.id },
-          invalidGiftaid
-        )
+        const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.houseInvalid).toBe(true)
       })
     })
 
     describe('email', () => {
-      it('returns email string from V2 API', async () => {
+      it('returns preferred non-ourdomain email', async () => {
         const wrapper = mountComponent()
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBe('test@example.com')
       })
 
-      it('returns null when no email', async () => {
-        const wrapper = mountComponent(
-          { giftaidid: invalidGiftaid.id },
-          invalidGiftaid
-        )
+      it('returns first non-ourdomain email if none preferred', async () => {
+        const giftaid = {
+          ...validGiftaid,
+          email: [
+            { email: 'personal@gmail.com', ourdomain: false, preferred: false },
+            { email: 'freegle@freegle.org', ourdomain: true, preferred: true },
+          ],
+        }
+        const wrapper = mountComponent({ giftaid })
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.email).toBe('personal@gmail.com')
+      })
+
+      it('returns null when no email array', async () => {
+        const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBeNull()
       })
 
-      it('returns null when email is empty string', async () => {
-        const giftaid = { ...validGiftaid, email: '' }
-        const wrapper = mountComponent({ giftaidid: giftaid.id }, giftaid)
+      it('returns null when email array is empty', async () => {
+        const giftaid = { ...validGiftaid, email: [] }
+        const wrapper = mountComponent({ giftaid })
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.email).toBeNull()
+      })
+
+      it('skips ourdomain emails', async () => {
+        const giftaid = {
+          ...validGiftaid,
+          email: [
+            { email: 'freegle@freegle.org', ourdomain: true, preferred: true },
+          ],
+        }
+        const wrapper = mountComponent({ giftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBeNull()
       })
@@ -308,10 +305,7 @@ describe('ModGiftAid', () => {
 
     describe('giveup', () => {
       it('calls reviewed when no donations', async () => {
-        const wrapper = mountComponent(
-          { giftaidid: invalidGiftaid.id },
-          invalidGiftaid
-        )
+        const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         const callback = vi.fn()
         wrapper.vm.giveup(callback)
@@ -349,20 +343,16 @@ describe('ModGiftAid', () => {
   })
 
   describe('props', () => {
-    it('looks up giftaid from store by giftaidid on mount', async () => {
+    it('copies giftaid prop to editgiftaid on mount', async () => {
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()
-      expect(mockGiftAidStore.byId).toHaveBeenCalledWith(123)
       expect(wrapper.vm.editgiftaid).toEqual(validGiftaid)
     })
   })
 
   describe('button disabled states', () => {
     it('disables Looks Good button when name is invalid', async () => {
-      const wrapper = mountComponent(
-        { giftaidid: invalidGiftaid.id },
-        invalidGiftaid
-      )
+      const wrapper = mountComponent({ giftaid: invalidGiftaid })
       await wrapper.vm.$nextTick()
       const buttons = wrapper.findAll('button')
       const looksGoodButton = buttons.find((b) =>

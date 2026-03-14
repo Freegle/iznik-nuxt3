@@ -131,7 +131,7 @@
                 v-for="l in locationsInBounds"
                 :key="'location-' + l.id"
                 :ref="'location-' + l.id"
-                :locationid="l.id"
+                :location="l"
                 :selected="selectedObj === l"
                 :selectable="!selectedObj"
                 :shade="shade"
@@ -517,7 +517,15 @@ const locationsInBounds = computed(() => {
         location.polygon &&
         bounds.value.contains([location.lat, location.lng])
       ) {
-        ret.push(location)
+        const wkt = new Wkt.Wkt()
+        try {
+          // console.log('Wkt.Wkt C') // , location.polygon
+          wkt.read(location.polygon)
+          location.json = wkt.toJson()
+          ret.push(location)
+        } catch (e) {
+          console.log('WKT error', location, e)
+        }
       }
     }
   }
@@ -874,11 +882,6 @@ async function fetchLocations(data) {
 
       if (ret?.locations) {
         locations.value = ret.locations
-
-        for (const loc of ret.locations) {
-          locationStore.list[loc.id] = loc
-        }
-
         dodgy.value = ret.dodgy
       }
     }

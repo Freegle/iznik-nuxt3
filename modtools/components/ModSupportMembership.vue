@@ -1,5 +1,5 @@
 <template>
-  <div v-if="membership">
+  <div>
     <b-card no-body>
       <b-card-body class="pl-3 pr-2 pt-2 pb-0">
         <b-row>
@@ -105,14 +105,13 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+// membership.id is groupid and membership.membershipid is membershipid
 import { useMemberStore } from '~/stores/member'
-import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  membershipid: {
-    type: Number,
+  membership: {
+    type: Object,
     required: true,
   },
   userid: {
@@ -124,27 +123,12 @@ const props = defineProps({
 const emit = defineEmits(['fetchuser'])
 
 const memberStore = useMemberStore()
-const userStore = useUserStore()
 const { checkWork } = useModMe()
-
-const membership = computed(() => {
-  const user = userStore.byId(props.userid)
-
-  if (!user?.memberships) {
-    return null
-  }
-
-  return (
-    user.memberships.find((m) => m.membershipid === props.membershipid) || null
-  )
-})
-
-const groupid = computed(() => membership.value?.id)
 
 async function changeEvents(newval) {
   const params = {
     userid: props.userid,
-    groupid: groupid.value,
+    groupid: props.membership.id,
     eventsallowed: newval,
   }
 
@@ -154,7 +138,7 @@ async function changeEvents(newval) {
 async function changeVolunteering(newval) {
   const params = {
     userid: props.userid,
-    groupid: groupid.value,
+    groupid: props.membership.id,
     volunteeringallowed: newval,
   }
 
@@ -162,29 +146,33 @@ async function changeVolunteering(newval) {
 }
 
 async function changeFrequency() {
-  // membership.emailfrequency has new value via v-model
+  // props.membership.emailfrequency has new value
   const params = {
     userid: props.userid,
-    groupid: groupid.value,
-    emailfrequency: membership.value?.emailfrequency,
+    groupid: props.membership.id,
+    emailfrequency: props.membership.emailfrequency,
   }
 
   await memberStore.update(params)
 }
 
 async function changePostingStatus() {
-  // membership.ourpostingstatus has new value via v-model
+  // props.membership.ourpostingstatus has new value
   const params = {
     userid: props.userid,
-    groupid: groupid.value,
-    ourpostingstatus: membership.value?.ourpostingstatus,
+    groupid: props.membership.id,
+    ourpostingstatus: props.membership.ourpostingstatus,
   }
 
   await memberStore.update(params)
 }
 
 function remove(callback) {
-  memberStore.remove(props.userid, groupid.value, props.membershipid)
+  memberStore.remove(
+    props.userid,
+    props.membership.id,
+    props.membership.membershipid
+  )
   emit('fetchuser')
   if (callback) callback()
   checkWork(true)

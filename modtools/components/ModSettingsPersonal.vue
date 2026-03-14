@@ -123,17 +123,6 @@
     <b-form-group label="Would you like some cake?">
       <ModCake />
     </b-form-group>
-    <h5 class="mt-3">Useful Links</h5>
-    <p>
-      <ExternalLink
-        href="https://wiki.ilovefreegle.org/Freegle_Volunteer_Agreement"
-        >Freegle Volunteer Agreement</ExternalLink
-      >
-      &middot;
-      <ExternalLink href="https://wiki.ilovefreegle.org/Trash_Nothing"
-        >Trash Nothing</ExternalLink
-      >
-    </p>
     <h5 class="mt-3">Unsubscribe</h5>
     <p>
       If you want to completely leave ModTools and Freegle and remove all your

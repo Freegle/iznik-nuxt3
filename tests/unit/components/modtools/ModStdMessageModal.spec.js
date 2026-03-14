@@ -17,14 +17,20 @@ import ModStdMessageModal from '~/modtools/components/ModStdMessageModal.vue'
 const originalConsoleWarn = console.warn
 
 beforeAll(() => {
+  // Temporarily replace console.warn to not throw on Vue warnings for template refs
+  // and for the SpinButton event emission handling quirk
   console.warn = (...args) => {
     const message = typeof args[0] === 'string' ? args[0] : ''
+    // Allow template ref warnings through without throwing
     if (message.includes('Template ref')) {
       return
     }
+    // Allow the callWithAsyncErrorHandling warning - this occurs when testing
+    // event handlers that receive function arguments (like SpinButton's @handle)
     if (message.includes('callWithAsyncErrorHandling')) {
       return
     }
+    // Re-throw other Vue warnings
     if (message.includes('[Vue warn]')) {
       throw new Error(
         `Vue warning should not occur in tests: ${args.join(' ')}`
@@ -35,6 +41,7 @@ beforeAll(() => {
 })
 
 afterAll(() => {
+  // Restore original console.warn
   console.warn = originalConsoleWarn
 })
 
@@ -51,23 +58,15 @@ const mockMessageStore = {
   delete: vi.fn(),
   hold: vi.fn(),
   patch: vi.fn(),
-  byId: vi.fn(),
 }
 
 const mockMemberStore = {
   reply: vi.fn(),
   delete: vi.fn(),
-  get: vi.fn(),
 }
 
 const mockUserStore = {
   edit: vi.fn(),
-  byId: vi.fn(),
-  fetch: vi.fn(),
-}
-
-const mockStdmsgStore = {
-  byId: vi.fn(),
 }
 
 const mockHide = vi.fn()
@@ -87,10 +86,6 @@ vi.mock('~/stores/member', () => ({
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
-}))
-
-vi.mock('~/stores/stdmsg', () => ({
-  useStdmsgStore: () => mockStdmsgStore,
 }))
 
 vi.mock('~/composables/useOurModal', () => ({
@@ -171,56 +166,17 @@ describe('ModStdMessageModal', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}, { message, member, stdmsgData } = {}) {
+  function mountComponent(props = {}) {
+    // Mock getElementById for modal movement methods
     const mockElement = { style: {} }
     vi.spyOn(window.document, 'getElementById').mockReturnValue(mockElement)
 
-    const resolvedStdmsg = stdmsgData || createStdmsg()
-    const resolvedMessage = message !== undefined ? message : createMessage()
-
-    // Set up stdmsg store mock
-    mockStdmsgStore.byId.mockImplementation((id) => {
-      if (id === resolvedStdmsg.id) return resolvedStdmsg
-      return null
-    })
-
-    // Set up message store mock
-    mockMessageStore.byId.mockImplementation((id) => {
-      if (resolvedMessage && id === resolvedMessage.id) return resolvedMessage
-      return null
-    })
-
-    // Set up member store mock
-    if (member) {
-      mockMemberStore.get.mockImplementation((id) => {
-        if (id === member.id) return member
-        return null
-      })
-    }
-
-    // Set up user store mock
-    const fromuser = resolvedMessage?.fromuser
-    mockUserStore.byId.mockImplementation((id) => {
-      if (fromuser && typeof fromuser === 'object' && id === fromuser.id)
-        return fromuser
-      if (member && id === member.userid) return member
-      return null
-    })
-
-    // Build final props
-    const finalProps = { ...props }
-    if (!('stdmsgid' in finalProps) && !('stdmsgaction' in finalProps)) {
-      finalProps.stdmsgid = resolvedStdmsg.id
-    }
-    if (resolvedMessage && !('messageid' in finalProps)) {
-      finalProps.messageid = resolvedMessage.id
-    }
-    if (member && !('membershipid' in finalProps)) {
-      finalProps.membershipid = member.id
-    }
-
     return shallowMount(ModStdMessageModal, {
-      props: finalProps,
+      props: {
+        stdmsg: createStdmsg(),
+        message: createMessage(),
+        ...props,
+      },
       global: {
         stubs: {
           'b-modal': {
@@ -312,17 +268,24 @@ describe('ModStdMessageModal', () => {
   describe('rendering', () => {
     it('renders modal with correct structure and content', () => {
       const wrapper = mountComponent()
+      // Title contains subject
       expect(wrapper.find('.modal').attributes('title')).toContain(
         'Offer: Test item (Location)'
       )
+      // From/To fields for non-Edit actions
       expect(wrapper.text()).toContain('From:')
       expect(wrapper.text()).toContain('To:')
+      // Mod displayname in From field
       expect(wrapper.text()).toContain('Mod User')
+      // User displayname in To field
       expect(wrapper.text()).toContain('Test User')
+      // User email shown, but not ilovefreegle email
       expect(wrapper.text()).toContain('test@example.com')
       expect(wrapper.text()).not.toContain('users.ilovefreegle.org')
+      // Form elements exist
       expect(wrapper.find('input').exists()).toBe(true)
       expect(wrapper.find('textarea').exists()).toBe(true)
+      // Cancel button
       expect(wrapper.text()).toContain('Cancel')
     })
   })
@@ -338,10 +301,9 @@ describe('ModStdMessageModal', () => {
       ['Hold Message', 'Send and Hold'],
       ['Unknown', 'Send'],
     ])('returns correct label for %s action', (action, expected) => {
-      const wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ action }) }
-      )
+      const wrapper = mountComponent({
+        stdmsg: createStdmsg({ action }),
+      })
       expect(wrapper.vm.processLabel).toBe(expected)
     })
   })
@@ -353,10 +315,9 @@ describe('ModStdMessageModal', () => {
       ['DEFAULT', 'Group Settings'],
       ['PROHIBITED', "Can't Post"],
     ])('returns correct display text for %s status', (status, expected) => {
-      const wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ newmodstatus: status }) }
-      )
+      const wrapper = mountComponent({
+        stdmsg: createStdmsg({ newmodstatus: status }),
+      })
       expect(wrapper.vm.modstatus).toBe(expected)
     })
   })
@@ -370,10 +331,9 @@ describe('ModStdMessageModal', () => {
     ])(
       'returns correct frequency for %s delivery status',
       (status, expected) => {
-        const wrapper = mountComponent(
-          {},
-          { stdmsgData: createStdmsg({ newdelstatus: status }) }
-        )
+        const wrapper = mountComponent({
+          stdmsg: createStdmsg({ newdelstatus: status }),
+        })
         expect(wrapper.vm.emailfrequency).toBe(expected)
       }
     )
@@ -396,91 +356,91 @@ describe('ModStdMessageModal', () => {
       expect(wrapper.vm.warning).toContain(expectedWarning)
     })
 
-    it.each([['This is a clean message'], ['Contact me at user@yahoo.com']])(
-      'returns null for valid content: %s',
-      async (body) => {
-        const wrapper = mountComponent()
-        wrapper.vm.body = body
-        await wrapper.vm.$nextTick()
-        expect(wrapper.vm.warning).toBeNull()
-      }
-    )
+    it.each([
+      ['This is a clean message'],
+      ['Contact me at user@yahoo.com'], // @yahoo in email is OK
+    ])('returns null for valid content: %s', async (body) => {
+      const wrapper = mountComponent()
+      wrapper.vm.body = body
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.warning).toBeNull()
+    })
   })
 
   describe('groupid computed', () => {
-    it('returns groupid from message groups', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.groupid).toBe(123)
-    })
-
-    it('returns null when message has no groups', () => {
-      const wrapper = mountComponent(
-        {},
-        { message: createMessage({ groups: [] }) }
-      )
-      expect(wrapper.vm.groupid).toBeNull()
-    })
-
-    it('returns groupid from member when no message', () => {
-      const member = createMember({ groupid: 789 })
-      const wrapper = mountComponent(
-        { messageid: null },
-        { message: null, member }
-      )
+    it('returns groupid from member, message groups, or null when missing', () => {
+      // From member
+      let wrapper = mountComponent({
+        message: null,
+        member: createMember({ groupid: 789 }),
+        stdmsg: createStdmsg(),
+      })
       expect(wrapper.vm.groupid).toBe(789)
+
+      // From message groups
+      wrapper = mountComponent()
+      expect(wrapper.vm.groupid).toBe(123)
+
+      // Null when message has no groups
+      wrapper = mountComponent({
+        message: createMessage({ groups: [] }),
+        stdmsg: createStdmsg(),
+      })
+      expect(wrapper.vm.groupid).toBeNull()
     })
   })
 
   describe('user computed', () => {
-    it('returns fromuser from message', () => {
-      const wrapper = mountComponent()
+    it('returns fromuser from message or member when no message', () => {
+      // From message
+      let wrapper = mountComponent()
       expect(wrapper.vm.user.displayname).toBe('Test User')
-    })
 
-    it('returns member user when no message', () => {
-      const member = createMember({ displayname: 'Member User' })
-      const wrapper = mountComponent(
-        { messageid: null },
-        { message: null, member }
-      )
+      // From member when no message
+      wrapper = mountComponent({
+        message: null,
+        member: createMember({ displayname: 'Member User' }),
+        stdmsg: createStdmsg(),
+      })
       expect(wrapper.vm.user.displayname).toBe('Member User')
     })
   })
 
   describe('toEmail computed', () => {
-    it('returns preferred email from fromuser.emails', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.toEmail).toBe('test@example.com')
-    })
+    it('returns email from member, preferred email from message, and skips ilovefreegle emails', () => {
+      // From member
+      let wrapper = mountComponent({
+        message: null,
+        member: createMember({ email: 'member@test.com' }),
+        stdmsg: createStdmsg(),
+      })
+      expect(wrapper.vm.toEmail).toBe('member@test.com')
 
-    it('skips ilovefreegle emails', () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          message: createMessage({
-            fromuser: {
-              id: 456,
-              displayname: 'Test User',
-              emails: [
-                { email: 'user@users.ilovefreegle.org', preferred: true },
-                { email: 'real@example.com', preferred: false },
-              ],
-            },
-          }),
-        }
-      )
+      // Preferred email from fromuser.emails
+      wrapper = mountComponent()
+      expect(wrapper.vm.toEmail).toBe('test@example.com')
+
+      // Skips ilovefreegle emails
+      wrapper = mountComponent({
+        message: createMessage({
+          fromuser: {
+            id: 456,
+            displayname: 'Test User',
+            emails: [
+              { email: 'user@users.ilovefreegle.org', preferred: true },
+              { email: 'real@example.com', preferred: false },
+            ],
+          },
+        }),
+      })
       expect(wrapper.vm.toEmail).toBe('real@example.com')
     })
-
-    it('returns member email when no message', () => {
-      const member = createMember({ email: 'member@test.com' })
-      const wrapper = mountComponent(
-        { messageid: null },
-        { message: null, member }
-      )
-      expect(wrapper.vm.toEmail).toBe('member@test.com')
-    })
   })
+
+  // Note: The 'process' function is not exposed via defineExpose and cannot be
+  // tested directly via shallowMount as event emissions from stubbed child
+  // components don't trigger parent event handlers. The process functionality
+  // should be covered by E2E tests with Playwright.
 
   describe('modal movement', () => {
     it('adjusts margins in all directions', () => {
@@ -492,24 +452,25 @@ describe('ModStdMessageModal', () => {
       expect(wrapper.vm.margLeft).toBe(initialLeft - 10)
 
       wrapper.vm.moveRight()
-      expect(wrapper.vm.margLeft).toBe(initialLeft)
+      expect(wrapper.vm.margLeft).toBe(initialLeft) // back to initial
 
       wrapper.vm.moveUp()
       expect(wrapper.vm.margTop).toBe(initialTop - 10)
 
       wrapper.vm.moveDown()
-      expect(wrapper.vm.margTop).toBe(initialTop)
+      expect(wrapper.vm.margTop).toBe(initialTop) // back to initial
     })
   })
 
   describe('Edit action specific', () => {
     it('shows edit-specific UI without From/To fields', () => {
-      const wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ action: 'Edit' }) }
-      )
+      const wrapper = mountComponent({
+        stdmsg: createStdmsg({ action: 'Edit' }),
+      })
+      // Hides From/To for Edit action
       expect(wrapper.text()).not.toContain('From:')
       expect(wrapper.text()).not.toContain('To:')
+      // Shows type selector and postcode input for structured message edit
       expect(wrapper.find('select').exists()).toBe(true)
       expect(wrapper.find('.postcode').exists()).toBe(true)
     })
@@ -517,42 +478,32 @@ describe('ModStdMessageModal', () => {
 
   describe('status change indicators', () => {
     it('shows status change indicators for modstatus, delstatus, and hold actions', () => {
-      let wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ newmodstatus: 'MODERATED' }) }
-      )
+      // Modstatus change text
+      let wrapper = mountComponent({
+        stdmsg: createStdmsg({ newmodstatus: 'MODERATED' }),
+      })
       expect(wrapper.text()).toContain('Change moderation status to')
       expect(wrapper.text()).toContain('Moderated')
 
-      wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ newdelstatus: 'DIGEST' }) }
-      )
+      // Delstatus change text
+      wrapper = mountComponent({
+        stdmsg: createStdmsg({ newdelstatus: 'DIGEST' }),
+      })
       expect(wrapper.text()).toContain('Change email frequency to')
 
-      wrapper = mountComponent(
-        {},
-        { stdmsgData: createStdmsg({ action: 'Hold Message' }) }
-      )
+      // Hold message text
+      wrapper = mountComponent({
+        stdmsg: createStdmsg({ action: 'Hold Message' }),
+      })
       expect(wrapper.text()).toContain('Hold message')
     })
   })
 
   describe('props', () => {
-    it('accepts stdmsgid prop and resolves from store', () => {
-      const stdmsgData = createStdmsg({ action: 'Reject' })
-      const wrapper = mountComponent(
-        { stdmsgid: stdmsgData.id },
-        { stdmsgData }
-      )
-      expect(wrapper.vm.stdmsg.action).toBe('Reject')
-    })
-
-    it('accepts stdmsgaction prop for inline actions', () => {
-      const wrapper = mountComponent({
-        stdmsgaction: 'Leave Member',
-      })
-      expect(wrapper.vm.stdmsg.action).toBe('Leave Member')
+    it('accepts stdmsg prop (required)', () => {
+      const stdmsg = createStdmsg({ action: 'Reject' })
+      const wrapper = mountComponent({ stdmsg })
+      expect(wrapper.props('stdmsg').action).toBe('Reject')
     })
   })
 
@@ -563,16 +514,25 @@ describe('ModStdMessageModal', () => {
     })
   })
 
+  describe('postcodeSelect', () => {
+    it('updates message location when postcode selected', () => {
+      const wrapper = mountComponent()
+      const newLocation = { name: 'New Location' }
+      wrapper.vm.postcodeSelect(newLocation)
+      expect(wrapper.props('message').location).toEqual(newLocation)
+    })
+  })
+
   describe('member mode', () => {
-    it('uses member displayname in title when no message', () => {
-      const member = createMember({
-        displayname: 'Test Member',
-        email: 'member@test.com',
+    it('uses member displayname in title and member email as toEmail when no message', () => {
+      const wrapper = mountComponent({
+        message: null,
+        member: createMember({
+          displayname: 'Test Member',
+          email: 'member@test.com',
+        }),
+        stdmsg: createStdmsg(),
       })
-      const wrapper = mountComponent(
-        { messageid: null },
-        { message: null, member }
-      )
       expect(wrapper.find('.modal').attributes('title')).toContain(
         'Message to Test Member'
       )

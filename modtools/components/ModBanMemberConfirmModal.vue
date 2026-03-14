@@ -104,7 +104,7 @@ onMounted(() => {
 
       if (
         (lat || lng) &&
-        (user.value.memberships.length === 1 || bounds.contains([lat, lng]))
+        (user.value.memberof.length === 1 || bounds.contains([lat, lng]))
       ) {
         homeGroup.value = true
       }

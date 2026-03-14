@@ -35,7 +35,7 @@ describe('chats/review.vue page', () => {
           ModHelpChatReview: { template: '<div class="help-stub" />' },
           ModChatReview: {
             template: '<div class="chat-review-stub" />',
-            props: ['id', 'messageid'],
+            props: ['id', 'message'],
             emits: ['reload'],
           },
           SpinButton: {

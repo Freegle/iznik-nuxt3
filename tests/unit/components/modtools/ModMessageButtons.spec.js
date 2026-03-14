@@ -3,24 +3,15 @@ import { mount } from '@vue/test-utils'
 import ModMessageButtons from '~/modtools/components/ModMessageButtons.vue'
 
 // Mock stores and composables before vi.mock calls using vi.hoisted
-const { mockMessageStore, mockModConfigStore } = vi.hoisted(() => {
+const { mockMessageStore } = vi.hoisted(() => {
   const mockMessageStore = {
-    byId: vi.fn(),
-    fetch: vi.fn().mockResolvedValue(),
     updateMT: vi.fn().mockResolvedValue(),
   }
-  const mockModConfigStore = {
-    configsById: {},
-  }
-  return { mockMessageStore, mockModConfigStore }
+  return { mockMessageStore }
 })
 
 vi.mock('~/stores/message', () => ({
   useMessageStore: () => mockMessageStore,
-}))
-
-vi.mock('~/stores/modconfig', () => ({
-  useModConfigStore: () => mockModConfigStore,
 }))
 
 vi.mock('~/composables/useStdMsgs', () => ({
@@ -110,7 +101,7 @@ describe('ModMessageButtons', () => {
           leave: leave === '' || leave === true
         }"><slot />{{ label }}</button>`,
       props: [
-        'messageid',
+        'message',
         'variant',
         'icon',
         'label',
@@ -158,23 +149,10 @@ describe('ModMessageButtons', () => {
     },
   }
 
-  function mountComponent(props = {}, messageOverrides = {}) {
-    const messageData = createMessage(messageOverrides)
-
-    mockMessageStore.byId.mockImplementation((id) => {
-      if (id === messageData.id) return messageData
-      return null
-    })
-
-    // If modconfigid is provided, set up the modconfig store
-    const modconfigid = props.modconfigid || null
-    if (modconfigid) {
-      // Already set up in beforeEach or via props
-    }
-
+  function mountComponent(props = {}) {
     return mount(ModMessageButtons, {
       props: {
-        messageid: messageData.id,
+        message: createMessage(),
         ...props,
       },
       global: {
@@ -185,8 +163,6 @@ describe('ModMessageButtons', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Reset configsById
-    mockModConfigStore.configsById = {}
   })
 
   describe('rendering', () => {
@@ -199,102 +175,108 @@ describe('ModMessageButtons', () => {
 
   describe('pending message buttons', () => {
     it('shows approve button for pending messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.approve').exists()).toBe(true)
     })
 
     it('shows reject button for pending messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.reject').exists()).toBe(true)
     })
 
     it('shows delete button for pending messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.delete').exists()).toBe(true)
     })
 
     it('shows hold button for pending messages without heldby', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Pending' }],
           heldby: null,
-        }
-      )
+        }),
+      })
       expect(wrapper.find('.mod-message-button.hold').exists()).toBe(true)
     })
 
     it('hides hold button when message is held', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Pending' }],
           heldby: { id: 1 },
-        }
-      )
+        }),
+      })
       expect(wrapper.find('.mod-message-button.hold').exists()).toBe(false)
     })
 
     it('shows spam button for pending messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.spam').exists()).toBe(true)
     })
 
     it('hides approve button when cantpost is true', () => {
-      const wrapper = mountComponent(
-        { cantpost: true },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        cantpost: true,
+      })
       expect(wrapper.find('.mod-message-button.approve').exists()).toBe(false)
     })
   })
 
   describe('approved message buttons', () => {
     it('shows leave (blank reply) button for approved messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Approved' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Approved' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.leave').exists()).toBe(true)
     })
 
     it('shows delete button for approved messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Approved' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Approved' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.delete').exists()).toBe(true)
     })
 
     it('shows spam button for approved messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Approved' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Approved' }],
+        }),
+      })
       expect(wrapper.find('.mod-message-button.spam').exists()).toBe(true)
     })
 
     it('shows Mark as TAKEN button for Offer without outcomes', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Approved' }],
           type: 'Offer',
           outcomes: [],
-        }
-      )
+        }),
+      })
       const spinButtons = wrapper.findAll('.spin-button')
       const takenButton = spinButtons.find((btn) =>
         btn.text().includes('Mark as TAKEN')
@@ -303,14 +285,13 @@ describe('ModMessageButtons', () => {
     })
 
     it('shows Mark as RECEIVED button for Wanted without outcomes', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Approved' }],
           type: 'Wanted',
           outcomes: [],
-        }
-      )
+        }),
+      })
       const spinButtons = wrapper.findAll('.spin-button')
       const receivedButton = spinButtons.find((btn) =>
         btn.text().includes('Mark as RECEIVED')
@@ -319,13 +300,12 @@ describe('ModMessageButtons', () => {
     })
 
     it('shows Mark as Withdrawn button for messages without outcomes', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Approved' }],
           outcomes: [],
-        }
-      )
+        }),
+      })
       const spinButtons = wrapper.findAll('.spin-button')
       const withdrawnButton = spinButtons.find((btn) =>
         btn.text().includes('Mark as Withdrawn')
@@ -334,14 +314,13 @@ describe('ModMessageButtons', () => {
     })
 
     it('hides TAKEN button when message has outcomes', () => {
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        message: createMessage({
           groups: [{ groupid: 456, collection: 'Approved' }],
           type: 'Offer',
           outcomes: [{ id: 1, outcome: 'Taken' }],
-        }
-      )
+        }),
+      })
       const spinButtons = wrapper.findAll('.spin-button')
       const takenButton = spinButtons.find((btn) =>
         btn.text().includes('Mark as TAKEN')
@@ -352,29 +331,37 @@ describe('ModMessageButtons', () => {
 
   describe('editreview buttons', () => {
     it('shows accept edit button when editreview is true', () => {
-      const wrapper = mountComponent({ editreview: true })
+      const wrapper = mountComponent({
+        editreview: true,
+      })
       expect(wrapper.find('.mod-message-button.approveedits').exists()).toBe(
         true
       )
     })
 
     it('shows reject edit button when editreview is true', () => {
-      const wrapper = mountComponent({ editreview: true })
+      const wrapper = mountComponent({
+        editreview: true,
+      })
       expect(wrapper.find('.mod-message-button.revertedits').exists()).toBe(
         true
       )
     })
 
     it('shows blank reply button when editreview is true', () => {
-      const wrapper = mountComponent({ editreview: true })
+      const wrapper = mountComponent({
+        editreview: true,
+      })
       expect(wrapper.find('.mod-message-button.leave').exists()).toBe(true)
     })
 
     it('hides pending buttons when editreview is true', () => {
-      const wrapper = mountComponent(
-        { editreview: true },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        editreview: true,
+      })
       // Should not show the normal pending buttons like approve
       expect(wrapper.find('.mod-message-button.approve').exists()).toBe(false)
     })
@@ -382,28 +369,31 @@ describe('ModMessageButtons', () => {
 
   describe('hasCollection helper', () => {
     it('returns true when message has Pending collection', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.vm.pending).toBe(true)
       expect(wrapper.vm.approved).toBe(false)
     })
 
     it('returns true when message has Approved collection', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Approved' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Approved' }],
+        }),
+      })
       expect(wrapper.vm.pending).toBe(false)
       expect(wrapper.vm.approved).toBe(true)
     })
 
     it('returns false when message has no matching collection', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Other' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Other' }],
+        }),
+      })
       expect(wrapper.vm.pending).toBe(false)
       expect(wrapper.vm.approved).toBe(false)
     })
@@ -411,10 +401,11 @@ describe('ModMessageButtons', () => {
 
   describe('validActions computed', () => {
     it('returns pending actions for pending messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+      })
       expect(wrapper.vm.validActions).toContain('Reject')
       expect(wrapper.vm.validActions).toContain('Leave')
       expect(wrapper.vm.validActions).toContain('Delete')
@@ -424,68 +415,70 @@ describe('ModMessageButtons', () => {
     })
 
     it('excludes Approve when cantpost is true', () => {
-      const wrapper = mountComponent(
-        { cantpost: true },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        cantpost: true,
+      })
       expect(wrapper.vm.validActions).not.toContain('Approve')
     })
 
     it('returns approved actions for approved messages', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Approved' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Approved' }],
+        }),
+      })
       expect(wrapper.vm.validActions).toContain('Leave Approved Message')
       expect(wrapper.vm.validActions).toContain('Delete Approved Message')
       expect(wrapper.vm.validActions).toContain('Edit')
     })
 
     it('returns empty array for other collections', () => {
-      const wrapper = mountComponent(
-        {},
-        { groups: [{ groupid: 456, collection: 'Other' }] }
-      )
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Other' }],
+        }),
+      })
       expect(wrapper.vm.validActions).toEqual([])
     })
   })
 
   describe('filtered computed', () => {
     it('returns empty array when modconfig is null', () => {
-      const wrapper = mountComponent()
+      const wrapper = mountComponent({ modconfig: null })
       expect(wrapper.vm.filtered).toEqual([])
     })
 
     it('filters standard messages by valid actions', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Approve', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Other', action: 'SomeOtherAction', rarelyused: 0 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Approve', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Other', action: 'SomeOtherAction', rarelyused: 0 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.vm.filtered.length).toBe(1)
       expect(wrapper.vm.filtered[0].action).toBe('Approve')
     })
 
     it('excludes rarely used messages by default', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.vm.filtered.length).toBe(1)
       expect(wrapper.vm.filtered[0].title).toBe('Common')
     })
@@ -493,82 +486,79 @@ describe('ModMessageButtons', () => {
 
   describe('rareToShow computed', () => {
     it('returns count of rarely used messages not shown', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Rare1', action: 'Reject', rarelyused: 1 },
-          { id: 3, title: 'Rare2', action: 'Delete', rarelyused: 1 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Rare1', action: 'Reject', rarelyused: 1 },
+            { id: 3, title: 'Rare2', action: 'Delete', rarelyused: 1 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.vm.rareToShow).toBe(2)
     })
 
     it('returns 0 when no rarely used messages', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Common1', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Common2', action: 'Reject', rarelyused: 0 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common1', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Common2', action: 'Reject', rarelyused: 0 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.vm.rareToShow).toBe(0)
     })
   })
 
   describe('showRare toggle', () => {
     it('shows button to reveal rare messages when there are some', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.text()).toContain('+1...')
     })
 
     it('hides rare button when no rare messages exist', () => {
-      const modConfig = createModConfig({
-        stdmsgs: [{ id: 1, title: 'Common', action: 'Approve', rarelyused: 0 }],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       expect(wrapper.text()).not.toContain('+')
     })
 
     it('shows all messages when showRare is toggled', async () => {
-      const modConfig = createModConfig({
-        stdmsgs: [
-          { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
-          { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
-        ],
+      const wrapper = mountComponent({
+        message: createMessage({
+          groups: [{ groupid: 456, collection: 'Pending' }],
+        }),
+        modconfig: createModConfig({
+          stdmsgs: [
+            { id: 1, title: 'Common', action: 'Approve', rarelyused: 0 },
+            { id: 2, title: 'Rare', action: 'Reject', rarelyused: 1 },
+          ],
+        }),
       })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent(
-        { modconfigid: 1 },
-        { groups: [{ groupid: 456, collection: 'Pending' }] }
-      )
       // Initially should have 1 filtered
       expect(wrapper.vm.filtered.length).toBe(1)
 
@@ -583,7 +573,9 @@ describe('ModMessageButtons', () => {
 
   describe('outcome method', () => {
     it('calls messageStore.updateMT with Taken outcome', () => {
-      const wrapper = mountComponent({}, { id: 999 })
+      const wrapper = mountComponent({
+        message: createMessage({ id: 999 }),
+      })
       const callback = vi.fn()
       wrapper.vm.outcome(callback, 'Taken')
       expect(mockMessageStore.updateMT).toHaveBeenCalledWith({
@@ -595,7 +587,9 @@ describe('ModMessageButtons', () => {
     })
 
     it('calls messageStore.updateMT with Received outcome', () => {
-      const wrapper = mountComponent({ messageid: 888 }, { id: 888 })
+      const wrapper = mountComponent({
+        message: createMessage({ id: 888 }),
+      })
       wrapper.vm.outcome(null, 'Received')
       expect(mockMessageStore.updateMT).toHaveBeenCalledWith({
         action: 'Outcome',
@@ -605,7 +599,9 @@ describe('ModMessageButtons', () => {
     })
 
     it('calls messageStore.updateMT with Withdrawn outcome', () => {
-      const wrapper = mountComponent({ messageid: 777 }, { id: 777 })
+      const wrapper = mountComponent({
+        message: createMessage({ id: 777 }),
+      })
       wrapper.vm.outcome(null, 'Withdrawn')
       expect(mockMessageStore.updateMT).toHaveBeenCalledWith({
         action: 'Outcome',
@@ -624,22 +620,25 @@ describe('ModMessageButtons', () => {
 
   describe('edge cases', () => {
     it('handles message with no groups', () => {
-      const wrapper = mountComponent({}, { groups: undefined })
+      const wrapper = mountComponent({
+        message: createMessage({ groups: undefined }),
+      })
       expect(wrapper.vm.pending).toBe(false)
       expect(wrapper.vm.approved).toBe(false)
     })
 
     it('handles message with empty groups array', () => {
-      const wrapper = mountComponent({}, { groups: [] })
+      const wrapper = mountComponent({
+        message: createMessage({ groups: [] }),
+      })
       expect(wrapper.vm.pending).toBe(false)
       expect(wrapper.vm.approved).toBe(false)
     })
 
     it('handles modconfig with empty stdmsgs', () => {
-      const modConfig = createModConfig({ stdmsgs: [] })
-      mockModConfigStore.configsById = { 1: modConfig }
-
-      const wrapper = mountComponent({ modconfigid: 1 })
+      const wrapper = mountComponent({
+        modconfig: createModConfig({ stdmsgs: [] }),
+      })
       expect(wrapper.vm.filtered).toEqual([])
     })
   })

@@ -35,7 +35,7 @@
     />
     <ModCommentAddModal
       v-if="showAddCommentModal"
-      :userid="userid"
+      :user="user"
       :groupid="groupid"
       :groupname="groupname"
       @added="commentadded"
@@ -44,7 +44,7 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirmRef"
-      :userid="userid"
+      :user="reportUser"
       :safelist="safelist"
     />
   </div>
@@ -54,9 +54,7 @@ import { ref, computed } from 'vue'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
-import { useSpammerStore } from '~/modtools/stores/spammer'
 import { useMe } from '~/composables/useMe'
-import { useModMe } from '~/modtools/composables/useModMe'
 
 const props = defineProps({
   userid: {
@@ -73,8 +71,8 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  spammerid: {
-    type: Number,
+  spam: {
+    type: Object,
     required: false,
     default: null,
   },
@@ -83,14 +81,10 @@ const props = defineProps({
 const emit = defineEmits(['commentadded'])
 
 const { $api } = useNuxtApp()
-const { checkWork } = useModMe()
 const groupStore = useGroupStore()
 const memberStore = useMemberStore()
 const userStore = useUserStore()
-const spammerStore = useSpammerStore()
 const { me, supportOrAdmin } = useMe()
-
-const spam = computed(() => spammerStore.byId(props.spammerid))
 
 const removeConfirmRef = ref(null)
 const banConfirmRef = ref(null)
@@ -113,6 +107,15 @@ const groupname = computed(() => {
   return group.value ? group.value.nameshort : null
 })
 
+const reportUser = computed(() => {
+  return {
+    // Due to inconsistencies about userid vs id in objects.
+    userid: user.value?.id,
+    id: user.value?.id,
+    displayname: user.value?.displayname,
+  }
+})
+
 async function fetchUser() {
   await userStore.fetch(props.userid, true)
   user.value = userStore.byId(props.userid)
@@ -129,7 +132,6 @@ async function remove() {
 
 function removeConfirmed() {
   memberStore.remove(props.userid, props.groupid)
-  checkWork(true)
 }
 
 async function ban() {
@@ -159,7 +161,6 @@ async function banConfirmed(reason) {
       reason,
     flag: true,
   })
-  checkWork(true)
 }
 
 async function addAComment() {

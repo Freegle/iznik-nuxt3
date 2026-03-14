@@ -316,8 +316,6 @@ const graphOptions = computed(() => {
 
 const approvedSplit = (type) => {
   // We want to return the approved message count, adjusted by the message breakdown for this type.
-  if (!MessageBreakdown.value) return []
-
   type = type.replace('s', '')
 
   const factor =
@@ -501,7 +499,7 @@ watch(
 )
 
 watch(graphType, () => {
-  maybeFetch(true)
+  maybeFetch()
 })
 
 // This is experimental code for if we find a way to fetch stats faster on the server for different units.

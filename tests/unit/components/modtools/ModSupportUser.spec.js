@@ -53,7 +53,7 @@ describe('ModSupportUser', () => {
     systemrole: 'User',
     bouncing: false,
     spammer: null,
-    memberships: [],
+    memberof: [],
     emails: [{ id: 1, email: 'test@example.com', preferred: true }],
     applied: [],
     membershiphistory: [],
@@ -135,34 +135,34 @@ describe('ModSupportUser', () => {
           },
           ModBouncing: {
             template: '<div class="mod-bouncing" />',
-            props: ['userid'],
+            props: ['user'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer" />',
-            props: ['userid'],
+            props: ['user'],
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['userid'],
+            props: ['user'],
           },
           ModMergeButton: {
             template: '<button class="merge-button" />',
           },
           ModDeletedOrForgotten: {
             template: '<div class="deleted-or-forgotten" />',
-            props: ['userid'],
+            props: ['user'],
           },
           ModMemberLogins: {
             template: '<div class="member-logins" />',
-            props: ['userid'],
+            props: ['member'],
           },
           ModMemberSummary: {
             template: '<div class="member-summary" />',
-            props: ['userid'],
+            props: ['member'],
           },
           ModSupportMembership: {
             template: '<div class="support-membership" />',
-            props: ['membershipid', 'userid'],
+            props: ['membership', 'userid'],
           },
           ModSupportChatList: {
             template: '<div class="chat-list" />',
@@ -185,12 +185,12 @@ describe('ModSupportUser', () => {
           },
           ModSpammerReport: {
             template: '<div class="spammer-report" />',
-            props: ['userid'],
+            props: ['user'],
             methods: { show: vi.fn() },
           },
           ModCommentAddModal: {
             template: '<div class="comment-add-modal" />',
-            props: ['userid'],
+            props: ['user'],
           },
           SpinButton: {
             template:
@@ -311,6 +311,14 @@ describe('ModSupportUser', () => {
       expect(wrapper.vm.preferredemail).toBe('first@test.com')
     })
 
+    it('reportUser returns correct format', async () => {
+      const wrapper = await mountComponent()
+      expect(wrapper.vm.reportUser).toEqual({
+        userid: 123,
+        displayname: 'Test User',
+      })
+    })
+
     it('admin returns true when systemrole is Admin', async () => {
       const wrapper = await mountComponent({}, { systemrole: 'Admin' })
       expect(wrapper.vm.admin).toBe(true)
@@ -325,7 +333,7 @@ describe('ModSupportUser', () => {
       const wrapper = await mountComponent(
         {},
         {
-          memberships: [
+          memberof: [
             { id: 1, nameshort: 'ZGroup', type: 'Freegle' },
             { id: 2, nameshort: 'AGroup', type: 'Freegle' },
             { id: 3, nameshort: 'Other', type: 'Other' },

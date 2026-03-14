@@ -16,18 +16,7 @@ vi.mock('~/composables/useOurModal', () => ({
   }),
 }))
 
-// Mock user store
-const mockUserStore = {
-  byId: vi.fn(),
-  fetch: vi.fn().mockResolvedValue({}),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 describe('ModMicrovolunteeringModal', () => {
-  const defaultUserId = 123
   const defaultUser = {
     id: 123,
     displayname: 'Test User',
@@ -36,31 +25,11 @@ describe('ModMicrovolunteeringModal', () => {
 
   const defaultItemIds = [1, 2, 3]
 
-  function mountComponent(propsOverrides = {}, itemIdsOverrides = null) {
-    const { _userData, _skipUserSetup, ...componentProps } = propsOverrides
-    const userid =
-      componentProps.userid !== undefined
-        ? componentProps.userid
-        : defaultUserId
-
-    // Set up user store to return user data based on userid
-    if (!_skipUserSetup) {
-      if (_userData) {
-        mockUserStore.byId.mockImplementation((id) => {
-          if (id === userid) {
-            return _userData
-          }
-          return null
-        })
-      }
-      // Otherwise use the beforeEach default
-    }
-
+  function mountComponent(userOverrides = {}, itemIdsOverrides = null) {
     return mount(ModMicrovolunteeringModal, {
       props: {
-        userid,
+        user: { ...defaultUser, ...userOverrides },
         itemIds: itemIdsOverrides !== null ? itemIdsOverrides : defaultItemIds,
-        ...componentProps,
       },
       global: {
         stubs: {
@@ -92,8 +61,6 @@ describe('ModMicrovolunteeringModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserStore.byId.mockReturnValue(defaultUser)
-    mockUserStore.fetch.mockResolvedValue({})
   })
 
   describe('rendering', () => {
@@ -148,23 +115,24 @@ describe('ModMicrovolunteeringModal', () => {
 
   describe('modal title', () => {
     it('displays user displayname in title', async () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        displayname: 'Jane Doe',
-      })
-      const wrapper = mountComponent()
+      const wrapper = mountComponent({ displayname: 'Jane Doe' })
       await flushPromises()
       expect(wrapper.find('.b-modal').attributes('title')).toBe(
         'Microvolunteering for Jane Doe'
       )
     })
 
-    it('shows userid fallback when user not in store', async () => {
-      mockUserStore.byId.mockReturnValue(null)
-      const wrapper = mountComponent({ userid: 456, _skipUserSetup: true })
+    it('updates title when user changes', async () => {
+      const wrapper = mountComponent({ displayname: 'John' })
       await flushPromises()
-      expect(wrapper.find('.b-modal').attributes('title')).toBe(
-        'Microvolunteering for #456'
+      expect(wrapper.find('.b-modal').attributes('title')).toContain('John')
+
+      await wrapper.setProps({
+        user: { id: 123, displayname: 'Updated Name' },
+      })
+      await flushPromises()
+      expect(wrapper.find('.b-modal').attributes('title')).toContain(
+        'Updated Name'
       )
     })
   })
@@ -291,11 +259,8 @@ describe('ModMicrovolunteeringModal', () => {
 
   describe('edge cases', () => {
     it('handles user with only id property', async () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        displayname: 'Minimal',
-      })
-      const wrapper = mountComponent()
+      const minimalUser = { displayname: 'Minimal' }
+      const wrapper = mountComponent(minimalUser)
       await flushPromises()
       expect(wrapper.find('.b-modal').attributes('title')).toBe(
         'Microvolunteering for Minimal'
@@ -303,8 +268,7 @@ describe('ModMicrovolunteeringModal', () => {
     })
 
     it('handles user with empty displayname', async () => {
-      mockUserStore.byId.mockReturnValue({ id: 123, displayname: '' })
-      const wrapper = mountComponent()
+      const wrapper = mountComponent({ displayname: '' })
       await flushPromises()
       expect(wrapper.find('.b-modal').attributes('title')).toBe(
         'Microvolunteering for '
@@ -330,22 +294,14 @@ describe('ModMicrovolunteeringModal', () => {
       expect(wrapper.findAll('.mod-microvolunteering')).toHaveLength(4)
     })
 
-    it('re-renders when userid prop changes and store has new user', async () => {
-      mockUserStore.byId.mockImplementation((id) => {
-        if (id === 123) return { id: 123, displayname: 'First User' }
-        if (id === 456) return { id: 456, displayname: 'Second User' }
-        return null
-      })
-      const wrapper = mountComponent({
-        userid: 123,
-        _skipUserSetup: true,
-      })
+    it('re-renders when user prop changes', async () => {
+      const wrapper = mountComponent({ displayname: 'First User' })
       await flushPromises()
       expect(wrapper.find('.b-modal').attributes('title')).toContain(
         'First User'
       )
 
-      await wrapper.setProps({ userid: 456 })
+      await wrapper.setProps({ user: { id: 456, displayname: 'Second User' } })
       await flushPromises()
       expect(wrapper.find('.b-modal').attributes('title')).toContain(
         'Second User'

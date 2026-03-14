@@ -55,16 +55,12 @@ describe('ModCommentEditModal', () => {
   })
 
   const defaultProps = {
-    userid: 123,
+    user: createTestUser(),
     comment: createTestComment(),
     groupname: 'Test Group',
   }
 
-  function mountComponent(props = {}, userOverrides = {}) {
-    const uid = props.userid || defaultProps.userid
-    const user = createTestUser({ id: uid, ...userOverrides })
-    mockUserStore.byId.mockReturnValue(user)
-
+  function mountComponent(props = {}) {
     return mount(ModCommentEditModal, {
       props: { ...defaultProps, ...props },
       global: {
@@ -103,12 +99,13 @@ describe('ModCommentEditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.saveComment.mockResolvedValue({})
-    mockUserStore.byId.mockReturnValue(createTestUser())
   })
 
   describe('rendering', () => {
     it('displays user displayname in title', () => {
-      const wrapper = mountComponent({}, { displayname: 'John Doe' })
+      const wrapper = mountComponent({
+        user: createTestUser({ displayname: 'John Doe' }),
+      })
       expect(wrapper.text()).toContain('John Doe')
     })
 
@@ -213,9 +210,10 @@ describe('ModCommentEditModal', () => {
   })
 
   describe('props', () => {
-    it('accepts userid prop (required)', () => {
-      const wrapper = mountComponent({ userid: 789 })
-      expect(wrapper.props('userid')).toBe(789)
+    it('accepts user prop (required)', () => {
+      const testUser = createTestUser({ id: 789 })
+      const wrapper = mountComponent({ user: testUser })
+      expect(wrapper.props('user')).toEqual(testUser)
     })
 
     it('accepts comment prop (required)', () => {
@@ -491,16 +489,22 @@ describe('ModCommentEditModal', () => {
   })
 
   describe('modal id', () => {
-    it('generates unique modal id based on userid', () => {
-      const wrapper = mountComponent({ userid: 12345 })
-      // The modal id is 'modCommentModal-' + userid
-      expect(wrapper.props('userid')).toBe(12345)
+    it('generates unique modal id based on user id', () => {
+      const wrapper = mountComponent({
+        user: createTestUser({ id: 12345 }),
+      })
+      // The modal id is 'modCommentModal-' + user.id
+      // We can verify by checking the component renders correctly with the user
+      expect(wrapper.props('user').id).toBe(12345)
     })
   })
 
   describe('edge cases', () => {
     it('handles user with minimal data', () => {
-      const wrapper = mountComponent({ userid: 1 }, { displayname: '' })
+      const wrapper = mountComponent({
+        user: { id: 1, displayname: '' },
+        comment: createTestComment(),
+      })
       expect(wrapper.find('.modal').exists()).toBe(true)
     })
 
@@ -668,10 +672,10 @@ describe('ModCommentEditModal', () => {
     })
 
     it('combines user name and group name correctly', () => {
-      const wrapper = mountComponent(
-        { groupname: 'Freegle Cambridge' },
-        { displayname: 'Jane Smith' }
-      )
+      const wrapper = mountComponent({
+        user: createTestUser({ displayname: 'Jane Smith' }),
+        groupname: 'Freegle Cambridge',
+      })
       expect(wrapper.text()).toContain('Jane Smith')
       expect(wrapper.text()).toContain('on')
       expect(wrapper.text()).toContain('Freegle Cambridge')

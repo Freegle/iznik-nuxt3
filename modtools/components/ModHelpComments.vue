@@ -8,12 +8,6 @@
       For GDPR reasons we should not keep notes older than three years unless
       they are still relevant. You can delete notes from here.
     </p>
-    <p>
-      More info
-      <ExternalLink href="https://wiki.ilovefreegle.org/Member_Notes"
-        >on the wiki</ExternalLink
-      >.
-    </p>
     <p>Soon there will be:</p>
     <ul>
       <li>A button to "bump" the note</li>

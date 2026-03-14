@@ -4,7 +4,6 @@ import ModMessage from '~/modtools/components/ModMessage.vue'
 
 // Hoisted mocks
 const {
-  mockAuthStore,
   mockLocationStore,
   mockMemberStore,
   mockMessageStore,
@@ -16,9 +15,6 @@ const {
   mockMyModGroups,
 } = vi.hoisted(() => {
   return {
-    mockAuthStore: {
-      groups: [{ groupid: 789, configid: 1 }],
-    },
     mockLocationStore: {
       fetch: vi.fn().mockResolvedValue(null),
     },
@@ -30,7 +26,6 @@ const {
       move: vi.fn().mockResolvedValue(),
       fetch: vi.fn().mockResolvedValue(),
       backToPending: vi.fn().mockResolvedValue(),
-      byId: vi.fn().mockReturnValue(null),
     },
     mockMiscStore: {
       modtoolsediting: false,
@@ -44,24 +39,13 @@ const {
           subjreg: /^(OFFER|WANTED):/i,
         },
       ],
-      fetchById: vi.fn().mockResolvedValue({
-        id: 1,
-        default: true,
-        coloursubj: true,
-        subjreg: /^(OFFER|WANTED):/i,
-      }),
     },
     mockModGroupStore: {
       fetchIfNeedBeMT: vi.fn().mockResolvedValue({}),
     },
     mockUserStore: {
       fetch: vi.fn().mockResolvedValue(),
-      fetchMT: vi.fn().mockResolvedValue(),
-      byId: vi.fn().mockReturnValue({
-        id: 456,
-        displayname: 'Updated User',
-        memberships: [{ id: 789, groupid: 789 }],
-      }),
+      byId: vi.fn().mockReturnValue({ id: 456, displayname: 'Updated User' }),
     },
     mockMe: { id: 999, displayname: 'Test Mod' },
     mockMyModGroups: [
@@ -88,10 +72,6 @@ const {
 })
 
 // Mock stores
-vi.mock('~/stores/auth', () => ({
-  useAuthStore: () => mockAuthStore,
-}))
-
 vi.mock('~/stores/location', () => ({
   useLocationStore: () => mockLocationStore,
 }))
@@ -164,7 +144,15 @@ describe('ModMessage', () => {
         collection: 'Pending',
       },
     ],
-    fromuser: 456,
+    fromuser: {
+      id: 456,
+      displayname: 'Test User',
+      spammer: null,
+      activedistance: 10,
+      emails: [{ id: 1, email: 'test@example.com', preferred: true }],
+      memberof: [{ id: 789 }],
+      messagehistory: [],
+    },
     location: { name: 'SW1A 1AA', lat: 51.5, lng: -0.1 },
     lat: 51.5,
     lng: -0.1,
@@ -189,12 +177,10 @@ describe('ModMessage', () => {
   })
 
   // Mount helper with common stubs
-  function mountComponent(props = {}, messageOverrides = {}) {
-    const testMessage = createTestMessage(messageOverrides)
-    mockMessageStore.byId.mockReturnValue(testMessage)
+  function mountComponent(props = {}) {
     return mount(ModMessage, {
       props: {
-        messageid: testMessage.id,
+        message: createTestMessage(),
         ...props,
       },
       global: {
@@ -266,36 +252,36 @@ describe('ModMessage', () => {
           },
           ModMessageDuplicate: {
             template: '<div class="mod-message-duplicate"><slot /></div>',
-            props: ['messageid'],
+            props: ['message'],
           },
           ModMessageCrosspost: {
             template: '<div class="mod-message-crosspost"><slot /></div>',
-            props: ['messageid'],
+            props: ['message'],
           },
           ModMessageRelated: {
             template: '<div class="mod-message-related"><slot /></div>',
-            props: ['messageid'],
+            props: ['message'],
           },
           ModComments: {
             template: '<div class="mod-comments"><slot /></div>',
-            props: ['userid'],
+            props: ['user'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer"><slot /></div>',
-            props: ['userid'],
+            props: ['user'],
           },
           ModMessageMicroVolunteering: {
             template:
               '<div class="mod-message-microvolunteering"><slot /></div>',
-            props: ['messageid', 'microvolunteering'],
+            props: ['message', 'microvolunteering'],
           },
           ModMessageWorry: {
             template: '<div class="mod-message-worry"><slot /></div>',
-            props: ['messageid'],
+            props: ['message'],
           },
           ModPhoto: {
             template: '<div class="mod-photo"><slot /></div>',
-            props: ['messageid', 'attachmentid'],
+            props: ['message', 'attachment'],
           },
           MessageReplyInfo: {
             template: '<div class="message-reply-info"><slot /></div>',
@@ -307,7 +293,7 @@ describe('ModMessage', () => {
           },
           ModMessageUserInfo: {
             template: '<div class="mod-message-user-info"><slot /></div>',
-            props: ['message', 'userid', 'modinfo', 'groupid', 'milesaway'],
+            props: ['message', 'user', 'modinfo', 'groupid'],
           },
           SettingsGroup: {
             template: '<div class="settings-group"><slot /></div>',
@@ -323,11 +309,11 @@ describe('ModMessage', () => {
           },
           ModMessageButtons: {
             template: '<div class="mod-message-buttons"><slot /></div>',
-            props: ['messageid', 'modconfigid', 'editreview', 'cantpost'],
+            props: ['message', 'modconfig', 'editreview', 'cantpost'],
           },
           ModMessageButton: {
             template: '<button class="mod-message-button"><slot /></button>',
-            props: ['messageid', 'variant', 'icon', 'release', 'label'],
+            props: ['message', 'variant', 'icon', 'release', 'label'],
           },
           ModMessageEmailModal: {
             template: '<div class="mod-message-email-modal"><slot /></div>',
@@ -335,7 +321,7 @@ describe('ModMessage', () => {
           },
           ModSpammerReport: {
             template: '<div class="mod-spammer-report"><slot /></div>',
-            props: ['userid', 'safelist'],
+            props: ['user', 'safelist'],
           },
           SpinButton: {
             template:
@@ -369,11 +355,6 @@ describe('ModMessage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockMiscStore.modtoolsediting = false
-    mockUserStore.byId.mockReturnValue({
-      id: 456,
-      displayname: 'Updated User',
-      memberships: [{ id: 789, groupid: 789 }],
-    })
   })
 
   afterEach(async () => {
@@ -401,12 +382,10 @@ describe('ModMessage', () => {
       ['Pending', true],
       ['Approved', false],
     ])('returns %s for %s collection', (collection, expected) => {
-      const wrapper = mountComponent(
-        {},
-        {
-          groups: [{ groupid: 789, collection }],
-        }
-      )
+      const message = createTestMessage({
+        groups: [{ groupid: 789, collection }],
+      })
+      const wrapper = mountComponent({ message })
       expect(wrapper.vm.pending).toBe(expected)
     })
   })
@@ -429,7 +408,8 @@ describe('ModMessage', () => {
         null,
       ],
     ])('%s', (_desc, overrides, expected) => {
-      const wrapper = mountComponent({}, overrides)
+      const message = createTestMessage(overrides)
+      const wrapper = mountComponent({ message })
       expect(wrapper.vm.position).toEqual(expected)
     })
   })
@@ -440,7 +420,8 @@ describe('ModMessage', () => {
       ['outside UK (west)', { lat: 52.0, lng: -20.0 }, true],
       ['outside UK (south)', { lat: 40.0, lng: -1.0 }, true],
     ])('%s returns %s', (_desc, location, expected) => {
-      const wrapper = mountComponent({}, { location })
+      const message = createTestMessage({ location })
+      const wrapper = mountComponent({ message })
       expect(wrapper.vm.outsideUK).toBe(expected)
     })
   })
@@ -454,25 +435,26 @@ describe('ModMessage', () => {
   })
 
   describe('Computed: membership', () => {
-    it('returns membership for the group from store user', () => {
+    it('returns membership for the group, undefined when no match', () => {
       const wrapper = mountComponent()
-      expect(wrapper.vm.membership).toEqual({ id: 789, groupid: 789 })
-    })
+      expect(wrapper.vm.membership).toEqual({ id: 789 })
 
-    it('returns undefined when no matching group in store user', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        displayname: 'Test User',
-        memberships: [{ id: 999, groupid: 999 }],
+      const message2 = createTestMessage({
+        fromuser: {
+          id: 456,
+          displayname: 'Test User',
+          memberof: [{ id: 999 }],
+        },
       })
-      const wrapper = mountComponent()
-      expect(wrapper.vm.membership).toBe(undefined)
+      const wrapper2 = mountComponent({ message: message2 })
+      expect(wrapper2.vm.membership).toBe(undefined)
     })
   })
 
   describe('Computed: subjectClass', () => {
     it('returns text-success for valid subjects', () => {
-      const wrapper = mountComponent({}, { subject: 'OFFER: Test Item' })
+      const message = createTestMessage({ subject: 'OFFER: Test Item' })
+      const wrapper = mountComponent({ message })
       expect(wrapper.vm.subjectClass).toBe('text-success')
     })
   })
@@ -515,13 +497,11 @@ describe('ModMessage', () => {
 
   describe('Save', () => {
     it('calls messageStore.patch with item/location or subject, sets editing false', async () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          item: { name: 'Test Item' },
-          location: { name: 'SW1A 1AA' },
-        }
-      )
+      const message = createTestMessage({
+        item: { name: 'Test Item' },
+        location: { name: 'SW1A 1AA' },
+      })
+      const wrapper = mountComponent({ message })
       wrapper.vm.startEdit()
       await wrapper.vm.save()
 
@@ -537,14 +517,12 @@ describe('ModMessage', () => {
     })
 
     it('calls messageStore.patch with subject when no item', async () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          item: null,
-          location: null,
-          subject: 'Custom Subject',
-        }
-      )
+      const message = createTestMessage({
+        item: null,
+        location: null,
+        subject: 'Custom Subject',
+      })
+      const wrapper = mountComponent({ message })
       wrapper.vm.startEdit()
       await wrapper.vm.save()
 
@@ -611,12 +589,10 @@ describe('ModMessage', () => {
     ])(
       '%s returns %s when newimages=%s, oldimages=%s, id=%s',
       (method, newimages, oldimages, id, expected) => {
-        const wrapper = mountComponent(
-          { editreview: true },
-          {
-            edits: [{ reviewrequired: true, newimages, oldimages }],
-          }
-        )
+        const message = createTestMessage({
+          edits: [{ reviewrequired: true, newimages, oldimages }],
+        })
+        const wrapper = mountComponent({ message, editreview: true })
         expect(wrapper.vm[method](id)).toBe(expected)
       }
     )
@@ -633,42 +609,37 @@ describe('ModMessage', () => {
       const wrapper = mountComponent()
       const pc = { name: 'SW1A 2AA', lat: 51.6, lng: -0.2 }
       wrapper.vm.postcodeSelect(pc)
-      expect(wrapper.vm.message.location).toEqual(pc)
+      expect(wrapper.props('message').location).toEqual(pc)
     })
   })
 
   describe('updateComments', () => {
-    it('re-fetches user from store', () => {
+    it('updates message fromuser from store', () => {
       const wrapper = mountComponent()
       wrapper.vm.updateComments()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        modtools: true,
-      })
+      expect(mockUserStore.byId).toHaveBeenCalledWith(456)
     })
   })
 
   describe('Held message', () => {
     it('shows release button when held, warning when held by someone else', async () => {
-      const wrapper1 = mountComponent(
-        {
-          summary: false,
-        },
-        {
-          heldby: { id: 999, displayname: 'Test Mod' },
-        }
-      )
+      const messageHeldByMe = createTestMessage({
+        heldby: { id: 999, displayname: 'Test Mod' },
+      })
+      const wrapper1 = mountComponent({
+        message: messageHeldByMe,
+        summary: false,
+      })
       await wrapper1.vm.$nextTick()
       expect(wrapper1.find('.mod-message-button').exists()).toBe(true)
 
-      const wrapper2 = mountComponent(
-        {
-          summary: false,
-        },
-        {
-          heldby: { id: 888, displayname: 'Other Mod' },
-        }
-      )
+      const messageHeldByOther = createTestMessage({
+        heldby: { id: 888, displayname: 'Other Mod' },
+      })
+      const wrapper2 = mountComponent({
+        message: messageHeldByOther,
+        summary: false,
+      })
       await wrapper2.vm.$nextTick()
       expect(wrapper2.text()).toContain('Held by')
     })
@@ -676,13 +647,15 @@ describe('ModMessage', () => {
 
   describe('Spammer indicator', () => {
     it('shows ModSpammer when user is a spammer', async () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        displayname: 'Spam User',
-        spammer: { collection: 'Spammer' },
-        memberships: [{ id: 789, groupid: 789 }],
+      const message = createTestMessage({
+        fromuser: {
+          id: 456,
+          displayname: 'Spam User',
+          spammer: { collection: 'Spammer' },
+          memberof: [{ id: 789 }],
+        },
       })
-      const wrapper = mountComponent({ summary: false })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.find('.mod-spammer').exists()).toBe(true)
     })
@@ -690,7 +663,8 @@ describe('ModMessage', () => {
 
   describe('Message type notices', () => {
     it('shows notice for Other type messages', async () => {
-      const wrapper = mountComponent({ summary: false }, { type: 'Other' })
+      const message = createTestMessage({ type: 'Other' })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain(
         'needs editing so that we know what kind of post'
@@ -700,12 +674,10 @@ describe('ModMessage', () => {
 
   describe('Outcomes', () => {
     it('shows outcome notice when outcomes exist', async () => {
-      const wrapper = mountComponent(
-        { summary: false },
-        {
-          outcomes: [{ outcome: 'TAKEN', timestamp: '2024-01-15' }],
-        }
-      )
+      const message = createTestMessage({
+        outcomes: [{ outcome: 'TAKEN', timestamp: '2024-01-15' }],
+      })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('TAKEN')
     })
@@ -713,13 +685,11 @@ describe('ModMessage', () => {
 
   describe('Deadline and delivery possible', () => {
     it('shows deadline and delivery possible when set', () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          deadline: '2024-02-01',
-          deliverypossible: true,
-        }
-      )
+      const message = createTestMessage({
+        deadline: '2024-02-01',
+        deliverypossible: true,
+      })
+      const wrapper = mountComponent({ message })
       expect(wrapper.text()).toContain('Deadline')
       expect(wrapper.text()).toContain('Delivery possible')
     })
@@ -727,13 +697,15 @@ describe('ModMessage', () => {
 
   describe('Active distance warning', () => {
     it('shows warning for large active distance', async () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        displayname: 'Test User',
-        activedistance: 100,
-        memberships: [{ id: 789, groupid: 789 }],
+      const message = createTestMessage({
+        fromuser: {
+          id: 456,
+          displayname: 'Test User',
+          activedistance: 100,
+          memberof: [{ id: 789 }],
+        },
       })
-      const wrapper = mountComponent({ summary: false })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('100 miles apart')
     })
@@ -741,12 +713,10 @@ describe('ModMessage', () => {
 
   describe('Outside UK warning', () => {
     it('shows warning for positions outside UK', async () => {
-      const wrapper = mountComponent(
-        { summary: false },
-        {
-          location: { lat: 40.0, lng: -1.0 },
-        }
-      )
+      const message = createTestMessage({
+        location: { lat: 40.0, lng: -1.0 },
+      })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('outside the UK')
     })
@@ -754,10 +724,8 @@ describe('ModMessage', () => {
 
   describe('Spam reason', () => {
     it('shows spam reason when present', async () => {
-      const wrapper = mountComponent(
-        { summary: false },
-        { spamreason: 'Suspicious content' }
-      )
+      const message = createTestMessage({ spamreason: 'Suspicious content' })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Suspicious content')
     })
@@ -765,7 +733,8 @@ describe('ModMessage', () => {
 
   describe('ModMessageWorry', () => {
     it('shows worry component when worry is set', async () => {
-      const wrapper = mountComponent({ summary: false }, { worry: 'medium' })
+      const message = createTestMessage({ worry: 'medium' })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.find('.mod-message-worry').exists()).toBe(true)
     })
@@ -773,22 +742,18 @@ describe('ModMessage', () => {
 
   describe('Availability badges', () => {
     it('shows availability badges with correct values', () => {
-      const wrapper1 = mountComponent(
-        {},
-        {
-          availableinitially: 5,
-          availablenow: 5,
-        }
-      )
+      const message1 = createTestMessage({
+        availableinitially: 5,
+        availablenow: 5,
+      })
+      const wrapper1 = mountComponent({ message: message1 })
       expect(wrapper1.text()).toContain('5 available')
 
-      const wrapper2 = mountComponent(
-        {},
-        {
-          availableinitially: 5,
-          availablenow: 3,
-        }
-      )
+      const message2 = createTestMessage({
+        availableinitially: 5,
+        availablenow: 3,
+      })
+      const wrapper2 = mountComponent({ message: message2 })
       expect(wrapper2.text()).toContain('5 available initially')
       expect(wrapper2.text()).toContain('3 now')
     })
@@ -796,14 +761,16 @@ describe('ModMessage', () => {
 
   describe('Email source button', () => {
     it('shows for Email source, hides for Platform', async () => {
-      const wrapper1 = mountComponent({ summary: false }, { source: 'Email' })
+      const emailMessage = createTestMessage({ source: 'Email' })
+      const wrapper1 = mountComponent({ message: emailMessage, summary: false })
       await wrapper1.vm.$nextTick()
       expect(wrapper1.text()).toContain('View Email Source')
 
-      const wrapper2 = mountComponent(
-        { summary: false },
-        { source: 'Platform' }
-      )
+      const platformMessage = createTestMessage({ source: 'Platform' })
+      const wrapper2 = mountComponent({
+        message: platformMessage,
+        summary: false,
+      })
       await wrapper2.vm.$nextTick()
       expect(wrapper2.text()).not.toContain('View Email Source')
     })
@@ -811,25 +778,23 @@ describe('ModMessage', () => {
 
   describe('Back to pending button', () => {
     it('shows for Approved messages, hides for Pending', async () => {
-      const wrapper1 = mountComponent(
-        {
-          summary: false,
-        },
-        {
-          groups: [{ groupid: 789, collection: 'Approved' }],
-        }
-      )
+      const approvedMessage = createTestMessage({
+        groups: [{ groupid: 789, collection: 'Approved' }],
+      })
+      const wrapper1 = mountComponent({
+        message: approvedMessage,
+        summary: false,
+      })
       await wrapper1.vm.$nextTick()
       expect(wrapper1.text()).toContain('Back to Pending')
 
-      const wrapper2 = mountComponent(
-        {
-          summary: false,
-        },
-        {
-          groups: [{ groupid: 789, collection: 'Pending' }],
-        }
-      )
+      const pendingMessage = createTestMessage({
+        groups: [{ groupid: 789, collection: 'Pending' }],
+      })
+      const wrapper2 = mountComponent({
+        message: pendingMessage,
+        summary: false,
+      })
       await wrapper2.vm.$nextTick()
       const buttons = wrapper2.findAll('.spin-button')
       const backToPendingButton = buttons.filter((b) =>
@@ -856,12 +821,10 @@ describe('ModMessage', () => {
       ['Pending', 'Pending'],
       ['Approved', 'Approved'],
     ])('shows %s alert in review mode', async (collection, expected) => {
-      const wrapper = mountComponent(
-        { review: true, summary: false },
-        {
-          groups: [{ groupid: 789, collection }],
-        }
-      )
+      const message = createTestMessage({
+        groups: [{ groupid: 789, collection }],
+      })
+      const wrapper = mountComponent({ message, review: true, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Post now in')
       expect(wrapper.text()).toContain(expected)
@@ -870,32 +833,28 @@ describe('ModMessage', () => {
 
   describe('Edit review mode', () => {
     it('shows ModDiff for subject when editreview with changes', () => {
-      const wrapper = mountComponent(
-        { editreview: true },
-        {
-          edits: [
-            {
-              reviewrequired: true,
-              oldsubject: 'Old Subject',
-              newsubject: 'New Subject',
-            },
-          ],
-        }
-      )
+      const message = createTestMessage({
+        edits: [
+          {
+            reviewrequired: true,
+            oldsubject: 'Old Subject',
+            newsubject: 'New Subject',
+          },
+        ],
+      })
+      const wrapper = mountComponent({ message, editreview: true })
       expect(wrapper.find('.mod-diff').exists()).toBe(true)
     })
   })
 
   describe('Location editing notice', () => {
     it('shows notice when editing and no location', async () => {
-      const wrapper = mountComponent(
-        { summary: false },
-        {
-          lat: null,
-          lng: null,
-          location: null,
-        }
-      )
+      const message = createTestMessage({
+        lat: null,
+        lng: null,
+        location: null,
+      })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       wrapper.vm.startEdit()
       await wrapper.vm.$nextTick()
@@ -907,25 +866,18 @@ describe('ModMessage', () => {
 
   describe('User summary display', () => {
     it('shows user displayname in summary mode', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        displayname: 'Updated User',
-        memberships: [{ id: 789, groupid: 789 }],
-      })
       const wrapper = mountComponent({ summary: true })
-      expect(wrapper.text()).toContain('Updated User')
+      expect(wrapper.text()).toContain('Test User')
     })
   })
 
   describe('Microvolunteering and related messages', () => {
     it('shows both sections when data present', async () => {
-      const wrapper = mountComponent(
-        { summary: false },
-        {
-          microvolunteering: [{ id: 1, vote: 'approve' }],
-          related: [{ id: 999, subject: 'Related Message' }],
-        }
-      )
+      const message = createTestMessage({
+        microvolunteering: [{ id: 1, vote: 'approve' }],
+        related: [{ id: 999, subject: 'Related Message' }],
+      })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.find('.mod-message-microvolunteering').exists()).toBe(true)
       expect(wrapper.find('.mod-message-related').exists()).toBe(true)
@@ -934,7 +886,8 @@ describe('ModMessage', () => {
 
   describe('Highlighter', () => {
     it('uses matchedon.word for highlighting when set', () => {
-      const wrapper = mountComponent({}, { matchedon: { word: 'test' } })
+      const message = createTestMessage({ matchedon: { word: 'test' } })
+      const wrapper = mountComponent({ message })
       expect(wrapper.text()).toContain('OFFER: Test Item (Location)')
       expect(wrapper.vm.message.matchedon.word).toBe('test')
     })
@@ -942,7 +895,8 @@ describe('ModMessage', () => {
 
   describe('Blank message body', () => {
     it('shows blank message notice when body is empty', async () => {
-      const wrapper = mountComponent({ summary: false }, { textbody: '' })
+      const message = createTestMessage({ textbody: '' })
+      const wrapper = mountComponent({ message, summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('This message is blank')
     })
@@ -954,12 +908,10 @@ describe('ModMessage', () => {
       await wrapper1.vm.$nextTick()
       expect(wrapper1.text()).toContain('Report Spammer')
 
-      const wrapper2 = mountComponent(
-        { summary: false },
-        {
-          heldby: { id: 888, displayname: 'Other Mod' },
-        }
-      )
+      const message = createTestMessage({
+        heldby: { id: 888, displayname: 'Other Mod' },
+      })
+      const wrapper2 = mountComponent({ message, summary: false })
       await wrapper2.vm.$nextTick()
       expect(wrapper2.text()).toContain('held by someone else')
     })

@@ -2,31 +2,31 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class AdminsAPI extends BaseAPI {
   fetch(params) {
-    return this.$getv2('/modtools/admin', params)
+    return this.$get('/admin', params)
   }
 
   async add(data) {
-    const { id } = await this.$postv2('/modtools/admin', data)
+    const { id } = await this.$post('/admin', data)
     return id
   }
 
   async patch(data) {
-    await this.$patchv2('/modtools/admin', data)
+    await this.$patch('/admin', data)
   }
 
   async del(data) {
-    await this.$delv2('/modtools/admin', data)
+    await this.$del('/admin', data)
   }
 
   async hold(id) {
-    await this.$postv2('/modtools/admin', {
+    await this.$post('/admin', {
       id,
       action: 'Hold',
     })
   }
 
   async release(id) {
-    await this.$postv2('/modtools/admin', {
+    await this.$post('/admin', {
       id,
       action: 'Release',
     })

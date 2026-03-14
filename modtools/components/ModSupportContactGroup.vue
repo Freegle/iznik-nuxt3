@@ -95,7 +95,7 @@
         <ModAlertHistory
           v-for="alert in alerts"
           :key="'alert-' + alert.id"
-          :alertid="alert.id"
+          :alert="alert"
         />
       </div>
       <Spinner v-else-if="busy" :size="50" class="d-block" />

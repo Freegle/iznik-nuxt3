@@ -1,9 +1,8 @@
 <template>
   <b-modal
-    v-if="attachment"
-    :id="'photoModal-' + attachmentid"
+    :id="'photoModal-' + attachment.id"
     ref="modal"
-    :title="message?.subject"
+    :title="message.subject"
     size="lg"
     no-stacking
     ok-only
@@ -25,17 +24,20 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
-  messageid: {
-    type: Number,
+  attachment: {
+    type: Object,
     required: true,
   },
-  attachmentid: {
-    type: Number,
+  message: {
+    type: Object,
+    required: true,
+  },
+  externalmods: {
+    type: Object,
     required: true,
   },
 })
@@ -43,35 +45,20 @@ const props = defineProps({
 const { modal, show, hide } = useOurModal()
 const messageStore = useMessageStore()
 
-const message = computed(() => messageStore.byId(props.messageid))
-
-const attachment = computed(() => {
-  return message.value?.attachments?.find((a) => a.id === props.attachmentid)
-})
-
-const externalmods = computed(() => {
-  if (attachment.value?.mods) {
-    const jsonmods = JSON.parse(attachment.value.mods)
-    if (!jsonmods) return {}
-    return jsonmods
-  }
-  return {}
-})
-
 async function updatedPhoto() {
-  await messageStore.patch({ id: props.messageid })
+  await messageStore.patch({ id: props.message.id })
 }
 
 async function removePhoto(id) {
   const attachments = []
 
-  message.value?.attachments?.forEach((a) => {
+  props.message.attachments.forEach((a) => {
     if (a.id !== id) {
       attachments.push(a.id)
     }
   })
 
-  await messageStore.patch({ id: props.messageid, attachments })
+  await messageStore.patch({ id: props.message.id, attachments })
 }
 
 defineExpose({ show, hide })

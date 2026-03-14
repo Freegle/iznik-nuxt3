@@ -61,7 +61,7 @@ describe('ModBanMemberConfirmModal', () => {
     mockUserStore.byId.mockReturnValue({
       id: 123,
       settings: { mylocation: { lat: 52.0, lng: -1.0 } },
-      memberships: [{ id: 456 }, { id: 789 }],
+      memberof: [{ id: 456 }, { id: 789 }],
     })
 
     return mount(ModBanMemberConfirmModal, {
@@ -100,7 +100,7 @@ describe('ModBanMemberConfirmModal', () => {
     mockUserStore.byId.mockReturnValue({
       id: 123,
       settings: { mylocation: { lat: 52.0, lng: -1.0 } },
-      memberships: [{ id: 456 }, { id: 789 }],
+      memberof: [{ id: 456 }, { id: 789 }],
     })
   })
 

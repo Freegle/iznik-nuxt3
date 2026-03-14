@@ -1,16 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModSettingShortlink from '~/modtools/components/ModSettingShortlink.vue'
-
-// Mock shortlinks store
-const mockShortlinkStore = {
-  list: {},
-  byId: vi.fn(),
-}
-
-vi.mock('~/stores/shortlinks', () => ({
-  useShortlinkStore: () => mockShortlinkStore,
-}))
 
 describe('ModSettingShortlink', () => {
   const defaultShortlink = {
@@ -21,13 +11,8 @@ describe('ModSettingShortlink', () => {
   }
 
   function mountComponent(shortlink = defaultShortlink) {
-    mockShortlinkStore.list[shortlink.id] = shortlink
-    mockShortlinkStore.byId.mockImplementation(
-      (id) => mockShortlinkStore.list[id] || null
-    )
-
     return mount(ModSettingShortlink, {
-      props: { shortlinkid: shortlink.id },
+      props: { shortlink },
       global: {
         mocks: {
           timeago: (date) => `${date} ago`,
@@ -37,11 +22,6 @@ describe('ModSettingShortlink', () => {
       },
     })
   }
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockShortlinkStore.list = {}
-  })
 
   describe('rendering', () => {
     it('renders a link with the correct href', () => {
@@ -85,33 +65,16 @@ describe('ModSettingShortlink', () => {
       const link = wrapper.find('a')
       expect(link.attributes('rel')).toBe('noopener noreferrer')
     })
-
-    it('renders nothing when shortlink is not in store', () => {
-      mockShortlinkStore.byId.mockReturnValue(null)
-
-      const wrapper = mount(ModSettingShortlink, {
-        props: { shortlinkid: 999 },
-        global: {
-          mocks: {
-            timeago: (date) => `${date} ago`,
-            pluralise: (word, count, showCount) =>
-              showCount ? `${count} ${word}${count !== 1 ? 's' : ''}` : word,
-          },
-        },
-      })
-
-      expect(wrapper.find('a').exists()).toBe(false)
-    })
   })
 
   describe('props', () => {
-    it('accepts shortlinkid as required prop', () => {
+    it('accepts shortlink as required prop', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('shortlinkid')).toBe(defaultShortlink.id)
+      expect(wrapper.props('shortlink')).toEqual(defaultShortlink)
     })
 
     it('handles shortlink with different name', () => {
-      const shortlink = { ...defaultShortlink, id: 2, name: 'mygroup' }
+      const shortlink = { ...defaultShortlink, name: 'mygroup' }
       const wrapper = mountComponent(shortlink)
       const link = wrapper.find('a')
       expect(link.attributes('href')).toBe('https://freegle.in/mygroup')

@@ -189,6 +189,12 @@
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
+          link="/publicity"
+          name="Publicity"
+          :count="['socialactions', 'popularposts']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
           link="/admins"
           name="Admins"
           :count="['pendingadmins']"
@@ -475,12 +481,16 @@ function googleLoggedIn() {
 }
 
 function googleLoaded() {
-  if (loginModal.value && loginModal.value.showModal) {
-    // The login modal is already showing — don't re-render it or we'll
-    // destroy any form state the user (or test automation) has entered.
-    console.log('Login modal already showing - not re-rendering')
+  if (
+    loginModal.value &&
+    loginModal.value.showModal &&
+    loginModal.value.email
+  ) {
+    console.log(
+      'Showing login modal - leave well alone',
+      loginModal.value.email
+    )
   } else {
-    // We need to force the login modal to rerender
     bumpLogin.value++
   }
 }

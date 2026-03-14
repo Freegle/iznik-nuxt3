@@ -3,7 +3,7 @@
     <ModMicrovolunteeringModal
       v-if="showMicrovolunteeringModal"
       ref="microvolunteering"
-      :userid="userid"
+      :user="user"
       :item-ids="itemIds"
       @hidden="showMicrovolunteeringModal = false"
     />
@@ -14,8 +14,8 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  user: {
+    type: Object,
     required: true,
   },
   items: {

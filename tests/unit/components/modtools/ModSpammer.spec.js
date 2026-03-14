@@ -3,17 +3,6 @@ import { mount, config } from '@vue/test-utils'
 import { ref } from 'vue'
 import ModSpammer from '~/modtools/components/ModSpammer.vue'
 
-let mockUserData = {}
-
-const mockUserStore = {
-  byId: (id) => mockUserData[id] || null,
-  fetch: vi.fn().mockResolvedValue(null),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 vi.mock('~/composables/useModMe', () => ({
   useModMe: () => ({
     hasPermissionSpamAdmin: ref(false),
@@ -27,7 +16,6 @@ config.global.mocks = {
 
 describe('ModSpammer', () => {
   const baseUser = {
-    id: 1,
     displayname: 'Test User',
     spammer: {
       reason: 'Posting spam links',
@@ -49,18 +37,9 @@ describe('ModSpammer', () => {
     }
   }
 
-  function populateUserStore(user) {
-    mockUserData[user.id] = user
-  }
-
   function mountComponent(props = {}) {
-    // Convert old-style user prop to userid and populate store
-    const { user: userProp, ...otherProps } = props
-    const user = userProp || baseUser
-    populateUserStore(user)
-
     return mount(ModSpammer, {
-      props: { userid: user.id, ...otherProps },
+      props: { user: baseUser, ...props },
       global: {
         mocks: {
           timeago: vi.fn(() => '3 days ago'),
@@ -99,7 +78,6 @@ describe('ModSpammer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserData = {}
   })
 
   describe('rendering', () => {
@@ -194,7 +172,7 @@ describe('ModSpammer', () => {
     it('passes props correctly and displays byuser info', () => {
       const sameip = [100, 200]
       const wrapper = mountComponent({ sameip })
-      expect(wrapper.props('userid')).toEqual(baseUser.id)
+      expect(wrapper.props('user')).toEqual(baseUser)
       expect(wrapper.props('sameip')).toEqual(sameip)
       expect(wrapper.text()).toContain('Mod Person')
       expect(wrapper.text()).toContain('mod@example.com')
@@ -223,7 +201,6 @@ describe('ModSpammer', () => {
   describe('edge cases', () => {
     it('handles minimal spammer data and empty reason', () => {
       const user = {
-        id: 99,
         displayname: 'Minimal User',
         spammer: {
           reason: '',

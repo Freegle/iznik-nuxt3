@@ -9,12 +9,12 @@
             }}
           </b-col>
           <b-col cols="6" md="4">
-            <span v-if="!event.userid"> Added by the system </span>
+            <span v-if="!event.user.id"> Added by the system </span>
             <span v-else>
-              {{ eventUser?.displayname }}
+              {{ event.user.displayname }}
               <span class="text-muted">
                 <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                  event.userid
+                  event.user.id
                 }}
               </span>
             </span>
@@ -47,8 +47,8 @@
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <ChatButton
-          v-if="groups.length > 0 && event.userid"
-          :userid="event.userid"
+          v-if="groups.length > 0 && event.user.id"
+          :userid="event.user.id"
           :groupid="groups[0].id"
           title="Chat"
           variant="white"
@@ -75,46 +75,27 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useGroupStore } from '~/stores/group'
-import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  eventid: {
-    type: Number,
+  event: {
+    type: Object,
     required: true,
   },
 })
 
 const communityEventStore = useCommunityEventStore()
 const groupStore = useGroupStore()
-const userStore = useUserStore()
-
-const event = computed(() => communityEventStore.byId(props.eventid))
 
 const showModal = ref(false)
 const eventmodal = ref(null)
 const showDeleteConfirm = ref(false)
 
-// Fetch user details for display
-watch(
-  () => event.value?.userid,
-  (userid) => {
-    if (userid) {
-      userStore.fetch(userid)
-    }
-  },
-  { immediate: true }
-)
-
-const eventUser = computed(() => {
-  return event.value?.userid ? userStore.byId(event.value.userid) : null
-})
-
 const groups = computed(() => {
   const ret = []
-  event.value?.groups?.forEach((id) => {
+  props.event?.groups?.forEach((id) => {
     const group = groupStore?.get(id)
 
     if (group) {
@@ -134,13 +115,13 @@ function confirmDelete() {
 }
 
 function deleteme() {
-  communityEventStore.delete(event.value.id)
+  communityEventStore.delete(props.event.id)
   showDeleteConfirm.value = false
 }
 
 function approve() {
   communityEventStore.save({
-    id: event.value.id,
+    id: props.event.id,
     pending: false,
   })
 }

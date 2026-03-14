@@ -31,13 +31,12 @@ module.exports = defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  workers: 11, // Parallel workers for test isolation validation
+  workers: 1, // Tests share data and interfere with each other when run in parallel
   maxFailures: 0,
   reporter: [
     ['list'],
     ['html', { open: process.env.CI ? 'never' : 'always', host: '0.0.0.0' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
-    ['./tests/e2e/status-reporter.js'],
     // Only include monocart reporter when explicitly enabled via env var
     ...(process.env.ENABLE_MONOCART_REPORTER === 'true'
       ? [
@@ -101,7 +100,7 @@ module.exports = defineConfig({
     baseURL: process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     // viewport set at test level for better control
-    trace: 'retain-on-failure',
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
     // Video recording configuration

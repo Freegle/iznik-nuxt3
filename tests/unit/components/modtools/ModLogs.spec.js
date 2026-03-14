@@ -56,8 +56,8 @@ describe('ModLogs', () => {
           },
           ModLog: {
             template:
-              '<div class="mod-log" :data-id="logid">log-{{ logid }}</div>',
-            props: ['logid'],
+              '<div class="mod-log" :data-id="log.id">{{ log.type }}/{{ log.subtype }}</div>',
+            props: ['log'],
           },
           InfiniteLoading: {
             template:

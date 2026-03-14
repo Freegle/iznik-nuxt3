@@ -1,15 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { reactive } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import CommunityEventsPage from '~/modtools/pages/communityevents/[[groupid]].vue'
 
-// Mock stores - reactive so computed properties re-evaluate when list is mutated
-const mockCommunityEventStore = reactive({
+// Mock stores
+const mockCommunityEventStore = {
   list: {},
   clear: vi.fn(),
-  fetchPending: vi.fn(),
-})
+  fetchMT: vi.fn(),
+}
 
 vi.mock('~/stores/communityevent', () => ({
   useCommunityEventStore: () => mockCommunityEventStore,
@@ -23,6 +22,15 @@ vi.mock('@/stores/auth', () => ({
   useAuthStore: () => mockAuthStore,
 }))
 
+const mockMiscStore = {
+  get: vi.fn(),
+  set: vi.fn(),
+}
+
+vi.mock('@/stores/misc', () => ({
+  useMiscStore: () => mockMiscStore,
+}))
+
 describe('CommunityEventsPage', () => {
   function mountComponent() {
     return mount(CommunityEventsPage, {
@@ -30,8 +38,8 @@ describe('CommunityEventsPage', () => {
         plugins: [createPinia()],
         stubs: {
           ModCommunityEvent: {
-            template: '<div class="mod-community-event" :data-id="eventid" />',
-            props: ['eventid'],
+            template: '<div class="mod-community-event" :data-id="event.id" />',
+            props: ['event'],
           },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',
@@ -57,7 +65,7 @@ describe('CommunityEventsPage', () => {
     setActivePinia(createPinia())
     mockCommunityEventStore.list = {}
     mockAuthStore.work = { pendingevents: 5 }
-    mockCommunityEventStore.fetchPending.mockResolvedValue()
+    mockCommunityEventStore.fetchMT.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -139,7 +147,11 @@ describe('CommunityEventsPage', () => {
 
       await wrapper.vm.loadMore(mockState)
 
-      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalledTimes(1)
+      expect(mockCommunityEventStore.fetchMT).toHaveBeenCalledWith({
+        context: null,
+        limit: 0,
+        pending: true,
+      })
       expect(mockState.complete).toHaveBeenCalled()
     })
 
@@ -152,31 +164,6 @@ describe('CommunityEventsPage', () => {
       expect(wrapper.vm.busy).toBe(true)
       await loadPromise
       expect(wrapper.vm.busy).toBe(false)
-    })
-
-    it('accumulates events across multiple loadMore calls', async () => {
-      let callCount = 0
-      mockCommunityEventStore.fetchPending.mockImplementation(() => {
-        callCount++
-        mockCommunityEventStore.list[callCount] = {
-          id: callCount,
-          title: `Event ${callCount}`,
-        }
-        return Promise.resolve()
-      })
-
-      const wrapper = mountComponent()
-      const mockState = { complete: vi.fn() }
-
-      await wrapper.vm.loadMore(mockState)
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.events).toHaveLength(1)
-
-      await wrapper.vm.loadMore(mockState)
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.events).toHaveLength(2)
-      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalledTimes(2)
-      expect(mockState.complete).toHaveBeenCalledTimes(2)
     })
   })
 })

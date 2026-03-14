@@ -17,7 +17,7 @@
         :key="'memberlist-' + member.id"
         class="p-0 mt-2"
       >
-        <ModRelatedMember :memberid="member.id" @processed="bump++" />
+        <ModRelatedMember :member="member" @processed="bump++" />
       </div>
 
       <infinite-loading
@@ -63,13 +63,13 @@ const visibleMembers = computed(() => {
     }
 
     let found = false
-    member.memberships.forEach((group) => {
+    member.memberof.forEach((group) => {
       if (parseInt(group.id) === groupid.value) {
         found = true
       }
     })
 
-    member.relatedto.memberships.forEach((group) => {
+    member.relatedto.memberof.forEach((group) => {
       if (parseInt(group.id) === groupid.value) {
         found = true
       }

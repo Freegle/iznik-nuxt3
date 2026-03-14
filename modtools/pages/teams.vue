@@ -61,7 +61,7 @@
           v-for="member in team.members"
           :key="'member-' + member.id"
           :teamid="team.id"
-          :userid="member.id"
+          :member="member"
           @removed="removed(team.name)"
         />
       </div>

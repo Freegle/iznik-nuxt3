@@ -40,7 +40,8 @@ const router = useRouter()
 const autocomplete = ref(null)
 
 // API base URL
-const source = runtimeConfig.public.APIv2 + '/authority'
+const api = runtimeConfig.public.APIv1
+const source = api + '/authority'
 
 // Set page head
 useHead(

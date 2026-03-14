@@ -5,8 +5,6 @@ import ModModeration from '~/modtools/components/ModModeration.vue'
 // Mock store
 const mockUserStore = {
   edit: vi.fn(),
-  byId: vi.fn(),
-  fetch: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -28,20 +26,11 @@ describe('ModModeration', () => {
   })
 
   function mountComponent(props = {}) {
-    const { _userData, ...componentProps } = props
-    const userid = componentProps.userid || 456
-    const userData = _userData || createUser({ id: userid })
-
-    mockUserStore.byId.mockImplementation((id) => {
-      if (id === userid) return userData
-      return null
-    })
-
     return mount(ModModeration, {
       props: {
         membership: createMembership(),
-        userid,
-        ...componentProps,
+        user: createUser(),
+        ...props,
       },
       global: {
         stubs: {
@@ -64,8 +53,6 @@ describe('ModModeration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.edit.mockResolvedValue({})
-    mockUserStore.byId.mockReturnValue(createUser())
-    mockUserStore.fetch.mockResolvedValue({})
   })
 
   describe('rendering', () => {
@@ -111,8 +98,7 @@ describe('ModModeration', () => {
     it('calls userStore.edit when setting postingStatus', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        userid: 111,
-        _userData: createUser({ id: 111 }),
+        user: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
@@ -126,11 +112,11 @@ describe('ModModeration', () => {
       })
     })
 
-    it('uses userid prop for edit calls', async () => {
+    it('uses userid prop when provided instead of user.id', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
+        user: createUser({ id: 111 }),
         userid: 999,
-        _userData: createUser({ id: 999 }),
       })
 
       // Directly set the computed property to test the setter
@@ -147,8 +133,7 @@ describe('ModModeration', () => {
     it('uses membership.id as fallback groupid when membership.groupid is null', async () => {
       const wrapper = mountComponent({
         membership: { id: 555, groupid: null, ourpostingstatus: 'MODERATED' },
-        userid: 111,
-        _userData: createUser({ id: 111 }),
+        user: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
@@ -166,14 +151,14 @@ describe('ModModeration', () => {
   describe('trustlevel computed', () => {
     it('returns trustlevel from user', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Basic' }),
+        user: createUser({ trustlevel: 'Basic' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Basic')
     })
 
     it('returns null when trustlevel is not set', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: null }),
+        user: createUser({ trustlevel: null }),
       })
       expect(wrapper.vm.trustlevel).toBeNull()
     })
@@ -181,8 +166,7 @@ describe('ModModeration', () => {
     it('calls userStore.edit when setting trustlevel', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        userid: 111,
-        _userData: createUser({ id: 111, trustlevel: null }),
+        user: createUser({ id: 111, trustlevel: null }),
       })
 
       // Directly set the computed property to test the setter
@@ -196,11 +180,11 @@ describe('ModModeration', () => {
       })
     })
 
-    it('uses userid prop for trustlevel edit', async () => {
+    it('uses userid prop when provided for trustlevel', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
+        user: createUser({ id: 111 }),
         userid: 888,
-        _userData: createUser({ id: 888 }),
       })
 
       // Directly set the computed property to test the setter
@@ -241,35 +225,35 @@ describe('ModModeration', () => {
   describe('trust level values', () => {
     it('handles Basic trust level', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Basic' }),
+        user: createUser({ trustlevel: 'Basic' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Basic')
     })
 
     it('handles Moderate trust level', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Moderate' }),
+        user: createUser({ trustlevel: 'Moderate' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Moderate')
     })
 
     it('handles Advanced trust level', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Advanced' }),
+        user: createUser({ trustlevel: 'Advanced' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Advanced')
     })
 
     it('handles Declined trust level', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Declined' }),
+        user: createUser({ trustlevel: 'Declined' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Declined')
     })
 
     it('handles Excluded trust level', () => {
       const wrapper = mountComponent({
-        _userData: createUser({ trustlevel: 'Excluded' }),
+        user: createUser({ trustlevel: 'Excluded' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Excluded')
     })
@@ -325,8 +309,7 @@ describe('ModModeration', () => {
     it('prefers groupid over id', async () => {
       const wrapper = mountComponent({
         membership: { id: 100, groupid: 200, ourpostingstatus: 'MODERATED' },
-        userid: 111,
-        _userData: createUser({ id: 111 }),
+        user: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
@@ -341,8 +324,7 @@ describe('ModModeration', () => {
     it('falls back to membership.id when groupid is undefined', async () => {
       const wrapper = mountComponent({
         membership: { id: 300, ourpostingstatus: 'MODERATED' },
-        userid: 111,
-        _userData: createUser({ id: 111 }),
+        user: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter

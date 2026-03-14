@@ -1,5 +1,5 @@
 <template>
-  <div v-if="message">
+  <div>
     <div ref="top" style="position: relative; top: -66px" />
     <b-card bg-variant="white" no-body>
       <b-card-header class="p-1 p-md-2">
@@ -29,7 +29,7 @@
                 class="mr-1"
                 size="lg"
                 :disabled-except-for="memberGroupIds"
-                :disabled="fromUser?.tnuserid"
+                :disabled="editmessage.fromuser?.tnuserid"
               />
               <div
                 v-if="editmessage.item && editmessage.location"
@@ -122,7 +122,13 @@
               display-message-link
             />
             <div
-              v-if="homegroup && group && homegroup !== group.namedisplay"
+              v-if="
+                homegroup &&
+                message &&
+                message.groups &&
+                message.groups.length &&
+                homegroup !== message.groups[0].namedisplay
+              "
               class="small text-danger"
             >
               Possibly should be on {{ homegroup }}
@@ -131,27 +137,27 @@
             <ModMessageDuplicate
               v-for="(duplicate, index) in duplicates"
               :key="'duplicate-' + duplicate.id + '-' + index"
-              :messageid="duplicate.id"
+              :message="duplicate"
             />
             <ModMessageCrosspost
               v-for="crosspost in crossposts"
               :key="'crosspost-' + crosspost.id"
-              :messageid="crosspost.id"
+              :message="crosspost"
             />
             <div v-if="expanded">
               <ModMessageRelated
                 v-for="related in message.related"
                 :key="'related-' + related.id"
-                :messageid="related.id"
+                :message="related"
               />
             </div>
           </div>
           <div class="d-flex">
             <div
-              v-if="summary && message && fromUser"
+              v-if="summary && message && message.fromuser"
               class="text-info font-weight-bold mr-2"
             >
-              {{ fromUser.displayname }}
+              {{ message.fromuser.displayname }}
             </div>
             <div v-if="expanded" class="d-flex">
               <div class="d-flex flex-column align-content-end">
@@ -220,17 +226,17 @@
               </NoticeMessage>
               <div v-if="message.heldby">
                 <NoticeMessage variant="warning" class="mb-2">
-                  <p v-if="me.id === heldbyId">
+                  <p v-if="me.id === message.heldby.id">
                     You held this. Other people will see a warning to check with
                     you before releasing it. If you release it, it will stay in
                     Pending.
                   </p>
                   <p v-else>
-                    Held by <strong>{{ heldbyName }}</strong
+                    Held by <strong>{{ message.heldby.displayname }}</strong
                     >. Please check with them before releasing it.
                   </p>
                   <ModMessageButton
-                    :messageid="message.id"
+                    :message="message"
                     variant="warning"
                     icon="play"
                     release
@@ -239,19 +245,22 @@
                 </NoticeMessage>
               </div>
             </div>
-            <div v-if="fromUser">
+            <div v-if="message.fromuser">
               <ModComments
-                :userid="fromUserId"
+                :user="message.fromuser"
                 @update-comments="updateComments"
               />
-              <ModSpammer v-if="fromUser.spammer" :userid="fromUserId" />
+              <ModSpammer
+                v-if="message.fromuser.spammer"
+                :user="message.fromuser"
+              />
               <NoticeMessage
-                v-if="fromUser.activedistance > 50"
+                v-if="message.fromuser.activedistance > 50"
                 variant="warning"
                 class="mb-2"
               >
                 This freegler recently active on groups
-                {{ fromUser.activedistance }} miles apart.
+                {{ message.fromuser.activedistance }} miles apart.
               </NoticeMessage>
             </div>
             <NoticeMessage v-if="outsideUK" variant="warning" class="mb-2">
@@ -274,8 +283,8 @@
               <ModMessageMicroVolunteering
                 v-for="m in message.microvolunteering"
                 :key="'microvolunteering-' + m.id"
-                :messageid="message.id"
-                :microvolunteeringid="m.id"
+                :message="message"
+                :microvolunteering="m"
                 class="mb-1"
               />
               <b-button
@@ -298,7 +307,7 @@
               </b-button>
               <p class="text-muted small" />
             </div>
-            <ModMessageWorry v-if="message.worry" :messageid="message.id" />
+            <ModMessageWorry v-if="message.worry" :message="message" />
             <div v-if="expanded">
               <!-- eslint-disable-next-line -->
               <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
@@ -356,10 +365,7 @@
                   >
                     Removed
                   </div>
-                  <ModPhoto
-                    :messageid="messageid"
-                    :attachmentid="attachment.id"
-                  />
+                  <ModPhoto :message="message" :attachment="attachment" />
                 </div>
               </div>
               <MessageReplyInfo
@@ -375,7 +381,7 @@
               :centerat="{ lat: group.lat, lng: group.lng }"
               :position="{ lat: position.lat, lng: position.lng }"
               locked
-              :boundary="group.poly"
+              :boundary="group.polygon"
               :height="150"
             />
           </b-col>
@@ -384,9 +390,11 @@
               class="rounded border border-info p-2 d-flex justify-content-between flex-wrap"
             >
               <ModMessageUserInfo
-                v-if="fromUser && message.groups && message.groups.length"
+                v-if="
+                  message.fromuser && message.groups && message.groups.length
+                "
                 :message="message"
-                :userid="fromUserId"
+                :user="message.fromuser"
                 modinfo
                 :groupid="message.groups[0].groupid"
               />
@@ -408,7 +416,11 @@
             </div>
             <div class="d-flex justify-content-between flex-wrap">
               <b-button
-                v-if="fromUser && !fromUser.ljuserid && !fromUser.tnuserid"
+                v-if="
+                  message.fromuser &&
+                  !message.fromuser.ljuserid &&
+                  !message.fromuser.tnuserid
+                "
                 variant="link"
                 @click="toggleMail"
               >
@@ -424,7 +436,11 @@
                 </span>
               </b-button>
               <b-button
-                v-if="fromUser && fromUser.emails && fromUser.emails.length"
+                v-if="
+                  message.fromuser &&
+                  message.fromuser.emails &&
+                  message.fromuser.emails.length
+                "
                 variant="link"
                 @click="showEmails = !showEmails"
               >
@@ -432,17 +448,23 @@
                   <span class="d-inline d-sm-none"> Hide </span>
                   <span class="d-none d-sm-inline">
                     Hide
-                    {{ pluralise('email', fromUser.emails.length, true) }}
+                    {{
+                      pluralise('email', message.fromuser.emails.length, true)
+                    }}
                   </span>
                 </span>
                 <span v-else>
                   <span class="d-inline d-sm-none">
                     <v-icon icon="envelope" />
-                    {{ pluralise('email', fromUser.emails.length, true) }}
+                    {{
+                      pluralise('email', message.fromuser.emails.length, true)
+                    }}
                   </span>
                   <span class="d-none d-sm-inline">
                     Show
-                    {{ pluralise('email', fromUser.emails.length, true) }}
+                    {{
+                      pluralise('email', message.fromuser.emails.length, true)
+                    }}
                   </span>
                 </span>
               </b-button>
@@ -468,21 +490,21 @@
               :emailfrequency="membership.emailfrequency"
               :membership-m-t="membership"
               class="border border-info mt-2 p-1"
-              :userid="fromUserId"
+              :userid="message.fromuser.id"
               @update:emailfrequency="settingsChange('emailfrequency', $event)"
               @update:eventsallowed="settingsChange('eventsallowed', $event)"
               @update:volunteeringallowed="
                 settingsChange('volunteeringallowed', $event)
               "
             />
-            <div v-if="showEmails && fromUser">
-              <div v-for="email in fromUser.emails" :key="email.id">
+            <div v-if="showEmails">
+              <div v-for="email in message.fromuser.emails" :key="email.id">
                 {{ email.email }} <v-icon v-if="email.preferred" icon="star" />
               </div>
             </div>
             <ModMemberActions
               v-if="showActions && message.groups && message.groups.length"
-              :userid="fromUserId"
+              :userid="message.fromuser.id"
               :groupid="message.groups[0].groupid"
               @commentadded="updateComments"
             />
@@ -514,7 +536,7 @@
         </b-row>
       </b-card-body>
       <b-card-footer v-if="!noactions && expanded">
-        <div v-if="message.heldby && heldbyId !== myid">
+        <div v-if="message.heldby && message.heldby.id !== myid">
           This message is held by someone else. The buttons are hidden so you
           don't click them by accident. Please check with them before releasing
           the message.
@@ -529,7 +551,8 @@
         <div
           v-if="
             pending &&
-            (!message.heldby || (message.heldby && heldbyId === myid)) &&
+            (!message.heldby ||
+              (message.heldby && message.heldby.id === myid)) &&
             !editing
           "
           class="text-end mb-1"
@@ -540,11 +563,12 @@
         </div>
         <ModMessageButtons
           v-if="
-            (!message.heldby || (message.heldby && heldbyId === myid)) &&
+            (!message.heldby ||
+              (message.heldby && message.heldby.id === myid)) &&
             !editing
           "
-          :messageid="message.id"
-          :modconfigid="configid"
+          :message="message"
+          :modconfig="modconfig"
           :editreview="editreview"
           :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'"
         />
@@ -575,7 +599,7 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :userid="fromUserId"
+      :user="message.fromuser"
       :safelist="false"
     />
     <div ref="bottom" />
@@ -586,7 +610,6 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import Highlighter from 'vue-highlight-words'
 
-import { useAuthStore } from '~/stores/auth'
 import { useLocationStore } from '~/stores/location'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
@@ -604,8 +627,8 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { twem } from '~/composables/useTwem'
 
 const props = defineProps({
-  messageid: {
-    type: Number,
+  message: {
+    type: Object,
     required: true,
   },
   editreview: {
@@ -647,7 +670,12 @@ const props = defineProps({
 
 const emit = defineEmits(['destroy'])
 
-const authStore = useAuthStore()
+// If viewing message within chat then fromuser is a number and so must be zapped
+if (props.message.fromuser && typeof props.message.fromuser === 'number') {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.fromuser = null
+}
+
 const locationStore = useLocationStore()
 const memberStore = useMemberStore()
 const messageStore = useMessageStore()
@@ -655,42 +683,6 @@ const miscStore = useMiscStore()
 const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const userStore = useUserStore()
-
-const message = computed(() => messageStore.byId(props.messageid))
-
-watch(
-  () => props.messageid,
-  async (id) => {
-    if (id && !messageStore.byId(id)) {
-      await messageStore.fetch(id)
-    }
-  },
-  { immediate: true }
-)
-
-// V2 API returns fromuser as a numeric ID. Resolve from user store reactively.
-const fromUserId = computed(() => {
-  if (!message.value) return null
-  const fu = message.value.fromuser
-  if (!fu) return null
-  return typeof fu === 'number' ? fu : fu.id
-})
-
-// Trigger a fetch if the user isn't in the store yet.
-watch(
-  fromUserId,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) {
-      userStore.fetchMT({ id: uid, modtools: true })
-    }
-  },
-  { immediate: true }
-)
-
-const fromUser = computed(() => {
-  if (!fromUserId.value) return null
-  return userStore.byId(fromUserId.value) || null
-})
 const { typeOptions } = setupKeywords()
 const { me, myid } = useMe()
 const { myModGroups, myModGroup } = useModMe()
@@ -720,8 +712,8 @@ const groupid = computed(() => {
   // moved from mixins/keywords
   let ret = 0
 
-  if (message.value && message.value.groups && message.value.groups.length) {
-    ret = message.value.groups[0].groupid
+  if (props.message && props.message.groups && props.message.groups.length) {
+    ret = props.message.groups[0].groupid
   }
   return ret
 })
@@ -729,15 +721,19 @@ const groupid = computed(() => {
 const messageGroup = computed(() => {
   let ret = null
 
-  if (message.value && message.value.groups && message.value.groups.length) {
-    ret = message.value.groups[0].groupid
+  if (props.message && props.message.groups && props.message.groups.length) {
+    ret = props.message.groups[0].groupid
   }
 
   return ret
 })
 
 const messageHistory = computed(() => {
-  return fromUser.value?.messagehistory || []
+  return props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.messagehistory
+    ? props.message.fromuser.messagehistory
+    : []
 })
 
 const group = computed(() => {
@@ -753,15 +749,15 @@ const group = computed(() => {
 const position = computed(() => {
   let ret = null
 
-  if (message.value) {
-    if (message.value.location) {
+  if (props.message) {
+    if (props.message.location) {
       // This is what we put in for message submitted on FD.
-      ret = message.value.location
-    } else if (message.value.lat || message.value.lng) {
+      ret = props.message.location
+    } else if (props.message.lat || props.message.lng) {
       // This happens for TN messages
       ret = {
-        lat: message.value.lat,
-        lng: message.value.lng,
+        lat: props.message.lat,
+        lng: props.message.lng,
       }
     }
   }
@@ -784,88 +780,52 @@ const pending = computed(() => {
 })
 
 const eSubject = computed(() => {
-  if (!message.value) return ''
-  return twem(message.value.subject)
+  return twem(props.message.subject)
 })
 
 const eBody = computed(() => {
-  if (!message.value) return ''
-  return twem(message.value.textbody)
-})
-
-// Handle heldby as either numeric ID (Go API) or object (PHP API).
-const heldbyId = computed(() => {
-  if (!message.value) return null
-  const h = message.value.heldby
-  if (!h) return null
-  return Number.isInteger(h) ? h : h.id
-})
-
-const heldbyName = computed(() => {
-  if (!message.value) return ''
-  const h = message.value.heldby
-  if (!h) return ''
-  if (Number.isInteger(h)) {
-    const user = userStore.byId(h)
-    return user?.displayname || ''
-  }
-  return h.displayname || ''
+  return twem(props.message.textbody)
 })
 
 const membership = computed(() => {
   let ret = null
 
-  if (groupid.value && fromUser.value?.memberships) {
-    ret = fromUser.value.memberships.find((g) => g.groupid === groupid.value)
+  if (groupid.value) {
+    ret =
+      props.message.fromuser &&
+      props.message.fromuser.memberof &&
+      props.message.fromuser.memberof.find((g) => g.id === groupid.value)
   }
 
   return ret
 })
 
-const configid = computed(() => {
-  let id = null
+const modconfig = computed(() => {
+  let ret = null
+  let configid = null
 
-  // Look up configid from authStore.groups (always populated from session)
-  // rather than relying on modGroupStore.list[].mysettings which may not be
-  // populated yet due to a race condition with fetchGroupMT().
-  if (groupid.value && authStore.groups) {
-    const sessionGroup = authStore.groups.find(
-      (g) => parseInt(g.groupid) === parseInt(groupid.value)
-    )
-    if (sessionGroup?.configid) {
-      id = sessionGroup.configid
+  myModGroups.value.forEach((grp) => {
+    if (grp.id === groupid.value) {
+      configid = grp.mysettings?.configid
     }
+  })
+
+  const configs = modconfigStore.configs
+  ret = configs.find((config) => config.id === configid)
+  if (!ret) {
+    ret = configs.find((config) => config.default)
   }
 
-  if (!id) {
-    const defaultConfig = modconfigStore.configs.find(
-      (config) => config.default
-    )
-    id = defaultConfig?.id
-  }
-
-  return id
+  return ret
 })
-
-const modconfig = ref(null)
-
-watch(
-  configid,
-  async (id) => {
-    if (id) {
-      modconfig.value = await modconfigStore.fetchById(id)
-    }
-  },
-  { immediate: true }
-)
 
 const subjectClass = computed(() => {
   let ret = 'text-success'
 
-  if (message.value && modconfig.value && modconfig.value.coloursubj) {
+  if (modconfig.value && modconfig.value.coloursubj) {
     ret =
-      message.value.subject?.match &&
-      message.value.subject.match(modconfig.value.subjreg)
+      props.message.subject?.match &&
+      props.message.subject.match(modconfig.value.subjreg)
         ? 'text-success'
         : 'text-danger'
   }
@@ -874,14 +834,14 @@ const subjectClass = computed(() => {
 })
 
 const oldSubject = computed(() => {
-  if (!props.editreview || !message.value || !message.value.edits) {
+  if (!props.editreview || !props.message || !props.message.edits) {
     return null
   }
 
   // Edits are in descending time order.
   let oldest = null
 
-  message.value.edits.forEach((edit) => {
+  props.message.edits.forEach((edit) => {
     if (edit.reviewrequired && edit.oldsubject) {
       oldest = edit.oldsubject
     }
@@ -891,7 +851,7 @@ const oldSubject = computed(() => {
 })
 
 const newSubject = computed(() => {
-  if (!props.editreview || !message.value || !message.value.edits) {
+  if (!props.editreview || !props.message || !props.message.edits) {
     return null
   }
 
@@ -899,7 +859,7 @@ const newSubject = computed(() => {
   // Edits are in descending time order.
   let newest = null
 
-  message.value.edits.forEach((edit) => {
+  props.message.edits.forEach((edit) => {
     if (edit.reviewrequired) {
       if (edit.newsubject && !newest) {
         newest = edit.newsubject
@@ -911,14 +871,14 @@ const newSubject = computed(() => {
 })
 
 const oldBody = computed(() => {
-  if (!props.editreview || !message.value || !message.value.edits) {
+  if (!props.editreview || !props.message || !props.message.edits) {
     return null
   }
 
   // Edits are in descending time order.
   let oldest = null
 
-  message.value.edits.forEach((edit) => {
+  props.message.edits.forEach((edit) => {
     if (edit.reviewrequired && edit.oldtext) {
       oldest = edit.oldtext
     }
@@ -928,15 +888,15 @@ const oldBody = computed(() => {
 })
 
 const newBody = computed(() => {
-  if (!props.editreview || !message.value || !message.value.edits) {
+  if (!props.editreview || !props.message || !props.message.edits) {
     return null
   }
 
   // Find the newest and oldest texts; intermediates are just confusing.
   // Edits are in descending time order.
-  let newest = message.value.textbody
+  let newest = props.message.textbody
 
-  message.value.edits.forEach((edit) => {
+  props.message.edits.forEach((edit) => {
     if (edit.reviewrequired) {
       if (edit.newtext && !newest) {
         newest = edit.newtext
@@ -950,9 +910,8 @@ const newBody = computed(() => {
 const duplicateAge = computed(() => {
   let ret = 31
   let check = false
-  if (!message.value?.groups) return null
 
-  message.value.groups.forEach((g) => {
+  props.message.groups.forEach((g) => {
     const grp = myModGroup(g.groupid)
 
     // console.log("duplicateAge group", group?.settings?.duplicates)
@@ -963,7 +922,7 @@ const duplicateAge = computed(() => {
       grp.settings.duplicates.check
     ) {
       check = true
-      const msgtype = message.value.type.toLowerCase()
+      const msgtype = props.message.type.toLowerCase()
       ret = Math.min(ret, grp.settings.duplicates[msgtype])
     }
   })
@@ -981,8 +940,10 @@ const duplicates = computed(() => {
 })
 
 const memberGroupIds = computed(() => {
-  return fromUser.value?.memberships
-    ? fromUser.value.memberships.map((g) => g.id)
+  return props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.memberof
+    ? props.message.fromuser.memberof.map((g) => g.id)
     : []
 })
 
@@ -997,21 +958,10 @@ watch(
   }
 )
 
-// When expanding, force-fetch the full message to get all attachments.
-// The list endpoint only returns the first image for performance.
-watch(expanded, async (newVal) => {
-  if (newVal && message.value?.id) {
-    const fresh = await messageStore.fetch(message.value.id, true)
-    if (fresh?.attachments) {
-      attachments.value = fresh.attachments
-    }
-  }
-})
-
 watch(
   () => props.nextAfterRemoved,
   (newVal) => {
-    if (message.value && newVal === message.value.id) {
+    if (newVal === props.message.id) {
       // This message is the one after one which has just been removed.  Make sure the top is visible.
       bottom.value.scrollIntoView()
       top.value.scrollIntoView(true)
@@ -1024,10 +974,10 @@ watch(
   async (newVal) => {
     // We want to ensure that we have the groups for any message history, so that we can use them in canonSubj.
     // console.log('ModMessage: watch messageHistory',newVal)
-    await newVal.forEach(async function (histMsg) {
-      if (!historyGroups[histMsg.groupid]) {
-        historyGroups[histMsg.groupid] = await modGroupStore.fetchIfNeedBeMT(
-          histMsg.groupid
+    await newVal.forEach(async function (message) {
+      if (!historyGroups[message.groupid]) {
+        historyGroups[message.groupid] = await modGroupStore.fetchIfNeedBeMT(
+          message.groupid
         )
       }
     })
@@ -1037,38 +987,26 @@ watch(
 
 onMounted(() => {
   expanded.value = !props.summary
-  if (message.value) {
-    attachments.value = Array.isArray(message.value.attachments)
-      ? message.value.attachments
-      : []
-    findHomeGroup()
-
-    // Fetch heldby user if message is held (Go API returns numeric ID).
-    if (message.value.heldby && Number.isInteger(message.value.heldby)) {
-      userStore.fetch(message.value.heldby)
-    }
-  }
+  attachments.value = Array.isArray(props.message.attachments)
+    ? props.message.attachments
+    : []
+  findHomeGroup()
 })
 
 onBeforeUnmount(() => {
-  if (message.value) {
-    emit('destroy', message.value.id, props.next)
-  }
+  emit('destroy', props.message.id, props.next)
 })
 
 function updateComments() {
-  // fromUser is a computed from userStore.byId, so it auto-updates when the store changes.
-  // Force a re-fetch to get updated comments.
-  if (fromUserId.value) {
-    userStore.fetchMT({ id: fromUserId.value, modtools: true })
-  }
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.fromuser = userStore.byId(props.message.fromuser.id)
 }
 
 function imageAdded(id) {
   let ret = false
 
-  if (props.editreview && message.value && message.value.edits) {
-    message.value.edits.forEach((edit) => {
+  if (props.editreview && props.message && props.message.edits) {
+    props.message.edits.forEach((edit) => {
       const n = edit.newimages ? JSON.parse(edit.newimages) : []
       const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
       if (n.includes(id) && !o.includes(id)) {
@@ -1083,8 +1021,8 @@ function imageAdded(id) {
 function imageRemoved(id) {
   let ret = false
 
-  if (props.editreview && message.value && message.value.edits) {
-    message.value.edits.forEach((edit) => {
+  if (props.editreview && props.message && props.message.edits) {
+    props.message.edits.forEach((edit) => {
       const n = edit.newimages ? JSON.parse(edit.newimages) : []
       const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
       if (!n.includes(id) && o.includes(id)) {
@@ -1099,8 +1037,8 @@ function imageRemoved(id) {
 function hasCollection(coll) {
   let ret = false
 
-  if (message.value?.groups) {
-    message.value.groups.forEach((grp) => {
+  if (props.message.groups) {
+    props.message.groups.forEach((grp) => {
       if (grp.collection === coll) {
         ret = true
       }
@@ -1111,11 +1049,12 @@ function hasCollection(coll) {
 }
 
 function postcodeSelect(pc) {
-  message.value.location = pc
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.location = pc
 }
 
 function startEdit() {
-  editmessage.value = message.value
+  editmessage.value = props.message
   editing.value = true
   miscStore.modtoolsediting = true
   editmessage.value.groups.forEach((grp) => {
@@ -1177,7 +1116,7 @@ async function save() {
 
 function settingsChange(param, val) {
   const params = {
-    userid: fromUserId.value,
+    userid: props.message.fromuser.id,
     groupid: groupid.value,
   }
   params[param] = val
@@ -1187,9 +1126,9 @@ function settingsChange(param, val) {
 async function toggleMail() {
   showMailSettings.value = !showMailSettings.value
 
-  if (showMailSettings.value && fromUserId.value) {
+  if (showMailSettings.value) {
     // Get the user into the store for SettingsGroup.
-    await userStore.fetch(fromUserId.value)
+    await userStore.fetch(props.message.fromuser.id)
   }
 }
 
@@ -1232,41 +1171,44 @@ function canonSubj(message) {
 
 function checkHistory(duplicateCheck) {
   const ret = []
-  if (!message.value) return ret
-  const subj = canonSubj(message.value)
+  const subj = canonSubj(props.message)
   const dupids = []
   const crossids = []
 
-  if (fromUser.value?.messagehistory) {
-    fromUser.value.messagehistory.forEach((histMsg) => {
+  if (
+    props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.messagehistory
+  ) {
+    props.message.fromuser.messagehistory.forEach((message) => {
       if (
-        histMsg.id !== message.value.id &&
+        message.id !== props.message.id &&
         duplicateAge.value &&
-        histMsg.daysago <= duplicateAge.value
+        message.daysago <= duplicateAge.value
       ) {
-        // if( duplicateCheck) console.log('checkHistory check',histMsg)
-        if (canonSubj(histMsg) === subj) {
+        // if( duplicateCheck) console.log('checkHistory check',message)
+        if (canonSubj(message) === subj) {
           // No point displaying any group tag in the duplicate.
-          histMsg.subject = histMsg.subject.replace(/\[.*\](.*)/, '$1')
+          message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
 
           // Check whether there are groups in common.
-          const groupsInCommon = message.value.groups
+          const groupsInCommon = props.message.groups
             .map((g) => g.groupid)
-            .filter((g) => g === histMsg.groupid).length
+            .filter((g) => g === message.groupid).length
 
-          const key = histMsg.id + '-' + histMsg.arrival
+          const key = message.id + '-' + message.arrival
 
           if (duplicateCheck && groupsInCommon) {
             // Same group - so this is a duplicate
             if (!dupids[key]) {
               dupids[key] = true
-              ret.push(histMsg)
+              ret.push(message)
             }
           } else if (!duplicateCheck && !groupsInCommon) {
             // Different group - so this is a crosspost.
             if (!crossids[key]) {
               crossids[key] = true
-              ret.push(histMsg)
+              ret.push(message)
             }
           }
         }
@@ -1284,10 +1226,10 @@ function photoAdd() {
 }
 
 async function findHomeGroup() {
-  if (message.value && message.value.lat && message.value.lng) {
+  if (props.message && props.message.lat && props.message.lng) {
     const loc = await locationStore.fetch({
-      lat: message.value.lat,
-      lng: message.value.lng,
+      lat: props.message.lat,
+      lng: props.message.lng,
     })
 
     if (loc && loc.groupsnear && loc.groupsnear.length) {
@@ -1303,11 +1245,11 @@ function cancelEdit() {
   miscStore.modtoolsediting = false
 
   // Fetch the message again to revert any changes.
-  messageStore.fetch(message.value.id)
+  messageStore.fetch(props.message.id)
 }
 
 async function backToPending(callback) {
-  await messageStore.backToPending(message.value.id)
+  await messageStore.backToPending(props.message.id)
   callback()
 }
 

@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class NewsAPI extends BaseAPI {
   fetchFeed(params) {
-    return this.$getv2('/newsfeed', params)
+    return this.$get('/newsfeed', params)
   }
 
   async fetch(id, distance, lovelist, logError) {
@@ -17,52 +17,52 @@ export default class NewsAPI extends BaseAPI {
   }
 
   async send(data) {
-    const { id } = await this.$postv2('/newsfeed', data)
+    const { id } = await this.$post('/newsfeed', data)
     return id
   }
 
   edit(id, message) {
-    return this.$patchv2('/newsfeed', { id, message, action: 'Edit' })
+    return this.$patch('/newsfeed', { id, message, action: 'Edit' })
   }
 
   love(id) {
-    return this.$postv2('/newsfeed', { id, action: 'Love' })
+    return this.$post('/newsfeed', { id, action: 'Love' })
   }
 
   unlove(id) {
-    return this.$postv2('/newsfeed', { id, action: 'Unlove' })
+    return this.$post('/newsfeed', { id, action: 'Unlove' })
   }
 
   async unfollow(id) {
-    await this.$postv2('/newsfeed', { id, action: 'Unfollow' })
+    await this.$post('/newsfeed', { id, action: 'Unfollow' })
   }
 
   async report(id, reason) {
-    await this.$postv2('/newsfeed', { id, reason, action: 'Report' })
+    await this.$post('/newsfeed', { id, reason, action: 'Report' })
   }
 
   async referto(id, type) {
-    await this.$postv2('/newsfeed', { id, action: 'ReferTo' + type })
+    await this.$post('/newsfeed', { id, action: 'ReferTo' + type })
   }
 
   async unhide(id, type) {
-    await this.$postv2('/newsfeed', { id, action: 'Unhide' })
+    await this.$post('/newsfeed', { id, action: 'Unhide' })
   }
 
   async hide(id, type) {
-    await this.$postv2('/newsfeed', { id, action: 'Hide' })
+    await this.$post('/newsfeed', { id, action: 'Hide' })
   }
 
   async convertToStory(id, type) {
-    await this.$postv2('/newsfeed', { id, action: 'ConvertToStory' })
+    await this.$post('/newsfeed', { id, action: 'ConvertToStory' })
   }
 
   async seen(id) {
-    await this.$postv2('/newsfeed?bump=' + id, { id, action: 'Seen' })
+    await this.$post('/newsfeed?bump=' + id, { id, action: 'Seen' })
   }
 
   del(id) {
-    return this.$delv2('/newsfeed', { id })
+    return this.$del('/newsfeed', { id })
   }
 
   async count(distance, log) {

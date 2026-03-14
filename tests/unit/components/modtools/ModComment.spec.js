@@ -64,6 +64,7 @@ describe('ModComment', () => {
 
   const defaultUser = {
     id: 123,
+    userid: 123,
     displayname: 'Test User',
     comments: [defaultComment],
   }
@@ -73,19 +74,10 @@ describe('ModComment', () => {
     userOverrides = {},
     extraProps = {}
   ) {
-    const comment = { ...defaultComment, ...commentOverrides }
-    const user = {
-      ...defaultUser,
-      ...userOverrides,
-      comments: [comment],
-    }
-
-    mockUserStore.byId.mockReturnValue(user)
-
     const wrapper = mount(ModComment, {
       props: {
-        commentid: comment.id,
-        userid: user.id,
+        comment: { ...defaultComment, ...commentOverrides },
+        user: { ...defaultUser, ...userOverrides },
         expandComments: false,
         ...extraProps,
       },
@@ -114,7 +106,7 @@ describe('ModComment', () => {
           },
           ModCommentEditModal: {
             template: '<div class="edit-modal" />',
-            props: ['userid', 'comment', 'groupname'],
+            props: ['user', 'comment', 'groupname'],
           },
         },
       },
@@ -304,14 +296,14 @@ describe('ModComment', () => {
   })
 
   describe('edge cases', () => {
-    it('handles updateComments correctly', async () => {
+    it('handles user without userid property (uses id instead)', async () => {
       mockUserStore.byId.mockReturnValue({
         id: 123,
         displayname: 'Test User',
         comments: [defaultComment],
       })
 
-      const wrapper = await createWrapper()
+      const wrapper = await createWrapper({}, { userid: undefined, id: 123 })
       await wrapper.vm.updateComments()
 
       expect(mockUserStore.fetchMT).toHaveBeenCalledWith({

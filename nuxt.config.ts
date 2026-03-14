@@ -309,6 +309,7 @@ export default defineNuxtConfig({
   // Environment variables the client needs.
   runtimeConfig: {
     public: {
+      APIv1: config.APIv1,
       APIv2: config.APIv2,
       OSM_TILE: config.OSM_TILE,
       GEOCODE: config.GEOCODE,

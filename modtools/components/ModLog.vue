@@ -1,5 +1,5 @@
 <template>
-  <div v-if="log">
+  <div>
     <b-row>
       <b-col cols="5" lg="2" class="small">
         {{ datetimeshort(log.timestamp) }}
@@ -9,27 +9,29 @@
           v-if="
             log.type === 'Group' &&
             log.subtype === 'Joined' &&
-            logUser &&
-            logByuser &&
-            logByuser.id !== logUser.id
+            log.user &&
+            log.byuser &&
+            log.byuser.id !== log.user.id
           "
-          :userid="logUser.id"
+          :user="log.user"
         />
         <ModLogUser
-          v-else-if="logUser && logByuser && logByuser.id !== logUser.id"
-          :userid="logByuser.id"
+          v-else-if="log.user && log.byuser && log.byuser.id !== log.user.id"
+          :user="log.byuser"
         />
-        <ModLogUser v-else-if="logByuser" :userid="logByuser.id" />
-        <ModLogUser v-else-if="logUser" :userid="logUser.id" />
-        <ModLogUser v-else-if="logMessage" :userid="logMessage.fromuser?.id" />
+        <ModLogUser v-else-if="log.byuser" :user="log.byuser" />
+        <ModLogUser v-else-if="log.user" :user="log.user" />
+        <ModLogUser v-else-if="log.message" :user="log.message.fromuser" />
       </b-col>
       <b-col cols="12" lg="6" class="forcebreak">
         <span v-if="log.type === 'Group'">
           <span v-if="log.subtype === 'Joined'">
             Joined
-            <ModLogGroup :logid="logid" />
-            <span v-if="logUser && logByuser && logByuser.id !== logUser.id">
-              (added by <ModLogUser :userid="logByuser.id" />)
+            <ModLogGroup :log="log" />
+            <span
+              v-if="log.user && log.byuser && log.byuser.id !== log.user.id"
+            >
+              (added by <ModLogUser :user="log.byuser" />)
             </span>
             <span v-if="log.text">
               <span v-if="log.text === 'Manual'"> Clicked on Join button </span>
@@ -37,24 +39,26 @@
             </span>
           </span>
           <span v-else-if="log.subtype === 'Applied'">
-            Applied to <ModLogGroup :logid="logid" />
+            Applied to <ModLogGroup :log="log" />
           </span>
           <span v-else-if="log.subtype === 'Left'">
-            <span v-if="logUser && logByuser && logByuser.id !== logUser.id">
-              Removed member <ModLogUser :userid="logUser.id" /> from
-              <ModLogGroup :logid="logid" />
+            <span
+              v-if="log.user && log.byuser && log.byuser.id !== log.user.id"
+            >
+              Removed member <ModLogUser :user="log.user" /> from
+              <ModLogGroup :log="log" />
               <span v-if="log.text">
                 {{ log.text }}
               </span>
             </span>
-            <span v-else> Left <ModLogGroup :logid="logid" /> </span>
+            <span v-else> Left <ModLogGroup :log="log" /> </span>
           </span>
           <span v-else-if="log.subtype === 'Edit'">
-            Edited group settings <ModLogGroup :logid="logid" tag="for" />
+            Edited group settings <ModLogGroup :log="log" tag="for" />
           </span>
           <span v-else-if="log.subtype === 'Autoapproved'">
-            Auto-approved <ModLogMessage :logid="logid" />
-            <ModLogGroup :logid="logid" tag="on" />
+            Auto-approved <ModLogMessage :log="log" />
+            <ModLogGroup :log="log" tag="on" />
           </span>
           <span v-else>
             <span class="text-muted"
@@ -66,74 +70,73 @@
           <span v-if="log.subtype === 'Received'">
             <span
               v-if="
-                logMessage &&
-                (logMessage.type === 'Offer' || logMessage.type === 'Wanted')
+                log.message &&
+                (log.message.type === 'Offer' || log.message.type === 'Wanted')
               "
             >
-              Posted <ModLogMessage :logid="logid" notext tag="to" />
+              Posted <ModLogMessage :log="log" notext tag="to" />
               <span v-if="sourceheader" class="text-muted small">
                 via {{ sourceheader }}
               </span>
               <span
                 v-if="
-                  logMessage.groups &&
-                  logMessage.groups[0] &&
-                  logMessage.groups[0].collection === 'Pending'
+                  log.message.groups &&
+                  log.message.groups[0] &&
+                  log.message.groups[0].collection === 'Pending'
                 "
                 class="text-warning"
               >
-                currently {{ logMessage.groups[0].collection }}
+                currently {{ log.message.groups[0].collection }}
               </span>
             </span>
-            <span v-else-if="logMessage">
-              <span v-if="logMessage.deleted">
+            <span v-else-if="log.message">
+              <span v-if="log.message.deleted">
                 <em
-                  >Emailed message #{{ logMessage.id }} which has been deleted
+                  >Emailed message #{{ log.message.id }} which has been deleted
                   (typically email chat reply)</em
                 >
               </span>
               <span v-else>
-                Emailed <em>{{ logMessage.subject }}</em> to
-                <em>{{ logMessage.envelopeto }}</em>
+                Emailed <em>{{ log.message.subject }}</em> to
+                <em>{{ log.message.envelopeto }}</em>
               </span>
             </span>
           </span>
           <span v-else-if="log.subtype === 'Autoreposted'">
-            Autoreposted <ModLogMessage :logid="logid" /> repost
-            {{ log.text }}
-            <span v-if="logUser">
+            Autoreposted <ModLogMessage :log="log" /> repost {{ log.text }}
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Repost'">
-            Manual repost of <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            Manual repost of <ModLogMessage :log="log" />
+            <span v-if="log.user">
               by
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Approved'">
             Approved message
-            <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            <ModLogMessage :log="log" />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'ClassifiedSpam'">
-            Sent spam <ModLogMessage :logid="logid" tag="to" notext />
-            <span v-if="logUser">
+            Sent spam <ModLogMessage :log="log" tag="to" notext />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Rejected'" class="text-danger">
             Rejected
-            <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            <ModLogMessage :log="log" />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Replied'" class="text-danger">
@@ -147,52 +150,52 @@
             </span>
           </span>
           <span v-else-if="log.subtype === 'Deleted'" class="text-danger">
-            Deleted <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            Deleted <ModLogMessage :log="log" />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Hold'">
-            Held <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            Held <ModLogMessage :log="log" />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Release'">
-            Released <ModLogMessage :logid="logid" />
-            <span v-if="logUser">
+            Released <ModLogMessage :log="log" />
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Edit'">
-            Edited <ModLogMessage :logid="logid" notext />
+            Edited <ModLogMessage :log="log" notext />
             <ModLogUser
-              v-if="logUser && logByuser && logByuser.id !== logUser.id"
-              :userid="logByuser.id"
+              v-if="log.user && log.byuser && log.byuser.id !== log.user.id"
+              :user="log.byuser"
             />
             Details:
             {{ log.text }}
-            <span v-if="logUser">
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Outcome'">
-            Marked <ModLogMessage :logid="logid" notext /> as
+            Marked <ModLogMessage :log="log" notext /> as
             <em>{{ log.text }}</em>
-            <span v-if="logUser">
+            <span v-if="log.user">
               from
-              <ModLogUser :userid="logUser.id" />
+              <ModLogUser :user="log.user" />
             </span>
           </span>
           <span v-else-if="log.subtype === 'Autoapproved'">
-            Auto-approved <ModLogMessage :logid="logid" />
+            Auto-approved <ModLogMessage :log="log" />
           </span>
           <span v-else-if="log.subtype === 'WorryWords'" class="text-danger">
-            Flagged <ModLogMessage :logid="logid" notext /> {{ log.text }}
+            Flagged <ModLogMessage :log="log" notext /> {{ log.text }}
           </span>
           <span v-else>
             <span class="text-muted"
@@ -202,15 +205,15 @@
         </span>
         <span v-else-if="log.type === 'User'">
           <span v-if="log.subtype === 'OurPostingStatus'">
-            <span v-if="log.groupid">
+            <span v-if="log.group">
               Set Posting Status to {{ postingStatus }}
-              <ModLogGroup :logid="logid" tag="on" />
+              <ModLogGroup :log="log" tag="on" />
             </span>
             <span v-else />
           </span>
           <span v-else-if="log.subtype === 'OurEmailFrequency'">
             Set Email Frequency to {{ log.text }}
-            <ModLogGroup :logid="logid" tag="on" />
+            <ModLogGroup :log="log" tag="on" />
           </span>
           <span v-else-if="log.subtype === 'Login'">
             Logged in <em class="text-muted small">{{ log.text }}</em>
@@ -218,50 +221,49 @@
           <span v-else-if="log.subtype === 'Logout'"> Logged out </span>
           <span v-else-if="log.subtype === 'Created'"> User Created </span>
           <span v-else-if="log.subtype === 'RoleChange'">
-            Role <ModLogGroup :logid="logid" tag="on" /> changed to
-            {{ log.text }}
+            Role <ModLogGroup :log="log" tag="on" /> changed to {{ log.text }}
           </span>
           <span v-else-if="log.subtype === 'Merged'">
             Merged with another user - {{ log.text }}
           </span>
           <span v-else-if="log.subtype === 'Approved'">
             Approved member
-            <ModLogUser :userid="logUser.id" />
-            <ModLogGroup :logid="logid" tag="on" />
-            <ModLogStdMsg :logid="logid" />
+            <ModLogUser :user="log.user" />
+            <ModLogGroup :log="log" tag="on" />
+            <ModLogStdMsg :log="log" />
           </span>
           <span v-else-if="log.subtype === 'Rejected'">
             Rejected member
-            <ModLogUser :userid="logUser.id" />
-            <ModLogGroup :logid="logid" tag="on" />
-            <ModLogStdMsg :logid="logid" />
+            <ModLogUser :user="log.user" />
+            <ModLogGroup :log="log" tag="on" />
+            <ModLogStdMsg :log="log" />
           </span>
           <span v-else-if="log.subtype === 'Deleted'">
-            <span v-if="logByuser">Rejected member</span>
+            <span v-if="byuser">Rejected member</span>
             <span v-else>User left platform ({{ log.text }})</span>
-            <ModLogUser :userid="logUser.id" />
-            <ModLogGroup :logid="logid" tag="on" />
-            <ModLogStdMsg :logid="logid" />
+            <ModLogUser :user="log.user" />
+            <ModLogGroup :log="log" tag="on" />
+            <ModLogStdMsg :log="log" />
           </span>
           <span v-else-if="log.subtype === 'Mailed'" class="text-danger">
             Mod sent
             <span v-if="log.text && log.text.length > 0">
               <em>{{ log.text }} </em></span
             >
-            <ModLogStdMsg :logid="logid" />
+            <ModLogStdMsg :log="log" />
           </span>
           <span v-else-if="log.subtype === 'Hold'">
             Held member
-            <ModLogUser :userid="logUser.id" />
-            <ModLogGroup :logid="logid" tag="on" />
+            <ModLogUser :user="log.user" />
+            <ModLogGroup :log="log" tag="on" />
           </span>
           <span v-else-if="log.subtype === 'Release'">
             Released member
-            <ModLogUser :userid="logUser.id" />
-            <ModLogGroup :logid="logid" tag="on" />
+            <ModLogUser :user="log.user" />
+            <ModLogGroup :log="log" tag="on" />
           </span>
           <span v-else-if="log.subtype === 'Suspect'">
-            Flagged <ModLogUser :userid="logUser.id" />
+            Flagged <ModLogUser :user="log.user" />
             <span v-if="log.text">: {{ log.text }}</span>
           </span>
           <span v-else-if="log.subtype === 'Split'">
@@ -308,7 +310,7 @@
             Deleted config {{ log.text }}
           </span>
           <span v-else-if="log.subtype === 'Edit'">
-            Edited config {{ log.config ? log.config.name : '' }}
+            Edited config {{ log.config.name }}
           </span>
           <span v-else>
             <span class="text-muted"
@@ -336,7 +338,7 @@
         <span v-else-if="log.type === 'Chat'">
           <span v-if="log.subtype === 'Approved'">
             Approved chat message for
-            <ModLogUser :userid="logUser.id" />
+            <ModLogUser :user="log.user" />
           </span>
           <span v-else>
             <span class="text-muted"
@@ -350,82 +352,26 @@
   </div>
 </template>
 <script setup>
-import { computed, watch } from 'vue'
-import { useUserStore } from '~/stores/user'
-import { useMessageStore } from '~/stores/message'
-import { useLogsStore } from '~/stores/logs'
-
-const userStore = useUserStore()
-const messageStore = useMessageStore()
-const logsStore = useLogsStore()
+import { computed } from 'vue'
 
 const props = defineProps({
-  logid: {
-    type: Number,
+  log: {
+    type: Object,
     required: true,
   },
 })
 
-const log = computed(() => logsStore.byId(props.logid))
-
-// Look up user from store by ID, fetching if needed
-const logUser = computed(() => {
-  if (!log.value) return null
-  // V2: log has userid as an ID
-  const uid = log.value.userid
-  if (uid) {
-    return userStore.byId(uid) || { id: uid, displayname: '#' + uid }
-  }
-  // V1 fallback: log.user is already an object
-  return log.value.user || null
-})
-
-const logByuser = computed(() => {
-  if (!log.value) return null
-  const uid = log.value.byuserid
-  if (uid) {
-    return userStore.byId(uid) || { id: uid, displayname: '#' + uid }
-  }
-  return log.value.byuser || null
-})
-
-const logMessage = computed(() => {
-  if (!log.value) return null
-  const mid = log.value.msgid
-  if (mid) {
-    return messageStore.byId(mid) || null
-  }
-  return log.value.message || null
-})
-
-// Trigger fetches for user/message IDs we don't have yet
-watch(
-  log,
-  (l) => {
-    if (!l) return
-    if (l.userid && !userStore.byId(l.userid)) {
-      userStore.fetch(l.userid)
-    }
-    if (l.byuserid && !userStore.byId(l.byuserid)) {
-      userStore.fetch(l.byuserid)
-    }
-    if (l.msgid && !messageStore.byId(l.msgid)) {
-      messageStore.fetch(l.msgid)
-    }
-  },
-  { immediate: true }
-)
-
 const sourceheader = computed(() => {
-  if (logMessage.value && logMessage.value.sourceheader) {
-    return logMessage.value.sourceheader.replace('Yahoo-', '')
+  if (props.log.message && props.log.message.sourceheader) {
+    // Server returns Yahoo for now.
+    return props.log.message.sourceheader.replace('Yahoo-', '')
   } else {
     return null
   }
 })
 
 const postingStatus = computed(() => {
-  switch (log.value?.text) {
+  switch (props.log.text) {
     case 'UNCHANGED':
       return 'Unchanged'
     case 'MODERATED':
@@ -438,4 +384,7 @@ const postingStatus = computed(() => {
       return null
   }
 })
+
+// byuser used in template via log.byuser
+const byuser = computed(() => props.log.byuser)
 </script>

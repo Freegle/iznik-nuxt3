@@ -1,5 +1,5 @@
 <template>
-  <div v-if="rating">
+  <div>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
     <b-card no-body>
       <b-card-header
@@ -69,31 +69,27 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  ratingid: {
-    type: Number,
+  rating: {
+    type: Object,
     required: true,
   },
 })
 
-const memberStore = useMemberStore()
 const userStore = useUserStore()
 const { amAModOn } = useModMe()
-
-const rating = computed(() => memberStore.ratingById(props.ratingid))
 
 const groupName = computed(() => {
   let ret = null
 
-  if (rating.value?.rater) {
-    const rater = userStore.byId(rating.value.rater)
-    if (rater && rater.memberships) {
-      rater.memberships.forEach((g) => {
-        if (g.id === rating.value.groupid && amAModOn(g.id)) {
+  if (props.rating.rater) {
+    const rater = userStore.byId(props.rating.rater)
+    if (rater && rater.memberof) {
+      rater.memberof.forEach((g) => {
+        if (g.id === props.rating.groupid && amAModOn(g.id)) {
           ret = g.namedisplay
         }
       })
@@ -104,11 +100,14 @@ const groupName = computed(() => {
 })
 
 function visibilityChanged(visible) {
-  if (visible && rating.value?.reviewrequired) {
-    // Mark this as reviewed.  They've had a chance to see it.
-    userStore.ratingReviewed({
-      id: rating.value.id,
-    })
+  console.log('MMR visibilityChanged', visible, props.rating.reviewrequired)
+  if (visible) {
+    if (props.rating.reviewrequired) {
+      // Mark this as reviewed.  They've had a chance to see it.
+      userStore.ratingReviewed({
+        id: props.rating.id,
+      })
+    }
   }
 }
 </script>

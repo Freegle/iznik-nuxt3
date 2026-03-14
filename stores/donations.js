@@ -22,11 +22,19 @@ export const useDonationStore = defineStore({
       return ret?.id
     },
     async stripeIntent(params) {
-      const ret = await api(this.config).donations.stripeIntent(params)
+      console.log('donations store stripeIntent called with:', params)
+      console.log('this.config:', this.config)
+      const apiInstance = api(this.config)
+      console.log('apiInstance:', apiInstance)
+      console.log('apiInstance.donations:', apiInstance.donations)
+      const ret = await apiInstance.donations.stripeIntent(params)
+      console.log('API returned', ret)
       return ret?.intent
     },
     async stripeSubscription(amount) {
-      return await api(this.config).donations.stripeSubscription(amount)
+      const ret = await api(this.config).donations.stripeSubscription(amount)
+      console.log('API returned', ret)
+      return ret
     },
   },
 })

@@ -89,9 +89,7 @@ test.describe('V2 API Page Tests', () => {
     page,
     waitForNuxtPageLoad,
   }) => {
-    // Donate page loads external Stripe/PayPal resources that may be slow in CI.
-    // Use domcontentloaded to avoid hanging on external resource loading.
-    await page.gotoAndVerify('/donate', { waitUntil: 'domcontentloaded' })
+    await page.gotoAndVerify('/donate')
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
 
     // Page title should indicate donations
@@ -106,14 +104,13 @@ test.describe('V2 API Page Tests', () => {
   test('Explore page for specific group exercises GET /api/v2/group/{id}', async ({
     page,
     waitForNuxtPageLoad,
-    testEnv,
   }) => {
-    await page.gotoAndVerify(`/explore/${testEnv.group.name}`)
+    await page.gotoAndVerify('/explore/FreeglePlayground')
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
 
     // Should display the group name
     await expect(
-      page.locator(`h4:has-text("${testEnv.group.name}")`).first()
+      page.locator('h4:has-text("FreeglePlayground")').first()
     ).toBeVisible({ timeout: timeouts.ui.appearance })
 
     // Should not show an error page

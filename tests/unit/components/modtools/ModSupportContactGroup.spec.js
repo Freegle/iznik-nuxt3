@@ -88,8 +88,8 @@ describe('ModSupportContactGroup', () => {
             props: ['variant'],
           },
           ModAlertHistory: {
-            template: '<div class="alert-history" :data-alert-id="alertid" />',
-            props: ['alertid'],
+            template: '<div class="alert-history" :data-alert-id="alert.id" />',
+            props: ['alert'],
           },
           QuillEditor: {
             template: '<div class="quill-editor" />',

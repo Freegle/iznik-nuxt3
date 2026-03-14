@@ -145,6 +145,12 @@
       "percentage": 12
     },
     {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "total": 19,
+      "lowValue": 2,
+      "percentage": 11
+    },
+    {
       "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
       "total": 62,
       "lowValue": 7,
@@ -1028,6 +1034,18 @@
       "file": "tests/unit/components/modtools/ModSettingsModConfig.spec.js",
       "line": 194,
       "test": "renders Create button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "line": 96,
+      "test": "renders Unlink button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "line": 103,
+      "test": "renders Unlink button with white variant",
       "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
     },
     {

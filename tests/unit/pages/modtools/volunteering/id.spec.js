@@ -1,15 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { reactive } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import VolunteeringPage from '~/modtools/pages/volunteering/[[id]].vue'
 
-// Mock stores - reactive so computed properties re-evaluate when list is mutated
-const mockVolunteeringStore = reactive({
+// Mock stores
+const mockVolunteeringStore = {
   list: {},
   clear: vi.fn(),
-  fetchPending: vi.fn(),
-})
+  fetchMT: vi.fn(),
+}
 
 vi.mock('@/stores/volunteering', () => ({
   useVolunteeringStore: () => mockVolunteeringStore,
@@ -23,6 +22,15 @@ vi.mock('@/stores/auth', () => ({
   useAuthStore: () => mockAuthStore,
 }))
 
+const mockMiscStore = {
+  get: vi.fn(),
+  set: vi.fn(),
+}
+
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => mockMiscStore,
+}))
+
 describe('VolunteeringPage', () => {
   function mountComponent() {
     return mount(VolunteeringPage, {
@@ -31,8 +39,8 @@ describe('VolunteeringPage', () => {
         stubs: {
           ModVolunteerOpportunity: {
             template:
-              '<div class="mod-volunteer-opportunity" :data-id="volunteeringid" />',
-            props: ['id', 'volunteeringid'],
+              '<div class="mod-volunteer-opportunity" :data-id="volunteering.id" />',
+            props: ['id', 'volunteering'],
           },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',
@@ -58,7 +66,7 @@ describe('VolunteeringPage', () => {
     setActivePinia(createPinia())
     mockVolunteeringStore.list = {}
     mockAuthStore.work = { pendingvolunteering: 5 }
-    mockVolunteeringStore.fetchPending.mockResolvedValue()
+    mockVolunteeringStore.fetchMT.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -105,50 +113,68 @@ describe('VolunteeringPage', () => {
   })
 
   describe('methods', () => {
-    it('loadMore fetches pending volunteerings', async () => {
+    it('loadMore increments show when more volunteerings exist', async () => {
+      mockVolunteeringStore.list = {
+        1: { id: 1 },
+        2: { id: 2 },
+      }
       const wrapper = mountComponent()
-      const mockState = { complete: vi.fn() }
+      wrapper.vm.show = 1
+      const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
       await wrapper.vm.loadMore(mockState)
 
-      expect(mockVolunteeringStore.fetchPending).toHaveBeenCalled()
+      expect(mockState.loaded).toHaveBeenCalled()
+      expect(wrapper.vm.show).toBe(2)
+    })
+
+    it('loadMore fetches more when show equals volunteerings length', async () => {
+      mockVolunteeringStore.list = {
+        1: { id: 1 },
+        2: { id: 2 },
+      }
+      const wrapper = mountComponent()
+      wrapper.vm.show = 2
+      const mockState = { loaded: vi.fn(), complete: vi.fn() }
+
+      await wrapper.vm.loadMore(mockState)
+
+      expect(mockVolunteeringStore.fetchMT).toHaveBeenCalledWith({
+        limit: 2,
+        pending: true,
+      })
+    })
+
+    it('loadMore completes when no new volunteerings fetched', async () => {
+      mockVolunteeringStore.list = {
+        1: { id: 1 },
+        2: { id: 2 },
+      }
+      const wrapper = mountComponent()
+      wrapper.vm.show = 2
+      const mockState = { loaded: vi.fn(), complete: vi.fn() }
+
+      await wrapper.vm.loadMore(mockState)
+
       expect(mockState.complete).toHaveBeenCalled()
     })
 
-    it('loadMore sets busy flag during fetch', async () => {
+    it('loadMore manages busy flag', async () => {
+      // The component has two code paths in loadMore:
+      // 1. If show < volunteerings.length: busy is set true then false quickly
+      // 2. If show >= volunteerings.length: busy is set true, then false after fetch
+      mockVolunteeringStore.list = {
+        1: { id: 1 },
+        2: { id: 2 },
+      }
       const wrapper = mountComponent()
-      const mockState = { complete: vi.fn() }
-
-      expect(wrapper.vm.busy).toBe(false)
-      const loadPromise = wrapper.vm.loadMore(mockState)
-      expect(wrapper.vm.busy).toBe(true)
-      await loadPromise
-      expect(wrapper.vm.busy).toBe(false)
-    })
-
-    it('accumulates volunteerings across multiple loadMore calls', async () => {
-      let callCount = 0
-      mockVolunteeringStore.fetchPending.mockImplementation(() => {
-        callCount++
-        // Simulate store accumulating items
-        mockVolunteeringStore.list[callCount] = {
-          id: callCount,
-          title: `Vol ${callCount}`,
-        }
-        return Promise.resolve()
-      })
-
-      const wrapper = mountComponent()
-      const mockState = { complete: vi.fn() }
+      wrapper.vm.show = 2 // Force the fetch path
+      const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
       await wrapper.vm.loadMore(mockState)
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.volunteerings).toHaveLength(1)
 
-      await wrapper.vm.loadMore(mockState)
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.volunteerings).toHaveLength(2)
-      expect(mockVolunteeringStore.fetchPending).toHaveBeenCalledTimes(2)
+      // After loadMore completes, busy should be false
+      expect(wrapper.vm.busy).toBe(false)
     })
   })
 

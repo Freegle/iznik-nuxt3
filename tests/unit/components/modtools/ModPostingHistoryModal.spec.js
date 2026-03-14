@@ -4,20 +4,11 @@ import { ref } from 'vue'
 import ModPostingHistoryModal from '~/modtools/components/ModPostingHistoryModal.vue'
 
 // Mock stores
-const groupData = {
-  123: { namedisplay: 'Test Group 1' },
-  456: { namedisplay: 'Test Group 2' },
-}
-
 const mockGroupStore = {
-  get: (id) => groupData[id] || null,
-}
-
-let mockUserData = {}
-
-const mockUserStore = {
-  byId: (id) => mockUserData[id] || null,
-  fetchMT: vi.fn().mockResolvedValue(null),
+  list: {
+    123: { namedisplay: 'Test Group 1' },
+    456: { namedisplay: 'Test Group 2' },
+  },
 }
 
 const mockHide = vi.fn()
@@ -26,10 +17,6 @@ const mockModalRef = { show: mockModalShow }
 
 vi.mock('~/stores/group', () => ({
   useGroupStore: () => mockGroupStore,
-}))
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
 }))
 
 vi.mock('~/composables/useOurModal', () => ({
@@ -82,20 +69,11 @@ describe('ModPostingHistoryModal', () => {
     ...overrides,
   })
 
-  function populateUserStore(user) {
-    mockUserData[user.id] = user
-  }
-
   function mountComponent(props = {}) {
-    // If a user object is passed via old-style props, convert to userid and populate store
-    const { user: userProp, ...otherProps } = props
-    const user = userProp || createUser()
-    populateUserStore(user)
-
     return mount(ModPostingHistoryModal, {
       props: {
-        userid: user.id,
-        ...otherProps,
+        user: createUser(),
+        ...props,
       },
       global: {
         stubs: {
@@ -139,7 +117,6 @@ describe('ModPostingHistoryModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserData = {}
   })
 
   describe('rendering', () => {
@@ -201,7 +178,6 @@ describe('ModPostingHistoryModal', () => {
           },
         ],
       })
-      populateUserStore(user)
       const wrapper = mountComponent({ user })
       expect(wrapper.vm.messages[0].groupname).toBe('#999')
     })
@@ -222,7 +198,7 @@ describe('ModPostingHistoryModal', () => {
 
     it('returns empty array when user has no messagehistory property', () => {
       const wrapper = mountComponent({
-        user: { id: 2, displayname: 'Test' },
+        user: { id: 1, displayname: 'Test' },
       })
       expect(wrapper.vm.messages).toEqual([])
     })
@@ -280,7 +256,7 @@ describe('ModPostingHistoryModal', () => {
   describe('no messages state', () => {
     it('shows notice when no posts to show', () => {
       const wrapper = mountComponent({
-        user: { id: 3, displayname: 'Test', messagehistory: [] },
+        user: { id: 1, displayname: 'Test', messagehistory: [] },
       })
       expect(wrapper.text()).toContain('no posts to show')
     })

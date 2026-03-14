@@ -5,8 +5,8 @@
     style="font-size: 0.9rem"
   >
     <small v-if="isRegexPattern" class="mr-1 text-muted">REGEX:</small>
-    <small v-if="worryword?.type !== 'Review'" class="mr-1 text-muted"
-      >{{ worryword?.type?.toUpperCase() }}:</small
+    <small v-if="worryword.type !== 'Review'" class="mr-1 text-muted"
+      >{{ worryword.type.toUpperCase() }}:</small
     >
     {{ displayText }}
     <b-button
@@ -35,17 +35,13 @@ import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
 const props = defineProps({
-  worrywordid: {
-    type: Number,
+  worryword: {
+    type: Object,
     required: true,
   },
 })
 
 const systemConfigStore = useSystemConfigStore()
-
-const worryword = computed(() => {
-  return systemConfigStore.worrywords.find((w) => w.id === props.worrywordid)
-})
 
 const showDeleteConfirm = ref(false)
 const deleteConfirmMessage = ref('')
@@ -55,20 +51,20 @@ const isLoading = computed(() => {
 })
 
 const isRegexPattern = computed(() => {
-  return worryword.value?.keyword?.startsWith('REGEX:')
+  return props.worryword.keyword.startsWith('REGEX:')
 })
 
 const displayText = computed(() => {
   return isRegexPattern.value
-    ? worryword.value?.keyword?.substring(6)
-    : worryword.value?.keyword
+    ? props.worryword.keyword.substring(6)
+    : props.worryword.keyword
 })
 
 const worrywordVariant = computed(() => {
   // Color-code based on type first, then consider regex
   const isRegex = isRegexPattern.value
 
-  switch (worryword.value?.type) {
+  switch (props.worryword.type) {
     case 'Regulated':
       return isRegex ? 'danger' : 'warning'
     case 'Reportable':
@@ -84,12 +80,12 @@ const worrywordVariant = computed(() => {
 })
 
 function confirmDelete() {
-  deleteConfirmMessage.value = `Are you sure you want to delete the worry word "${worryword.value?.keyword}"? This will affect system-wide message filtering and cannot be undone.`
+  deleteConfirmMessage.value = `Are you sure you want to delete the worry word "${props.worryword.keyword}"? This will affect system-wide message filtering and cannot be undone.`
   showDeleteConfirm.value = true
 }
 
 async function handleDelete() {
-  await systemConfigStore.deleteWorryword(props.worrywordid)
+  await systemConfigStore.deleteWorryword(props.worryword.id)
   showDeleteConfirm.value = false
   deleteConfirmMessage.value = ''
 }

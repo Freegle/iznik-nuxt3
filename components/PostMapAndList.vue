@@ -434,7 +434,7 @@ const closestGroups = computed(() => {
   const distances = {}
 
   if (centre.value) {
-    const allGroups = groupStore.summaryList
+    const allGroups = groupStore.list
 
     for (const ix in allGroups) {
       const group = allGroups[ix]

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user">
+  <div>
     <NoticeMessage :variant="variant" class="mb-1">
       <div>
         {{ user.displayname }} {{ collname }}: {{ user.spammer.reason }}
@@ -39,9 +39,13 @@
     <notice-message v-if="sameip && sameip.length" variant="warning">
       <p>
         Recently active on the same IP address:
-        <nuxt-link v-for="uid in sameip" :key="uid" :to="'/support/' + uid">
+        <nuxt-link
+          v-for="userid in sameip"
+          :key="userid"
+          :to="'/support/' + userid"
+        >
           <v-icon icon="hashtag" class="text-muted" scale="0.5" /><strong>{{
-            uid
+            userid
           }}</strong
           >&nbsp; </nuxt-link
         >.
@@ -54,13 +58,12 @@
   </div>
 </template>
 <script setup>
-import { computed, watch } from 'vue'
-import { useUserStore } from '~/stores/user'
+import { computed } from 'vue'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  user: {
+    type: Object,
     required: true,
   },
   sameip: {
@@ -70,22 +73,10 @@ const props = defineProps({
   },
 })
 
-const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
-
 const { hasPermissionSpamAdmin } = useModMe()
 
 const variant = computed(() => {
-  if (!user.value?.spammer) return 'warning'
-  switch (user.value.spammer.collection) {
+  switch (props.user.spammer.collection) {
     case 'Spammer': {
       return 'danger'
     }
@@ -99,8 +90,7 @@ const variant = computed(() => {
 })
 
 const collname = computed(() => {
-  if (!user.value?.spammer) return ''
-  switch (user.value.spammer.collection) {
+  switch (props.user.spammer.collection) {
     case 'Spammer': {
       return 'Confirmed Spammer'
     }
@@ -114,7 +104,7 @@ const collname = computed(() => {
       return 'Disputed Spammer'
     }
     default:
-      return user.value.spammer.collection
+      return props.user.spammer.collection
   }
 })
 </script>

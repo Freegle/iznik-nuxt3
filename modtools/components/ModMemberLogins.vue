@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-badge
-      v-for="l in user?.logins"
+      v-for="l in member.logins"
       :key="'login-' + l.id"
       variant="info"
       class="border border-info rounded p-1 mr-1"
@@ -11,26 +11,12 @@
   </div>
 </template>
 <script setup>
-import { computed, watch } from 'vue'
-import { useUserStore } from '~/stores/user'
-
-const props = defineProps({
-  userid: {
-    type: Number,
+defineProps({
+  member: {
+    type: Object,
     required: true,
   },
 })
-
-const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
 
 function loginType(type) {
   switch (type) {

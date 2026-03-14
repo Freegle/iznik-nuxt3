@@ -11,7 +11,7 @@ export default class GiftAidAPI extends BaseAPI {
   }
 
   async list() {
-    const ret = await this.$getv2('/giftaid', {
+    const ret = await this.$get('/giftaid', {
       all: true,
     })
 
@@ -19,7 +19,7 @@ export default class GiftAidAPI extends BaseAPI {
   }
 
   async search(val) {
-    const ret = await this.$getv2('/giftaid', {
+    const ret = await this.$get('/giftaid', {
       search: val,
     })
 
@@ -27,7 +27,7 @@ export default class GiftAidAPI extends BaseAPI {
   }
 
   save({ period, fullname, homeaddress }) {
-    return this.$postv2('/giftaid', { period, fullname, homeaddress })
+    return this.$post('/giftaid', { period, fullname, homeaddress })
   }
 
   edit(
@@ -50,10 +50,10 @@ export default class GiftAidAPI extends BaseAPI {
       reviewed,
       deleted,
     }
-    return this.$patchv2('/giftaid', data)
+    return this.$patch('/giftaid', data)
   }
 
   remove() {
-    return this.$delv2('/giftaid')
+    return this.$del('/giftaid')
   }
 }

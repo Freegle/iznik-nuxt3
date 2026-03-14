@@ -1,17 +1,17 @@
 <template>
-  <b-row v-if="user" class="mb-2">
+  <b-row class="mb-2">
     <b-col cols="4">
       <ProfileImage
-        :image="user.profile?.turl || user.profile?.paththumb"
-        :name="user.displayname"
+        :image="member.profile?.turl || member.profile?.paththumb"
+        :name="member.displayname"
         class="mr-2"
         size="lg"
       />
     </b-col>
     <b-col cols="6">
-      <strong>{{ user.displayname || '#' + userid }}</strong>
+      <strong>{{ member.displayname }}</strong>
       <span class="text-faded small">
-        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ userid }}
+        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ member.id }}
       </span>
     </b-col>
     <b-col>
@@ -22,9 +22,7 @@
   </b-row>
 </template>
 <script setup>
-import { computed, watch } from 'vue'
 import { useTeamStore } from '@/stores/team'
-import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
@@ -32,8 +30,8 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  userid: {
-    type: Number,
+  member: {
+    type: Object,
     required: true,
   },
 })
@@ -42,22 +40,11 @@ const emit = defineEmits(['removed'])
 
 const { supportOrAdmin } = useMe()
 
-const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
-
 async function remove() {
   const teamStore = useTeamStore()
   await teamStore.remove({
     id: props.teamid,
-    userid: props.userid,
+    userid: props.member.id,
   })
   emit('removed')
 }

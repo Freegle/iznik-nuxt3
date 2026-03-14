@@ -11,20 +11,9 @@ const mockSpammerStore = createMockSpammerStore()
 const mockHide = vi.fn()
 const mockShow = vi.fn()
 
-let mockUserData = {}
-
-const mockUserStore = {
-  byId: (id) => mockUserData[id] || null,
-  fetch: vi.fn().mockResolvedValue(null),
-}
-
 // Mock the spammer store import - component uses ~/stores/spammer which maps to modtools/stores/spammer
 vi.mock('~/stores/spammer', () => ({
   useSpammerStore: () => mockSpammerStore,
-}))
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
 }))
 
 // Override the global useOurModal mock with our custom spy
@@ -42,20 +31,11 @@ describe('ModSpammerReport', () => {
     displayname: 'Test User',
   }
 
-  function populateUserStore(user) {
-    mockUserData[user.id] = user
-  }
-
   function mountComponent(props = {}) {
-    // Convert old-style user prop to userid and populate store
-    const { user: userProp, ...otherProps } = props
-    const user = userProp || defaultUser
-    populateUserStore(user)
-
     return mount(ModSpammerReport, {
       props: {
-        userid: user.id,
-        ...otherProps,
+        user: defaultUser,
+        ...props,
       },
       global: {
         stubs: {
@@ -85,7 +65,6 @@ describe('ModSpammerReport', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserData = {}
     // Reset mock store methods
     mockSpammerStore.report.mockResolvedValue({})
     mockSpammerStore.safelist.mockResolvedValue({})
@@ -318,9 +297,9 @@ describe('ModSpammerReport', () => {
       })
     })
 
-    it('sends report with correct userid', async () => {
+    it('uses user.userid as fallback when user.id is not available', async () => {
       const wrapper = mountComponent({
-        user: { id: 222, displayname: 'User with id' },
+        user: { userid: 222, displayname: 'User with userid' },
         safelist: false,
       })
 
@@ -330,6 +309,22 @@ describe('ModSpammerReport', () => {
 
       expect(mockSpammerStore.report).toHaveBeenCalledWith({
         userid: 222,
+        reason: 'Test reason',
+      })
+    })
+
+    it('prefers user.id over user.userid when both present', async () => {
+      const wrapper = mountComponent({
+        user: { id: 333, userid: 444, displayname: 'User with both' },
+        safelist: false,
+      })
+
+      wrapper.vm.reason = 'Test reason'
+      await wrapper.vm.send()
+      await flushPromises()
+
+      expect(mockSpammerStore.report).toHaveBeenCalledWith({
+        userid: 333,
         reason: 'Test reason',
       })
     })
@@ -397,9 +392,9 @@ describe('ModSpammerReport', () => {
   describe('edge cases', () => {
     it('handles user with only displayname', () => {
       const wrapper = mountComponent({
-        user: { id: 900, displayname: 'Display Only User' },
+        user: { displayname: 'Display Only User' },
       })
-      expect(wrapper.props('userid')).toBe(900)
+      expect(wrapper.props('user').displayname).toBe('Display Only User')
     })
 
     it('handles empty reason string (truthy check)', async () => {
@@ -423,9 +418,26 @@ describe('ModSpammerReport', () => {
       expect(mockSpammerStore.report).toHaveBeenCalled()
     })
 
-    it('uses userid prop directly for report', async () => {
+    it('handles user.id being 0 (nullish coalescing uses 0)', async () => {
       const wrapper = mountComponent({
-        user: { id: 555, displayname: 'Direct ID User' },
+        user: { id: 0, userid: 999, displayname: 'Zero ID User' },
+        safelist: false,
+      })
+
+      wrapper.vm.reason = 'Test reason'
+      await wrapper.vm.send()
+      await flushPromises()
+
+      // The component uses ?? (nullish coalescing), so 0 is used (not null/undefined)
+      expect(mockSpammerStore.report).toHaveBeenCalledWith({
+        userid: 0,
+        reason: 'Test reason',
+      })
+    })
+
+    it('handles user.id being undefined', async () => {
+      const wrapper = mountComponent({
+        user: { userid: 555, displayname: 'No ID User' },
         safelist: false,
       })
 

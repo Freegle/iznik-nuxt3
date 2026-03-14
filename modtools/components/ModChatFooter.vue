@@ -46,7 +46,7 @@
           </notice-message>
           <ModComments
             v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
-            :userid="otheruser.id"
+            :user="otheruser"
             class="mt-1"
             @editing="editing"
           />
@@ -401,13 +401,13 @@
       @hidden="showConfirmModal = false"
     />
     <ModSpammerReport
-      v-if="showSpamModal && chat.user1id"
-      :userid="chat.user1id"
+      v-if="showSpamModal && modchatuser"
+      :user="modchatuser"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
-      v-if="showAddCommentModal && chat.user1id"
-      :userid="chat.user1id"
+      v-if="showAddCommentModal && modchatuser"
+      :user="modchatuser"
       :groupid="chat.group.id"
       @hidden="showAddCommentModal = false"
     />
@@ -532,9 +532,12 @@ const rsvp = ref(null)
 const showSpamModal = ref(false)
 const showConfirmModal = ref(false)
 const showAddCommentModal = ref(false)
+const modchatuser = ref(null)
 
+// MT: Fetch the user1 (member) via v1 API to include comments/notes
 if (chat.value?.user1id) {
   await userStore.fetchMT({ id: chat.value.user1id })
+  modchatuser.value = userStore.byId(chat.value.user1id)
 }
 
 // Computed properties

@@ -4,7 +4,11 @@ import { ref, nextTick } from 'vue'
 import ModMicrovolunteeringDetailsButton from '~/modtools/components/ModMicrovolunteeringDetailsButton.vue'
 
 describe('ModMicrovolunteeringDetailsButton', () => {
-  const defaultUserId = 123
+  const defaultUser = {
+    id: 123,
+    displayname: 'Test User',
+    email: 'test@example.com',
+  }
 
   const defaultItems = [
     { id: 1, type: 'rotatedimage' },
@@ -12,24 +16,18 @@ describe('ModMicrovolunteeringDetailsButton', () => {
     { id: 3, type: 'related' },
   ]
 
-  function mountComponent(propsOverrides = {}, itemsOverrides = null) {
-    const userid =
-      propsOverrides.userid !== undefined
-        ? propsOverrides.userid
-        : defaultUserId
-
+  function mountComponent(userOverrides = {}, itemsOverrides = null) {
     return mount(ModMicrovolunteeringDetailsButton, {
       props: {
-        userid,
+        user: { ...defaultUser, ...userOverrides },
         items: itemsOverrides !== null ? itemsOverrides : defaultItems,
-        ...propsOverrides,
       },
       global: {
         stubs: {
           ModMicrovolunteeringModal: {
             template:
               '<div class="microvolunteering-modal" v-if="visible"><slot /></div>',
-            props: ['userid', 'itemIds'],
+            props: ['user', 'itemIds'],
             setup() {
               const visible = ref(false)
               return {
@@ -140,14 +138,14 @@ describe('ModMicrovolunteeringDetailsButton', () => {
       const mockShow = vi.fn()
       const wrapper = mount(ModMicrovolunteeringDetailsButton, {
         props: {
-          userid: defaultUserId,
+          user: defaultUser,
           items: defaultItems,
         },
         global: {
           stubs: {
             ModMicrovolunteeringModal: {
               template: '<div class="microvolunteering-modal" />',
-              props: ['userid', 'itemIds'],
+              props: ['user', 'itemIds'],
               setup() {
                 return {
                   show: mockShow,
@@ -175,18 +173,19 @@ describe('ModMicrovolunteeringDetailsButton', () => {
   })
 
   describe('modal integration', () => {
-    it('passes userid prop to modal when shown', async () => {
+    it('passes user prop to modal when shown', async () => {
+      const customUser = { id: 789, displayname: 'Modal User' }
       const wrapper = mount(ModMicrovolunteeringDetailsButton, {
         props: {
-          userid: 789,
+          user: customUser,
           items: defaultItems,
         },
         global: {
           stubs: {
             ModMicrovolunteeringModal: {
               template:
-                '<div class="microvolunteering-modal" :data-user-id="userid" />',
-              props: ['userid', 'itemIds'],
+                '<div class="microvolunteering-modal" :data-user-id="user.id" />',
+              props: ['user', 'itemIds'],
               setup() {
                 return { show: vi.fn() }
               },
@@ -214,7 +213,7 @@ describe('ModMicrovolunteeringDetailsButton', () => {
       const items = [{ id: 5 }, { id: 10 }, { id: 15 }]
       const wrapper = mount(ModMicrovolunteeringDetailsButton, {
         props: {
-          userid: defaultUserId,
+          user: defaultUser,
           items,
         },
         global: {
@@ -222,7 +221,7 @@ describe('ModMicrovolunteeringDetailsButton', () => {
             ModMicrovolunteeringModal: {
               template:
                 '<div class="microvolunteering-modal" :data-count="itemIds.length" />',
-              props: ['userid', 'itemIds'],
+              props: ['user', 'itemIds'],
               setup() {
                 return { show: vi.fn() }
               },
@@ -249,7 +248,7 @@ describe('ModMicrovolunteeringDetailsButton', () => {
     it('hides modal when hidden event is emitted', async () => {
       const wrapper = mount(ModMicrovolunteeringDetailsButton, {
         props: {
-          userid: defaultUserId,
+          user: defaultUser,
           items: defaultItems,
         },
         global: {
@@ -258,7 +257,7 @@ describe('ModMicrovolunteeringDetailsButton', () => {
               name: 'ModMicrovolunteeringModal',
               template:
                 '<div class="microvolunteering-modal" @click="$emit(\'hidden\')" />',
-              props: ['userid', 'itemIds'],
+              props: ['user', 'itemIds'],
               emits: ['hidden'],
               setup() {
                 return { show: vi.fn() }
@@ -291,7 +290,8 @@ describe('ModMicrovolunteeringDetailsButton', () => {
 
   describe('edge cases', () => {
     it('handles user with minimal properties', async () => {
-      const wrapper = mountComponent({ userid: 1 })
+      const minimalUser = { id: 1 }
+      const wrapper = mountComponent(minimalUser)
       await flushPromises()
       expect(wrapper.find('button').exists()).toBe(true)
     })
@@ -325,14 +325,14 @@ describe('ModMicrovolunteeringDetailsButton', () => {
     it('updates ref when modal becomes visible', async () => {
       const wrapper = mount(ModMicrovolunteeringDetailsButton, {
         props: {
-          userid: defaultUserId,
+          user: defaultUser,
           items: defaultItems,
         },
         global: {
           stubs: {
             ModMicrovolunteeringModal: {
               template: '<div class="microvolunteering-modal" ref="modal" />',
-              props: ['userid', 'itemIds'],
+              props: ['user', 'itemIds'],
               setup() {
                 return {
                   show: vi.fn(),

@@ -1,12 +1,16 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class CommunityEventAPI extends BaseAPI {
+  fetchMT(params) {
+    return this.$get('/communityevent', params)
+  }
+
   fetch(id, logError = true) {
     return this.$getv2('/communityevent/' + id, {}, logError)
   }
 
-  list(params) {
-    return this.$getv2('/communityevent', params)
+  list(id) {
+    return this.$getv2('/communityevent')
   }
 
   listGroup(id) {
@@ -14,20 +18,20 @@ export default class CommunityEventAPI extends BaseAPI {
   }
 
   save(data) {
-    return this.$patchv2('/communityevent', data)
+    return this.$patch('/communityevent', data)
   }
 
   async add(data) {
-    const { id } = await this.$postv2('/communityevent', data)
+    const { id } = await this.$post('/communityevent', data)
     return id
   }
 
   addGroup(id, groupid) {
-    return this.$patchv2('/communityevent', { id, groupid, action: 'AddGroup' })
+    return this.$patch('/communityevent', { id, groupid, action: 'AddGroup' })
   }
 
   removeGroup(id, groupid) {
-    return this.$patchv2('/communityevent', {
+    return this.$patch('/communityevent', {
       id,
       groupid,
       action: 'RemoveGroup',
@@ -35,27 +39,18 @@ export default class CommunityEventAPI extends BaseAPI {
   }
 
   setPhoto(id, photoid) {
-    return this.$patchv2('/communityevent', { id, photoid, action: 'SetPhoto' })
+    return this.$patch('/communityevent', { id, photoid, action: 'SetPhoto' })
   }
 
   addDate(id, start, end) {
-    return this.$patchv2('/communityevent', {
-      id,
-      start,
-      end,
-      action: 'AddDate',
-    })
+    return this.$patch('/communityevent', { id, start, end, action: 'AddDate' })
   }
 
   removeDate(id, dateid) {
-    return this.$patchv2('/communityevent', {
-      id,
-      dateid,
-      action: 'RemoveDate',
-    })
+    return this.$patch('/communityevent', { id, dateid, action: 'RemoveDate' })
   }
 
   del(id) {
-    return this.$delv2('/communityevent', { id })
+    return this.$del('/communityevent', { id })
   }
 }

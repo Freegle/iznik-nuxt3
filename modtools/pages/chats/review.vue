@@ -10,7 +10,7 @@
         >
           <ModChatReview
             :id="message.chatid"
-            :messageid="message.id"
+            :message="message"
             @reload="reload"
           />
         </div>

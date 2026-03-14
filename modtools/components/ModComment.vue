@@ -3,7 +3,7 @@
     <NoticeMessage v-if="savedComment" variant="danger" class="mb-2">
       <div
         v-for="n in 10"
-        :key="'modcomments-' + userid + '-' + savedComment.id + '-' + n"
+        :key="'modcomments-' + user.id + '-' + savedComment.id + '-' + n"
       >
         <div class="d-flex">
           <div v-if="n === 1 && savedComment.flag">
@@ -64,7 +64,7 @@
       <ModCommentEditModal
         v-if="showCommentEditModal"
         ref="editComment"
-        :userid="userid"
+        :user="user"
         :comment="comment"
         :groupname="groupname"
         @edited="updateComments"
@@ -85,12 +85,12 @@ import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  commentid: {
-    type: Number,
+  comment: {
+    type: Object,
     required: true,
   },
-  userid: {
-    type: Number,
+  user: {
+    type: Object,
     required: true,
   },
   expandComments: {
@@ -112,21 +112,14 @@ const showConfirmDelete = ref(false)
 const showCommentEditModal = ref(false)
 const savedComment = ref(null)
 
-const user = computed(() => userStore.byId(props.userid))
-
-const comment = computed(() => {
-  if (!user.value || !user.value.comments) return null
-  return user.value.comments.find((c) => c.id === props.commentid) || null
-})
-
 const group = computed(() => {
   let ret = null
 
-  if (comment.value?.groupid) {
-    ret = myGroup(comment.value.groupid)
+  if (props.comment.groupid) {
+    ret = myGroup(props.comment.groupid)
 
     if (!ret) {
-      ret = groupStore.get(comment.value.groupid)
+      ret = groupStore.get(props.comment.groupid)
     }
   }
 
@@ -134,16 +127,18 @@ const group = computed(() => {
 })
 
 const groupname = computed(() => {
-  return group.value ? group.value.namedisplay : '#' + comment.value?.groupid
+  return group.value ? group.value.namedisplay : '#' + props.comment.groupid
 })
 
 async function updateComments() {
+  const userid = props.user.userid ? props.user.userid : props.user.id
+
   await userStore.fetchMT({
-    id: props.userid,
+    id: userid,
     emailhistory: true,
   })
 
-  const user = userStore.byId(props.userid)
+  const user = userStore.byId(userid)
   const savedCommentId = savedComment.value.id
   savedComment.value = false
   if (user.comments) {
@@ -161,7 +156,7 @@ function deleteIt() {
 }
 
 async function deleteConfirmed() {
-  await userStore.deleteComment(props.commentid)
+  await userStore.deleteComment(props.comment.id)
   updateComments()
 }
 
@@ -172,13 +167,11 @@ function editIt() {
 
 onMounted(() => {
   // To stop it updating on screen when editing in a modal.
-  if (comment.value) {
-    savedComment.value = cloneDeep(comment.value)
-  }
+  savedComment.value = cloneDeep(props.comment)
 
-  if (comment.value?.groupid && !group.value) {
+  if (props.comment.groupid && !group.value) {
     // Need to fetch group
-    groupStore.fetch(comment.value.groupid)
+    groupStore.fetch(props.comment.groupid)
   }
 })
 </script>

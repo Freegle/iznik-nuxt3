@@ -277,10 +277,7 @@ describe('ModChatFooter', () => {
       template: '<div class="our-uploader" />',
       props: ['modelValue'],
     },
-    ModComments: {
-      template: '<div class="mod-comments" />',
-      props: ['userid'],
-    },
+    ModComments: { template: '<div class="mod-comments" />', props: ['user'] },
     ExternalLink: {
       template: '<a class="external-link"><slot /></a>',
       props: ['href'],

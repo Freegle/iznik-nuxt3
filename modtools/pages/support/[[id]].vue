@@ -74,7 +74,7 @@
               <ModMessage
                 v-for="message in messages"
                 :key="'message-' + message.id"
-                :messageid="message.id"
+                :message="message"
                 noactions
               />
             </div>
@@ -352,6 +352,7 @@ async function searchById(msgId) {
   try {
     const message = await messageStore.fetchMT({
       id: msgId,
+      messagehistory: true,
     })
     if (message) messageStore.list[msgId] = message
   } catch (e) {

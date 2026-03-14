@@ -7,7 +7,7 @@
       <ModCommentUser
         v-for="comment in visibleComments"
         :key="'commentlist-' + comment.id"
-        :commentid="comment.id"
+        :comment="comment"
         class="p-0 mt-2"
       />
       <NoticeMessage v-if="!comments.length && !busy" class="mt-2">
@@ -65,7 +65,7 @@ const filteredComments = computed(() => {
       groupid.value === null ||
       groupid.value === c.groupid ||
       c.flag ||
-      c.byuserid === myid.value
+      c.byuser?.id === myid.value
     )
   })
 })

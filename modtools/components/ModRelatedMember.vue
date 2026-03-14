@@ -3,10 +3,10 @@
     <b-card-body>
       <b-row>
         <b-col cols="12" md="6">
-          <ModMember :membershipid="user1.id" />
+          <ModMember :member="user1" />
         </b-col>
         <b-col cols="12" md="6">
-          <ModMember :membershipid="user2.id" />
+          <ModMember :member="user2" />
         </b-col>
       </b-row>
       <div class="d-flex flex-wrap justify-content-start pills mt-2">
@@ -51,8 +51,8 @@ import { useMemberStore } from '~/stores/member'
 const LONG_THRESHOLD = 4
 
 const props = defineProps({
-  memberid: {
-    type: Number,
+  member: {
+    type: Object,
     required: true,
   },
 })
@@ -61,14 +61,12 @@ const emit = defineEmits(['processed'])
 
 const memberStore = useMemberStore()
 
-const member = computed(() => memberStore.get(props.memberid))
-
 function posted(member) {
   return member.messagehistory && member.messagehistory.length
 }
 
 function isMember(member) {
-  return member.memberships && member.memberships.length
+  return member.memberof && member.memberof.length
 }
 
 function count(l, r) {
@@ -167,17 +165,17 @@ function findLongest(str1, str2) {
 }
 
 const user1 = computed(() => {
-  const m1 = new Date(member.value.lastaccess)
-  const m2 = new Date(member.value.relatedto.lastaccess)
+  const m1 = new Date(props.member.lastaccess)
+  const m2 = new Date(props.member.relatedto.lastaccess)
 
-  return m1 > m2 ? member.value : member.value.relatedto
+  return m1 > m2 ? props.member : props.member.relatedto
 })
 
 const user2 = computed(() => {
-  const m1 = new Date(member.value.lastaccess)
-  const m2 = new Date(member.value.relatedto.lastaccess)
+  const m1 = new Date(props.member.lastaccess)
+  const m2 = new Date(props.member.relatedto.lastaccess)
 
-  return m1 <= m2 ? member.value : member.value.relatedto
+  return m1 <= m2 ? props.member : props.member.relatedto
 })
 
 const posted1 = computed(() => posted(user1.value))
@@ -196,11 +194,11 @@ const activeSameDay = computed(() => {
 })
 
 const groupsInCommon = computed(() => {
-  const common = user1.value.memberships.filter((group) => {
+  const common = user1.value.memberof.filter((group) => {
     const gid = group.id
     let found = false
 
-    user2.value.memberships.forEach((group2) => {
+    user2.value.memberof.forEach((group2) => {
       if (group2.id === gid) {
         found = true
       }
@@ -247,7 +245,7 @@ function updateWork() {
 }
 
 async function ask() {
-  await memberStore.askMerge(props.memberid, {
+  await memberStore.askMerge(props.member.id, {
     user1: user1.value.id,
     user2: user2.value.id,
   })
@@ -256,7 +254,7 @@ async function ask() {
 }
 
 async function ignore() {
-  await memberStore.ignoreMerge(props.memberid, {
+  await memberStore.ignoreMerge(props.member.id, {
     user1: user1.value.id,
     user2: user2.value.id,
   })

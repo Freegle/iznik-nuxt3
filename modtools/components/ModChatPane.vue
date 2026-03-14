@@ -127,6 +127,7 @@ if (props.id) {
     // Fetch the messages.  No need to wait, as we might already have the messages in store.
     chatStore.fetchMessages(props.id)
 
+    // Fetch the user via v1 API to include comments/notes for MT
     if (chat.value.user1id) {
       const otheruid = chat.value.user1id
       await userStore.fetchMT({ id: otheruid })
@@ -184,6 +185,7 @@ watch(me, async (newVal, oldVal) => {
 
       chatStore.fetchMessages(props.id)
 
+      // Fetch the user via v1 API to include comments/notes for MT
       if (chat?.value?.user1id) {
         const otheruid = chat.value.user1id
         await userStore.fetchMT({ id: otheruid })

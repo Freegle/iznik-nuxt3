@@ -23,7 +23,6 @@ import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
 import EmailTrackingAPI from './EmailTrackingAPI.js'
-import ExportAPI from './ExportAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
@@ -42,6 +41,8 @@ import NoticeboardAPI from './NoticeboardAPI.js'
 import NotificationAPI from './NotificationAPI.js'
 import SessionAPI from './SessionAPI.js'
 import ShortlinksAPI from './ShortlinksAPI.js'
+import SimulationAPI from './SimulationAPI.js'
+import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
 import StatusAPI from './StatusAPI.js'
 import StoriesAPI from './StoriesAPI.js'
@@ -67,7 +68,6 @@ interface API {
   domain: DomainAPI;
   donations: DonationsAPI;
   emailtracking: EmailTrackingAPI;
-  export: ExportAPI;
   giftaid: GiftAidAPI;
   group: GroupAPI;
   image: ImageAPI;
@@ -86,6 +86,8 @@ interface API {
   notification: NotificationAPI;
   session: SessionAPI;
   shortlinks: ShortlinksAPI;
+  simulation: SimulationAPI;
+  socialactions: SocialActionsAPI;
   spammers: SpammersAPI;
   status: StatusAPI;
   stories: StoriesAPI;

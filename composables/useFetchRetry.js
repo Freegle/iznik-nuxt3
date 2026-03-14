@@ -23,13 +23,6 @@ export function fetchRetry(fetch) {
       return [false, false, null, new Error('Too many retries, give up')]
     }
 
-    // Don't retry aborted requests — these are intentional cancellations
-    // (e.g. all pending requests are aborted during logout to prevent stale
-    // responses from re-establishing session cookies).
-    if (error?.name === 'AbortError') {
-      return [false, false, null, error]
-    }
-
     if (miscStore?.unloading) {
       // Don't retry if we're unloading.
       console.log("Unloading - don't retry")
@@ -48,14 +41,14 @@ export function fetchRetry(fetch) {
       return [true, false]
     }
 
-    // Retry on network errors or server errors (5xx).  Don't retry client errors (4xx) - these are legitimate
-    // API responses (e.g. 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict).
-    if (error !== null || response?.status >= 500) {
+    // Retry on pretty much any error except those which can legitimately be returned by the API server.  These are
+    // the low 400s.
+    if (error !== null || response?.status > 404) {
       console.log('Error - retry', error, response?.status)
       return [true, false]
     }
 
-    if (response?.status >= 200 && response?.status < 300) {
+    if (response?.status === 200) {
       try {
         const data = await response.json()
 
@@ -64,35 +57,20 @@ export function fetchRetry(fetch) {
           console.log('Success but no data - retry')
           return [true, false]
         } else {
+          // 200 response with valid JSON.  This is the rule not the exception.
           return [false, true, data]
         }
       } catch (e) {
-        if (response?.status === 204) {
-          // 204 No Content - no body expected, that's fine.
-          return [false, true, null]
-        }
-
-        // JSON parse failed on a response that should have had a body.  Retry.
+        // JSON parse failed.  That shouldn't happen, so retry.
         return [true, false]
       }
     } else {
-      // Client error (4xx) that we aren't supposed to retry.  Parse the response body if available
-      // so callers can access error details.
-      let responseData = null
-
-      try {
-        responseData = await response.json()
-      } catch (e) {
-        // No JSON body - that's OK for error responses.
-      }
-
+      // Some error that we aren't supposed to retry.
       if (!error) {
-        const fetchError = new FetchError(
+        error = new FetchError(
           'Request failed with ' + response?.status,
           response
         )
-        fetchError.data = responseData
-        error = fetchError
       }
 
       return [false, false, null, error]

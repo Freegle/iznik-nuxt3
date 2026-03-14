@@ -3,8 +3,7 @@
     id="spamreportmodal"
     ref="modal"
     :title="
-      (safelist ? 'Add to Safelist ' : 'Report Spammer ') +
-      (user ? user.displayname : '#' + userid)
+      (safelist ? 'Add to Safelist ' : 'Report Spammer ') + user.displayname
     "
     size="lg"
     no-stacking
@@ -72,14 +71,13 @@
   </b-modal>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import { useSpammerStore } from '~/stores/spammer'
-import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  user: {
+    type: Object,
     required: true,
   },
   safelist: {
@@ -91,23 +89,12 @@ const props = defineProps({
 
 const { modal, hide } = useOurModal()
 const spammerStore = useSpammerStore()
-const userStore = useUserStore()
-
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
 
 const reason = ref(null)
 
 async function send() {
   if (reason.value) {
-    const userid = props.userid
+    const userid = props.user.id ?? props.user.userid
     if (props.safelist) {
       await spammerStore.safelist({
         userid,

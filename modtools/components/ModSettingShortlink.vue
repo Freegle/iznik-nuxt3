@@ -1,5 +1,5 @@
 <template>
-  <div v-if="shortlink">
+  <div>
     <!-- eslint-disable-next-line -->
     <a :href="'https://freegle.in/' + shortlink.name" rel="noopener noreferrer">freegle.in/{{ shortlink.name }}</a>
     <span class="text-muted small">
@@ -9,15 +9,10 @@
   </div>
 </template>
 <script setup>
-import { useShortlinkStore } from '~/stores/shortlinks'
-
-const props = defineProps({
-  shortlinkid: {
-    type: Number,
+defineProps({
+  shortlink: {
+    type: Object,
     required: true,
   },
 })
-
-const shortlinkStore = useShortlinkStore()
-const shortlink = computed(() => shortlinkStore.byId(props.shortlinkid))
 </script>

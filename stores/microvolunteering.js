@@ -11,7 +11,7 @@ export const useMicroVolunteeringStore = defineStore({
       this.config = config
     },
     clearOne(id) {
-      delete this.list[id]
+      this.list[id] = null
     },
     clear() {
       this.$reset()

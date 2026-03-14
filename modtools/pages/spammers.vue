@@ -50,7 +50,7 @@
         <ModMember
           v-for="(spammer, index) in visibleSpammers"
           :key="'spammer-' + tabIndex + '-' + spammer.id"
-          :membershipid="spammer.user.id"
+          :member="spammer.user"
           :sameip="spammer.sameip"
           class="mb-1"
           :index="index"
@@ -123,7 +123,14 @@ const collection = computed(() => {
 })
 
 const spammers = computed(() => {
-  return spammerStore.getList(collection.value)
+  const ret = spammerStore.getList(collection.value)
+
+  // Need to move the byuser into the spammer object so that ModSpammer finds it.
+  ret.forEach((s) => {
+    s.user.spammer.byuser = s.byuser
+  })
+
+  return ret
 })
 
 const visibleSpammers = computed(() => {

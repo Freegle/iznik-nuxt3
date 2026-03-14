@@ -55,7 +55,7 @@ await groupStore.fetch()
 // Calculate the initial bounds for the region.
 let initialBounds = null
 const initialGroupIds = []
-const allGroups = groupStore.summaryList
+const allGroups = groupStore.list
 
 let swlat = null
 let swlng = null

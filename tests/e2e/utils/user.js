@@ -16,108 +16,166 @@ const { waitForModal } = require('./ui')
  */
 async function waitForAuthPersistence(page) {
   console.log('Waiting for auth to be persisted to localStorage...')
-  await page.waitForFunction(
-    () => {
-      try {
-        const authData = localStorage.getItem('auth')
-        if (!authData) return false
-        const parsed = JSON.parse(authData)
-        // Check the nested auth object for jwt or persistent token
-        const tokens = parsed?.auth
-        return !!(tokens?.jwt || tokens?.persistent)
-      } catch (e) {
-        return false
-      }
-    },
-    null,
-    { timeout: timeouts.ui.appearance }
-  )
-  console.log('Auth persisted to localStorage')
+  try {
+    await page.waitForFunction(
+      () => {
+        try {
+          const authData = localStorage.getItem('auth')
+          if (!authData) return false
+          const parsed = JSON.parse(authData)
+          // Check the nested auth object for jwt or persistent token
+          const tokens = parsed?.auth
+          return !!(tokens?.jwt || tokens?.persistent)
+        } catch (e) {
+          return false
+        }
+      },
+      { timeout: timeouts.ui.appearance }
+    )
+    console.log('Auth persisted to localStorage')
+  } catch (error) {
+    console.log(`Warning: Auth persistence check timed out: ${error.message}`)
+    // Don't throw - the login may still have succeeded but persistence is slow
+  }
 }
 
 /**
- * Clears browser cookies and storage without navigating.
+ * Clears all session data from the current page WITHOUT navigating.
+ * This is a fast operation that just clears storage and cookies.
  * @param {import('@playwright/test').Page} page - Current Playwright page object
  * @returns {Promise<void>}
  */
 async function clearSessionData(page) {
-  await page.evaluate(() => {
+  // First, call the logout API to clear server-side session
+  await page.evaluate(async () => {
     try {
-      localStorage.clear()
-    } catch {}
-    try {
-      sessionStorage.clear()
-    } catch {}
+      await fetch('/api/session', {
+        method: 'POST',
+        headers: {
+          'X-HTTP-Method-Override': 'DELETE',
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch {
+      // Ignore errors - user might not be logged in
+    }
   })
 
+  // Clear all browser storage and Pinia state
+  // IMPORTANT: Clear localStorage AFTER modifying Pinia stores, because the
+  // persistence plugin may write to localStorage when store values change.
+  // By clearing localStorage last, we ensure all persisted data is removed.
+  await page.evaluate(() => {
+    // Clear Pinia stores FIRST (this may trigger persistence writes)
+    if (window.$nuxt && window.$nuxt.$pinia) {
+      for (const store of window.$nuxt.$pinia._s.values()) {
+        if (store.$reset) {
+          store.$reset()
+        }
+      }
+      // Explicitly clear loggedInEver which is preserved by auth store's logout()
+      const authStore = window.$nuxt.$pinia._s.get('auth')
+      if (authStore) {
+        authStore.loggedInEver = false
+        authStore.loginCount = 0
+        // Also clear auth tokens
+        authStore.auth = { jwt: null, persistent: null }
+        authStore.user = null
+        authStore.loginStateKnown = false
+      }
+    }
+
+    // Clear indexedDB
+    if (window.indexedDB && window.indexedDB.databases) {
+      window.indexedDB
+        .databases()
+        .then((databases) => {
+          databases.forEach((db) => {
+            window.indexedDB.deleteDatabase(db.name)
+          })
+        })
+        .catch(() => {})
+    }
+
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear()
+    } catch {
+      // Ignore
+    }
+
+    // Clear localStorage LAST to ensure any persistence writes are cleared
+    try {
+      localStorage.clear()
+    } catch {
+      // Ignore
+    }
+  })
+
+  // Clear all cookies
   const context = page.context()
   await context.clearCookies()
 }
 
 /**
- * Logs out by clicking the actual logout button in the UI.
- * Falls back to clearing cookies/storage if no logout button is found
- * (e.g. user is not logged in).
+ * Clears all session data from the current page to simulate logout.
  * @param {import('@playwright/test').Page} page - Current Playwright page object
- * @param {boolean} [navigateToHome=true] - Whether to navigate to homepage after logout
- * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object
+ * @param {boolean} [navigateToHome=true] - Whether to navigate to homepage after clearing (slower but ensures fresh state)
+ * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object with cleared session
  */
 async function logoutIfLoggedIn(page, navigateToHome = true) {
-  console.log('Logging out via UI')
+  console.log('Clearing all session data to simulate fresh browser state')
 
   try {
-    // Check if the logout button is visible (desktop or mobile)
-    const desktopLogout = page.locator('#menu-option-logout')
-    const mobileLogout = page.locator('text=Logout').filter({ visible: true })
-
-    const isDesktopVisible = await desktopLogout.isVisible().catch(() => false)
-    const isMobileVisible = await mobileLogout.isVisible().catch(() => false)
-
-    // Allow 401 errors from in-flight API requests that complete after logout
-    // (addAllowedErrorPattern only exists on fixture-enhanced pages)
-    if (typeof page.addAllowedErrorPattern === 'function') {
-      page.addAllowedErrorPattern(
-        /Failed to load resource: the server responded with a status of 401/
-      )
-    }
-
-    if (isDesktopVisible) {
-      console.log('Clicking desktop logout button')
-      await desktopLogout.click()
-    } else if (isMobileVisible) {
-      console.log('Clicking mobile logout button')
-      await mobileLogout.click()
-    } else {
-      console.log('No logout button visible')
-    }
-
-    // Always clear session data BEFORE navigating. If the logout button click
-    // didn't work (hydration race), the old cookies would be sent with the
-    // navigation request, causing the server to render an authenticated page
-    // whose in-flight API responses re-establish the session via Set-Cookie.
     await clearSessionData(page)
+    console.log('Cleared session data')
 
+    // Only navigate if explicitly requested (for backwards compatibility)
     if (navigateToHome) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
+
+      // Wait for DOM to be ready - don't use networkidle as the app has background polling
+      // that can prevent network from becoming idle, causing timeouts in parallel runs
+      await page.waitForLoadState('domcontentloaded', {
+        timeout: timeouts.navigation.default,
+      })
+
+      // Verify logged-out state by checking localStorage auth is cleared
+      const isLoggedOut = await page.evaluate(() => {
+        try {
+          const authData = localStorage.getItem('auth')
+          if (!authData) return true
+          const parsed = JSON.parse(authData)
+          const tokens = parsed?.auth
+          // Check if there are any valid tokens remaining
+          return !(tokens?.jwt || tokens?.persistent)
+        } catch (e) {
+          return true // If we can't parse, assume logged out
+        }
+      })
+
+      if (!isLoggedOut) {
+        console.log(
+          'Warning: Auth data still present after logout, clearing again'
+        )
+        // Try clearing again
+        await clearSessionData(page)
+        // Reload to ensure fresh state
+        await page.reload({ timeout: timeouts.navigation.initial })
+        // Wait for DOM to be ready - don't use networkidle as the app has background polling
+        await page.waitForLoadState('domcontentloaded', {
+          timeout: timeouts.navigation.default,
+        })
+      }
+
+      console.log('Verified logged-out state')
     }
-
-    // Clear again to catch any cookies set by the unauthenticated page load
-    await clearSessionData(page)
-
-    // Don't reset allowed error patterns here — the 401 response from in-flight
-    // requests may arrive asynchronously after this point. Each test gets a fresh
-    // browser context so patterns don't leak between tests.
 
     return page
   } catch (error) {
-    console.error(`Error during logout: ${error.message}`)
-    // Fall back to clearing cookies/storage
-    await clearSessionData(page)
-    if (navigateToHome) {
-      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-    }
-    return page
+    console.error(`Error clearing session data: ${error.message}`)
+    throw error
   }
 }
 
@@ -239,11 +297,11 @@ async function signUpViaHomepage(
     console.log('Cleared session data before signup')
   }
 
-  // Always navigate to homepage — even if already there.  After clearSessionData,
-  // the in-memory Pinia store still has stale state (e.g. loggedInEver=true).
-  // A fresh page load re-hydrates from the now-empty localStorage so the login
-  // modal opens in signup mode rather than login mode.
-  await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+  // Navigate to homepage if we're not already there
+  const currentUrl = page.url()
+  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+  }
 
   // Wait for page to be fully loaded with JavaScript
   // Don't use networkidle - the app has background polling that prevents idle state
@@ -314,16 +372,9 @@ async function signUpViaHomepage(
     }
   }
 
-  // Check if we're in register mode by looking for the name input.
-  // Wait for it — the modal may still be animating or the signUp computed
-  // may not have resolved yet (especially on first visit where it defaults to signup).
+  // Check if we're in register mode by looking for the name input
   const fullnameInput = page.locator('#fullname, input[name="fullname"]')
-  try {
-    await fullnameInput.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-  } catch {
+  if (!(await fullnameInput.isVisible().catch(() => false))) {
     console.log('Could not find or switch to register mode')
     return false
   }
@@ -334,9 +385,14 @@ async function signUpViaHomepage(
   // Generate display name if not provided
   const fullName = displayName || `Test User ${Date.now()}`
 
-  // Fill email FIRST — the EmailValidator component does an async domain check
-  // that can trigger a Vue re-render, which may clear other fields. By filling
-  // email first, any re-render happens before we fill the name.
+  // Fill in the name field
+  await fullnameInput.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  await fullnameInput.type(fullName)
+
+  // Fill in the email field
   const emailInput = page
     .locator('input[type="email"], input[name="email"]')
     .first()
@@ -344,7 +400,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await emailInput.fill(email)
+  await emailInput.type(email)
 
   // Fill in the password field
   const passwordInput = page
@@ -354,14 +410,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await passwordInput.fill(password)
-
-  // Fill in the name field LAST so it isn't cleared by EmailValidator re-renders
-  await fullnameInput.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
-  await fullnameInput.fill(fullName)
+  await passwordInput.type(password)
 
   // Handle marketing consent if specified
   if (marketingConsent !== null) {
@@ -403,11 +452,9 @@ async function signUpViaHomepage(
   // Wait for successful registration
   console.log('Waiting for confirmation after registration')
 
-  let registrationSuccessful = false
-
   try {
-    // Wait for redirect to explore, myposts, or browse page after successful registration
-    await page.waitForURL(/\/(explore|myposts|browse)/, {
+    // Wait for redirect to explore page or myposts, which happens after successful registration
+    await page.waitForURL(/\/(explore|myposts)/, {
       timeout: timeouts.navigation.default,
     })
 
@@ -416,11 +463,13 @@ async function signUpViaHomepage(
       console.log('Redirected to explore page - registration successful')
     } else if (currentUrl.includes('/myposts')) {
       console.log('Redirected to myposts page - registration successful')
-    } else if (currentUrl.includes('/browse')) {
-      console.log('Redirected to browse page - registration successful')
     }
 
-    registrationSuccessful = true
+    // Wait for auth to be persisted to localStorage before returning
+    // This ensures navigation to other pages preserves the logged-in state
+    await waitForAuthPersistence(page)
+
+    return true
   } catch (error) {
     // If we're not redirected to explore, look for other success indicators
     const successIndicators = [
@@ -432,6 +481,8 @@ async function signUpViaHomepage(
       'text=welcome to freegle',
       'text=no community for your area',
     ]
+
+    let registrationSuccessful = false
 
     for (const indicator of successIndicators) {
       try {
@@ -453,17 +504,14 @@ async function signUpViaHomepage(
         // Continue to the next indicator
       }
     }
-  }
 
-  // Wait for auth persistence AFTER determining success — outside the
-  // try/catch so a persistence timeout doesn't trigger the slow indicator loop.
-  // Auth MUST be persisted to localStorage for the session to survive hard
-  // navigation (gotoAndVerify). Without it, SSR renders unauthenticated pages.
-  if (registrationSuccessful) {
-    await waitForAuthPersistence(page)
-  }
+    // If registration was successful via indicators, also wait for auth persistence
+    if (registrationSuccessful) {
+      await waitForAuthPersistence(page)
+    }
 
-  return registrationSuccessful
+    return registrationSuccessful
+  }
 }
 
 /**
@@ -546,7 +594,6 @@ async function loginViaHomepage(
 
         return loginLinkVisible || formFieldsPresent
       },
-      null,
       { timeout: timeouts.ui.appearance }
     )
   } catch (error) {
@@ -1244,54 +1291,33 @@ async function loginViaModTools(page, email, password = 'freegle') {
     timeout: timeouts.navigation.initial,
   })
 
-  // Wait for the login modal to appear
+  // Wait for the login modal to appear (same pattern as test-modtools-login.spec.js)
   const loginModal = page.locator('#loginModal')
   await loginModal.first().waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
 
-  const fullnameField = page.locator('#fullname, input[name="fullname"]')
+  // Switch to login mode if we're in signup mode
+  const loginLink = page
+    .locator('.test-already-a-freegler')
+    .filter({ visible: true })
+    .first()
+  const loginLinkVisible = await loginLink.isVisible().catch(() => false)
 
-  // Wait for modal form to be ready (email + password fields present)
-  await page.waitForFunction(
-    () => {
-      const emailEl = document.querySelector(
-        'input[type="email"], input[name="email"]'
-      )
-      const passwordEl = document.querySelector(
-        'input[type="password"], input[name="password"]'
-      )
-      return emailEl && passwordEl
-    },
-    null,
-    { timeout: timeouts.ui.appearance }
-  )
-
-  // Switch to login mode if in signup mode (fullname field visible)
-  const fullnameVisible = await fullnameField.isVisible().catch(() => false)
-  if (fullnameVisible) {
-    console.log('In signup mode, switching to login mode')
-    const loginLink = page
-      .locator('.test-already-a-freegler')
-      .filter({ visible: true })
-      .first()
+  if (loginLinkVisible) {
+    console.log('Switching from signup to login mode')
     await loginLink.click()
-    // Wait until fullname field is hidden — this confirms we're in login mode
-    await fullnameField.waitFor({ state: 'hidden', timeout: 10000 })
-    console.log('Switched to login mode')
+    // Wait for fullname field to disappear
+    const fullnameField = page.locator('#fullname, input[name="fullname"]')
+    try {
+      await fullnameField.waitFor({ state: 'hidden', timeout: 3000 })
+    } catch {
+      console.log('Mode switch may not have completed, continuing...')
+    }
   }
 
-  // Verify we're in login mode — the submit button must say "Log in"
-  const loginButton = page.locator(
-    '#loginModal button[type="submit"]:has-text("Log in")'
-  )
-  await loginButton.first().waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
-
-  // Fill credentials
+  // Fill in credentials
   const emailField = page
     .locator('input[type="email"], input[name="email"]')
     .first()
@@ -1299,25 +1325,58 @@ async function loginViaModTools(page, email, password = 'freegle') {
     .locator('input[type="password"], input[name="password"]')
     .first()
 
-  console.log(`Typing email: ${email}`)
+  await emailField.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
   await emailField.fill(email)
-
-  console.log('Typing password')
   await passwordField.fill(password)
 
-  // Click the Log in button (never Join Freegle!)
-  await loginButton.first().click()
-  console.log('Clicked Log in button')
+  // Click the login button scoped to the modal
+  const submitButton = page
+    .locator(
+      '#loginModal button:has-text("Log in"):not([disabled]):not(.disabled)'
+    )
+    .first()
+  const submitVisible = await submitButton.isVisible().catch(() => false)
 
-  // Wait for the modal to close (v-if="!loggedIn" removes it from DOM)
-  await loginModal.waitFor({
-    state: 'detached',
-    timeout: timeouts.navigation.slowPage,
-  })
-  console.log('Login modal closed — login successful')
+  if (!submitVisible) {
+    console.log('Login button not found in modal')
+    return false
+  }
+
+  await submitButton.click()
+  console.log('Clicked login button')
+
+  // Wait for the modal to close (indicates successful login)
+  try {
+    await loginModal.waitFor({
+      state: 'hidden',
+      timeout: timeouts.ui.appearance,
+    })
+    console.log('Login modal closed — login successful')
+  } catch {
+    // Check for error message
+    const errorText = await page
+      .locator('.alert-danger, .text-danger')
+      .first()
+      .textContent()
+      .catch(() => '')
+    if (errorText) {
+      console.log(`Login failed with error: ${errorText}`)
+      return false
+    }
+    console.log('Modal did not close but no error found, continuing...')
+  }
 
   // Wait for auth to persist to localStorage
-  await waitForAuthPersistence(page)
+  try {
+    await waitForAuthPersistence(page)
+  } catch {
+    console.log(
+      'Auth persistence check timed out, but login may have succeeded'
+    )
+  }
 
   return true
 }

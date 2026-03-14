@@ -66,13 +66,6 @@ export function useReplyToPost() {
       )
 
       // Open the chat, which will send the message and go to the chat. The chat will clear the store.
-      if (!chatButtonRef) {
-        console.error(
-          'chatButtonRef is null — ChatButton component not mounted yet'
-        )
-        return null
-      }
-
       await chatButtonRef.openChat(
         null,
         replyToSend.value.replyMessage,

@@ -9,16 +9,8 @@ const mockModConfigStore = {
   fetchConfig: vi.fn(),
 }
 
-const mockStdmsgStore = {
-  set: vi.fn(),
-}
-
 vi.mock('~/stores/modconfig', () => ({
   useModConfigStore: () => mockModConfigStore,
-}))
-
-vi.mock('~/stores/stdmsg', () => ({
-  useStdmsgStore: () => mockStdmsgStore,
 }))
 
 // Mock composable
@@ -74,8 +66,8 @@ describe('ModSettingsStandardMessageSet', () => {
           },
           ModSettingsStandardMessageButton: {
             template:
-              '<button class="std-msg-btn" :data-id="stdmsgid">{{ stdmsgid }}</button>',
-            props: ['stdmsgid'],
+              '<button class="std-msg-btn" :data-id="stdmsg.id">{{ stdmsg.title }}</button>',
+            props: ['stdmsg'],
           },
           ModSettingsStandardMessageModal: {
             template: '<div class="std-msg-modal" :data-locked="locked"></div>',

@@ -22,21 +22,12 @@
         You can ignore them until they join other groups or something else
         unusual happens.
       </li>
+      <li>You can remove them from a group.</li>
       <li>
         To report them as a spammer, add a note, or other things, click the link
-        to go to their membership on your group. From there you can send them a
-        message or whatever, or, in very exceptional circumstances, remove or
-        ban them with a polite explanation.
+        to go to their membership on your group.
       </li>
     </ul>
-    <p>
-      See also
-      <ExternalLink
-        href="https://wiki.ilovefreegle.org/Best_Practice#Don.E2.80.99t_knock_enthusiasm"
-        >Don't knock enthusiasm</ExternalLink
-      >
-      on the wiki.
-    </p>
   </NoticeMessage>
   <b-button v-else variant="link" class="float-end pt-0" @click="toggleHelp">
     Help

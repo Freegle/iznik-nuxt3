@@ -87,7 +87,7 @@ describe('support/[[id]].vue page', () => {
           },
           ModMessage: {
             template: '<div class="mod-message" />',
-            props: ['messageid', 'noactions'],
+            props: ['message', 'noactions'],
           },
           ModSystemLogs: {
             template: '<div class="mod-system-logs" />',
@@ -201,6 +201,7 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.searchedMessage()
       expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
         id: '12345',
+        messagehistory: true,
       })
     })
 
@@ -210,6 +211,7 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.searchedMessage()
       expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
         id: '12345',
+        messagehistory: true,
       })
     })
 

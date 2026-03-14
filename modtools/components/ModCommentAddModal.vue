@@ -1,15 +1,14 @@
 <template>
   <div>
     <b-modal
-      :id="'modCommentModal-' + userid"
+      :id="'modCommentModal-' + user.id"
       ref="modal"
       size="lg"
       no-stacking
       @hidden="onHide"
     >
       <template #title>
-        Add Note for {{ user ? user.displayname : '#' + userid }}
-        <span v-if="groupname">on</span>
+        Add Note for {{ user.displayname }} <span v-if="groupname">on</span>
         {{ groupname }}
       </template>
       <template #default>
@@ -67,15 +66,15 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import { useNuxtApp } from '#app'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  user: {
+    type: Object,
     required: true,
   },
   groupid: {
@@ -96,16 +95,6 @@ const { $api } = useNuxtApp()
 const userStore = useUserStore()
 const { bump, context } = setupModMembers()
 const { modal, hide } = useOurModal()
-
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
 
 const user1 = ref(null)
 const user2 = ref(null)
@@ -138,7 +127,7 @@ function toggleFlag() {
 async function save() {
   // Go direct to API because comments aren't in the Store separately.
   await $api.comment.add({
-    userid: props.userid,
+    userid: props.user.id,
     groupid: props.groupid,
     user1: user1.value,
     user2: user2.value,
@@ -155,7 +144,7 @@ async function save() {
   })
 
   await userStore.fetchMT({
-    id: props.userid,
+    id: props.user.id,
     emailhistory: true,
   })
   context.value = null

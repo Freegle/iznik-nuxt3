@@ -1,7 +1,7 @@
 <template>
   <span v-if="user">
     <v-icon
-      v-if="user.systemrole && user.systemrole !== 'User'"
+      v-if="user.systemrole !== 'User'"
       icon="crown"
       class="text-warning"
       title="Mod"
@@ -18,32 +18,14 @@
       <v-icon icon="hashtag" class="text-muted" scale="0.6" />{{ user.id }}
     </span>
   </span>
-  <span v-else-if="userid" class="text-muted small"> #{{ userid }} </span>
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
-import { useUserStore } from '~/stores/user'
-
-const userStore = useUserStore()
-
-const props = defineProps({
-  userid: {
-    type: Number,
+defineProps({
+  user: {
+    type: Object,
     required: false,
     default: null,
   },
 })
-
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) {
-      userStore.fetch(uid)
-    }
-  },
-  { immediate: true }
-)
 </script>

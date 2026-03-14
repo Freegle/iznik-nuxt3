@@ -9,16 +9,6 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
-// Mock user store
-let mockUserData = null
-const mockUserStore = {
-  byId: vi.fn((id) => mockUserData),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 describe('ModComments', () => {
   const defaultUser = {
     id: 123,
@@ -31,10 +21,9 @@ describe('ModComments', () => {
   }
 
   function createWrapper(userOverrides = {}, extraProps = {}) {
-    mockUserData = { ...defaultUser, ...userOverrides }
     return mount(ModComments, {
       props: {
-        userid: 123,
+        user: { ...defaultUser, ...userOverrides },
         expandComments: false,
         ...extraProps,
       },
@@ -42,8 +31,8 @@ describe('ModComments', () => {
         stubs: {
           ModComment: {
             template:
-              '<div class="mod-comment" :data-id="commentid">comment-{{ commentid }}</div>',
-            props: ['commentid', 'userid', 'expandComments'],
+              '<div class="mod-comment" :data-id="comment.id">{{ comment.user1 }}</div>',
+            props: ['comment', 'user', 'expandComments'],
           },
           'b-button': {
             template:
@@ -61,7 +50,6 @@ describe('ModComments', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserData = null
   })
 
   describe('rendering', () => {
@@ -96,10 +84,9 @@ describe('ModComments', () => {
       expect(sorted[2].groupid).toBe(3)
     })
 
-    it('returns empty array when userid is null', () => {
-      mockUserData = null
+    it('returns empty array when user is null', () => {
       const wrapper = mount(ModComments, {
-        props: { userid: null },
+        props: { user: null },
         global: {
           stubs: {
             ModComment: true,

@@ -432,7 +432,6 @@ describe('ModSupportFindGroup', () => {
 
       expect(mockModGroupStore.listMT).toHaveBeenCalledWith({
         grouptype: 'Freegle',
-        support: true,
       })
     })
 

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="microvolunteering">
+  <div>
     <div
       v-if="microvolunteering.result === 'Reject'"
       class="border border-warning rounded p-2"
@@ -52,50 +52,24 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
-import { useMessageStore } from '~/stores/message'
+import { computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  messageid: {
-    type: Number,
+  message: {
+    type: Object,
     required: true,
   },
-  microvolunteeringid: {
-    type: Number,
+  microvolunteering: {
+    type: Object,
     required: true,
   },
 })
 
-const messageStore = useMessageStore()
 const userStore = useUserStore()
 
-const message = computed(() => {
-  return messageStore?.byId(props.messageid)
-})
-
-const microvolunteering = computed(() => {
-  const msg = message.value
-  if (msg?.microvolunteering) {
-    return msg.microvolunteering.find((m) => m.id === props.microvolunteeringid)
-  }
-  return null
-})
-
-watch(
-  () => props.messageid,
-  (newVal) => {
-    if (newVal) {
-      messageStore.fetch(newVal)
-    }
-  },
-  { immediate: true }
-)
-
 const user = computed(() => {
-  return microvolunteering.value
-    ? userStore?.byId(microvolunteering.value.userid)
-    : null
+  return userStore?.byId(props.microvolunteering.userid)
 })
 
 const email = computed(() => {
@@ -113,8 +87,6 @@ const email = computed(() => {
 })
 
 onMounted(() => {
-  if (microvolunteering.value?.userid) {
-    userStore.fetch(microvolunteering.value.userid)
-  }
+  userStore.fetch(props.microvolunteering.userid)
 })
 </script>

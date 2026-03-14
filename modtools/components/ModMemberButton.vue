@@ -20,47 +20,30 @@
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
-      :title="'Delete: ' + (user ? user.displayname : '#' + userid)"
+      :title="'Delete: ' + member.displayname"
       @confirm="deleteConfirmed"
     />
-    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :userid="userid" />
+    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="member" />
     <ModStdMessageModal
       v-if="showStdMsgModal"
       ref="stdmodal"
-      :stdmsgid="stdmsgId"
-      :stdmsgaction="stdmsgAction"
-      :membershipid="membershipid"
+      :stdmsg="stdmsg"
+      :member="member"
       :autosend="autosend"
     />
   </div>
 </template>
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useMemberStore } from '~/stores/member'
-import { useUserStore } from '~/stores/user'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  member: {
+    type: Object,
     required: true,
-  },
-  groupid: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  membershipid: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  spammerid: {
-    type: Number,
-    required: false,
-    default: null,
   },
   stdmsgid: {
     type: Number,
@@ -159,7 +142,6 @@ const props = defineProps({
 const emit = defineEmits(['pressed'])
 
 const memberStore = useMemberStore()
-const userStore = useUserStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
 const { myid } = useMe()
@@ -171,21 +153,16 @@ const stdmodal = ref(null)
 const showDeleteModal = ref(false)
 const showStdMsgModal = ref(false)
 const showSpamModal = ref(false)
-const stdmsgId = ref(null)
-const stdmsgAction = ref(null)
+const stdmsg = ref(null)
 
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
+const groupid = computed(() => {
+  // For member entries this is returned at the top level.
+  return props.member.groupid
+})
 
 const spinclass = computed(() => {
   if (props.variant === 'primary') {
+    // Primary buttons have "success" (green) class.
     return 'success'
   }
 
@@ -208,73 +185,75 @@ function spamReport() {
 
 async function spamConfirmAction() {
   await spammerStore.confirm({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
   })
 }
 
 async function spamRequestRemove() {
   await spammerStore.requestremove({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
   })
 }
 
 async function spamRemove() {
   await spammerStore.remove({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
   })
 }
 
 async function spamSafelist() {
   await spammerStore.safelist({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
     myid: myid.value,
   })
 }
 
 async function spamHold() {
   await spammerStore.hold({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
     myid: myid.value,
   })
 }
 
 async function deleteConfirmed() {
   await memberStore.delete({
-    id: props.userid,
-    groupid: props.groupid,
+    id: props.member.userid,
+    groupid: groupid.value,
   })
 }
 
 async function reviewHoldIt() {
   await memberStore.reviewHold({
-    membershipid: props.membershipid,
-    groupid: props.reviewgroupid ?? props.groupid,
+    membershipid: props.member.membershipid,
+    groupid: props.reviewgroupid ?? props.member.id,
   })
 }
 
 async function reviewReleaseIt() {
   await memberStore.reviewRelease({
-    membershipid: props.membershipid,
-    groupid: props.reviewgroupid ?? props.groupid,
+    membershipid: props.member.membershipid,
+    groupid: props.reviewgroupid ?? props.member.id,
   })
 }
 
 async function releaseIt() {
   await spammerStore.release({
-    id: props.spammerid,
-    userid: props.userid,
+    id: props.member.spammer.id,
+    userid: props.member.userid,
   })
 }
 
 async function click(callback) {
   if (props.approve) {
+    // Standard approve button - no modal.
     await approveIt()
   } else if (props.delete) {
+    // Standard delete button - no modal.
     await deleteIt()
   } else if (props.spamreport) {
     await spamReport()
@@ -299,15 +278,13 @@ async function click(callback) {
     await reviewReleaseIt()
   } else {
     // We want to show a modal.
-    stdmsgId.value = null
-    stdmsgAction.value = null
-
     if (props.leave) {
-      stdmsgAction.value = 'Leave Member'
+      stdmsg.value = {
+        action: 'Leave Member',
+      }
     } else if (props.stdmsgid) {
-      // We have a standard message.  Fetch it into the store.
-      await stdmsgStore.fetch(props.stdmsgid)
-      stdmsgId.value = props.stdmsgid
+      // We have a standard message.  Fetch it.
+      stdmsg.value = await stdmsgStore.fetch(props.stdmsgid)
     }
 
     showStdMsgModal.value = true

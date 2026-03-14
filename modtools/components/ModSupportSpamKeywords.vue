@@ -102,7 +102,7 @@
           <ModSpamKeywordBadge
             v-for="spamKeyword in filteredSpamKeywords"
             :key="spamKeyword.id"
-            :spam-keyword-id="spamKeyword.id"
+            :spam-keyword="spamKeyword"
           />
         </div>
       </div>

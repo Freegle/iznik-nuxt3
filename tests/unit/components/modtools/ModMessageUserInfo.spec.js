@@ -11,16 +11,6 @@ vi.mock('~/stores/misc', () => ({
   useMiscStore: () => mockMiscStore,
 }))
 
-// Mock user store
-let mockUserData = null
-const mockUserStore = {
-  byId: vi.fn((id) => mockUserData),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 // Mock dateshort from #imports
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
@@ -54,20 +44,27 @@ describe('ModMessageUserInfo', () => {
       openwanteds: 1,
     },
     supporter: false,
-    memberships: [
-      {
-        groupid: 789,
-        added: '2023-01-15',
-      },
-    ],
     ...overrides,
   })
 
-  function mountComponent(props = {}, userOverrides = {}) {
-    mockUserData = createTestUser(userOverrides)
+  const createTestMessage = (overrides = {}) => ({
+    id: 456,
+    fromuser: {
+      id: 123,
+      memberof: [
+        {
+          id: 789,
+          added: '2023-01-15',
+        },
+      ],
+    },
+    ...overrides,
+  })
+
+  function mountComponent(props = {}) {
     return mount(ModMessageUserInfo, {
       props: {
-        userid: 123,
+        user: createTestUser(),
         ...props,
       },
       global: {
@@ -90,15 +87,15 @@ describe('ModMessageUserInfo', () => {
           },
           ModModeration: {
             template: '<div class="mod-moderation" />',
-            props: ['userid', 'membership'],
+            props: ['user', 'membership'],
           },
           ModPostingHistory: {
             template: '<div class="mod-posting-history" />',
-            props: ['userid'],
+            props: ['user'],
           },
           ModMemberships: {
             template: '<div class="mod-memberships" />',
-            props: ['userid'],
+            props: ['user'],
           },
         },
       },
@@ -108,7 +105,6 @@ describe('ModMessageUserInfo', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockMiscStore.modtools = false
-    mockUserData = null
   })
 
   describe('rendering', () => {
@@ -166,34 +162,36 @@ describe('ModMessageUserInfo', () => {
 
   describe('open offers/wanteds display', () => {
     it('displays open offers when available and modinfo is false', () => {
-      const wrapper = mountComponent(
-        { modinfo: false },
-        { info: { openoffers: 3, openwanteds: 0 } }
-      )
+      const wrapper = mountComponent({
+        modinfo: false,
+        user: createTestUser({ info: { openoffers: 3, openwanteds: 0 } }),
+      })
       expect(wrapper.text()).toContain('open OFFER')
     })
 
     it('displays open wanteds when available', () => {
-      const wrapper = mountComponent(
-        { modinfo: false },
-        { info: { openoffers: 0, openwanteds: 2 } }
-      )
+      const wrapper = mountComponent({
+        modinfo: false,
+        user: createTestUser({ info: { openoffers: 0, openwanteds: 2 } }),
+      })
       expect(wrapper.text()).toContain('open WANTED')
     })
 
     it('does not display when modinfo is true', () => {
-      const wrapper = mountComponent(
-        { modinfo: true, groupid: 789 },
-        { info: { openoffers: 5, openwanteds: 3 } }
-      )
+      const wrapper = mountComponent({
+        modinfo: true,
+        groupid: 789,
+        message: createTestMessage(),
+        user: createTestUser({ info: { openoffers: 5, openwanteds: 3 } }),
+      })
       expect(wrapper.text()).not.toContain('open OFFER')
     })
 
     it('does not display when both are 0', () => {
-      const wrapper = mountComponent(
-        { modinfo: false },
-        { info: { openoffers: 0, openwanteds: 0 } }
-      )
+      const wrapper = mountComponent({
+        modinfo: false,
+        user: createTestUser({ info: { openoffers: 0, openwanteds: 0 } }),
+      })
       expect(wrapper.text()).not.toContain('open OFFER')
       expect(wrapper.text()).not.toContain('open WANTED')
     })
@@ -201,12 +199,16 @@ describe('ModMessageUserInfo', () => {
 
   describe('supporter badge', () => {
     it('shows ModSupporter when user is supporter', () => {
-      const wrapper = mountComponent({}, { supporter: true })
+      const wrapper = mountComponent({
+        user: createTestUser({ supporter: true }),
+      })
       expect(wrapper.find('.supporter-badge').exists()).toBe(true)
     })
 
     it('does not show ModSupporter when user is not supporter', () => {
-      const wrapper = mountComponent({}, { supporter: false })
+      const wrapper = mountComponent({
+        user: createTestUser({ supporter: false }),
+      })
       expect(wrapper.find('.supporter-badge').exists()).toBe(false)
     })
   })
@@ -216,6 +218,7 @@ describe('ModMessageUserInfo', () => {
       const wrapper = mountComponent({
         modinfo: true,
         groupid: 789,
+        message: createTestMessage(),
       })
       expect(wrapper.text()).toContain('Joined')
     })
@@ -224,6 +227,7 @@ describe('ModMessageUserInfo', () => {
       const wrapper = mountComponent({
         modinfo: true,
         groupid: 789,
+        message: createTestMessage(),
       })
       expect(wrapper.text()).toContain('123')
       expect(wrapper.find('i.hashtag').exists()).toBe(true)
@@ -233,6 +237,7 @@ describe('ModMessageUserInfo', () => {
       const wrapper = mountComponent({
         modinfo: true,
         groupid: 789,
+        message: createTestMessage(),
       })
       expect(wrapper.find('.mod-moderation').exists()).toBe(true)
     })
@@ -264,6 +269,7 @@ describe('ModMessageUserInfo', () => {
         const wrapper = mountComponent({
           modinfo: true,
           groupid: 789,
+          message: createTestMessage(),
         })
         expect(wrapper.vm.membership).toBeTruthy()
         expect(wrapper.vm.membership.id).toBe(789)
@@ -273,22 +279,34 @@ describe('ModMessageUserInfo', () => {
         const wrapper = mountComponent({
           modinfo: true,
           groupid: 999,
+          message: createTestMessage(),
         })
+        // Null when find() returns undefined and then null check fails
         expect(wrapper.vm.membership).toBeFalsy()
       })
 
       it('returns null when groupid is not provided', () => {
         const wrapper = mountComponent({
           modinfo: true,
+          message: createTestMessage(),
         })
         expect(wrapper.vm.membership).toBeNull()
       })
 
-      it('returns null when user has no memberships', () => {
-        const wrapper = mountComponent(
-          { modinfo: true, groupid: 789 },
-          { memberships: undefined }
-        )
+      it('returns null when message is null', () => {
+        const wrapper = mountComponent({
+          modinfo: true,
+          groupid: 789,
+        })
+        expect(wrapper.vm.membership).toBeNull()
+      })
+
+      it('returns null when fromuser is null', () => {
+        const wrapper = mountComponent({
+          modinfo: true,
+          groupid: 789,
+          message: { id: 456, fromuser: null },
+        })
         expect(wrapper.vm.membership).toBeNull()
       })
     })
@@ -298,7 +316,9 @@ describe('ModMessageUserInfo', () => {
         const wrapper = mountComponent({
           modinfo: true,
           groupid: 789,
+          message: createTestMessage(),
         })
+        // Should be some positive number of days
         expect(typeof wrapper.vm.joinedAge).toBe('number')
       })
 
@@ -306,6 +326,7 @@ describe('ModMessageUserInfo', () => {
         const wrapper = mountComponent({
           modinfo: true,
           groupid: 999,
+          message: createTestMessage(),
         })
         expect(wrapper.vm.joinedAge).toBeNull()
       })
@@ -335,59 +356,64 @@ describe('ModMessageUserInfo', () => {
 
     describe('openOffersPlural', () => {
       it('returns formatted open offers string', () => {
-        const wrapper = mountComponent(
-          {},
-          { info: { openoffers: 3, openwanteds: 0 } }
-        )
+        const wrapper = mountComponent({
+          user: createTestUser({ info: { openoffers: 3, openwanteds: 0 } }),
+        })
         expect(wrapper.vm.openOffersPlural).toContain('3')
         expect(wrapper.vm.openOffersPlural).toContain('open OFFER')
       })
 
       it('returns empty string when no offers', () => {
-        const wrapper = mountComponent(
-          {},
-          { info: { openoffers: 0, openwanteds: 0 } }
-        )
+        const wrapper = mountComponent({
+          user: createTestUser({ info: { openoffers: 0, openwanteds: 0 } }),
+        })
         expect(wrapper.vm.openOffersPlural).toBe('')
       })
     })
 
     describe('openWantedsPlural', () => {
       it('returns formatted open wanteds string', () => {
-        const wrapper = mountComponent(
-          {},
-          { info: { openoffers: 0, openwanteds: 2 } }
-        )
+        const wrapper = mountComponent({
+          user: createTestUser({ info: { openoffers: 0, openwanteds: 2 } }),
+        })
         expect(wrapper.vm.openWantedsPlural).toContain('2')
         expect(wrapper.vm.openWantedsPlural).toContain('open WANTED')
       })
 
       it('returns empty string when no wanteds', () => {
-        const wrapper = mountComponent(
-          {},
-          { info: { openoffers: 0, openwanteds: 0 } }
-        )
+        const wrapper = mountComponent({
+          user: createTestUser({ info: { openoffers: 0, openwanteds: 0 } }),
+        })
         expect(wrapper.vm.openWantedsPlural).toBe('')
       })
     })
   })
 
   describe('props', () => {
-    it('accepts userid prop (required)', () => {
-      const wrapper = mountComponent({ userid: 999 })
-      expect(wrapper.props('userid')).toBe(999)
+    it('accepts user prop (required)', () => {
+      const user = createTestUser({ id: 999 })
+      const wrapper = mountComponent({ user })
+      expect(wrapper.props('user')).toEqual(user)
     })
   })
 
   describe('joined age styling', () => {
     it('applies text-danger when joined within 31 days', () => {
+      // Set up a recent join date
       const recentDate = new Date()
       recentDate.setDate(recentDate.getDate() - 10) // 10 days ago
 
-      const wrapper = mountComponent(
-        { modinfo: true, groupid: 789 },
-        { memberships: [{ groupid: 789, added: recentDate.toISOString() }] }
-      )
+      const wrapper = mountComponent({
+        modinfo: true,
+        groupid: 789,
+        message: {
+          id: 456,
+          fromuser: {
+            id: 123,
+            memberof: [{ id: 789, added: recentDate.toISOString() }],
+          },
+        },
+      })
       expect(wrapper.vm.joinedAge).toBeLessThanOrEqual(31)
     })
   })
@@ -395,15 +421,14 @@ describe('ModMessageUserInfo', () => {
   describe('Go API data shape', () => {
     it('renders without crashing when user profile has paththumb instead of turl (V2 API format)', () => {
       // The Go V2 user API returns profile with path/paththumb, not url/turl
-      const wrapper = mountComponent(
-        {},
-        {
+      const wrapper = mountComponent({
+        user: createTestUser({
           profile: {
             path: 'https://example.com/uimg_123.jpg',
             paththumb: 'https://example.com/tuimg_123.jpg',
           },
-        }
-      )
+        }),
+      })
       expect(wrapper.text()).toContain('Test User')
       const profileImage = wrapper.find('.profile-image')
       expect(profileImage.attributes('data-image')).toBe(
@@ -417,34 +442,6 @@ describe('ModMessageUserInfo', () => {
       const wrapper = mountComponent({ milesaway: 0 })
       // 0 is falsy, so should not show miles
       expect(wrapper.text()).not.toContain('away')
-    })
-
-    it('renders nothing when user is not in store', () => {
-      mockUserData = null
-      const wrapper = mount(ModMessageUserInfo, {
-        props: { userid: 999 },
-        global: {
-          stubs: {
-            'nuxt-link': {
-              template: '<a><slot /></a>',
-              props: ['to', 'title'],
-            },
-            'v-icon': { template: '<i />', props: ['icon'] },
-            ProfileImage: {
-              template: '<div />',
-              props: ['image', 'name', 'isThumbnail', 'size'],
-            },
-            ModSupporter: { template: '<span />' },
-            ModModeration: {
-              template: '<div />',
-              props: ['userid', 'membership'],
-            },
-            ModPostingHistory: { template: '<div />', props: ['userid'] },
-            ModMemberships: { template: '<div />', props: ['userid'] },
-          },
-        },
-      })
-      expect(wrapper.text()).toBe('')
     })
   })
 })

@@ -107,7 +107,7 @@
  *   ERROR          - Something went wrong
  */
 
-import { ref, computed, getCurrentInstance, watch } from 'vue'
+import { ref, computed, getCurrentInstance, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
@@ -662,7 +662,7 @@ export function useReplyStateMachine(messageId) {
       const ret = await instance.proxy.$api.user.add(email.value, false)
       log('Registration API response:', ret)
 
-      if (ret.password) {
+      if (ret.ret === 0 && ret.password) {
         // New user registered successfully
         log('New user registered')
         isNewUser.value = true
@@ -681,18 +681,14 @@ export function useReplyStateMachine(messageId) {
         // Persist the new user flag
         persistState()
 
-        // Transition BEFORE fetchMe to prevent race condition:
-        // fetchMe triggers the `me` watcher which calls onLoginSuccess(),
-        // which also transitions to JOINING_GROUP and calls handleJoinGroup().
-        // By transitioning first, onLoginSuccess()'s guard
-        // (state === AUTHENTICATING) fails, preventing double execution.
+        // Fetch the user data
+        await fetchMe(true)
+        log('Fetched new user data', { myid: myid.value })
+
         transitionTo(ReplyState.JOINING_GROUP, {
           event: ReplyEvent.REGISTRATION_SUCCESS,
           isNewUser: true,
         })
-
-        await fetchMe(true)
-        log('Fetched new user data', { myid: myid.value })
 
         await handleJoinGroup(callback)
       } else {
@@ -724,28 +720,15 @@ export function useReplyStateMachine(messageId) {
     log('onLoginSuccess() called', {
       state: state.value,
       hasReply: !!replyText.value,
-      hasEmail: !!email.value,
-      myid: myid.value,
-      chatButtonRef: !!chatButtonRef.value,
     })
 
     // Handle login success from AUTHENTICATING state (normal flow)
     if (state.value === ReplyState.AUTHENTICATING && replyText.value) {
       log('Resuming after login from AUTHENTICATING')
-      try {
-        transitionTo(ReplyState.JOINING_GROUP, {
-          event: ReplyEvent.LOGIN_SUCCESS,
-        })
-        await handleJoinGroup()
-      } catch (e) {
-        logError(
-          'onLoginSuccess failed during resume',
-          e,
-          state.value,
-          messageId
-        )
-        fallbackToComposing('login_resume_error')
-      }
+      transitionTo(ReplyState.JOINING_GROUP, {
+        event: ReplyEvent.LOGIN_SUCCESS,
+      })
+      await handleJoinGroup()
       return
     }
 
@@ -835,28 +818,7 @@ export function useReplyStateMachine(messageId) {
   async function handleCreateChat(callback) {
     log('handleCreateChat() starting', { chatButtonRef: !!chatButtonRef.value })
 
-    // After forced login, the component may still be re-mounting.
-    // Wait for setRefs() to provide the chatButtonRef (event-based, not timer-based).
-    if (!chatButtonRef.value) {
-      await Promise.race([
-        new Promise((resolve) => {
-          const stop = watch(chatButtonRef, (val) => {
-            if (val) {
-              stop()
-              resolve()
-            }
-          })
-          // Also resolve immediately if it became available during watch setup
-          if (chatButtonRef.value) {
-            stop()
-            resolve()
-          }
-        }),
-        // Timeout after 5 seconds — if the component hasn't mounted by then,
-        // fall through to the null check below.
-        new Promise((resolve) => setTimeout(resolve, 5000)),
-      ])
-    }
+    await nextTick()
 
     if (!chatButtonRef.value) {
       logError('Chat button ref not available', null, state.value, messageId)

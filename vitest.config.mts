@@ -106,11 +106,6 @@ export default defineConfig({
         rootDir,
         'tests/unit/mocks/handsontable-css.js'
       ),
-      // Store mocks for testing (avoids complex dependency chains)
-      '~/stores/auth': path.join(rootDir, 'tests/unit/mocks/auth-store.js'),
-      '@/stores/auth': path.join(rootDir, 'tests/unit/mocks/auth-store.js'),
-      '~/stores/chat': path.join(rootDir, 'tests/unit/mocks/chat-store.js'),
-      '@/stores/chat': path.join(rootDir, 'tests/unit/mocks/chat-store.js'),
       // Composable mocks for testing
       '~/composables/useOurModal': path.join(
         rootDir,

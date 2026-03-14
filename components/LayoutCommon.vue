@@ -125,8 +125,6 @@ import {
   onMounted,
   onBeforeUnmount,
   defineAsyncComponent,
-  watch,
-  nextTick,
 } from 'vue'
 import { useRoute } from 'vue-router'
 import SomethingWentWrong from './SomethingWentWrong'
@@ -141,7 +139,7 @@ import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
 import { useMobileStore } from '@/stores/mobile'
-import ChatButton from '~/components/ChatButton'
+const ChatButton = defineAsyncComponent(() => import('~/components/ChatButton'))
 const InterestedInOthersModal = defineAsyncComponent(() =>
   import('~/components/InterestedInOthersModal.vue')
 )
@@ -335,36 +333,8 @@ onMounted(async () => {
       interestedInOthersMsgid.value = replyToSend.value.replyMsgId
       const messageStore = useMessageStore()
       await messageStore.fetch(replyToSend.value.replyMsgId, true)
-      // Wait for Vue to flush DOM updates so ChatButton (v-if="replyToSend")
-      // mounts and populates the template ref.
-      await nextTick()
-      if (!replyToPostChatButton.value) {
-        // Ref may not be available yet if rendering is delayed. Wait for it.
-        await Promise.race([
-          new Promise((resolve) => {
-            const stop = watch(replyToPostChatButton, (val) => {
-              if (val) {
-                stop()
-                resolve()
-              }
-            })
-            if (replyToPostChatButton.value) {
-              stop()
-              resolve()
-            }
-          }),
-          new Promise((resolve) => setTimeout(resolve, 10000)),
-        ])
-      }
       console.log('Reply to post chat button', replyToPostChatButton.value)
-      if (!replyToPostChatButton.value) {
-        console.warn(
-          'ChatButton ref not available after wait — reply will be retried on next page load'
-        )
-      }
-      const replyResult = replyToPostChatButton.value
-        ? await replyToPost(replyToPostChatButton.value)
-        : null
+      const replyResult = await replyToPost(replyToPostChatButton.value)
       if (replyResult) {
         replySent()
       }

@@ -4,9 +4,7 @@
       <b-modal
         id="aboutmemodal"
         ref="modal"
-        :title="
-          'Microvolunteering for ' + (user ? user.displayname : '#' + userid)
-        "
+        :title="'Microvolunteering for ' + user.displayname"
         size="xl"
       >
         <template #default>
@@ -22,13 +20,11 @@
   </div>
 </template>
 <script setup>
-import { computed, watch } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
-import { useUserStore } from '~/stores/user'
 
-const props = defineProps({
-  userid: {
-    type: Number,
+defineProps({
+  user: {
+    type: Object,
     required: true,
   },
   itemIds: {
@@ -36,17 +32,6 @@ const props = defineProps({
     required: true,
   },
 })
-
-const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
-  },
-  { immediate: true }
-)
 
 const { modal, hide, show } = useOurModal()
 

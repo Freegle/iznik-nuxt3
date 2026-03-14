@@ -41,13 +41,8 @@
         <div v-if="isPageLoadExpanded" class="page-load-children">
           <ModSystemLogTreeNode
             v-for="(childNode, idx) in node.children"
-            :key="
-              childNode.nodeKey ||
-              childNode.trace_id ||
-              childNode.log?.id ||
-              idx
-            "
-            :node-key="childNode.nodeKey"
+            :key="childNode.trace_id || childNode.log?.id || idx"
+            :node="childNode"
             :hide-user-column="hideUserColumn"
             @filter-trace="$emit('filter-trace', $event)"
             @filter-session="$emit('filter-session', $event)"
@@ -133,7 +128,7 @@
         <!-- The log entry (show for standalone nodes without children) -->
         <ModSystemLogEntry
           v-else
-          :log-id="parentLog?.id"
+          :log="parentLog"
           :hide-user-column="hideUserColumn"
           class="tree-entry"
           @filter-trace="$emit('filter-trace', $event)"
@@ -232,7 +227,7 @@
                 {{ clientLog.count }}×
               </span>
               <ModSystemLogEntry
-                :log-id="clientLog.log.id"
+                :log="clientLog.log"
                 :hide-user-column="hideUserColumn"
                 class="tree-entry child-entry"
                 @filter-trace="$emit('filter-trace', $event)"
@@ -263,7 +258,7 @@
                   />
                 </div>
                 <ModSystemLogEntry
-                  :log-id="api.log.id"
+                  :log="api.log"
                   :hide-user-column="hideUserColumn"
                   class="tree-entry child-entry flex-grow-1"
                   @filter-trace="$emit('filter-trace', $event)"
@@ -288,7 +283,7 @@
                 >
                   <span class="tree-connector" />
                   <ModSystemLogEntry
-                    :log-id="serverLog.log.id"
+                    :log="serverLog.log"
                     :hide-user-column="hideUserColumn"
                     class="tree-entry child-entry server-entry"
                     @filter-trace="$emit('filter-trace', $event)"
@@ -307,7 +302,7 @@
             >
               <span class="tree-connector" />
               <ModSystemLogEntry
-                :log-id="emailLog.log.id"
+                :log="emailLog.log"
                 :hide-user-column="hideUserColumn"
                 class="tree-entry child-entry email-entry"
                 @filter-trace="$emit('filter-trace', $event)"
@@ -346,8 +341,8 @@ defineOptions({
 const BATCH_SIZE = 50
 
 const props = defineProps({
-  nodeKey: {
-    type: String,
+  node: {
+    type: Object,
     required: true,
   },
   hideUserColumn: {
@@ -361,9 +356,6 @@ const emit = defineEmits(['filter-trace', 'filter-session', 'filter-ip'])
 
 const systemLogsStore = useSystemLogsStore()
 
-// Look up the node object from the store by key.
-const node = computed(() => systemLogsStore.getNode(props.nodeKey) || {})
-
 const loadMoreSentinel = ref(null)
 const visibleChildCount = ref(BATCH_SIZE)
 let observer = null
@@ -371,16 +363,16 @@ const expandedRoutes = ref({})
 const expandedApis = ref({})
 const toggledRoutes = ref({})
 
-const isPageLoadGroup = computed(() => node.value.type === 'page-load-group')
+const isPageLoadGroup = computed(() => props.node.type === 'page-load-group')
 
 const isPageLoadExpanded = computed(() => {
   if (!isPageLoadGroup.value) return false
-  return systemLogsStore.isGroupExpanded(node.value.groupKey)
+  return systemLogsStore.isGroupExpanded(props.node.groupKey)
 })
 
 const pageLoadChildCount = computed(() => {
   if (!isPageLoadGroup.value) return 0
-  return node.value.children?.length || 0
+  return props.node.children?.length || 0
 })
 
 const pageLoadTimestampRange = computed(() => {
@@ -393,49 +385,49 @@ const pageLoadTimestampRange = computed(() => {
       second: '2-digit',
     })
   }
-  const first = formatTime(node.value.firstTimestamp)
-  const last = formatTime(node.value.lastTimestamp)
+  const first = formatTime(props.node.firstTimestamp)
+  const last = formatTime(props.node.lastTimestamp)
   if (first === last) return first
   return `${first} - ${last}`
 })
 
-const isTraceGroup = computed(() => node.value.type === 'trace-group')
+const isTraceGroup = computed(() => props.node.type === 'trace-group')
 
 const hasChildren = computed(() => {
   // Has children if it's a trace group with more than 1 log.
   // Use childCount from summary if available.
-  if (node.value.childCount !== undefined) {
-    return isTraceGroup.value && node.value.childCount > 1
+  if (props.node.childCount !== undefined) {
+    return isTraceGroup.value && props.node.childCount > 1
   }
   return isTraceGroup.value && totalLogCount.value > 1
 })
 
 const childCount = computed(() => {
   // Use childCount from summary if available.
-  if (node.value.childCount !== undefined) {
-    return node.value.childCount
+  if (props.node.childCount !== undefined) {
+    return props.node.childCount
   }
   return totalLogCount.value
 })
 
 const parentLog = computed(() => {
   // For trace-group, use parent; for standalone, use log.
-  return isTraceGroup.value ? node.value.parent : node.value.log
+  return isTraceGroup.value ? props.node.parent : props.node.log
 })
 
 const isExpanded = computed(() => {
   if (!isTraceGroup.value) return false
-  return systemLogsStore.isGroupExpanded(node.value.trace_id)
+  return systemLogsStore.isGroupExpanded(props.node.trace_id)
 })
 
 const isLoading = computed(() => {
   // Check if children are being loaded.
-  return node.value.loading || false
+  return props.node.loading || false
 })
 
 const childrenLoaded = computed(() => {
   // Check if children have been fetched.
-  return node.value.children && node.value.children.length > 0
+  return props.node.children && props.node.children.length > 0
 })
 
 // Get all logs in chronological order.
@@ -444,8 +436,8 @@ const allLogsChronological = computed(() => {
   if (!isTraceGroup.value) return []
 
   const allLogs = []
-  if (node.value.children) {
-    for (const child of node.value.children) {
+  if (props.node.children) {
+    for (const child of props.node.children) {
       allLogs.push(child)
     }
   }
@@ -619,8 +611,8 @@ const routeBreadcrumbs = computed(() => {
   if (!isTraceGroup.value) return null
 
   // Use routeSummary from summary data if available.
-  if (node.value.routeSummary && node.value.routeSummary.length > 0) {
-    return node.value.routeSummary
+  if (props.node.routeSummary && props.node.routeSummary.length > 0) {
+    return props.node.routeSummary
   }
 
   // Fallback: build from loaded children.
@@ -698,15 +690,15 @@ const summaryDescription = computed(() => {
   const parts = []
 
   // Count user actions and API calls from the node
-  if (node.value.childCount) {
+  if (props.node.childCount) {
     parts.push(
-      `${node.value.childCount} log${node.value.childCount !== 1 ? 's' : ''}`
+      `${props.node.childCount} log${props.node.childCount !== 1 ? 's' : ''}`
     )
   }
 
   // Add source info if available
-  if (node.value.sources && node.value.sources.length > 0) {
-    const sourceList = node.value.sources.join(', ')
+  if (props.node.sources && props.node.sources.length > 0) {
+    const sourceList = props.node.sources.join(', ')
     parts.push(`(${sourceList})`)
   }
 
@@ -724,8 +716,8 @@ const summaryDescription = computed(() => {
 // Get first timestamp for collapsed summary.
 // Uses node summary data if available.
 const firstTimestamp = computed(() => {
-  if (node.value.firstTimestamp) {
-    return node.value.firstTimestamp
+  if (props.node.firstTimestamp) {
+    return props.node.firstTimestamp
   }
   const logs = allLogsChronological.value
   if (logs.length === 0) return null
@@ -735,8 +727,8 @@ const firstTimestamp = computed(() => {
 // Get last timestamp for collapsed summary.
 // Uses node summary data if available.
 const lastTimestamp = computed(() => {
-  if (node.value.lastTimestamp) {
-    return node.value.lastTimestamp
+  if (props.node.lastTimestamp) {
+    return props.node.lastTimestamp
   }
   const logs = allLogsChronological.value
   if (logs.length === 0) return null
@@ -806,26 +798,26 @@ function isRouteFromMobile(route) {
 
 function togglePageLoadExpand() {
   if (isPageLoadGroup.value) {
-    systemLogsStore.toggleGroupExpanded(node.value.groupKey)
+    systemLogsStore.toggleGroupExpanded(props.node.groupKey)
   }
 }
 
 async function toggleExpand() {
   if (isTraceGroup.value) {
     const wasExpanded = isExpanded.value
-    systemLogsStore.toggleGroupExpanded(node.value.trace_id)
+    systemLogsStore.toggleGroupExpanded(props.node.trace_id)
 
     // If expanding and children not yet loaded, fetch them.
-    if (!wasExpanded && !childrenLoaded.value && node.value.trace_id) {
+    if (!wasExpanded && !childrenLoaded.value && props.node.trace_id) {
       // Pass time bounds from the summary for a more efficient query.
       const timeBounds =
-        node.value.firstTimestamp && node.value.lastTimestamp
+        props.node.firstTimestamp && props.node.lastTimestamp
           ? {
-              start: node.value.firstTimestamp,
-              end: node.value.lastTimestamp,
+              start: props.node.firstTimestamp,
+              end: props.node.lastTimestamp,
             }
           : null
-      await systemLogsStore.fetchTraceChildren(node.value.trace_id, timeBounds)
+      await systemLogsStore.fetchTraceChildren(props.node.trace_id, timeBounds)
     }
   }
 }

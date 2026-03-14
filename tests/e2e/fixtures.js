@@ -178,55 +178,43 @@ const test = base.test.extend({
     await use(emailGenerator)
   },
 
-  // Isolated test environment per test file (for parallel execution).
-  // Reads pre-generated environment data from test-envs.json.
-  // Environments are created by create-test-env.php before the test run.
+  // Auto-apply progress tracking to all tests
+  // eslint-disable-next-line no-empty-pattern
+  progressTracker: async ({}, use) => {
+    const testInfo = test.info()
+    const testId = `${testInfo.file}::${testInfo.title}`
 
-  testEnv: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use, testInfo) => {
-      // Derive prefix from filename: test-modtools-hold-release.spec.js -> mtholdrelease
-      const filename = path.basename(testInfo.file, '.spec.js')
-      const prefix = filename
-        .replace('test-modtools-', 'mt')
-        .replace('test-', '')
-        .replace(/-/g, '')
+    // Register test start
+    updateProgress({
+      testId,
+      title: testInfo.title,
+      status: 'running',
+      startTime: Date.now(),
+      retry: testInfo.retry,
+    })
 
-      // Read pre-generated environments (created before test run)
-      const envsPath = path.join(__dirname, 'test-envs.json')
-      try {
-        const envsData = JSON.parse(fs.readFileSync(envsPath, 'utf-8'))
-        const env = envsData[prefix]
-        if (env) {
-          console.log(
-            `Test environment loaded: group=${env.group.name}, mod=${env.mod.email}`
-          )
-          await use(env)
-          return
-        }
-        console.warn(`No pre-generated environment for prefix "${prefix}"`)
-      } catch (error) {
-        console.error(`Failed to read test-envs.json: ${error.message}`)
-      }
-
-      // Fall back to shared FreeglePlayground environment
-      console.log('Falling back to shared FreeglePlayground environment')
-      await use({
-        group: { id: null, name: 'FreeglePlayground' },
-        group2: { id: null, name: 'FreeglePlayground2' },
-        mod: { id: null, email: 'testmod@test.com' },
-        user: { id: null, email: 'test@test.com' },
-        user2: { id: null, email: 'test3@test.com' },
-        messages: { offer: null, wanted: null },
-        pending: { offer: null, wanted: null },
-        chats: { user2user: null, user2mod: null },
+    try {
+      await use({})
+      // Test completed successfully
+      updateProgress({
+        testId,
+        status: 'completed',
+        endTime: Date.now(),
       })
-    },
-    { scope: 'test' },
-  ],
+    } catch (error) {
+      // Test failed
+      updateProgress({
+        testId,
+        status: 'failed',
+        endTime: Date.now(),
+        error: error.message,
+      })
+      throw error
+    }
+  },
 
   // Override the page fixture to use our isolated context
-  page: async ({ context }, use) => {
+  page: async ({ context, progressTracker }, use) => {
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
@@ -265,14 +253,13 @@ const test = base.test.extend({
       /The given origin is not allowed for the given client ID/, // Not available in test.
       /Failed to load resource: the server responded with a status of 404.*api\/message\/\d+/, // Message API 404 errors can happen during normal operation.
       /Failed to load resource: the server responded with a status of 404.*api\/user\/\d+/, // User API 404 errors can happen during cleanup.
-      /Failed to load resource: the server responded with a status of 404.*api\/chat\//, // Chat API 404 errors when chat rooms are deleted between test runs.
       /Failed to load resource: the server responded with a status of 404.*api\/session/, // Session API 404 can happen when trying to logout when not logged in.
       /Failed to load resource: the server responded with a status of 404.*delivery\.localhost/, // Delivery service 404 errors for missing images can happen during normal operation.
       /FedCM get\(\) rejects with/, // Not available in test
       /Error retrieving a token./, // Also related to GSI FedCM, not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
-      // NOTE: Do NOT add a broad Sentry catch-all — Sentry errors are critical. Only specific known patterns below.
+      /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
       /tuimg_0/i, // Allow any error mentioning tuimg_0 (case-insensitive)
       /delivery\.localhost.*tuimg_0/i, // Specific delivery service tuimg_0 errors
       /stripe\.com/i, // Ignore any Stripe-related errors during testing (case-insensitive)
@@ -280,36 +267,26 @@ const test = base.test.extend({
       /The request has been aborted/, // Can happen during navigation.
       /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
       /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
-      /Failed to load resource: net::ERR_ABORTED/, // Can happen during page navigation when requests are cancelled
       /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
       /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
       /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
       /Refused to frame/, // Can happen in test.
       /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
       /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
-      /\[Exc?eption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
-      /\[Exc?eption for Sentry\]:.*\((Error|TypeError):/, // Sentry capturing minified/runtime errors
+      /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
+      /\[Exeption for Sentry\]:.*\((Error|TypeError):/, // Sentry capturing minified/runtime errors
       /accounts\.google\.com\/gsi/, // Google authentication/sign-in errors in test
       /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
       // CSP (Content Security Policy) violations - common in development/testing
       /Refused to apply inline style because it violates the following Content Security Policy directive/,
       /Content Security Policy directive.*style-src/,
       /Either the 'unsafe-inline' keyword.*is required to enable inline execution/,
-      // V2 API expected error responses during normal flows
-      /Failed to load resource: the server responded with a status of 409.*api\/user/, // 409 Conflict when registering an existing email (expected in reply flow)
-      /Failed to load resource: the server responded with a status of 401.*api\/tryst/, // 401 when not logged in (tryst requires auth)
-      /Failed to load resource: the server responded with a status of 401.*api\/session/, // 401 when checking session while not logged in
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
-      /Failed to load resource.*freegle-dev-local/, // Freegle dev site may not be running during ModTools tests
       /Failed to load resource: the server responded with a status of 404.*api\/modtools\//, // modtools endpoints not yet in Go API
-      /\[Exc?eption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
+      /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
       /Failed to load resource: the server responded with a status of 500.*modtools-dev-local/, // modtools dev container may be unstable during parallel tests
       /Failed to fetch dynamically imported module/, // Dynamic module import failures (dev container instability)
       /error caught during app initialization/, // App initialization errors (dev container instability)
-      /Only one navigator\.credentials\.get request may be outstanding at one time/, // FedCM concurrent credential requests in test
-      /useOurModal show problem/, // Race condition fixed in useOurModal.js (nextTick) - allow until container rebuild
-      /Failed to load resource: the server responded with a status of 500.*connect\.facebook\.net/, // Facebook SDK transient 500 errors
-      /Refused to execute script from.*connect\.facebook\.net.*MIME type/, // Facebook SDK MIME type error when returning error page
     ]
 
     // Initialize the working copy of allowed error patterns
@@ -409,9 +386,59 @@ const test = base.test.extend({
       }
     })
 
-    // Track navigation events for debugging (no timer — Playwright's own
-    // test timeout at 600s handles stuck tests reliably without the race
-    // conditions inherent in a custom setTimeout-based inactivity timer).
+    // Track navigation events and setup navigation inactivity timeout
+    let navigationInactivityTimer = null
+    const MAX_NAVIGATION_INACTIVITY =
+      timeouts.navigation.inactivity || 9 * 60 * 1000 // Default to 9 minutes in milliseconds
+
+    // Create a function to reset the inactivity timer
+    const resetNavigationInactivityTimer = () => {
+      // Clear any existing timer
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+      }
+
+      // Set a new timer
+      navigationInactivityTimer = setTimeout(() => {
+        const lastNavTimestamp =
+          navigationEvents.length > 0
+            ? new Date(navigationEvents[navigationEvents.length - 1].timestamp)
+            : new Date(0)
+
+        const inactivityDuration = Date.now() - lastNavTimestamp.getTime()
+
+        console.error(`\n\n==== NAVIGATION INACTIVITY TIMEOUT ====`)
+        console.error(
+          `No navigation events detected for ${
+            inactivityDuration / 1000
+          } seconds (threshold: ${MAX_NAVIGATION_INACTIVITY / 1000} seconds)`
+        )
+        console.error(`Last navigation: ${lastNavTimestamp.toISOString()}`)
+        console.error(`Current URL: ${page.url()}`)
+        console.error(
+          `==== TERMINATING TEST DUE TO NAVIGATION INACTIVITY ====\n\n`
+        )
+
+        // Take screenshot before failing
+        page
+          .screenshot({
+            path: getScreenshotPath(`navigation-inactivity-${Date.now()}.png`),
+            fullPage: true,
+          })
+          .catch((err) => console.error('Failed to capture screenshot:', err))
+
+        // Force test to fail
+        throw new Error(
+          `Navigation inactivity timeout: No navigation events detected for ${
+            inactivityDuration / 1000
+          } seconds. Test execution may be stuck.`
+        )
+      }, MAX_NAVIGATION_INACTIVITY)
+    }
+
+    // Start the initial timer
+    resetNavigationInactivityTimer()
+
     page.on('framenavigated', (frame) => {
       if (frame === page.mainFrame()) {
         const isHardNavigation =
@@ -427,8 +454,14 @@ const test = base.test.extend({
         })
 
         console.log(`[${timestamp}] [NAVIGATION:${navType}] ${url}`)
+
+        // Reset the inactivity timer whenever a navigation event occurs
+        resetNavigationInactivityTimer()
       }
     })
+
+    // Add method to manually reset navigation timer (useful for long operations)
+    page.resetNavigationTimer = resetNavigationInactivityTimer
 
     // Methods to access console errors
     page.consoleErrors = () => consoleErrors
@@ -485,7 +518,6 @@ const test = base.test.extend({
     page.gotoAndVerify = async (path, options = {}) => {
       const timeout = options.timeout || timeouts.navigation.default
       const maxRetries = options.maxRetries || 3
-      const waitUntil = options.waitUntil || 'load'
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -493,10 +525,9 @@ const test = base.test.extend({
             `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
 
-          // Navigate with timeout and configurable waitUntil strategy.
-          // Default 'load' waits for all resources; 'domcontentloaded' is faster
-          // for pages with external resources (e.g., Stripe, PayPal) that may be slow in CI.
-          await page.goto(path, { timeout, waitUntil })
+          // Navigate with timeout.
+          // Uses waitUntil: 'load' by default, which indicates that the page is fully loaded.
+          await page.goto(path, { timeout })
 
           // Wait for page to finish hydrating (loading spinner to disappear)
           // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
@@ -618,6 +649,13 @@ const test = base.test.extend({
     const performTeardown = async (options = {}) => {
       const timeout = options.timeout || timeouts.teardown.networkIdle
       try {
+        // Clear the navigation inactivity timer during teardown
+        if (navigationInactivityTimer) {
+          clearTimeout(navigationInactivityTimer)
+          navigationInactivityTimer = null
+          console.log('Navigation inactivity timer cleared during teardown')
+        }
+
         // Clear browser storage before ending the test
         try {
           await page
@@ -701,6 +739,15 @@ const test = base.test.extend({
         await page.waitForLoadState('domcontentloaded', { timeout })
         return true
       } catch (error) {
+        // Clear the navigation inactivity timer even if teardown fails
+        if (navigationInactivityTimer) {
+          clearTimeout(navigationInactivityTimer)
+          navigationInactivityTimer = null
+          console.log(
+            'Navigation inactivity timer cleared during teardown (after error)'
+          )
+        }
+
         console.warn(`Teardown warning: ${error.message}`)
         // Take a screenshot if network doesn't become idle
         await page.screenshot({
@@ -743,12 +790,26 @@ const test = base.test.extend({
       // Call use() with the logging page instead of the original page
       await use(loggingPage)
 
+      // Clear navigation inactivity timer after test completes successfully
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+        navigationInactivityTimer = null
+        console.log('Navigation inactivity timer cleared after successful test')
+      }
+
       // Log navigation summary at the end of successful tests
       const navSummary = loggingPage.getNavigationSummary()
       console.log(
         `Navigation summary: ${navSummary.total} total (${navSummary.hardCount} hard, ${navSummary.softCount} soft)`
       )
     } catch (error) {
+      // Clear navigation inactivity timer even if test fails
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+        navigationInactivityTimer = null
+        console.log('Navigation inactivity timer cleared after test failure')
+      }
+
       // Take a full page screenshot on any test failure
       const screenshotPath = getScreenshotPath(`test-failure-${Date.now()}.png`)
       await loggingPage.screenshot({ path: screenshotPath, fullPage: true })
@@ -802,16 +863,112 @@ test.afterAll(async () => {
 })
 
 // Progress tracking functions
+const PROGRESS_FILE = path.join(
+  __dirname,
+  '../../test-results/test-progress.json'
+)
+
+const initializeProgressFile = () => {
+  try {
+    const dir = path.dirname(PROGRESS_FILE)
+    fs.mkdirSync(dir, { recursive: true })
+    const initialProgress = {
+      totalTests: 0,
+      completedTests: 0,
+      failedTests: 0,
+      runningTests: 0,
+      tests: {},
+      startTime: Date.now(),
+      lastUpdate: Date.now(),
+    }
+    fs.writeFileSync(PROGRESS_FILE, JSON.stringify(initialProgress, null, 2))
+    console.log('Initialized test progress tracking file')
+  } catch (error) {
+    console.warn('Failed to initialize progress file:', error.message)
+  }
+}
+
+const updateProgress = (testUpdate) => {
+  try {
+    let progress
+    try {
+      progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
+    } catch (readError) {
+      // File doesn't exist or is corrupted, initialize it
+      initializeProgressFile()
+      progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
+    }
+
+    const { testId, title, status, startTime, endTime, error, retry } =
+      testUpdate
+
+    // Update or add test entry
+    if (!progress.tests[testId]) {
+      progress.tests[testId] = {
+        title,
+        status: 'pending',
+        attempts: [],
+      }
+      progress.totalTests = Object.keys(progress.tests).length
+    }
+
+    const testEntry = progress.tests[testId]
+
+    // Handle retry attempts
+    if (status === 'running') {
+      const attempt = {
+        status: 'running',
+        startTime,
+        retry: retry || 0,
+      }
+      testEntry.attempts.push(attempt)
+      testEntry.status = 'running'
+    } else if (status === 'completed' || status === 'failed') {
+      // Update the latest attempt
+      const latestAttempt = testEntry.attempts[testEntry.attempts.length - 1]
+      if (latestAttempt) {
+        latestAttempt.status = status
+        latestAttempt.endTime = endTime
+        if (error) latestAttempt.error = error
+      }
+      testEntry.status = status
+    }
+
+    // Recalculate totals based on final test statuses (not attempts)
+    const testStatuses = Object.values(progress.tests).map((t) => t.status)
+    progress.completedTests = testStatuses.filter(
+      (s) => s === 'completed'
+    ).length
+    progress.failedTests = testStatuses.filter((s) => s === 'failed').length
+    progress.runningTests = testStatuses.filter((s) => s === 'running').length
+
+    progress.lastUpdate = Date.now()
+
+    fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2))
+
+    console.log(
+      `Progress: ${progress.completedTests + progress.failedTests}/${
+        progress.totalTests
+      } tests completed (${progress.runningTests} running)`
+    )
+  } catch (error) {
+    console.warn('Failed to update progress:', error.message)
+  }
+}
+
+// Initialize progress tracking after function definitions
+initializeProgressFile()
+
 // Define our extended test with custom fixtures
 const testWithFixtures = test.extend({
-  postMessage: async ({ page, setNewUserPassword, testEnv }, use) => {
+  postMessage: async ({ page, setNewUserPassword }, use) => {
     /**
      * Helper function to post a message to Freegle
      * @param {Object} options - Configuration options for posting
      * @param {string} options.type - The type of post ('OFFER' or 'WANTED')
      * @param {string} options.item - The item title/name
      * @param {string} options.description - The item description
-     * @param {string} options.postcode - The postcode for the item (defaults to testEnv postcode)
+     * @param {string} options.postcode - The postcode for the item
      * @param {string} options.email - The email to use for posting
      * @returns {Promise<{id: string|null, description: string}>} - Information about the created post
      */
@@ -820,7 +977,7 @@ const testWithFixtures = test.extend({
         type = 'OFFER',
         item = 'test post - please delete',
         description = `Created by automated test at ${new Date().toISOString()}`,
-        postcode = testEnv?.postcode || environment.postcode,
+        postcode = environment.postcode,
         email,
       } = options
 
@@ -868,12 +1025,16 @@ const testWithFixtures = test.extend({
       const pageTitle = await page.title()
       base.expect(pageTitle).toContain(type.toUpperCase())
 
-      // Fill in the item type using fill() — triggers Vue v-model via input event
-      const itemInput = page.locator(
-        '[id^="what"], .type-input, input[placeholder*="give"]'
-      )
-      await itemInput.click()
-      await itemInput.fill(item)
+      // Fill in the item type (item) using type() to trigger Vue reactivity
+      await page
+        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+        .click()
+      await page
+        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+        .clear()
+      await page
+        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+        .type(item, { delay: 100 })
 
       // Fill in the post details
       await page.waitForSelector(
@@ -881,12 +1042,22 @@ const testWithFixtures = test.extend({
         { timeout: timeouts.ui.appearance }
       )
 
-      // Fill description using fill() instead of type() with delay
-      const descInput = page.locator(
-        '[id^="description"], textarea.description, textarea.form-control'
-      )
-      await descInput.click()
-      await descInput.fill(description)
+      // Add the description using type() to trigger Vue reactivity
+      await page
+        .locator(
+          '[id^="description"], textarea.description, textarea.form-control'
+        )
+        .click()
+      await page
+        .locator(
+          '[id^="description"], textarea.description, textarea.form-control'
+        )
+        .clear()
+      await page
+        .locator(
+          '[id^="description"], textarea.description, textarea.form-control'
+        )
+        .type(description, { delay: 50 })
 
       // Wait for Vue reactivity to process the form changes and make the Next button available
       // This replaces the fixed 2000ms wait with a responsive check
@@ -926,12 +1097,15 @@ const testWithFixtures = test.extend({
             (desktopBtn && desktopBtn.offsetParent !== null)
           )
         },
-        null,
         { timeout: timeouts.ui.appearance }
       )
 
+      // Scroll to bottom of page to ensure Next button is visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForTimeout(500) // Allow scroll to complete
+
       // Click the Next/Continue button to go to location page
-      // Playwright's click() auto-scrolls the element into view
+      // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
 
       // Fill in location details
@@ -953,7 +1127,12 @@ const testWithFixtures = test.extend({
         timeout: timeouts.api.default,
       })
 
-      // Click the Next/Continue button (Playwright auto-scrolls)
+      // Click the Next/Continue button
+      // Scroll to bottom of page to ensure Next button is visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForTimeout(500) // Allow scroll to complete
+
+      // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
 
       // For OFFER posts, handle the /give/options page (delivery and deadline options)
@@ -990,7 +1169,11 @@ const testWithFixtures = test.extend({
         await noDeadlineButton.click()
         console.log('Clicked "No deadline" for deadline option')
 
-        // Click Next to go to email/whoami page (Playwright auto-scrolls)
+        // Click Next to go to email/whoami page
+        await page.evaluate(() =>
+          window.scrollTo(0, document.body.scrollHeight)
+        )
+        await page.waitForTimeout(500)
         await page.locator('.next-btn:has-text("Next")').click()
       }
 
@@ -1068,6 +1251,10 @@ const testWithFixtures = test.extend({
         fullPage: true,
       })
 
+      // Scroll to bottom of page to ensure "Freegle it!" button is visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForTimeout(500) // Allow scroll to complete
+
       // Wait for validation to complete and the button to appear using web assertions
       console.log(
         'Waiting for Freegle it button to appear after email validation'
@@ -1084,10 +1271,8 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
-      // Wait for Vue to attach event handlers by checking the button is enabled
-      await base.expect(freegleButton).toBeEnabled({
-        timeout: timeouts.ui.appearance,
-      })
+      // Small delay to allow Vue to fully hydrate event handlers
+      await page.waitForTimeout(1000)
 
       // Set up console listener to capture browser errors
       const consoleMessages = []
@@ -1109,12 +1294,22 @@ const testWithFixtures = test.extend({
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
 
-      // Click without force: true — Playwright's default actionability checks
-      // ensure the button is stable and receiving events. With force: true, the
-      // click can land before Vue has attached the @click handler, especially
-      // on client-only rendered pages.
-      await freegleButton.click()
+      // Try multiple click methods to ensure it works
+      try {
+        // First try normal Playwright click with force
+        await freegleButton.click({ force: true })
+        console.log('Submit button clicked with force:true')
+      } catch (clickError) {
+        console.log('Force click failed, trying JS click:', clickError.message)
+        // Fallback to JavaScript click if Playwright click fails
+        await freegleButton.evaluate((el) => el.click())
+        console.log('Submit button clicked via JavaScript')
+      }
       console.log('Submit button clicked successfully')
+
+      // Give a moment for any immediate navigation to start
+      await page.waitForTimeout(500)
+      console.log('Current URL after submit click + 500ms:', page.url())
 
       // Wait for page url to contain myposts
       console.log('Waiting for navigation to My Posts page')
@@ -1333,7 +1528,6 @@ const testWithFixtures = test.extend({
               false
           )
         },
-        null,
         { timeout }
       )
     }
@@ -1378,7 +1572,6 @@ const testWithFixtures = test.extend({
                 false
             )
           },
-          null,
           { timeout: options.timeout || 30000 }
         )
       }
@@ -1709,7 +1902,6 @@ const testWithFixtures = test.extend({
       const browser = page.context().browser()
       const freshContext = await browser.newContext({
         viewport: { width: 1280, height: 900 },
-        storageState: { cookies: [], origins: [] },
       })
       const freshPage = await freshContext.newPage()
 
@@ -1843,55 +2035,98 @@ const testWithFixtures = test.extend({
       await sendReplyButton.click()
       console.log('Clicked Send your reply button')
 
-      // The reply state machine handles authentication for new users automatically:
-      // 1. Calls user.add(email) to register the user
-      // 2. Joins the message's group
-      // 3. Creates the chat and sends the reply
-      // 4. Shows a "Welcome to Freegle" modal for new users
-      // 5. Navigates to /chats/
-      //
-      // We need to handle the Welcome modal if it appears, then verify
-      // we end up at /chats/ with a chat entry.
+      // Wait for "Welcome to Freegle" modal containing "It looks like this is your first time"
+      console.log('Waiting for Welcome to Freegle modal')
+      console.log(
+        'DEBUG: Current URL before waiting for modal:',
+        freshPage.url()
+      )
+      console.log('DEBUG: Checking for any modals on page...')
+
+      // Check what modals exist first
+      const allModals = await freshPage.locator('.modal-content').count()
+      console.log(`DEBUG: Found ${allModals} modal-content elements`)
+
+      if (allModals > 0) {
+        const modalTexts = await freshPage
+          .locator('.modal-content')
+          .allTextContents()
+        console.log('DEBUG: Modal texts found:', modalTexts)
+      }
 
       try {
-        // The Welcome modal may appear for new users. Handle it if it does.
-        const welcomeModal = freshPage.locator('.modal-content').filter({
-          hasText: 'Welcome to Freegle',
+        const welcomeModal = freshPage
+          .locator('.modal-content')
+          .filter({
+            hasText: 'Welcome to Freegle',
+          })
+          .filter({
+            hasText: 'It looks like this is your first time',
+          })
+
+        console.log(
+          'DEBUG: About to wait for Welcome modal with shorter timeout...'
+        )
+        await welcomeModal.waitFor({
+          state: 'visible',
+          timeout: 5000, // Much shorter timeout - if modal doesn't appear quickly, it's probably not coming
         })
 
-        try {
-          await welcomeModal.waitFor({ state: 'visible', timeout: 10000 })
-          console.log('Welcome to Freegle modal appeared')
+        console.log('Welcome to Freegle modal appeared')
 
-          const closeButton = welcomeModal.locator(
-            '.btn:has-text("Close and Continue")'
-          )
-          await closeButton.waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance,
+        // Click "Close and Continue" button and wait for navigation
+        const closeButton = welcomeModal.locator(
+          '.btn:has-text("Close and Continue")'
+        )
+        await closeButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+
+        console.log(
+          'Clicking Close and Continue button and waiting for reply to complete'
+        )
+
+        // Click the button first - the modal will stay open while sendReply runs
+        await closeButton.click()
+        console.log(
+          'Clicked Close and Continue, waiting for navigation to chats'
+        )
+
+        // Wait for navigation to chats page - this indicates the reply API call completed
+        // Don't use networkidle - the app has background polling that prevents idle state
+        try {
+          await freshPage.waitForURL('**/chats/**', {
+            timeout: timeouts.navigation.default,
           })
-          await closeButton.click()
-          console.log('Clicked Close and Continue')
-        } catch {
-          // Welcome modal may have already been dismissed or may not appear
-          // for users who have been registered before in a previous test run
-          console.log('Welcome modal did not appear within timeout')
+          console.log('Successfully redirected to chats page')
+        } catch (error) {
+          console.log('Navigation after close button click:', error.message)
+          // Check if we're on the chats page anyway
+          if (freshPage.url().includes('/chats/')) {
+            console.log('Navigation completed despite error - continuing')
+          } else {
+            throw error
+          }
         }
 
-        // Wait for navigation to chats page - this is the definitive success indicator
-        await freshPage.waitForURL('**/chats/**', {
-          timeout: timeouts.navigation.default,
-        })
-        console.log('Successfully navigated to chats page')
-
-        // Handle ContactDetailsAskModal if it appears
+        // Handle ContactDetailsAskModal if it appears on the chats page
         try {
+          console.log('Checking for ContactDetailsAskModal on chats page')
           const contactModal = freshPage.locator('.modal-content').filter({
             hasText: 'Contact details',
           })
-          await contactModal.waitFor({ state: 'visible', timeout: 3000 })
+
+          // Wait briefly to see if the modal appears
+          await contactModal.waitFor({
+            state: 'visible',
+            timeout: 3000,
+          })
+
           console.log('ContactDetailsAskModal appeared, filling postcode')
 
+          // Fill in postcode - look for the postcode input
+          // Note: Mobile phone input was removed in SMS notifications removal (commit 9fac7ae9)
           const postcodeInput = contactModal.locator(
             'input[placeholder*="postcode"], .pcinp'
           )
@@ -1900,44 +2135,93 @@ const testWithFixtures = test.extend({
             timeout: timeouts.ui.appearance,
           })
           await postcodeInput.fill('EH3 6SS')
+          console.log('Filled postcode')
 
-          const modalCloseButton = contactModal.locator(
-            '.btn-close, .close, button[aria-label="Close"]'
-          )
-          if ((await modalCloseButton.count()) > 0) {
-            await modalCloseButton.click()
+          // The modal auto-saves when postcode is selected, just need to close it
+          // Look for the close button or wait for modal to close automatically
+          try {
+            const modalCloseButton = contactModal.locator(
+              '.btn-close, .close, button[aria-label="Close"]'
+            )
+            if ((await modalCloseButton.count()) > 0) {
+              await modalCloseButton.click()
+              console.log('Clicked close button in ContactDetailsAskModal')
+            }
+          } catch (e) {
+            console.log('No close button found, modal may auto-close')
           }
+
+          // Wait for the contact modal to disappear
           await contactModal.waitFor({
             state: 'detached',
             timeout: timeouts.ui.response,
           })
           console.log('ContactDetailsAskModal closed')
-        } catch {
-          // Modal didn't appear, that's fine
+        } catch (contactModalError) {
+          console.log(
+            'ContactDetailsAskModal did not appear, continuing:',
+            contactModalError.message
+          )
         }
 
-        // Verify a chat entry exists
+        // Wait for the chat list to load and look for a chat entry
         await freshPage.waitForSelector('.chat-entry', {
           timeout: timeouts.ui.appearance,
         })
-        const chatCount = await freshPage
+
+        // Check that there's one chat entry
+        const chatEntries = freshPage
           .locator('.chat-entry')
           .filter({ visible: true })
-          .count()
+        const chatCount = await chatEntries.count()
 
-        if (chatCount === 0) {
-          console.log('No chat entries found after reply')
+        if (chatCount > 0) {
+          console.log(`Found ${chatCount} chat entries in /chats after reply`)
+        } else {
+          console.log('Warning: No chat entries found in /chats after reply')
           await freshContext.close()
           return false
         }
 
-        console.log(`Reply completed successfully, ${chatCount} chat entries`)
+        console.log(
+          'Reply process completed successfully with signup and contact details filled'
+        )
         await freshContext.close()
         return true
       } catch (error) {
-        console.log('Reply with signup failed:', error.message)
-        await freshContext.close()
-        return false
+        console.log('DEBUG: Welcome modal error:', error.message)
+
+        // If the error is due to page being closed, don't try to continue
+        if (
+          error.message.includes(
+            'Target page, context or browser has been closed'
+          )
+        ) {
+          console.log('Browser context was closed, stopping fixture execution')
+          return false
+        }
+
+        // If it's just a timeout waiting for the modal, this indicates an issue
+        if (
+          error.message.includes('Timeout') ||
+          error.message.includes('waiting for locator')
+        ) {
+          console.log(
+            'ERROR: Welcome to Freegle modal did not appear - this indicates a problem'
+          )
+          console.log(
+            'DEBUG: Expected modal for new user signup, but it was not found'
+          )
+          await freshContext.close()
+          return false // Modal should appear for new users
+        } else {
+          console.log(
+            'Unexpected error during Welcome modal wait:',
+            error.message
+          )
+          await freshContext.close()
+          return false
+        }
       }
     }
 

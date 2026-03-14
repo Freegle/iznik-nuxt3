@@ -1,5 +1,5 @@
 <template>
-  <div v-if="message">
+  <div>
     <NoticeMessage
       v-for="word in message.worry"
       :key="'worry-' + message.id + '-' + word.worryword.id"
@@ -69,26 +69,14 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useMessageStore } from '~/stores/message'
+import { ref } from 'vue'
 
-const props = defineProps({
-  messageid: {
-    type: Number,
+defineProps({
+  message: {
+    type: Object,
     required: true,
   },
 })
-
-const messageStore = useMessageStore()
-const message = computed(() => messageStore.byId(props.messageid))
-
-watch(
-  () => props.messageid,
-  (id) => {
-    if (id && !messageStore.byId(id)) messageStore.fetch(id)
-  },
-  { immediate: true }
-)
 
 const expand = ref(false)
 </script>

@@ -54,17 +54,6 @@ describe('members/review.vue page', () => {
           ScrollToTop: { template: '<div class="scroll-stub" />' },
           ModHelpMemberReview: { template: '<div class="help-stub" />' },
           ModPostcodeTester: { template: '<div class="postcode-stub" />' },
-          ModGroupSelect: {
-            template: '<div class="group-select-stub" />',
-            props: [
-              'modelValue',
-              'all',
-              'modonly',
-              'systemwide',
-              'work',
-              'remember',
-            ],
-          },
           ModMemberReview: {
             template: '<div class="member-review-stub" />',
             props: ['member'],

@@ -24,7 +24,6 @@ async function waitForAuthInLocalStorage(page) {
         return false
       }
     },
-    null,
     { timeout: timeouts.ui.appearance }
   )
   console.log('[Auth] Auth found in localStorage')
@@ -55,7 +54,6 @@ async function waitForAuthHydration(page) {
         return true // Parse error means no valid auth, continue
       }
     },
-    null,
     { timeout: timeouts.ui.appearance }
   )
   console.log('[Auth] Page stabilized and auth hydrated')
@@ -283,30 +281,12 @@ async function fillReplyForm(
 }
 
 /**
- * Helper: Wait for Nuxt/Vue app to be fully hydrated.
- * SSR renders HTML immediately but event handlers aren't attached until
- * Vue hydrates. Clicking a button before hydration completes does nothing.
- * This is a real UX issue — users see a button but it doesn't respond.
- */
-async function waitForNuxtHydration(page) {
-  await page.waitForFunction(
-    () => {
-      const nuxtRoot = document.querySelector('#__nuxt')
-      return nuxtRoot && nuxtRoot.__vue_app__
-    },
-    null,
-    { timeout: timeouts.ui.appearance }
-  )
-}
-
-/**
  * Helper: Click the Reply button to expand reply section
  */
 async function clickReplyButton(page) {
-  // Wait for Vue to hydrate SSR components.
-  // Without this, buttons are visible but have no event handlers attached.
-  // Don't use waitForLoadState('load') — it hangs if the load event already fired.
-  await waitForNuxtHydration(page)
+  // Wait for page to be stable before trying to interact
+  // This prevents "Execution context was destroyed" errors after navigation
+  await page.waitForLoadState('domcontentloaded')
 
   // Try footer reply button first (mobile/single column), then inline
   let replyButton = page.locator('.app-footer .reply-button:has-text("Reply")')
@@ -330,13 +310,11 @@ async function clickReplyButton(page) {
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-
-  // Click once — hydration should be complete by now
   await replyButton.click()
   console.log('[Reply] Clicked Reply button')
 
-  const replyTextarea = page.locator('textarea[name="reply"]')
-  await replyTextarea.waitFor({
+  // Wait for reply section to expand
+  await page.locator('textarea[name="reply"]').waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
@@ -347,9 +325,6 @@ async function clickReplyButton(page) {
  * Helper: Click Send and wait for result
  */
 async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
-  // Ensure Vue has hydrated so @click handlers are attached to SSR-rendered buttons
-  await waitForNuxtHydration(page)
-
   const sendButton = page
     .locator('.btn:has-text("Send your reply")')
     .filter({ visible: true })
@@ -423,7 +398,6 @@ async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
 module.exports = {
   waitForAuthInLocalStorage,
   waitForAuthHydration,
-  waitForNuxtHydration,
   dismissLoginModalIfPresent,
   navigateToMessageViaBrowse,
   navigateToMessageViaExplore,

@@ -121,7 +121,7 @@ function showPhotoModal() {
 }
 
 async function showModal() {
-  await fetchMe(true)
+  await fetchMe(['me'], true)
   showAboutMeModal.value = true
 }
 </script>

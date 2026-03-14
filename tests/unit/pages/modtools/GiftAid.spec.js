@@ -29,22 +29,12 @@ const mockUserStore = {
   byId: vi.fn().mockReturnValue(null),
 }
 
-// Mock giftaid store
-const mockGiftAidStore = {
-  add: vi.fn(),
-  byId: vi.fn().mockReturnValue(null),
-}
-
 vi.mock('~/stores/donations', () => ({
   useDonationStore: () => mockDonationStore,
 }))
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
-}))
-
-vi.mock('~/modtools/stores/giftaid', () => ({
-  useGiftAidStore: () => mockGiftAidStore,
 }))
 
 describe('GiftAid Page', () => {
@@ -91,8 +81,8 @@ describe('GiftAid Page', () => {
           },
           ModHelpGiftAid: { template: '<div class="help-giftaid"></div>' },
           ModGiftAid: {
-            template: '<div class="mod-giftaid" :data-id="giftaidid"></div>',
-            props: ['giftaidid'],
+            template: '<div class="mod-giftaid" :data-id="giftaid.id"></div>',
+            props: ['giftaid'],
           },
           OurDatePicker: {
             template:

@@ -7,7 +7,6 @@ import ModRelatedMember from '~/modtools/components/ModRelatedMember.vue'
 const mockMemberStore = {
   askMerge: vi.fn(),
   ignoreMerge: vi.fn(),
-  get: vi.fn(),
 }
 
 vi.mock('~/stores/member', () => ({
@@ -31,7 +30,7 @@ describe('ModRelatedMember', () => {
       ],
       lastaccess: now.subtract(1, 'day').toISOString(),
       messagehistory: [{ id: 101, subject: 'Test post' }],
-      memberships: [{ id: 10, namedisplay: 'Group 1' }],
+      memberof: [{ id: 10, namedisplay: 'Group 1' }],
       relatedto: {
         id: 2,
         displayname: 'User Two',
@@ -46,19 +45,17 @@ describe('ModRelatedMember', () => {
         ],
         lastaccess: now.subtract(2, 'day').toISOString(),
         messagehistory: [],
-        memberships: [{ id: 10, namedisplay: 'Group 1' }],
+        memberof: [{ id: 10, namedisplay: 'Group 1' }],
       },
       ...overrides,
     }
   }
 
-  function mountComponent(memberOverrides = {}) {
-    const member = createMember(memberOverrides)
-    mockMemberStore.get.mockReturnValue(member)
-
+  function mountComponent(props = {}) {
     return mount(ModRelatedMember, {
       props: {
-        memberid: member.id,
+        member: createMember(),
+        ...props,
       },
       global: {
         stubs: {
@@ -87,8 +84,8 @@ describe('ModRelatedMember', () => {
           },
           ModMember: {
             template:
-              '<div class="mod-member" :data-id="membershipid">Member {{ membershipid }}</div>',
-            props: ['membershipid'],
+              '<div class="mod-member" :data-id="member.id">{{ member.displayname }}</div>',
+            props: ['member'],
           },
         },
       },
@@ -128,7 +125,7 @@ describe('ModRelatedMember', () => {
   describe('user ordering', () => {
     it('orders user1 as more recently active', () => {
       const now = dayjs()
-      const wrapper = mountComponent({
+      const member = createMember({
         lastaccess: now.subtract(1, 'day').toISOString(),
         relatedto: {
           id: 2,
@@ -137,16 +134,17 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: now.subtract(5, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.user1.id).toBe(1)
       expect(wrapper.vm.user2.id).toBe(2)
     })
 
     it('swaps order when relatedto is more recent', () => {
       const now = dayjs()
-      const wrapper = mountComponent({
+      const member = createMember({
         lastaccess: now.subtract(10, 'day').toISOString(),
         relatedto: {
           id: 2,
@@ -155,9 +153,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: now.subtract(1, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.user1.id).toBe(2)
       expect(wrapper.vm.user2.id).toBe(1)
     })
@@ -165,7 +164,7 @@ describe('ModRelatedMember', () => {
 
   describe('whichposted computed', () => {
     it('returns Both when both have posts', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         messagehistory: [{ id: 1 }],
         relatedto: {
           id: 2,
@@ -174,9 +173,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.whichposted).toBe('Both')
     })
 
@@ -187,7 +187,7 @@ describe('ModRelatedMember', () => {
     })
 
     it('returns Second only when only second has posts', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         messagehistory: [],
         relatedto: {
           id: 2,
@@ -196,14 +196,15 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.whichposted).toBe('Second only')
     })
 
     it('returns Neither when no one has posts', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         messagehistory: [],
         relatedto: {
           id: 2,
@@ -212,14 +213,15 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.whichposted).toBe('Neither')
     })
 
     it('shows warning variant when Both posted', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         messagehistory: [{ id: 1 }],
         relatedto: {
           id: 2,
@@ -228,9 +230,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       const buttons = wrapper.findAll('button')
       const postedButton = buttons.find((b) => b.text().includes('Posted'))
       expect(postedButton.attributes('data-variant')).toBe('warning')
@@ -239,8 +242,8 @@ describe('ModRelatedMember', () => {
 
   describe('whichjoined computed', () => {
     it('returns Both when both are members', () => {
-      const wrapper = mountComponent({
-        memberships: [{ id: 10 }],
+      const member = createMember({
+        memberof: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -248,15 +251,16 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [{ id: 20 }],
+          memberof: [{ id: 20 }],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.whichjoined).toBe('Both')
     })
 
     it('returns Neither when neither is a member', () => {
-      const wrapper = mountComponent({
-        memberships: [],
+      const member = createMember({
+        memberof: [],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -264,9 +268,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.whichjoined).toBe('Neither')
     })
   })
@@ -274,7 +279,7 @@ describe('ModRelatedMember', () => {
   describe('activeSameDay computed', () => {
     it('returns true when active on same day', () => {
       const today = dayjs().startOf('day')
-      const wrapper = mountComponent({
+      const member = createMember({
         lastaccess: today.add(10, 'hour').toISOString(),
         relatedto: {
           id: 2,
@@ -283,9 +288,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.activeSameDay).toBe(true)
     })
 
@@ -296,7 +302,7 @@ describe('ModRelatedMember', () => {
 
     it('shows Active same day badge when true', () => {
       const today = dayjs().startOf('day')
-      const wrapper = mountComponent({
+      const member = createMember({
         lastaccess: today.add(10, 'hour').toISOString(),
         relatedto: {
           id: 2,
@@ -305,9 +311,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.text()).toContain('Active same day')
     })
   })
@@ -320,8 +327,8 @@ describe('ModRelatedMember', () => {
     })
 
     it('returns falsy when no groups in common', () => {
-      const wrapper = mountComponent({
-        memberships: [{ id: 10 }],
+      const member = createMember({
+        memberof: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -329,9 +336,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [{ id: 20 }],
+          memberof: [{ id: 20 }],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.groupsInCommon).toBeFalsy()
     })
 
@@ -346,7 +354,7 @@ describe('ModRelatedMember', () => {
     // that causes it to return 0 for most comparisons. These tests verify the actual behavior.
 
     it('returns true for identical emails', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         email: null,
         emails: [
           {
@@ -370,15 +378,16 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       // Identical emails would match
       expect(wrapper.vm.similarNameOrEmail).toBe(true)
     })
 
     it('returns true for identical display names', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
         relatedto: {
           id: 2,
@@ -394,14 +403,15 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.similarNameOrEmail).toBe(true)
     })
 
     it('returns false for very different names/emails', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'Alice',
         emails: [
           {
@@ -425,14 +435,15 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.similarNameOrEmail).toBe(false)
     })
 
     it('shows Similar name/email badge when names match', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
         relatedto: {
           id: 2,
@@ -441,18 +452,19 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.text()).toContain('Similar name/email')
     })
   })
 
   describe('probablySame computed', () => {
     it('returns true when similar and groups in common', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
-        memberships: [{ id: 10 }],
+        memberof: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name for actual similarity
@@ -460,18 +472,19 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [{ id: 10 }],
+          memberof: [{ id: 10 }],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.probablySame).toBeTruthy()
     })
 
     it('returns true when similar and active same day', () => {
       const today = dayjs().startOf('day')
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
         lastaccess: today.add(10, 'hour').toISOString(),
-        memberships: [],
+        memberof: [],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name for actual similarity
@@ -479,16 +492,17 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.vm.probablySame).toBe(true)
     })
 
     it('returns false when similar but no groups/same day', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
-        memberships: [],
+        memberof: [],
         lastaccess: dayjs().subtract(5, 'day').toISOString(),
         relatedto: {
           id: 2,
@@ -497,18 +511,19 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(10, 'day').toISOString(),
           messagehistory: [],
-          memberships: [],
+          memberof: [],
         },
       })
+      const wrapper = mountComponent({ member })
       // When not active on same day and no groups in common, probablySame is false
       // even if names are similar
       expect(wrapper.vm.probablySame).toBe(false)
     })
 
     it('shows Probably the same badge when true', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         displayname: 'John Smith',
-        memberships: [{ id: 10 }],
+        memberof: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name
@@ -516,9 +531,10 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberships: [{ id: 10 }],
+          memberof: [{ id: 10 }],
         },
       })
+      const wrapper = mountComponent({ member })
       expect(wrapper.text()).toContain('Probably the same')
     })
   })
@@ -589,7 +605,7 @@ describe('ModRelatedMember', () => {
 
   describe('getEmail helper', () => {
     it('returns member.email when available', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         email: 'direct@example.com',
         emails: [
           {
@@ -600,13 +616,14 @@ describe('ModRelatedMember', () => {
           },
         ],
       })
+      const wrapper = mountComponent({ member })
       // The getEmail function is called in similarNameOrEmail
       // We test it indirectly through the similarity check
       expect(wrapper.vm.user1.email).toBe('direct@example.com')
     })
 
     it('falls back to preferred email from emails array', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         email: null,
         emails: [
           {
@@ -623,12 +640,13 @@ describe('ModRelatedMember', () => {
           },
         ],
       })
+      const wrapper = mountComponent({ member })
       // The email fallback happens in getEmail function
       expect(wrapper.vm.user1.emails[1].email).toBe('preferred@example.com')
     })
 
     it('skips ourdomain emails', () => {
-      const wrapper = mountComponent({
+      const member = createMember({
         email: null,
         emails: [
           {
@@ -645,6 +663,7 @@ describe('ModRelatedMember', () => {
           },
         ],
       })
+      const wrapper = mountComponent({ member })
       // The component should skip the ourdomain email
       expect(wrapper.vm.user1.emails[1].email).toBe('user@gmail.com')
     })

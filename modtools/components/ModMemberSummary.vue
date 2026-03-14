@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user">
+  <div>
     <h4>
       <b-badge
         :variant="offers > 0 ? 'success' : 'light'"
@@ -20,15 +20,15 @@
         {{ pluralise(['WANTED', 'WANTEDs'], wanteds, true) }}
       </b-badge>
       <b-badge
-        :variant="user.modmails > 0 ? 'danger' : 'light'"
+        :variant="member.modmails > 0 ? 'danger' : 'light'"
         title="Recent ModMails"
         class="clickme me-2"
         @click="showModmails"
       >
         <v-icon icon="exclamation-triangle" class="fa-fw" />
         {{
-          user.modmails
-            ? pluralise('Modmail', user.modmails, true)
+          member.modmails
+            ? pluralise('Modmail', member.modmails, true)
             : '0 Modmails'
         }}
       </b-badge>
@@ -69,46 +69,31 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :userid="userid"
+      :user="member"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
     <ModLogsModal
       v-if="showLogsModal"
       ref="logs"
-      :userid="userid"
+      :userid="member.userid"
       modmailsonly
       @hidden="showLogsModal = false"
     />
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  userid: {
-    type: Number,
+  member: {
+    type: Object,
     required: true,
   },
 })
 
 const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
-
-watch(
-  () => props.userid,
-  (uid) => {
-    if (uid && !userStore.byId(uid)) {
-      userStore.fetchMT({
-        id: uid,
-        info: true,
-        emailhistory: true,
-      })
-    }
-  },
-  { immediate: true }
-)
 
 const history = ref(null)
 const logs = ref(null)
@@ -120,8 +105,8 @@ const showLogsModal = ref(false)
 function countType(typeToCount) {
   let count = 0
 
-  if (user.value && user.value.messagehistory) {
-    user.value.messagehistory.forEach((entry) => {
+  if (props.member && props.member.messagehistory) {
+    props.member.messagehistory.forEach((entry) => {
       if (entry.type === typeToCount && entry.daysago < 31 && !entry.deleted) {
         count++
       }
@@ -135,10 +120,27 @@ const offers = computed(() => countType('Offer'))
 const wanteds = computed(() => countType('Wanted'))
 
 const userinfo = computed(() => {
-  if (user.value && user.value.info) {
-    return user.value.info
+  if (props.member.info) {
+    return props.member.info
   }
+  const user = userStore.byId(props.member.userid)
+  if (user && user.info) {
+    return user.info
+  }
+
   return null
+})
+
+onMounted(() => {
+  if (props.member.id) {
+    if (!userStore.byId(props.member.id)) {
+      userStore.fetchMT({
+        id: props.member.id,
+        info: true,
+        emailhistory: true,
+      })
+    }
+  }
 })
 
 function showHistory(typeArg = null) {

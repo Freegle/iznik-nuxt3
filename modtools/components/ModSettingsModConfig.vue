@@ -53,19 +53,17 @@
       <NoticeMessage v-if="config.using && config.using.length">
         <div>
           This config is being used.
-          <b-button v-if="!showUsing" variant="link" @click="fetchUsingUsers">
+          <b-button v-if="!showUsing" variant="link" @click="showUsing = true">
             Show who's using it
           </b-button>
         </div>
         <div v-if="showUsing">
-          <div v-for="uid in config.using" :key="'using-' + uid">
-            {{
-              userStore.byId(uid)?.displayname ||
-              userStore.byId(uid)?.fullname ||
-              ''
-            }}
+          <div v-for="using in config.using" :key="'using-' + using.id">
+            {{ using.fullname }}
             <span class="text-muted small">
-              <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ uid }}
+              <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+                using.userid
+              }}
             </span>
           </div>
         </div>
@@ -94,14 +92,8 @@
                 it's a standard configuration everyone can see.
               </span>
               <span v-else-if="config.cansee === 'Shared'">
-                it's used by
-                <em>{{
-                  sharedbyUser?.displayname || sharedbyUser?.fullname || ''
-                }}</em>
-                on
-                <em>{{
-                  sharedonGroup?.namedisplay || sharedonGroup?.nameshort || ''
-                }}</em
+                it's used by <em>{{ config.sharedby.displayname }}</em> on
+                <em>{{ config.sharedon.namedisplay }}</em
                 >, which you also mod.
               </span>
             </p>
@@ -308,15 +300,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useModConfigStore } from '~/stores/modconfig'
-import { useModGroupStore } from '~/stores/modgroup'
 import { useMiscStore } from '@/stores/misc'
-import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
 const modConfigStore = useModConfigStore()
-const modGroupStore = useModGroupStore()
-const userStore = useUserStore()
 const { myid } = useMe()
 
 const loading = ref(false)
@@ -366,31 +354,6 @@ const configOptions = computed(() => {
 const config = computed(() => {
   return modConfigStore.current
 })
-
-const sharedbyUser = computed(() => {
-  return config.value?.sharedbyid
-    ? userStore.byId(config.value.sharedbyid)
-    : null
-})
-
-const sharedonGroup = computed(() => {
-  return config.value?.sharedonid
-    ? modGroupStore.list[config.value.sharedonid]
-    : null
-})
-
-async function fetchUsingUsers() {
-  if (config.value?.using?.length) {
-    await userStore.fetchMultiple(config.value.using)
-  }
-  if (config.value?.sharedbyid) {
-    await userStore.fetch(config.value.sharedbyid)
-  }
-  if (config.value?.sharedonid) {
-    await modGroupStore.fetchIfNeedBeMT(config.value.sharedonid)
-  }
-  showUsing.value = true
-}
 
 watch(
   configid,

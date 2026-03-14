@@ -8,7 +8,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -30,7 +30,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
    * We can't automate the actual OAuth flow, but we CAN test that the
    * reply state survives the loginCount key bump that forces the re-render.
    */
-  test.skip('4.1 reply state survives loginCount key bump (social login simulation)', async ({
+  test('4.1 reply state survives loginCount key bump (social login simulation)', async ({
     page,
     postMessage,
     testEmail,
@@ -51,7 +51,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for social login simulation',
-
+      postcode: environment.postcode,
       email: testEmail,
     })
     expect(result.id).toBeTruthy()

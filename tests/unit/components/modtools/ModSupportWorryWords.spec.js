@@ -63,8 +63,9 @@ describe('ModSupportWorryWords', () => {
             template: '<div class="invalid-feedback"><slot /></div>',
           },
           ModWorryWordBadge: {
-            template: '<span class="worry-word-badge">{{ worrywordid }}</span>',
-            props: ['worrywordid'],
+            template:
+              '<span class="worry-word-badge">{{ worryword.keyword }}</span>',
+            props: ['worryword'],
           },
         },
       },

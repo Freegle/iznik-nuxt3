@@ -12,40 +12,37 @@
         </div>
         <div>
           <ProfileImage
-            :image="user.profile?.turl || user.profile?.paththumb"
-            :name="user.displayname || member.fullname"
+            :image="member.profile?.turl || member.profile?.paththumb"
+            :name="member.displayname"
             class="ml-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
-          {{ user.displayname || member.fullname }}
+          {{ member.displayname }}
         </div>
-        <div v-if="member.added || member.joined">
-          <v-icon icon="calendar-alt" />
-          {{ datetimeshort(member.added || member.joined) }}
+        <div v-if="member.joined">
+          <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}
         </div>
         <div><v-icon icon="hashtag" />{{ member.userid }}</div>
       </b-card-header>
       <b-card-body>
-        <ModDeletedOrForgotten v-if="user" :userid="member.userid" />
+        <ModDeletedOrForgotten v-if="user" :user="user" />
         <NoticeMessage v-if="banned" variant="danger" class="mb-2">
           This freegler is banned from this group.
         </NoticeMessage>
-        <div v-if="heldByUser">
+        <div v-if="member.heldby">
           <NoticeMessage variant="warning" class="mb-2">
-            <p v-if="me.id === heldByUser.id">
+            <p v-if="me.id === member.heldby.id">
               You held this member. Other people will see a warning to check
               with you before releasing them.
             </p>
             <p v-else>
-              Held by <strong>{{ heldByUser.displayname }}</strong
+              Held by <strong>{{ member.heldby.displayname }}</strong
               >. Please check before releasing them.
             </p>
             <ModMemberButton
-              v-if="heldByUser"
-              :userid="member.userid"
-              :groupid="member.groupid"
-              :spammerid="user.spammer?.id"
+              v-if="member.heldby"
+              :member="member"
               variant="warning"
               icon="play"
               release
@@ -53,27 +50,24 @@
             />
           </NoticeMessage>
         </div>
-        <ModComments
-          :userid="member.userid"
-          :expand-comments="expandComments"
-        />
-        <ModSpammer
-          v-if="user.spammer"
-          :userid="member.userid"
-          :sameip="sameip"
-        />
-        <NoticeMessage v-if="user.suspectreason" variant="danger" class="mb-2">
-          This freegler is flagged: {{ user.suspectreason }}
+        <ModComments :user="member" :expand-comments="expandComments" />
+        <ModSpammer v-if="member.spammer" :user="member" :sameip="sameip" />
+        <NoticeMessage
+          v-if="member.suspectreason"
+          variant="danger"
+          class="mb-2"
+        >
+          This freegler is flagged: {{ member.suspectreason }}
         </NoticeMessage>
         <NoticeMessage
-          v-if="user.activedistance > 50"
+          v-if="member.activedistance > 50"
           variant="warning"
           class="mb-2"
         >
           This freegler recently active on groups
-          {{ user.activedistance }} miles apart.
+          {{ member.activedistance }} miles apart.
         </NoticeMessage>
-        <ModBouncing v-if="user.bouncing" :userid="member.userid" />
+        <ModBouncing v-if="member.bouncing" :user="member" />
         <NoticeMessage v-if="member.bandate">
           Banned
           <span :title="datetime(member.bandate)">{{
@@ -88,9 +82,11 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="border border-info p-1 flex-grow-1 mr-1">
             <SettingsGroup
-              v-if="groupid"
+              v-if="groupid && member.ourpostingstatus"
               :emailfrequency="member.emailfrequency"
               :membership-m-t="member"
+              :moderation="member.ourpostingstatus"
+              :userid="member.userid"
               xclass="border border-info p-1 flex-grow-1 mr-1"
               @update:emailfrequency="
                 settingsChange('emailfrequency', groupid, $event)
@@ -104,16 +100,17 @@
             />
             <div class="fw-bold mt-1">Moderation status:</div>
             <ModModeration
+              :user="user"
               :userid="member.userid"
               :membership="member"
               class="order-2 order-md-3 order-lg-4"
             />
           </div>
           <div>
-            <ModMemberSummary :userid="member.userid" />
-            <ModMemberEngagement :userid="member.userid" />
-            <div v-if="user.info && user.info.publiclocation">
-              Public location: {{ user.info.publiclocation.location }}
+            <ModMemberSummary :member="member" />
+            <ModMemberEngagement :member="member" />
+            <div v-if="member.info && member.info.publiclocation">
+              Public location: {{ member.info.publiclocation.location }}
             </div>
             <ModMemberActions
               v-if="!footeractions"
@@ -121,10 +118,10 @@
               :groupid="groupid"
               :banned="Boolean(member.bandate)"
             />
-            <ModMemberships :userid="member.userid" />
-            <ModMemberLogins :userid="member.userid" />
+            <ModMemberships :user="member" />
+            <ModMemberLogins :member="member" />
             <b-button
-              v-if="user.emails && user.emails.length"
+              v-if="member.emails && member.emails.length"
               variant="link"
               @click="showEmails = !showEmails"
             >
@@ -132,15 +129,15 @@
               <span v-if="showEmails">
                 <span class="d-inline d-sm-none"> Hide </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', user.emails.length, true) }}
+                  Show {{ pluralise('email', member.emails.length, true) }}
                 </span>
               </span>
               <span v-else>
                 <span class="d-inline d-sm-none">
-                  {{ user.emails.length }}
+                  {{ member.emails.length }}
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', user.emails.length, true) }}
+                  Show {{ pluralise('email', member.emails.length, true) }}
                 </span>
               </span>
             </b-button>
@@ -152,7 +149,7 @@
               View profile
             </b-button>
             <div v-if="showEmails">
-              <div v-for="e in user.emails" :key="e.id">
+              <div v-for="e in member.emails" :key="e.id">
                 {{ e.email }} <v-icon v-if="e.preferred" icon="star" />
               </div>
             </div>
@@ -250,8 +247,8 @@
       </b-card-body>
       <b-card-footer class="d-flex justify-content-between flex-wrap">
         <ModMemberButtons
-          :membershipid="member.id"
-          :modconfigid="configid"
+          :member="member"
+          :modconfig="modconfig"
           :actions="footeractions"
         />
         <div
@@ -283,7 +280,7 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :userid="member.userid"
+      :user="member"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
@@ -310,7 +307,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
@@ -318,8 +315,8 @@ import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
-  membershipid: {
-    type: Number,
+  member: {
+    type: Object,
     required: true,
   },
   spammerlist: {
@@ -346,8 +343,6 @@ const props = defineProps({
 
 const chatStore = useChatStore()
 const memberStore = useMemberStore()
-
-const member = computed(() => memberStore.get(props.membershipid))
 const userStore = useUserStore()
 const modConfigStore = useModConfigStore()
 const { me, myGroups } = useMe()
@@ -368,11 +363,11 @@ const banned = ref(false)
 const chatid = ref(0)
 
 const email = computed(() => {
-  // Email comes from full user data (fetched via userStore.fetchMT).
-  let ret = user.value?.email
+  // Depending on which context we're used it, we might or might not have an email returned.
+  let ret = props.member.email
 
-  if (!ret && user.value?.emails) {
-    user.value.emails.forEach((e) => {
+  if (!props.member.email && props.member.emails) {
+    props.member.emails.forEach((e) => {
       if (!e.ourdomain && (!ret || e.preferred)) {
         ret = e.email
       }
@@ -383,43 +378,26 @@ const email = computed(() => {
 })
 
 const groupid = computed(() => {
-  return member.value?.groupid
+  return props.member.groupid
 })
 
-const configid = computed(() => {
-  let id = null
+const modconfig = computed(() => {
+  let ret = null
+  let configid = null
+
   myGroups.value.forEach((group) => {
     if (group.id === groupid.value) {
-      id = group.configid
+      configid = group.configid
     }
   })
-  return id
-})
+  const configs = modConfigStore.configs
+  ret = configs.find((config) => config.id === configid)
 
-watch(
-  configid,
-  async (id) => {
-    if (id) {
-      await modConfigStore.fetchById(id)
-    }
-  },
-  { immediate: true }
-)
+  return ret
+})
 
 const user = computed(() => {
-  // Full user data from store, populated by fetchMT on mount.
-  // Falls back to props.member for fields not yet loaded.
-  const storeUser = userStore.list[member.value?.userid]
-  return storeUser || member.value
-})
-
-// V2 API returns heldby as a numeric user ID, not an object.
-const heldByUser = computed(() => {
-  const hb = member.value?.heldby
-  if (!hb) return null
-  // V1 compat: heldby might already be an object
-  if (typeof hb === 'object') return hb
-  return userStore.byId(hb) || { id: hb, displayname: '#' + hb }
+  return props.member
 })
 
 const isTN = computed(() => {
@@ -488,29 +466,23 @@ const newslettersallowed = computed({
 const autorepost = computed({
   get() {
     return (
-      member.value && !isTN.value && Boolean(!member.value.autorepostsdisable)
+      props.member && !isTN.value && Boolean(!props.member.autorepostsdisable)
     )
   },
   set() {},
 })
 
 onMounted(() => {
-  if (member.value?.banned) {
+  if (props.member.banned) {
     banned.value = true
   }
 
-  // Fetch full user data via V2 pattern - cached in userStore.
-  if (member.value?.userid) {
+  if (!user.value) {
+    // Fetch with info so that we can display more.
     userStore.fetchMT({
-      id: member.value.userid,
+      id: props.member.userid,
       info: true,
     })
-  }
-
-  // V2 API returns heldby as a numeric ID — fetch the user so we can show their name.
-  const hb = member.value?.heldby
-  if (hb && typeof hb !== 'object' && !userStore.byId(hb)) {
-    userStore.fetch(hb)
   }
 })
 
@@ -527,7 +499,7 @@ function showLogs() {
 
 function settingsChange(param, groupidArg, val) {
   const params = {
-    userid: member.value?.userid,
+    userid: props.member.userid,
     groupid: groupidArg,
   }
   params[param] = val
@@ -573,7 +545,7 @@ async function changeAutorepost(e) {
   const settingsObj = user.value.settings || {}
   settingsObj.autorepostsdisable = !e.value
   await userStore.edit({
-    id: member.value?.userid,
+    id: props.member.userid,
     settings: settingsObj,
   })
 }
@@ -586,19 +558,17 @@ function confirmUnban(memberArg) {
 
 async function unban() {
   showUnbanModal.value = false
-  await memberStore.unban(member.value?.userid, groupid.value)
-  // Update the member in the store
-  const m = memberStore.get(props.membershipid)
-  if (m) {
-    delete m.bandate
-    delete m.bannedby
-  }
+  await memberStore.unban(props.member.userid, groupid.value)
+  // eslint-disable-next-line vue/no-mutating-props
+  delete props.member.bandate
+  // eslint-disable-next-line vue/no-mutating-props
+  delete props.member.bannedby
 }
 
 async function showChat() {
   chatid.value = await chatStore.openChatToMods(
-    member.value?.groupid,
-    member.value?.userid
+    props.member.groupid,
+    props.member.userid
   )
   showModChatModal.value = true
   modChatModal.value?.show()

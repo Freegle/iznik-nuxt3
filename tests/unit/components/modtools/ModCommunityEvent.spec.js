@@ -3,22 +3,12 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ModCommunityEvent from '~/modtools/components/ModCommunityEvent.vue'
 
-const defaultEvent = {
-  id: 123,
-  pending: true,
-  groups: [456],
-  userid: 789,
-}
-
-const mockCommunityEventStore = {
-  byId: vi.fn((id) => (id === 123 ? defaultEvent : null)),
-  delete: vi.fn(),
-  save: vi.fn(),
-}
-
 // Mock the stores
 vi.mock('~/stores/communityevent', () => ({
-  useCommunityEventStore: () => mockCommunityEventStore,
+  useCommunityEventStore: () => ({
+    delete: vi.fn(),
+    save: vi.fn(),
+  }),
 }))
 
 const mockGroupStore = {
@@ -29,36 +19,28 @@ vi.mock('~/stores/group', () => ({
   useGroupStore: () => mockGroupStore,
 }))
 
-const mockUserStore = {
-  fetch: vi.fn(),
-  byId: vi.fn(),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 describe('ModCommunityEvent', () => {
+  const defaultProps = {
+    event: {
+      id: 123,
+      pending: true,
+      groups: [456],
+      user: {
+        id: 789,
+        displayname: 'Test User',
+      },
+    },
+  }
+
   const mockGroup = {
     id: 456,
     nameshort: 'TestGroup',
     ourPostingStatus: 'ALLOWED',
   }
 
-  const mockUser = {
-    id: 789,
-    displayname: 'Test User',
-  }
-
-  function mountComponent(props = {}, eventOverrides = {}) {
-    const event = { ...defaultEvent, ...eventOverrides }
-    const eventId = props.eventid || event.id
-    mockCommunityEventStore.byId.mockReturnValue(
-      Object.keys(eventOverrides).length > 0 ? event : defaultEvent
-    )
-
+  function mountComponent(props = {}) {
     return mount(ModCommunityEvent, {
-      props: { eventid: eventId, ...props },
+      props: { ...defaultProps, ...props },
       global: {
         plugins: [createPinia()],
         stubs: {
@@ -120,9 +102,6 @@ describe('ModCommunityEvent', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockGroupStore.get.mockReturnValue(mockGroup)
-    mockUserStore.byId.mockReturnValue(mockUser)
-    mockUserStore.fetch.mockResolvedValue(mockUser)
-    mockCommunityEventStore.byId.mockReturnValue(defaultEvent)
   })
 
   describe('rendering', () => {
@@ -132,7 +111,9 @@ describe('ModCommunityEvent', () => {
     })
 
     it('does not render when event is not pending', () => {
-      const wrapper = mountComponent({}, { pending: false })
+      const wrapper = mountComponent({
+        event: { ...defaultProps.event, pending: false },
+      })
       expect(wrapper.find('.card').exists()).toBe(false)
     })
 
@@ -141,18 +122,18 @@ describe('ModCommunityEvent', () => {
       expect(wrapper.text()).toContain('123')
     })
 
-    it('renders user displayname from user store', () => {
+    it('renders user displayname when user has id', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test User')
     })
 
-    it('fetches user on mount', () => {
-      mountComponent()
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
-    })
-
-    it('renders "Added by the system" when no userid', () => {
-      const wrapper = mountComponent({}, { userid: 0 })
+    it('renders "Added by the system" when user has no id', () => {
+      const wrapper = mountComponent({
+        event: {
+          ...defaultProps.event,
+          user: { id: 0, displayname: '' },
+        },
+      })
       expect(wrapper.text()).toContain('Added by the system')
     })
 
@@ -176,13 +157,18 @@ describe('ModCommunityEvent', () => {
       expect(wrapper.text()).toContain('Delete')
     })
 
-    it('renders ChatButton when groups and userid exist', () => {
+    it('renders ChatButton when groups and user exist', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.chat-button').exists()).toBe(true)
     })
 
-    it('does not render ChatButton when no userid', () => {
-      const wrapper = mountComponent({}, { userid: 0 })
+    it('does not render ChatButton when user has no id', () => {
+      const wrapper = mountComponent({
+        event: {
+          ...defaultProps.event,
+          user: { id: 0 },
+        },
+      })
       expect(wrapper.find('.chat-button').exists()).toBe(false)
     })
 
@@ -198,7 +184,9 @@ describe('ModCommunityEvent', () => {
 
   describe('computed', () => {
     it('groups returns empty array when no groups', () => {
-      const wrapper = mountComponent({}, { groups: [] })
+      const wrapper = mountComponent({
+        event: { ...defaultProps.event, groups: [] },
+      })
       expect(wrapper.vm.groups).toEqual([])
     })
 
