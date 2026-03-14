@@ -31,7 +31,7 @@ module.exports = defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  workers: 11, // Parallel workers - testing 11 to improve CI performance
+  workers: 1, // Tests share data and interfere with each other when run in parallel
   maxFailures: 0,
   reporter: [
     ['list'],
