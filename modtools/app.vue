@@ -51,7 +51,6 @@ import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { computed, watch, reloadNuxtApp } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
-import { usePublicityStore } from '~/stores/publicity'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
 
@@ -110,7 +109,6 @@ const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
-const publicityStore = usePublicityStore()
 const systemConfigStore = useSystemConfigStore()
 const emailTrackingStore = useEmailTrackingStore()
 
@@ -154,7 +152,6 @@ modconfigStore.init(runtimeConfig)
 modGroupStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
-publicityStore.init(runtimeConfig)
 systemConfigStore.init(runtimeConfig)
 emailTrackingStore.init(runtimeConfig)
 

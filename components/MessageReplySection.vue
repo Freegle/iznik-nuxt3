@@ -269,10 +269,11 @@ const replyToUser = computed(() => {
 })
 
 // Watch for login state changes to resume authentication flow
-watch(me, (newVal, oldVal) => {
+watch(me, async (newVal, oldVal) => {
   console.log('[MessageReplySection] Login state changed', {
     newVal: !!newVal,
     oldVal: !!oldVal,
+    state: stateMachine.state.value,
   })
   if (
     !oldVal &&
@@ -282,7 +283,14 @@ watch(me, (newVal, oldVal) => {
     console.log(
       '[MessageReplySection] User logged in during authentication - resuming'
     )
-    stateMachine.onLoginSuccess()
+    try {
+      await stateMachine.onLoginSuccess()
+    } catch (e) {
+      console.error(
+        '[MessageReplySection] onLoginSuccess failed, falling back to COMPOSING:',
+        e
+      )
+    }
   }
 })
 

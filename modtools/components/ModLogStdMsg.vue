@@ -4,11 +4,17 @@
   </span>
 </template>
 <script setup>
-defineProps({
-  log: {
-    type: Object,
-    required: false,
-    default: null,
+import { computed } from 'vue'
+import { useLogsStore } from '~/stores/logs'
+
+const props = defineProps({
+  logid: {
+    type: Number,
+    required: true,
   },
 })
+
+const logsStore = useLogsStore()
+
+const log = computed(() => logsStore.byId(props.logid))
 </script>

@@ -32,11 +32,25 @@ vi.mock('~/stores/member', () => ({
   useMemberStore: () => mockMemberStore,
 }))
 
+const mockSpammerStore = {
+  byId: vi.fn(),
+}
+
+vi.mock('~/modtools/stores/spammer', () => ({
+  useSpammerStore: () => mockSpammerStore,
+}))
+
 // Mock useMe composable
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
     me: { value: { id: 999, displayname: 'Mod User' } },
     supportOrAdmin: { value: true },
+  }),
+}))
+
+vi.mock('~/modtools/composables/useModMe', () => ({
+  useModMe: () => ({
+    checkWork: vi.fn(),
   }),
 }))
 
@@ -139,6 +153,7 @@ describe('ModMemberActions', () => {
     mockMemberStore.remove.mockResolvedValue()
     mockMemberStore.ban.mockResolvedValue()
     mockApi.comment.add.mockResolvedValue()
+    mockSpammerStore.byId.mockReturnValue(null)
   })
 
   describe('rendering', () => {
@@ -168,12 +183,14 @@ describe('ModMemberActions', () => {
     })
 
     it('shows Report Spammer button when not spam', () => {
-      const wrapper = mountComponent({ spam: null })
+      mockSpammerStore.byId.mockReturnValue(null)
+      const wrapper = mountComponent({ spammerid: null })
       expect(wrapper.text()).toContain('Report Spammer')
     })
 
     it('hides Report Spammer button when spam', () => {
-      const wrapper = mountComponent({ spam: { id: 1 } })
+      mockSpammerStore.byId.mockReturnValue({ id: 1, collection: 'PendingAdd' })
+      const wrapper = mountComponent({ spammerid: 1 })
       expect(wrapper.text()).not.toContain('Report Spammer')
     })
 
@@ -220,16 +237,6 @@ describe('ModMemberActions', () => {
       mockGroupStore.get.mockReturnValue(null)
       const wrapper = mountComponent({ groupid: 789 })
       expect(wrapper.vm.groupname).toBeNull()
-    })
-
-    it('reportUser returns formatted user object', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.user = { id: 456, displayname: 'Test User' }
-      expect(wrapper.vm.reportUser).toEqual({
-        userid: 456,
-        id: 456,
-        displayname: 'Test User',
-      })
     })
   })
 

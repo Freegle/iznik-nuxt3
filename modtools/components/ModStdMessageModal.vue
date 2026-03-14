@@ -2,13 +2,15 @@
   <b-modal
     id="stdmsgmodal"
     ref="modal"
-    :title="message ? message.subject : 'Message to ' + member.displayname"
+    :title="
+      message ? message.subject : 'Message to ' + (user ? user.displayname : '')
+    "
     no-stacking
     no-close-on-backdrop
     size="lg"
   >
     <template #default>
-      <div v-if="stdmsg.action !== 'Edit'" class="d-flex">
+      <div v-if="stdmsg?.action !== 'Edit'" class="d-flex">
         <div>
           From:&nbsp;
           <br />
@@ -17,14 +19,14 @@
         <div>
           {{ fromName }}
           <br />
-          {{ message ? message.fromuser.displayname : member.displayname }}
+          {{ user ? user.displayname : '' }}
           <span v-if="toEmail"> &lt;{{ toEmail }}&gt; </span>
         </div>
       </div>
       <div
         v-if="
           message &&
-          stdmsg.action === 'Edit' &&
+          stdmsg?.action === 'Edit' &&
           message.item &&
           message.location
         "
@@ -55,7 +57,7 @@
       </NoticeMessage>
       <b-form-textarea v-model="body" rows="10" class="mt-2" />
       <div
-        v-if="stdmsg.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'"
+        v-if="stdmsg?.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'"
         class="mt-1"
       >
         <v-icon
@@ -72,7 +74,7 @@
         Change email frequency to <em>{{ emailfrequency }}</em>
       </div>
       <div
-        v-if="stdmsg.newmodstatus && stdmsg.newmodstatus !== 'UNCHANGED'"
+        v-if="stdmsg?.newmodstatus && stdmsg.newmodstatus !== 'UNCHANGED'"
         class="mt-1"
       >
         <v-icon
@@ -88,7 +90,7 @@
         <v-icon v-else icon="cog" />
         Change moderation status to <em>{{ modstatus }}</em>
       </div>
-      <div v-if="stdmsg.action === 'Hold Message'" class="mt-1 text-warning">
+      <div v-if="stdmsg?.action === 'Hold Message'" class="mt-1 text-warning">
         <v-icon v-if="changingHold" icon="sync" class="text-success fa-spin" />
         <v-icon v-else-if="changedHold" icon="check" class="text-success" />
         <v-icon v-else icon="pause" />
@@ -146,25 +148,36 @@ import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
+import { useStdmsgStore } from '~/stores/stdmsg'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: false,
     default: null,
   },
-  member: {
-    type: Object,
+  // membershipid - the membership record ID, NOT the user ID.
+  membershipid: {
+    type: Number,
     required: false,
     default: null,
   },
-  stdmsg: {
-    type: Object,
-    required: true,
+  // Use stdmsgid to look up a real standard message from the stdmsg store.
+  stdmsgid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  // Use stdmsgaction for inline action-only cases (e.g. 'Reject', 'Leave Member')
+  // where there is no stored standard message.
+  stdmsgaction: {
+    type: String,
+    required: false,
+    default: null,
   },
   autosend: {
     type: Boolean,
@@ -178,9 +191,21 @@ const modGroupStore = useModGroupStore()
 const messageStore = useMessageStore()
 const memberStore = useMemberStore()
 const userStore = useUserStore()
+const stdmsgStore = useStdmsgStore()
 const { typeOptions } = setupKeywords()
 const { me } = useMe()
 const { checkWorkDeferGetMessages } = useModMe()
+
+// Resolve the stdmsg: either from the store by ID, or an inline action-only object.
+const stdmsg = computed(() => {
+  if (props.stdmsgid) {
+    return stdmsgStore.byId(props.stdmsgid) || null
+  }
+  if (props.stdmsgaction) {
+    return { action: props.stdmsgaction }
+  }
+  return null
+})
 
 const subject = ref(null)
 const body = ref(null)
@@ -197,34 +222,55 @@ const changedHold = ref(false)
 const margTop = ref(0)
 const margLeft = ref(0)
 
-const groupid = computed(() => {
-  let ret = null
-
-  if (props.member) {
-    ret = props.member.groupid
-  } else if (
-    props.message &&
-    props.message.groups &&
-    props.message.groups.length
-  ) {
-    ret = props.message.groups[0].groupid
+// Fetch message from message store by ID.
+const message = computed(() => {
+  if (props.messageid) {
+    return messageStore.byId(props.messageid) || null
   }
-  return ret
+  return null
 })
 
+// Fetch membership from member store. member.id in that store is the membershipid.
+const membership = computed(() => {
+  if (props.membershipid) {
+    return memberStore.get(props.membershipid) || null
+  }
+  return null
+})
+
+const groupid = computed(() => {
+  if (membership.value) {
+    return membership.value.groupid
+  }
+  if (message.value && message.value.groups && message.value.groups.length) {
+    return message.value.groups[0].groupid
+  }
+  return null
+})
+
+// The target user — always fetched from the user store.
+// For messages: message.fromuser is a uint64 user ID.
+// For memberships: membership.userid is the user ID.
 const user = computed(() => {
-  return props.message ? props.message.fromuser : props.member
+  let uid = null
+
+  if (message.value) {
+    uid =
+      typeof message.value.fromuser === 'object'
+        ? message.value.fromuser?.id
+        : message.value.fromuser
+  } else if (membership.value) {
+    uid = membership.value.userid
+  }
+
+  if (uid) {
+    return userStore.byId(uid) || { id: uid, displayname: '#' + uid }
+  }
+  return null
 })
 
 const userid = computed(() => {
-  // Because of server inconsistencies we need to be a bit careful about how we get the user id.
-  let ret = null
-
-  if (user.value) {
-    ret = user.value.userid ? user.value.userid : user.value.id
-  }
-
-  return ret
+  return user.value?.id || null
 })
 
 const fromName = computed(() => {
@@ -233,10 +279,8 @@ const fromName = computed(() => {
 
 const toEmail = computed(() => {
   let ret = null
-  if (props.member) {
-    ret = props.member.email
-  } else if (props.message.fromuser && props.message.fromuser.emails) {
-    props.message.fromuser.emails.forEach((email) => {
+  if (user.value && user.value.emails) {
+    user.value.emails.forEach((email) => {
       if (
         email.email &&
         !email.email.includes('users.ilovefreegle.org') &&
@@ -245,13 +289,15 @@ const toEmail = computed(() => {
         ret = email.email
       }
     })
+  } else if (user.value && user.value.email) {
+    ret = user.value.email
   }
 
   return ret
 })
 
 const processLabel = computed(() => {
-  switch (props.stdmsg.action) {
+  switch (stdmsg.value?.action) {
     case 'Approve':
     case 'Approve Member':
       return 'Send and Approve'
@@ -277,7 +323,7 @@ const processLabel = computed(() => {
 })
 
 const modstatus = computed(() => {
-  switch (props.stdmsg.newmodstatus) {
+  switch (stdmsg.value?.newmodstatus) {
     case 'UNCHANGED':
       return 'Unchanged'
     case 'MODERATED':
@@ -292,7 +338,7 @@ const modstatus = computed(() => {
 })
 
 const emailfrequency = computed(() => {
-  switch (props.stdmsg.newdelstatus) {
+  switch (stdmsg.value?.newdelstatus) {
     case 'DIGEST':
       return 24
     case 'NONE':
@@ -342,36 +388,58 @@ const warning = computed(() => {
   return ret
 })
 
+// Trigger fetch for the fromuser ID when the message is available.
+// Fetch the target user from the user store when we know their ID.
+// For messages: fromuser is a uint64. For memberships: userid is the user ID.
+watch(
+  () => {
+    if (message.value) {
+      const fu = message.value.fromuser
+      return typeof fu === 'object' ? fu?.id : fu
+    }
+    if (membership.value) {
+      return membership.value.userid
+    }
+    return null
+  },
+  (uid) => {
+    if (uid && !userStore.byId(uid)) {
+      userStore.fetch(uid)
+    }
+  },
+  { immediate: true }
+)
+
 watch(body, () => {
   replyTooShort.value = false
 })
 
 async function fillin() {
   // Calculate initial subject.  Everything apart from Edits adds a Re:.
-  const defpref = props.stdmsg.action === 'Edit' ? '' : 'Re:'
+  const defpref = stdmsg.value.action === 'Edit' ? '' : 'Re:'
 
-  if (props.member) {
+  if (membership.value) {
     subject.value =
-      (props.stdmsg.subjpref ? props.stdmsg.subjpref : defpref) +
-      (props.stdmsg.subjsuff ? props.stdmsg.subjsuff : '')
+      (stdmsg.value.subjpref ? stdmsg.value.subjpref : defpref) +
+      (stdmsg.value.subjsuff ? stdmsg.value.subjsuff : '')
   } else {
     subject.value =
-      (props.stdmsg.subjpref ? props.stdmsg.subjpref : defpref) +
-      (props.stdmsg.action === 'Edit' ? '' : ': ') +
-      props.message.subject +
-      (props.stdmsg.subjsuff ? props.stdmsg.subjsuff : '')
+      (stdmsg.value.subjpref ? stdmsg.value.subjpref : defpref) +
+      (stdmsg.value.action === 'Edit' ? '' : ': ') +
+      message.value.subject +
+      (stdmsg.value.subjsuff ? stdmsg.value.subjsuff : '')
   }
 
   subject.value = await substitutionStrings(subject.value)
 
   // Calculate initial body
-  let msg = props.message ? props.message.textbody : ''
+  let msg = message.value ? message.value.textbody : ''
   msg = msg || ''
 
-  if (msg || props.member) {
+  if (msg || membership.value) {
     if (msg) {
       // We have an existing body to include.  Quote it, unless it's an edit.
-      const edit = props.stdmsg && props.stdmsg.action === 'Edit'
+      const edit = stdmsg.value && stdmsg.value.action === 'Edit'
       if (!edit && msg) {
         msg = '> ' + (msg + '').replace(/((\r\n)|\r|\n)/gm, '\n> ')
       }
@@ -379,27 +447,27 @@ async function fillin() {
       bodyInitialLength.value = msg.length
     }
 
-    if (props.stdmsg) {
-      if (props.stdmsg.body) {
+    if (stdmsg.value) {
+      if (stdmsg.value.body) {
         // Text to insert.
-        if (props.stdmsg.insert === 'Top') {
-          msg = props.stdmsg.body.trim() + '\n\n' + msg
+        if (stdmsg.value.insert === 'Top') {
+          msg = stdmsg.value.body.trim() + '\n\n' + msg
         } else {
-          msg = msg + '\n\n' + props.stdmsg.body.trim()
+          msg = msg + '\n\n' + stdmsg.value.body.trim()
         }
-      } else if (props.stdmsg.action !== 'Edit' && msg) {
+      } else if (stdmsg.value.action !== 'Edit' && msg) {
         // No text to insert - add a couple of blank lines at the top for typing.
         msg = '\n\n' + msg
       }
 
-      if (props.stdmsg.edittext === 'Correct Case') {
+      if (stdmsg.value.edittext === 'Correct Case') {
         // First the subject
         const matches = SUBJECT_REGEX.exec(subject.value)
         if (
           matches &&
           matches.length > 0 &&
           matches[0].length > 0 &&
-          props.message.item
+          message.value.item
         ) {
           subject.value =
             matches[1] +
@@ -409,8 +477,7 @@ async function fillin() {
             matches[3] +
             ')'
 
-          // eslint-disable-next-line vue/no-mutating-props
-          props.message.item.name = matches[2].toLowerCase().trim()
+          message.value.item.name = matches[2].toLowerCase().trim()
         } else {
           subject.value = subject.value.toLowerCase().trim()
         }
@@ -450,9 +517,9 @@ async function fillin() {
         })
       }
     }
-  } else if (props.stdmsg) {
+  } else if (stdmsg.value) {
     // No existing body
-    msg = '\n\n' + (props.stdmsg.body ? props.stdmsg.body : '')
+    msg = '\n\n' + (stdmsg.value.body ? stdmsg.value.body : '')
   }
 
   body.value = (await substitutionStrings(msg)).trim()
@@ -490,7 +557,7 @@ async function substitutionStrings(text) {
 
     text = text.replace(
       /\$origsubj/g,
-      props.message ? props.message.subject : ''
+      message.value ? message.value.subject : ''
     )
 
     if (user.value.messagehistory) {
@@ -541,10 +608,10 @@ async function substitutionStrings(text) {
       })
     }
 
-    if (props.member) {
+    if (membership.value) {
       text = text.replace(
         /\$memberreason/g,
-        props.member.joincomment ? props.member.joincomment : ''
+        membership.value.joincomment ? membership.value.joincomment : ''
       )
     }
 
@@ -559,12 +626,12 @@ async function substitutionStrings(text) {
     text = text.replace(/\$membermail/g, toEmail.value)
     let from
 
-    if (props.message) {
-      from = props.message.fromuser.realemail
-        ? props.message.fromuser.realemail
-        : props.message.fromaddr
-    } else {
-      from = props.member.email
+    if (user.value && user.value.realemail) {
+      from = user.value.realemail
+    } else if (message.value) {
+      from = message.value.fromaddr
+    } else if (user.value && user.value.email) {
+      from = user.value.email
     }
 
     const fromid = from
@@ -576,8 +643,8 @@ async function substitutionStrings(text) {
 
     let summ = ''
 
-    if (props.message && props.message.duplicates) {
-      props.message.duplicates.forEach((m) => {
+    if (message.value && message.value.duplicates) {
+      message.value.duplicates.forEach((m) => {
         // eslint-disable-next-line new-cap
         summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
       })
@@ -596,12 +663,12 @@ async function process(callback) {
 
   const msglen = body.value.length - bodyInitialLength.value
 
-  if (props.stdmsg.action !== 'Edit' && msglen >= 0 && msglen < 30) {
+  if (stdmsg.value.action !== 'Edit' && msglen >= 0 && msglen < 30) {
     replyTooShort.value = true
   } else {
     if (
-      props.stdmsg.newdelstatus &&
-      props.stdmsg.newdelstatus !== 'UNCHANGED'
+      stdmsg.value.newdelstatus &&
+      stdmsg.value.newdelstatus !== 'UNCHANGED'
     ) {
       changingNewDelStatus.value = true
       await userStore.edit({
@@ -614,14 +681,14 @@ async function process(callback) {
     }
 
     if (
-      props.stdmsg.newmodstatus &&
-      props.stdmsg.newmodstatus !== 'UNCHANGED'
+      stdmsg.value.newmodstatus &&
+      stdmsg.value.newmodstatus !== 'UNCHANGED'
     ) {
       changingNewModStatus.value = true
       await userStore.edit({
         id: userid.value,
         groupid: groupid.value,
-        ourPostingStatus: props.stdmsg.newmodstatus,
+        ourPostingStatus: stdmsg.value.newmodstatus,
       })
       changingNewModStatus.value = false
       changedNewModStatus.value = true
@@ -630,98 +697,116 @@ async function process(callback) {
     const subj = subject.value.trim()
     const bodyText = body.value.trim()
 
-    switch (props.stdmsg.action) {
+    switch (stdmsg.value.action) {
       case 'Approve':
         await messageStore.approve({
-          id: props.message.id,
+          id: message.value.id,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Leave':
       case 'Leave Approved Message':
         await messageStore.reply({
-          id: props.message.id,
+          id: message.value.id,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Hold Message':
         changingHold.value = true
 
         await messageStore.hold({
-          id: props.message.id,
+          id: message.value.id,
         })
 
         changingHold.value = false
         changedHold.value = true
 
         await messageStore.reply({
-          id: props.message.id,
+          id: message.value.id,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
+        })
+        break
+      case 'Approve Member':
+        await memberStore.approve({
+          id: membership.value.userid,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: stdmsg.value.id,
+        })
+        break
+      case 'Reject Member':
+        await memberStore.reject({
+          id: membership.value.userid,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Leave Member':
       case 'Leave Approved Member':
         await memberStore.reply({
-          id: props.member.userid,
+          id: membership.value.userid,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Reject':
         await messageStore.reject({
-          id: props.message.id,
+          id: message.value.id,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Delete':
       case 'Delete Approved Message':
         await messageStore.delete({
-          id: props.message.id,
+          id: message.value.id,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Delete Member':
       case 'Delete Approved Member':
         await memberStore.delete({
-          id: props.member.userid,
+          id: membership.value.userid,
           groupid: groupid.value,
           subject: subj,
           body: bodyText,
-          stdmsgid: props.stdmsg.id,
+          stdmsgid: stdmsg.value.id,
         })
         break
       case 'Edit':
-        if (props.message) {
-          if (props.message.item && props.message.location) {
+        if (message.value) {
+          if (message.value.item && message.value.location) {
             // Well-structured message
             await messageStore.patch({
-              id: props.message.id,
-              msgtype: props.message.type,
-              item: props.message.item.name,
-              location: props.message.location.name,
+              id: message.value.id,
+              msgtype: message.value.type,
+              item: message.value.item.name,
+              location: message.value.location.name,
               textbody: bodyText,
             })
           } else {
             // Not
             await messageStore.patch({
-              id: props.message.id,
+              id: message.value.id,
               subject: subj,
               textbody: bodyText,
             })
@@ -729,7 +814,7 @@ async function process(callback) {
         }
         break
       default:
-        console.error('Unknown stdmsg action', props.stdmsg.action)
+        console.error('Unknown stdmsg action', stdmsg.value.action)
     }
     checkWorkDeferGetMessages()
     hide()
@@ -738,8 +823,7 @@ async function process(callback) {
 }
 
 function postcodeSelect(newpc) {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.message.location = newpc
+  message.value.location = newpc
 }
 
 function moveLeft() {

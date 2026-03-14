@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import ModMessageMicroVolunteering from '~/modtools/components/ModMessageMicroVolunteering.vue'
 
+// Mock message store
+const mockMessageStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+}
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
+}))
+
 // Mock user store
 const mockUserStore = {
   byId: vi.fn(),
@@ -13,13 +23,8 @@ vi.mock('~/stores/user', () => ({
 }))
 
 describe('ModMessageMicroVolunteering', () => {
-  const createTestMessage = (overrides = {}) => ({
-    id: 123,
-    subject: 'Free sofa',
-    ...overrides,
-  })
-
   const createTestMicrovolunteering = (overrides = {}) => ({
+    id: 99,
     userid: 456,
     result: 'Reject',
     msgcategory: 'CouldBeBetter',
@@ -27,11 +32,28 @@ describe('ModMessageMicroVolunteering', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  const createTestMessage = (microvolunteeringOverrides = {}) => ({
+    id: 123,
+    subject: 'Free sofa',
+    microvolunteering: [
+      createTestMicrovolunteering(microvolunteeringOverrides),
+    ],
+  })
+
+  function mountComponent(
+    props = {},
+    microvolunteeringOverrides = {},
+    { skipMessageSetup = false } = {}
+  ) {
+    if (!skipMessageSetup) {
+      const msg = createTestMessage(microvolunteeringOverrides)
+      mockMessageStore.byId.mockReturnValue(msg)
+    }
+
     return mount(ModMessageMicroVolunteering, {
       props: {
-        message: createTestMessage(),
-        microvolunteering: createTestMicrovolunteering(),
+        messageid: 123,
+        microvolunteeringid: 99,
         ...props,
       },
       global: {
@@ -51,6 +73,8 @@ describe('ModMessageMicroVolunteering', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockMessageStore.byId.mockReturnValue(createTestMessage())
+    mockMessageStore.fetch.mockResolvedValue({})
     mockUserStore.byId.mockReturnValue({
       displayname: 'Test User',
       emails: [
@@ -99,75 +123,71 @@ describe('ModMessageMicroVolunteering', () => {
     })
 
     it('displays "No comment supplied" when no comments', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ comments: null }),
-      })
+      const wrapper = mountComponent({}, { comments: null })
       expect(wrapper.text()).toContain('No comment supplied')
     })
   })
 
   describe('rendering - Approve result', () => {
     it('displays success border for approve', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Approve' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Approve' })
       expect(wrapper.find('.border-success').exists()).toBe(true)
     })
 
     it('displays "thinks this post is ok" for approve', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Approve' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Approve' })
       expect(wrapper.text()).toContain('thinks this post is ok')
     })
 
     it('displays user info for approve result', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Approve' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Approve' })
       expect(wrapper.text()).toContain('Test User')
     })
   })
 
   describe('msgcategory display', () => {
     it('displays "Could be better" for CouldBeBetter category', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({
-          msgcategory: 'CouldBeBetter',
-        }),
-      })
+      const wrapper = mountComponent({}, { msgcategory: 'CouldBeBetter' })
       expect(wrapper.text()).toContain('Could be better')
     })
 
     it('displays "shouldn\'t be here" for ShouldntBeHere category', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({
-          msgcategory: 'ShouldntBeHere',
-        }),
-      })
+      const wrapper = mountComponent({}, { msgcategory: 'ShouldntBeHere' })
       expect(wrapper.text()).toContain("shouldn't be here")
     })
 
     it('has text-warning for CouldBeBetter', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({
-          msgcategory: 'CouldBeBetter',
-        }),
-      })
+      const wrapper = mountComponent({}, { msgcategory: 'CouldBeBetter' })
       expect(wrapper.find('strong.text-warning').exists()).toBe(true)
     })
 
     it('has text-danger for ShouldntBeHere', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({
-          msgcategory: 'ShouldntBeHere',
-        }),
-      })
+      const wrapper = mountComponent({}, { msgcategory: 'ShouldntBeHere' })
       expect(wrapper.find('strong.text-danger').exists()).toBe(true)
     })
   })
 
   describe('computed properties', () => {
+    describe('microvolunteering', () => {
+      it('returns microvolunteering from message store by id', () => {
+        const wrapper = mountComponent()
+        expect(wrapper.vm.microvolunteering).toEqual(
+          createTestMicrovolunteering()
+        )
+      })
+
+      it('returns null when message not in store', () => {
+        mockMessageStore.byId.mockReturnValue(null)
+        const wrapper = mountComponent({}, {}, { skipMessageSetup: true })
+        expect(wrapper.vm.microvolunteering).toBeNull()
+      })
+
+      it('returns undefined when microvolunteering id not found in message', () => {
+        const wrapper = mountComponent({ microvolunteeringid: 999 })
+        expect(wrapper.vm.microvolunteering).toBeUndefined()
+      })
+    })
+
     describe('user', () => {
       it('returns user from store based on microvolunteering userid', () => {
         mockUserStore.byId.mockReturnValue({
@@ -183,6 +203,12 @@ describe('ModMessageMicroVolunteering', () => {
         mockUserStore.byId.mockReturnValue(undefined)
         const wrapper = mountComponent()
         expect(wrapper.vm.user).toBeUndefined()
+      })
+
+      it('returns null when microvolunteering not found', () => {
+        mockMessageStore.byId.mockReturnValue(null)
+        const wrapper = mountComponent({}, {}, { skipMessageSetup: true })
+        expect(wrapper.vm.user).toBeNull()
       })
     })
 
@@ -272,35 +298,40 @@ describe('ModMessageMicroVolunteering', () => {
 
   describe('onMounted', () => {
     it('fetches user data on mount', async () => {
-      mountComponent({
-        microvolunteering: createTestMicrovolunteering({ userid: 789 }),
-      })
+      mountComponent({}, { userid: 789 })
       await flushPromises()
       expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
+    })
+
+    it('fetches message data on mount', async () => {
+      mountComponent()
+      await flushPromises()
+      expect(mockMessageStore.fetch).toHaveBeenCalledWith(123)
     })
   })
 
   describe('conditional rendering', () => {
     it('shows reject section only when result is Reject', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Reject' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Reject' })
       expect(wrapper.find('.border-warning').exists()).toBe(true)
       expect(wrapper.find('.border-success').exists()).toBe(false)
     })
 
     it('shows approve section only when result is Approve', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Approve' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Approve' })
       expect(wrapper.find('.border-success').exists()).toBe(true)
       expect(wrapper.find('.border-warning').exists()).toBe(false)
     })
 
     it('shows nothing when result is neither Reject nor Approve', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ result: 'Other' }),
-      })
+      const wrapper = mountComponent({}, { result: 'Other' })
+      expect(wrapper.find('.border-warning').exists()).toBe(false)
+      expect(wrapper.find('.border-success').exists()).toBe(false)
+    })
+
+    it('shows nothing when microvolunteering not found', () => {
+      mockMessageStore.byId.mockReturnValue(null)
+      const wrapper = mountComponent({}, {}, { skipMessageSetup: true })
       expect(wrapper.find('.border-warning').exists()).toBe(false)
       expect(wrapper.find('.border-success').exists()).toBe(false)
     })
@@ -323,26 +354,21 @@ describe('ModMessageMicroVolunteering', () => {
 
   describe('edge cases', () => {
     it('handles empty comments string', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ comments: '' }),
-      })
+      const wrapper = mountComponent({}, { comments: '' })
       expect(wrapper.text()).toContain('No comment supplied')
     })
 
     it('handles whitespace only comments', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({ comments: '   ' }),
-      })
+      const wrapper = mountComponent({}, { comments: '   ' })
       // Whitespace is truthy in v-if
       expect(wrapper.text()).toContain('"   "')
     })
 
     it('displays comments with special characters', () => {
-      const wrapper = mountComponent({
-        microvolunteering: createTestMicrovolunteering({
-          comments: 'Test <script>alert("xss")</script>',
-        }),
-      })
+      const wrapper = mountComponent(
+        {},
+        { comments: 'Test <script>alert("xss")</script>' }
+      )
       // Vue escapes HTML by default
       expect(wrapper.text()).toContain('Test')
     })

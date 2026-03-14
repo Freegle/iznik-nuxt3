@@ -3,7 +3,7 @@ import BaseAPI from '@/api/BaseAPI'
 export default class SystemLogsAPI extends BaseAPI {
   fetch(params) {
     // Use v2 endpoint for system logs from Loki
-    return this.$getv2('/systemlogs', params)
+    return this.$getv2('/modtools/systemlogs', params)
   }
 
   // Fetch API headers for a specific API log entry by request_id.
@@ -15,7 +15,7 @@ export default class SystemLogsAPI extends BaseAPI {
       start: '24h',
       limit: 1,
     }
-    return this.$getv2('/systemlogs', params)
+    return this.$getv2('/modtools/systemlogs', params)
   }
 
   fetchCounts(params) {
@@ -41,6 +41,6 @@ export default class SystemLogsAPI extends BaseAPI {
       params.search = endpoint
     }
 
-    return this.$getv2('/systemlogs', params)
+    return this.$getv2('/modtools/systemlogs', params)
   }
 }

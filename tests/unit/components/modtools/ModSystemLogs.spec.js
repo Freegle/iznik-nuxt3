@@ -55,6 +55,7 @@ vi.mock('~/stores/user', () => ({
 // Mock the group store
 const mockGroupStore = {
   list: {},
+  get: vi.fn((id) => mockGroupStore.list[id] || null),
   fetch: vi.fn(),
 }
 
@@ -81,7 +82,7 @@ describe('ModSystemLogs', () => {
           },
           ModSystemLogTreeNode: {
             template: '<div class="tree-node" />',
-            props: ['node', 'hideUserColumn'],
+            props: ['nodeKey', 'hideUserColumn'],
             methods: { expand: vi.fn() },
           },
           'b-alert': {
@@ -151,15 +152,17 @@ describe('ModSystemLogs', () => {
     })
 
     it('shows log list when logs exist', async () => {
-      mockSystemLogsStore.logsAsTree = [{ trace_id: 'trace-1', log: { id: 1 } }]
+      mockSystemLogsStore.logsAsTree = [
+        { trace_id: 'trace-1', log: { id: 1 }, nodeKey: 'trace-trace-1' },
+      ]
       const wrapper = await mountComponent()
       expect(wrapper.find('.log-list').exists()).toBe(true)
     })
 
     it('renders tree nodes for each log', async () => {
       mockSystemLogsStore.logsAsTree = [
-        { trace_id: 'trace-1', log: { id: 1 } },
-        { trace_id: 'trace-2', log: { id: 2 } },
+        { trace_id: 'trace-1', log: { id: 1 }, nodeKey: 'trace-trace-1' },
+        { trace_id: 'trace-2', log: { id: 2 }, nodeKey: 'trace-trace-2' },
       ]
       const wrapper = await mountComponent()
       expect(wrapper.findAll('.tree-node')).toHaveLength(2)
@@ -173,7 +176,9 @@ describe('ModSystemLogs', () => {
     })
 
     it('renders column headers', async () => {
-      mockSystemLogsStore.logsAsTree = [{ trace_id: 'trace-1', log: { id: 1 } }]
+      mockSystemLogsStore.logsAsTree = [
+        { trace_id: 'trace-1', log: { id: 1 }, nodeKey: 'trace-trace-1' },
+      ]
       const wrapper = await mountComponent()
       expect(wrapper.text()).toContain('Time')
       expect(wrapper.text()).toContain('Source')
@@ -181,13 +186,17 @@ describe('ModSystemLogs', () => {
     })
 
     it('shows User column when not filtering by user', async () => {
-      mockSystemLogsStore.logsAsTree = [{ trace_id: 'trace-1', log: { id: 1 } }]
+      mockSystemLogsStore.logsAsTree = [
+        { trace_id: 'trace-1', log: { id: 1 }, nodeKey: 'trace-trace-1' },
+      ]
       const wrapper = await mountComponent({ userid: null })
       expect(wrapper.find('.log-col-user').exists()).toBe(true)
     })
 
     it('hides User column when filtering by user', async () => {
-      mockSystemLogsStore.logsAsTree = [{ trace_id: 'trace-1', log: { id: 1 } }]
+      mockSystemLogsStore.logsAsTree = [
+        { trace_id: 'trace-1', log: { id: 1 }, nodeKey: 'trace-trace-1' },
+      ]
       const wrapper = await mountComponent({ userid: 123 })
       expect(wrapper.find('.log-col-user').exists()).toBe(false)
     })
@@ -195,7 +204,7 @@ describe('ModSystemLogs', () => {
 
   describe('computed properties', () => {
     it('logsAsTree reflects store state', async () => {
-      const logs = [{ trace_id: 'trace-1' }]
+      const logs = [{ trace_id: 'trace-1', nodeKey: 'trace-trace-1' }]
       mockSystemLogsStore.logsAsTree = logs
       const wrapper = await mountComponent()
       expect(wrapper.vm.logsAsTree).toEqual(logs)
@@ -231,7 +240,9 @@ describe('ModSystemLogs', () => {
     })
 
     it('hasLogs returns true when logs exist', async () => {
-      mockSystemLogsStore.logsAsTree = [{ trace_id: 'trace-1' }]
+      mockSystemLogsStore.logsAsTree = [
+        { trace_id: 'trace-1', nodeKey: 'trace-trace-1' },
+      ]
       const wrapper = await mountComponent()
       expect(wrapper.vm.hasLogs).toBe(true)
     })

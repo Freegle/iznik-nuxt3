@@ -6,7 +6,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment } = require('./config')
+
 const { loginViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 const {
   navigateToMessageViaBrowse,
@@ -31,7 +31,7 @@ test.describe('Reply Flow - New User Registration', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for new user registration reply',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -61,6 +61,7 @@ test.describe('Reply Flow - New User Registration', () => {
     testEmail,
     getTestEmail,
     withdrawPost,
+    testEnv,
   }) => {
     // Post a message first
     const uniqueItem = `test-newuser-browse-${Date.now()}`
@@ -68,7 +69,7 @@ test.describe('Reply Flow - New User Registration', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for new user registration from browse page',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -80,7 +81,7 @@ test.describe('Reply Flow - New User Registration', () => {
     await navigateToMessageViaBrowse(
       page,
       result.id,
-      'FreeglePlayground',
+      testEnv.group.name,
       uniqueItem
     )
     await clickReplyButton(page)
@@ -109,6 +110,7 @@ test.describe('Reply Flow - New User Registration', () => {
     testEmail,
     getTestEmail,
     withdrawPost,
+    testEnv,
   }) => {
     // Post a message first
     const uniqueItem = `test-newuser-explore-${Date.now()}`
@@ -116,7 +118,7 @@ test.describe('Reply Flow - New User Registration', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for new user registration from explore page',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -125,7 +127,7 @@ test.describe('Reply Flow - New User Registration', () => {
     await logoutIfLoggedIn(page)
 
     // Navigate via explore page and find our specific message
-    await navigateToMessageViaExplore(page, 'FreeglePlayground', uniqueItem)
+    await navigateToMessageViaExplore(page, testEnv.group.name, uniqueItem)
     await clickReplyButton(page)
 
     // Fill in reply as new user

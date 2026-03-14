@@ -8,21 +8,28 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 
-onMounted(() => {
-  // Will usually arrive here on first load of session as authStore user not set in authuser.global.ts: bounce back to intended path
-  const route = useRoute()
-  const authStore = useAuthStore()
-  const me = authStore.user
-  if (me && me.id) {
-    const router = useRouter()
-    if (route.query?.return) {
-      router.push(route.query.return)
-    } else {
-      router.push('/')
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
+const me = computed(() => authStore.user)
+
+// Redirect when user becomes available (may happen after hydration + fetchUser)
+watch(
+  me,
+  (newVal) => {
+    if (newVal && newVal.id) {
+      if (route.query?.return) {
+        router.push(route.query.return)
+      } else {
+        router.push('/')
+      }
     }
-  }
-})
+  },
+  { immediate: true }
+)
 </script>

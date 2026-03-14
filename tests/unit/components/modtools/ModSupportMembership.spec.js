@@ -1,15 +1,20 @@
 /* eslint-disable no-template-curly-in-string */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createMockMemberStore } from '../../mocks/stores'
+import { createMockMemberStore, createMockUserStore } from '../../mocks/stores'
 import ModSupportMembership from '~/modtools/components/ModSupportMembership.vue'
 
-// Create mock store instance
+// Create mock store instances
 const mockMemberStore = createMockMemberStore()
+const mockUserStore = createMockUserStore()
 
-// Mock the store import
+// Mock the store imports
 vi.mock('~/stores/member', () => ({
   useMemberStore: () => mockMemberStore,
+}))
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
 }))
 
 // Mock useModMe composable
@@ -34,14 +39,25 @@ describe('ModSupportMembership', () => {
     ...overrides,
   })
 
+  const defaultMembership = createMembership()
+
   const defaultProps = {
-    membership: createMembership(),
+    membershipid: 200,
     userid: 456,
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, membershipOverrides = {}) {
+    const membership = createMembership(membershipOverrides)
+    const mergedProps = { ...defaultProps, ...props }
+
+    // Set up user store to return user with this membership
+    mockUserStore.byId = vi.fn().mockReturnValue({
+      id: mergedProps.userid,
+      memberships: [membership],
+    })
+
     return mount(ModSupportMembership, {
-      props: { ...defaultProps, ...props },
+      props: mergedProps,
       global: {
         stubs: {
           'b-card': {
@@ -109,47 +125,41 @@ describe('ModSupportMembership', () => {
     vi.clearAllMocks()
     mockMemberStore.update = vi.fn().mockResolvedValue({})
     mockMemberStore.remove = vi.fn().mockResolvedValue({})
+    mockUserStore.byId = vi.fn().mockReturnValue({
+      id: 456,
+      memberships: [defaultMembership],
+    })
   })
 
   describe('rendering', () => {
     it('displays the group name', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ nameshort: 'MyGroup' }),
-      })
+      const wrapper = mountComponent({}, { nameshort: 'MyGroup' })
       expect(wrapper.text()).toContain('MyGroup')
     })
 
     it('displays the added date', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ added: '2024-06-01T12:00:00Z' }),
-      })
+      const wrapper = mountComponent({}, { added: '2024-06-01T12:00:00Z' })
       expect(wrapper.text()).toContain('short:2024-06-01T12:00:00Z')
     })
   })
 
   describe('role icons', () => {
     it('shows crown icon with warning color for Owner role', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ role: 'Owner' }),
-      })
+      const wrapper = mountComponent({}, { role: 'Owner' })
       const icon = wrapper.find('.icon-crown.text-warning')
       expect(icon.exists()).toBe(true)
       expect(icon.attributes('title')).toBe('Owner')
     })
 
     it('shows crown icon with info color for Moderator role', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ role: 'Moderator' }),
-      })
+      const wrapper = mountComponent({}, { role: 'Moderator' })
       const icon = wrapper.find('.icon-crown.text-info')
       expect(icon.exists()).toBe(true)
       expect(icon.attributes('title')).toBe('Moderator')
     })
 
     it('shows user icon with success color for Member role', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ role: 'Member' }),
-      })
+      const wrapper = mountComponent({}, { role: 'Member' })
       const icon = wrapper.find('.icon-user.text-success')
       expect(icon.exists()).toBe(true)
       expect(icon.attributes('title')).toBe('Member')
@@ -158,10 +168,10 @@ describe('ModSupportMembership', () => {
 
   describe('ModRole component', () => {
     it('passes correct props to ModRole', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 789, role: 'Moderator' }),
-        userid: 123,
-      })
+      const wrapper = mountComponent(
+        { userid: 123, membershipid: 200 },
+        { id: 789, membershipid: 200, role: 'Moderator' }
+      )
       const modRole = wrapper.find('.mod-role')
       expect(modRole.attributes('data-userid')).toBe('123')
       expect(modRole.attributes('data-groupid')).toBe('789')
@@ -221,13 +231,10 @@ describe('ModSupportMembership', () => {
 
   describe('changeFrequency', () => {
     it('calls memberStore.update with correct params', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({
-          id: 100,
-          emailfrequency: 24,
-        }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200, emailfrequency: 24 }
+      )
 
       await wrapper.vm.changeFrequency()
 
@@ -239,10 +246,10 @@ describe('ModSupportMembership', () => {
     })
 
     it('updates when frequency select changes', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ emailfrequency: -1 }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { membershipid: 200, emailfrequency: -1 }
+      )
 
       const select = wrapper.findAll('select')[0]
       await select.setValue('4')
@@ -253,13 +260,10 @@ describe('ModSupportMembership', () => {
 
   describe('changePostingStatus', () => {
     it('calls memberStore.update with correct params', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({
-          id: 100,
-          ourpostingstatus: 'MODERATED',
-        }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200, ourpostingstatus: 'MODERATED' }
+      )
 
       await wrapper.vm.changePostingStatus()
 
@@ -271,10 +275,10 @@ describe('ModSupportMembership', () => {
     })
 
     it('updates when posting status select changes', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ ourpostingstatus: 'DEFAULT' }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { membershipid: 200, ourpostingstatus: 'DEFAULT' }
+      )
 
       const select = wrapper.findAll('select')[1]
       await select.setValue('PROHIBITED')
@@ -285,10 +289,10 @@ describe('ModSupportMembership', () => {
 
   describe('changeEvents', () => {
     it('calls memberStore.update with eventsallowed true', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 100 }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200 }
+      )
 
       await wrapper.vm.changeEvents(true)
 
@@ -300,10 +304,10 @@ describe('ModSupportMembership', () => {
     })
 
     it('calls memberStore.update with eventsallowed false', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 100 }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200 }
+      )
 
       await wrapper.vm.changeEvents(false)
 
@@ -317,10 +321,10 @@ describe('ModSupportMembership', () => {
 
   describe('changeVolunteering', () => {
     it('calls memberStore.update with volunteeringallowed true', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 100 }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200 }
+      )
 
       await wrapper.vm.changeVolunteering(true)
 
@@ -332,10 +336,10 @@ describe('ModSupportMembership', () => {
     })
 
     it('calls memberStore.update with volunteeringallowed false', async () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 100 }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200 }
+      )
 
       await wrapper.vm.changeVolunteering(false)
 
@@ -367,25 +371,19 @@ describe('ModSupportMembership', () => {
     })
 
     it('events toggle reflects eventsallowed value', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ eventsallowed: 1 }),
-      })
+      const wrapper = mountComponent({}, { eventsallowed: 1 })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[0].attributes('data-value')).toBe('true')
     })
 
     it('events toggle reflects eventsallowed false value', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ eventsallowed: 0 }),
-      })
+      const wrapper = mountComponent({}, { eventsallowed: 0 })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[0].attributes('data-value')).toBe('false')
     })
 
     it('volunteering toggle reflects volunteeringallowed value', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ volunteeringallowed: 1 }),
-      })
+      const wrapper = mountComponent({}, { volunteeringallowed: 1 })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[1].attributes('data-value')).toBe('true')
     })
@@ -393,13 +391,10 @@ describe('ModSupportMembership', () => {
 
   describe('remove function', () => {
     it('calls memberStore.remove with correct params', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({
-          id: 100,
-          membershipid: 200,
-        }),
-        userid: 456,
-      })
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200 }
+      )
 
       wrapper.vm.remove(() => {})
 
@@ -452,47 +447,35 @@ describe('ModSupportMembership', () => {
   })
 
   describe('props validation', () => {
-    it('accepts membership and userid props', () => {
-      const membership = createMembership({ nameshort: 'CustomGroup' })
-      const wrapper = mountComponent({
-        membership,
-        userid: 789,
-      })
+    it('accepts membershipid and userid props', () => {
+      const wrapper = mountComponent({ membershipid: 300, userid: 789 })
 
-      expect(wrapper.props('membership').nameshort).toBe('CustomGroup')
+      expect(wrapper.props('membershipid')).toBe(300)
       expect(wrapper.props('userid')).toBe(789)
     })
   })
 
   describe('edge cases', () => {
     it('handles membership with null eventsallowed', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ eventsallowed: null }),
-      })
+      const wrapper = mountComponent({}, { eventsallowed: null })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[0].attributes('data-value')).toBe('false')
     })
 
     it('handles membership with null volunteeringallowed', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ volunteeringallowed: null }),
-      })
+      const wrapper = mountComponent({}, { volunteeringallowed: null })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[1].attributes('data-value')).toBe('false')
     })
 
     it('handles membership with 0 eventsallowed (falsy)', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ eventsallowed: 0 }),
-      })
+      const wrapper = mountComponent({}, { eventsallowed: 0 })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[0].attributes('data-value')).toBe('false')
     })
 
     it('handles membership with truthy non-1 eventsallowed', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ eventsallowed: 2 }),
-      })
+      const wrapper = mountComponent({}, { eventsallowed: 2 })
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles[0].attributes('data-value')).toBe('true')
     })

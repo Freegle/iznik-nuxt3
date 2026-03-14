@@ -13,6 +13,16 @@ vi.mock('@/stores/team', () => ({
   }),
 }))
 
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 // Mock useMe composable
 const mockSupportOrAdmin = ref(false)
 
@@ -23,15 +33,17 @@ vi.mock('~/composables/useMe', () => ({
 }))
 
 describe('ModTeamMember', () => {
+  const defaultUser = {
+    id: 123,
+    displayname: 'Test Member',
+    profile: {
+      turl: 'https://example.com/photo.jpg',
+    },
+  }
+
   const defaultProps = {
     teamid: 1,
-    member: {
-      id: 123,
-      displayname: 'Test Member',
-      profile: {
-        turl: 'https://example.com/photo.jpg',
-      },
-    },
+    userid: 123,
   }
 
   function mountComponent(props = {}) {
@@ -69,6 +81,8 @@ describe('ModTeamMember', () => {
     setActivePinia(createPinia())
     mockSupportOrAdmin.value = false
     mockRemove.mockResolvedValue()
+    mockUserStore.byId.mockReturnValue(defaultUser)
+    mockUserStore.fetch.mockResolvedValue(defaultUser)
   })
 
   describe('rendering', () => {

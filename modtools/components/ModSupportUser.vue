@@ -42,15 +42,15 @@
       </b-row>
     </b-card-header>
     <b-card-body v-if="expanded" class="p-1">
-      <ModBouncing v-if="user.bouncing" :user="user" class="mb-2" />
+      <ModBouncing v-if="user.bouncing" :userid="user.id" class="mb-2" />
       <NoticeMessage v-if="user.systemrole === 'Admin'" class="mb-2">
         This user has admin rights.
       </NoticeMessage>
       <NoticeMessage v-if="user.systemrole === 'Support'" class="mb-2">
         This user has support rights.
       </NoticeMessage>
-      <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
-      <ModComments :user="user" />
+      <ModSpammer v-if="user.spammer" class="mb-2" :userid="user.id" />
+      <ModComments :userid="user.id" />
 
       <div class="d-flex flex-wrap">
         <b-button variant="white" class="mr-2 mb-1" @click="spamReport">
@@ -94,7 +94,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
-      <ModDeletedOrForgotten v-if="user" :user="user" />
+      <ModDeletedOrForgotten v-if="user" :userid="user.id" />
       <h3 class="mt-2">Trust Level</h3>
       <p>This controls whether someone is asked to do micromoderation tasks.</p>
       <p>
@@ -219,7 +219,7 @@
         </b-col>
       </b-row>
       <h3 class="mt-2">Logins</h3>
-      <ModMemberLogins :member="user" />
+      <ModMemberLogins :userid="user.id" />
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input
@@ -272,10 +272,10 @@
       <div v-if="memberships && memberships.length">
         <div
           v-for="membership in memberships"
-          :key="'membership-' + membership.id"
+          :key="'membership-' + membership.membershipid"
         >
           <ModSupportMembership
-            :membership="membership"
+            :membershipid="membership.membershipid"
             :userid="user.id"
             @fetchuser="fetchUser"
           />
@@ -351,7 +351,7 @@
       </div>
       <div v-else>No application history.</div>
       <h3 class="mt-2">Posting History</h3>
-      <ModMemberSummary :member="user" />
+      <ModMemberSummary :userid="user.id" />
       <div v-if="messageHistoriesShown.length">
         <b-row
           v-for="message in messageHistoriesShown"
@@ -540,12 +540,12 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :user="reportUser"
+      :userid="id"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
       v-if="showAddCommentModal"
-      :user="user"
+      :userid="id"
       @added="updateComments"
       @hidden="showAddCommentModal = false"
     />
@@ -603,21 +603,13 @@ const preferredemail = computed(() => {
   return user.value.emails[0].email
 })
 
-const reportUser = computed(() => {
-  return {
-    // Due to inconsistencies about userid vs id in objects.
-    userid: user.value.id,
-    displayname: user.value.displayname,
-  }
-})
-
 const admin = computed(() => {
   return user.value && user.value.systemrole === 'Admin'
 })
 
 const freegleMemberships = computed(() => {
-  return user.value && user.value.memberof
-    ? user.value.memberof
+  return user.value && user.value.memberships
+    ? user.value.memberships
         .filter((m) => m.type === 'Freegle')
         .sort(function (a, b) {
           return a.nameshort
@@ -678,16 +670,13 @@ const membershipHistoriesUnshown = computed(() => {
 })
 
 const messageHistoriesShown = computed(() => {
-  return showAllMessageHistories.value
-    ? user.value.messagehistory
-    : user.value.messagehistory.slice(0, SHOW)
+  const history = user.value.messagehistory || []
+  return showAllMessageHistories.value ? history : history.slice(0, SHOW)
 })
 
 const messageHistoriesUnshown = computed(() => {
-  const ret =
-    user.value.messagehistory.length > SHOW
-      ? user.value.messagehistory.length - SHOW
-      : 0
+  const history = user.value.messagehistory || []
+  const ret = history.length > SHOW ? history.length - SHOW : 0
   return ret
 })
 
@@ -764,13 +753,17 @@ onMounted(async () => {
 async function fetchUser() {
   if (props.id) {
     await userStore.fetchMT({
-      search: props.id,
+      id: props.id,
+      modtools: true,
       emailhistory: true,
       info: true,
     })
     user.value = userStore.byId(props.id)
     if (user.value && user.value.spammer && user.value.spammer.byuserid) {
-      await userStore.fetchMT({ search: user.value.spammer.byuserid })
+      await userStore.fetchMT({
+        id: user.value.spammer.byuserid,
+        modtools: true,
+      })
       user.value.spammer.byuser = await userStore.fetch(
         user.value.spammer.byuserid
       )

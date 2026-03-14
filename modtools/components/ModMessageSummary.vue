@@ -25,7 +25,7 @@
     <div :class="classes" :data-id="id" @click="expand">
       <MessageItemLocation
         :id="id"
-        :matchedon="matchedon"
+        :matchedon="message.matchedon"
         class="header-title"
         :expanded="false"
         :show-location="showLocation"
@@ -39,7 +39,7 @@
       >
         <MessageDescription
           :id="id"
-          :matchedon="matchedon"
+          :matchedon="message.matchedon"
           class="d-none d-md-block description"
         />
       </div>
@@ -88,11 +88,6 @@ const props = defineProps({
   id: {
     type: Number,
     required: true,
-  },
-  matchedon: {
-    type: Object,
-    required: false,
-    default: null,
   },
   expandButtonText: {
     type: String,

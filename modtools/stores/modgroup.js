@@ -15,6 +15,7 @@ export const useModGroupStore = defineStore({
     received: false,
     sessionGroups: false,
     failedGroups: [],
+    cachedWorkData: null,
   }),
   actions: {
     init(config) {
@@ -43,29 +44,31 @@ export const useModGroupStore = defineStore({
           this.clear()
         }
         // Get ALL groups into base groupStore once
-        if (Object.keys(groupStore.list).length === 0) {
+        if (Object.keys(groupStore.summaryList).length === 0) {
           console.log('getModGroups fetch ALL base groups')
           await groupStore.fetch()
           console.log('getModGroups fetched ALL base groups')
         }
 
-        // Get work for each group
+        // Get per-group work counts and update groups
         const me = authStore.user
-        this.sessionGroups = false
+        this.sessionGroups = authStore.groups || false
         if (me && me.id) {
-          const ret = await this.$api.session.fetch({
-            components: ['groups'],
-          })
-          if (ret && ret.groups) {
-            this.sessionGroups = ret.groups
-
-            // Update work for each of our groups
-            for (const group of Object.values(this.list)) {
-              const g = this.sessionGroups.find((g) => g.id === group.id)
-              if (g && g.work) {
-                group.work = g.work
+          try {
+            const workData = await this.$api.group.fetchWork()
+            if (workData && Array.isArray(workData)) {
+              // Cache work data so it can be applied when groups are loaded later.
+              this.cachedWorkData = workData
+              // Update work for any groups already loaded.
+              for (const group of Object.values(this.list)) {
+                const w = workData.find((w) => w.groupid === group.id)
+                if (w) {
+                  group.work = w
+                }
               }
             }
+          } catch (e) {
+            console.error('Failed to fetch group work counts', e.message)
           }
         }
 
@@ -100,28 +103,47 @@ export const useModGroupStore = defineStore({
         tnkey
       )
       if (group) {
-        // Set group work and role from sessionGroups ie session v1 call if not present.
-        // sessionGroups usually got every 30s in getModGroups()
-        // Note: group.myrole is overridden on server for support and admin so set group.role from sessionGroups
+        // Set group role from auth store's groups (V2 session memberships).
+        const authStore = useAuthStore()
         if (!this.sessionGroups) {
-          const ret = await this.$api.session.fetch({
-            components: ['groups'],
-          })
-          if (ret && ret.groups) {
-            this.sessionGroups = ret.groups
-          }
+          this.sessionGroups = authStore.groups || []
         }
         if (this.sessionGroups) {
-          const g = this.sessionGroups.find((g) => g.id === group.id)
+          const g = this.sessionGroups.find(
+            (g) => g.groupid === group.id || g.id === group.id
+          )
           if (g) {
-            if (g.work) {
-              group.work = g.work
-            }
             if (g.role) {
               group.role = g.role
+              group.myrole = g.role
+            }
+            group.mysettings = g
+          }
+        }
+
+        // Apply cached work counts if available, otherwise fetch.
+        if (!group.work) {
+          if (this.cachedWorkData) {
+            const w = this.cachedWorkData.find((w) => w.groupid === group.id)
+            if (w) {
+              group.work = w
+            }
+          } else {
+            try {
+              const workData = await this.$api.group.fetchWork()
+              if (workData && Array.isArray(workData)) {
+                this.cachedWorkData = workData
+                const w = workData.find((w) => w.groupid === group.id)
+                if (w) {
+                  group.work = w
+                }
+              }
+            } catch (e) {
+              // Non-fatal — work counts are supplementary.
             }
           }
         }
+
         this.list[group.id] = group
       }
       const gettingix = this.getting.indexOf(id)

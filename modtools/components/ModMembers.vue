@@ -6,7 +6,7 @@
       class="p-0 mt-2"
     >
       <ModMember
-        :member="member"
+        :membershipid="member.id"
         :actions="false"
         :expand-comments="parseInt(filter) === 1"
       />

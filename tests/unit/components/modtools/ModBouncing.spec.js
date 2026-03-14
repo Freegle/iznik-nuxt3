@@ -16,16 +16,37 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
-describe('ModBouncing', () => {
-  const defaultUser = {
-    id: 123,
-    email: 'test@example.com',
-    role: 'Member',
-  }
+const defaultUser = {
+  id: 123,
+  email: 'test@example.com',
+  role: 'Member',
+}
 
-  function mountComponent(props = {}) {
+const mockUserStore = {
+  byId: vi.fn((id) => {
+    if (id === 123) return defaultUser
+    if (id === 456) return { ...defaultUser, id: 456 }
+    return null
+  }),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+describe('ModBouncing', () => {
+  let currentUser
+
+  function mountComponent(props = {}, userOverrides = {}) {
+    const uid = props.userid || 123
+    currentUser = { ...defaultUser, ...userOverrides, id: uid }
+    mockUserStore.byId.mockImplementation((id) =>
+      id === uid ? currentUser : null
+    )
+
     return mount(ModBouncing, {
-      props: { user: defaultUser, ...props },
+      props: { userid: uid, ...props },
       global: {
         stubs: {
           NoticeMessage: {
@@ -60,9 +81,7 @@ describe('ModBouncing', () => {
     })
 
     it('shows Reactivate button for Members', () => {
-      const wrapper = mountComponent({
-        user: { ...defaultUser, role: 'Member' },
-      })
+      const wrapper = mountComponent({}, { role: 'Member' })
       expect(wrapper.text()).toContain('Reactivate')
     })
 
@@ -76,7 +95,7 @@ describe('ModBouncing', () => {
 
   describe('unbounce method', () => {
     it('calls authStore.unbounceMT with user id', async () => {
-      const wrapper = mountComponent({ user: { ...defaultUser, id: 456 } })
+      const wrapper = mountComponent({ userid: 456 }, { id: 456 })
       await wrapper.vm.unbounce()
       expect(mockAuthStore.unbounceMT).toHaveBeenCalledWith(456)
     })
@@ -99,9 +118,7 @@ describe('ModBouncing', () => {
 
   describe('role-based behavior', () => {
     it('shows cannot unbounce message for non-Member roles when not support', () => {
-      const wrapper = mountComponent({
-        user: { ...defaultUser, role: 'Owner' },
-      })
+      const wrapper = mountComponent({}, { role: 'Owner' })
       expect(wrapper.text()).toContain("You can't unbounce")
     })
   })

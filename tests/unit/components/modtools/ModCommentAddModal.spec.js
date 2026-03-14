@@ -1,11 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
-import { createMockUserStore } from '../../mocks/stores'
 import ModCommentAddModal from '~/modtools/components/ModCommentAddModal.vue'
 
 // Create mock instances
-const mockUserStore = createMockUserStore()
+const mockUserStore = {
+  user: null,
+  add: vi.fn().mockResolvedValue(123),
+  fetch: vi.fn().mockResolvedValue({}),
+  fetchMT: vi.fn().mockResolvedValue({}),
+  updateUser: vi.fn().mockResolvedValue({}),
+  byId: vi.fn().mockReturnValue(null),
+}
 const mockHide = vi.fn()
 const mockBump = ref(0)
 const mockContext = ref(null)
@@ -52,12 +58,16 @@ describe('ModCommentAddModal', () => {
   })
 
   const defaultProps = {
-    user: createTestUser(),
+    userid: 123,
     groupid: 456,
     groupname: 'Test Group',
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, userOverrides = {}) {
+    const uid = props.userid || defaultProps.userid
+    const user = createTestUser({ id: uid, ...userOverrides })
+    mockUserStore.byId.mockReturnValue(user)
+
     return mount(ModCommentAddModal, {
       props: { ...defaultProps, ...props },
       global: {
@@ -103,13 +113,12 @@ describe('ModCommentAddModal', () => {
     mockContext.value = null
     mockCommentAdd.mockResolvedValue({})
     mockUserStore.fetchMT.mockResolvedValue({})
+    mockUserStore.byId.mockReturnValue(createTestUser())
   })
 
   describe('rendering', () => {
     it('displays user displayname in title', () => {
-      const wrapper = mountComponent({
-        user: createTestUser({ displayname: 'John Doe' }),
-      })
+      const wrapper = mountComponent({}, { displayname: 'John Doe' })
       expect(wrapper.text()).toContain('John Doe')
     })
 
@@ -121,13 +130,7 @@ describe('ModCommentAddModal', () => {
 
     it('does not display "on" before groupname when groupname is null', () => {
       const wrapper = mountComponent({ groupname: null })
-      // The title should NOT contain "on" followed by a groupname
-      // Check that the title area doesn't have the pattern "Test User on"
-      // Note: "on the wiki" exists elsewhere in the text, so we check specifically
-      // that the title pattern doesn't include "on" before null groupname
       expect(wrapper.text()).toContain('Add Note for Test User')
-      // When groupname is null, it should just show the user's name without "on" after it
-      // The v-if="groupname" ensures <span v-if="groupname">on</span> is not rendered
       expect(wrapper.text()).not.toMatch(/Test User on\s+\s*You can add/)
     })
 
@@ -227,10 +230,9 @@ describe('ModCommentAddModal', () => {
   })
 
   describe('props', () => {
-    it('accepts user prop (required)', () => {
-      const testUser = createTestUser({ id: 789 })
-      const wrapper = mountComponent({ user: testUser })
-      expect(wrapper.props('user')).toEqual(testUser)
+    it('accepts userid prop (required)', () => {
+      const wrapper = mountComponent({ userid: 789 })
+      expect(wrapper.props('userid')).toBe(789)
     })
 
     it('accepts groupid prop (optional)', () => {
@@ -294,7 +296,7 @@ describe('ModCommentAddModal', () => {
     describe('save', () => {
       it('calls $api.comment.add with correct parameters', async () => {
         const wrapper = mountComponent({
-          user: createTestUser({ id: 100 }),
+          userid: 100,
           groupid: 200,
         })
 
@@ -326,7 +328,7 @@ describe('ModCommentAddModal', () => {
 
       it('calls userStore.fetchMT with user id and emailhistory', async () => {
         const wrapper = mountComponent({
-          user: createTestUser({ id: 555 }),
+          userid: 555,
         })
 
         await wrapper.vm.save()
@@ -513,21 +515,16 @@ describe('ModCommentAddModal', () => {
   })
 
   describe('modal id', () => {
-    it('generates unique modal id based on user id', () => {
-      const wrapper = mountComponent({
-        user: createTestUser({ id: 12345 }),
-      })
-      // The modal id is 'modCommentModal-' + user.id
-      // We can verify by checking the component renders correctly with the user
-      expect(wrapper.props('user').id).toBe(12345)
+    it('generates unique modal id based on userid', () => {
+      const wrapper = mountComponent({ userid: 12345 })
+      // The modal id is 'modCommentModal-' + userid
+      expect(wrapper.props('userid')).toBe(12345)
     })
   })
 
   describe('edge cases', () => {
     it('handles user with minimal data', () => {
-      const wrapper = mountComponent({
-        user: { id: 1, displayname: '' },
-      })
+      const wrapper = mountComponent({ userid: 1 }, { displayname: '' })
       expect(wrapper.find('.modal').exists()).toBe(true)
     })
 

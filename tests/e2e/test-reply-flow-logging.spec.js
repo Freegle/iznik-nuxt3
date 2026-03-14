@@ -7,7 +7,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment } = require('./config')
+
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -42,7 +42,7 @@ test.describe('Reply Flow - State Machine Logging', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for logging verification',
-      postcode: environment.postcode,
+
       email: posterEmail,
     })
     expect(result.id).toBeTruthy()

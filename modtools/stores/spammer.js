@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
 import { fetchMe } from '~/composables/useMe'
+import { useUserStore } from '~/stores/user'
 
 export const useSpammerStore = defineStore({
   id: 'spammer',
@@ -36,21 +37,80 @@ export const useSpammerStore = defineStore({
 
       delete params.context
       if (this.context) {
-        params['context[id]'] = this.context.id
+        // V2 API expects context as a simple ID value
+        params.context = this.context.id
       }
 
       const { spammers, context } = await api(this.config).spammers.fetch(
         params
       )
       if (this.instance === instance) {
+        // Batch-fetch user data for all userids and byuserids in the response.
+        await this.fetchUsers(spammers)
+
         this.addAll(spammers)
         this.context = context
       }
     },
 
+    async fetchUsers(spammers) {
+      const userStore = useUserStore()
+      const ids = new Set()
+
+      spammers.forEach((s) => {
+        if (s.userid) ids.add(s.userid)
+        if (s.byuserid) ids.add(s.byuserid)
+      })
+
+      if (ids.size > 0) {
+        await userStore.fetchMultiple([...ids])
+      }
+    },
+
     addAll(items) {
+      const userStore = useUserStore()
+
       items.forEach((item) => {
-        item.user.userid = item.user.id
+        // Build a user object from the user store, decorated with spammer info.
+        const userData = userStore.list[item.userid]
+
+        if (userData) {
+          item.user = {
+            ...userData,
+            userid: userData.id,
+            spammer: {
+              collection: item.collection,
+              reason: item.reason,
+              added: item.added,
+              byuserid: item.byuserid,
+            },
+          }
+
+          // Enrich byuser from the user store.
+          if (item.byuserid) {
+            const byUserData = userStore.list[item.byuserid]
+            if (byUserData) {
+              item.byuser = {
+                id: byUserData.id,
+                displayname: byUserData.displayname,
+                email: byUserData.email,
+              }
+              item.user.spammer.byuser = item.byuser
+            }
+          }
+        } else {
+          // Fallback: minimal user object so components don't crash.
+          item.user = {
+            id: item.userid,
+            userid: item.userid,
+            spammer: {
+              collection: item.collection,
+              reason: item.reason,
+              added: item.added,
+              byuserid: item.byuserid,
+            },
+          }
+        }
 
         const existing = this.list.findIndex((obj) => {
           return parseInt(obj.id) === parseInt(item.id)
@@ -76,7 +136,7 @@ export const useSpammerStore = defineStore({
         reason: params.reason,
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
     },
     async confirm(params) {
       await api(this.config).spammers.patch({
@@ -85,7 +145,7 @@ export const useSpammerStore = defineStore({
         collection: 'Spammer',
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },
@@ -99,7 +159,7 @@ export const useSpammerStore = defineStore({
 
       this.removeFromList(params.id)
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
     },
     async remove(params) {
       await api(this.config).spammers.del({
@@ -107,7 +167,7 @@ export const useSpammerStore = defineStore({
         userid: params.userid,
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },
@@ -119,7 +179,7 @@ export const useSpammerStore = defineStore({
         collection: 'Whitelisted',
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },
@@ -157,6 +217,10 @@ export const useSpammerStore = defineStore({
     },
   },
   getters: {
+    byId: (state) => (id) => {
+      return state.list.find((s) => parseInt(s.id) === parseInt(id)) || null
+    },
+
     getList: (state) => (collection) => {
       return state.list.filter((s) => s.collection === collection)
     },

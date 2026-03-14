@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div v-if="chat" class="layout">
     <div class="type">
       <v-icon
         v-if="chat.chattype === 'User2User'"
@@ -15,7 +15,7 @@
     <div class="id text-muted">
       Chat <v-icon icon="hashtag" scale="0.5" class="text-muted" />{{ chat.id }}
     </div>
-    <ModChatViewButton :id="chat.id" :chat="chat" :pov="pov" class="button" />
+    <ModChatViewButton :id="chat.id" :pov="pov" class="button" />
     <div class="name d-flex">
       {{ chat.name }}&nbsp;
       <span v-if="otheruser" class="text-muted">
@@ -34,10 +34,13 @@
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useChatStore } from '~/stores/chat'
+
+const chatStore = useChatStore()
 
 const props = defineProps({
-  chat: {
-    type: Object,
+  chatid: {
+    type: Number,
     required: true,
   },
   pov: {
@@ -47,11 +50,13 @@ const props = defineProps({
   },
 })
 
+const chat = computed(() => chatStore.byChatId(props.chatid))
+
 const otheruser = computed(() => {
-  if (!props.chat || props.chat.chattype !== 'User2User') {
+  if (!chat.value || chat.value.chattype !== 'User2User') {
     return null
   } else {
-    return props.chat.user1 === props.pov ? props.chat.user2 : props.chat.user1
+    return chat.value.user1 === props.pov ? chat.value.user2 : chat.value.user1
   }
 })
 </script>

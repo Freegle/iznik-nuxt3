@@ -2,40 +2,70 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class MembershipsAPI extends BaseAPI {
   update(data) {
-    return this.$patch('/memberships', data)
+    return this.$patchv2('/memberships', data)
   }
 
   joinGroup(data) {
-    return this.$put('/memberships', data)
+    return this.$putv2('/memberships', data)
   }
 
   leaveGroup(data) {
-    return this.$del('/memberships', data)
+    return this.$delv2('/memberships', data)
   }
 
-  fetch(params, logError = true) {
-    return this.$get('/memberships', params, logError)
+  async fetch(params, logError = true) {
+    const members = await this.$getv2('/memberships', params, logError)
+    const member = Array.isArray(members) ? members[0] : members
+    return { member }
   }
 
-  fetchMembers(params) {
-    // console.error('MembershipsAPI fetchMembers', params)
-    return this.$get('/memberships', params)
+  async fetchMembers(params) {
+    const ret = await this.$getv2('/memberships', params)
+
+    // Happiness collection returns { members, ratings }; others return an array.
+    if (ret && ret.members !== undefined) {
+      return { members: ret.members, context: null, ratings: ret.ratings || [] }
+    }
+
+    return { members: ret, context: null, ratings: [] }
   }
 
   save(event) {
-    return this.$patch('/memberships', event)
+    return this.$patchv2('/memberships', event)
   }
 
   del(id) {
-    return this.$del('/memberships', { id })
+    return this.$delv2('/memberships', { id })
   }
 
   put(data) {
-    return this.$put('/memberships', data)
+    return this.$putv2('/memberships', data)
+  }
+
+  approveMember(userid, groupid, subject = null, stdmsgid = null, body = null) {
+    return this.$postv2('/memberships', {
+      action: 'Approve',
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
+    })
+  }
+
+  rejectMember(userid, groupid, subject = null, stdmsgid = null, body = null) {
+    return this.$postv2('/memberships', {
+      action: 'Reject',
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
+    })
   }
 
   reply(userid, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'Leave Approved Member',
       userid,
       groupid,
@@ -46,7 +76,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   delete(userid, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'Delete Approved Member',
       userid,
       groupid,
@@ -57,14 +87,14 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   remove(userid, groupid) {
-    return this.$del('/memberships', {
+    return this.$delv2('/memberships', {
       userid,
       groupid,
     })
   }
 
   ban(userid, groupid) {
-    return this.$del('/memberships', {
+    return this.$delv2('/memberships', {
       userid,
       groupid,
       ban: true,
@@ -72,7 +102,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   unban(userid, groupid) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       userid,
       groupid,
       action: 'Unban',
@@ -80,7 +110,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   hold(userid, groupid) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'Hold',
       userid,
       groupid,
@@ -88,7 +118,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   release(userid, groupid) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'Release',
       userid,
       groupid,
@@ -96,7 +126,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   reviewHold(membershipid, groupid) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'ReviewHold',
       membershipid,
       groupid,
@@ -104,7 +134,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   reviewRelease(membershipid, groupid) {
-    return this.$post('/memberships', {
+    return this.$postv2('/memberships', {
       action: 'ReviewRelease',
       membershipid,
       groupid,
@@ -112,6 +142,6 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   happinessReviewed(params) {
-    return this.$post('/memberships', params)
+    return this.$postv2('/memberships', params)
   }
 }

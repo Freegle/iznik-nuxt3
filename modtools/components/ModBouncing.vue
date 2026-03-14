@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="user">
     <NoticeMessage v-if="unbounced" variant="warning" class="mb-2">
       We'll try sending them mail again to see if their email is still bouncing.
     </NoticeMessage>
@@ -25,26 +25,38 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
 })
 
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const { supportOrAdmin } = useMe()
+
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
 
 const unbouncing = ref(false)
 const unbounced = ref(false)
 
 async function unbounce() {
   unbouncing.value = true
-  await authStore.unbounceMT(props.user.id)
+  await authStore.unbounceMT(props.userid)
   unbouncing.value = false
   unbounced.value = true
 }

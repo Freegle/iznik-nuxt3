@@ -57,9 +57,9 @@
       <!-- Tree View -->
       <ModSystemLogTreeNode
         v-for="node in logsAsTree"
-        :key="node.trace_id || node.log?.id"
+        :key="node.nodeKey || node.trace_id || node.log?.id"
         ref="treeNodes"
-        :node="node"
+        :node-key="node.nodeKey"
         :hide-user-column="isFilteringByUser"
         @filter-trace="filterByTrace"
         @filter-session="filterBySession"
@@ -214,7 +214,7 @@ async function batchFetchEntities() {
   }
 
   // Batch fetch groups that aren't already in the store
-  const missingGroupIds = groupIds.filter((id) => !groupStore.list[id])
+  const missingGroupIds = groupIds.filter((id) => !groupStore.get(id))
   if (missingGroupIds.length > 0) {
     const BATCH_SIZE = 20
     for (let i = 0; i < missingGroupIds.length; i += BATCH_SIZE) {

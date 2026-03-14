@@ -13,6 +13,8 @@ const { mockMessageStore, mockStdmsgStore, mockCheckWorkDeferGetMessages } =
       release: vi.fn().mockResolvedValue(),
       approveedits: vi.fn().mockResolvedValue(),
       revertedits: vi.fn().mockResolvedValue(),
+      byId: vi.fn(),
+      fetch: vi.fn().mockResolvedValue(),
     }
 
     const mockStdmsgStore = {
@@ -78,7 +80,7 @@ describe('ModMessageButton', () => {
     },
     ModStdMessageModal: {
       template: '<div class="stdmsg-modal"><slot /></div>',
-      props: ['stdmsg', 'message', 'autosend'],
+      props: ['stdmsgid', 'stdmsgaction', 'messageid', 'autosend'],
       methods: {
         show: vi.fn(),
         fillin: vi.fn(),
@@ -90,10 +92,18 @@ describe('ModMessageButton', () => {
     },
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, messageOverrides = {}) {
+    const messageData = createMessage(messageOverrides)
+
+    // Set up message store mock to return the message by ID
+    mockMessageStore.byId.mockImplementation((id) => {
+      if (id === messageData.id) return messageData
+      return null
+    })
+
     return mount(ModMessageButton, {
       props: {
-        message: createMessage(),
+        messageid: messageData.id,
         variant: 'primary',
         label: 'Test Button',
         icon: 'check',
@@ -116,7 +126,6 @@ describe('ModMessageButton', () => {
         label: 'Hold',
         icon: 'pause',
       })
-      // Find by class since stubbed components don't have the same name
       const spinButton = wrapper.find('.spin-button')
       expect(spinButton.exists()).toBe(true)
       expect(spinButton.text()).toContain('Hold')
@@ -141,25 +150,20 @@ describe('ModMessageButton', () => {
 
   describe('groupid computed', () => {
     it('returns groupid from first group', () => {
-      const wrapper = mountComponent({
-        message: createMessage({
-          groups: [{ groupid: 789, collection: 'Pending' }],
-        }),
-      })
+      const wrapper = mountComponent(
+        {},
+        { groups: [{ groupid: 789, collection: 'Pending' }] }
+      )
       expect(wrapper.vm.groupid).toBe(789)
     })
 
     it('returns null when message has no groups', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ groups: [] }),
-      })
+      const wrapper = mountComponent({}, { groups: [] })
       expect(wrapper.vm.groupid).toBeNull()
     })
 
     it('returns null when groups is undefined', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ groups: undefined }),
-      })
+      const wrapper = mountComponent({}, { groups: undefined })
       expect(wrapper.vm.groupid).toBeNull()
     })
   })
@@ -183,44 +187,32 @@ describe('ModMessageButton', () => {
 
   describe('confirmButton computed', () => {
     it('returns true when message is held and action is not spam or delete', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ heldby: { id: 1 } }),
-        approve: true,
-      })
+      const wrapper = mountComponent({ approve: true }, { heldby: { id: 1 } })
       expect(wrapper.vm.confirmButton).toBe(true)
     })
 
     it('returns false when message is held but action is spam', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ heldby: { id: 1 } }),
-        spam: true,
-      })
+      const wrapper = mountComponent({ spam: true }, { heldby: { id: 1 } })
       expect(wrapper.vm.confirmButton).toBe(false)
     })
 
     it('returns false when message is held but action is delete', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ heldby: { id: 1 } }),
-        delete: true,
-      })
+      const wrapper = mountComponent({ delete: true }, { heldby: { id: 1 } })
       expect(wrapper.vm.confirmButton).toBe(false)
     })
 
     it('returns falsy when message is not held', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ heldby: null }),
-        approve: true,
-      })
+      const wrapper = mountComponent({ approve: true }, { heldby: null })
       expect(wrapper.vm.confirmButton).toBeFalsy()
     })
   })
 
   describe('approve action', () => {
     it('calls messageStore.approve when approve prop is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 111, groups: [{ groupid: 222 }] }),
-        approve: true,
-      })
+      const wrapper = mountComponent(
+        { approve: true },
+        { id: 111, groups: [{ groupid: 222 }] }
+      )
       await wrapper.vm.click()
       expect(mockMessageStore.approve).toHaveBeenCalledWith({
         id: 111,
@@ -243,10 +235,10 @@ describe('ModMessageButton', () => {
     })
 
     it('calls messageStore.delete when deleteConfirmed is called', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 333, groups: [{ groupid: 444 }] }),
-        delete: true,
-      })
+      const wrapper = mountComponent(
+        { delete: true },
+        { id: 333, groups: [{ groupid: 444 }] }
+      )
       await wrapper.vm.deleteConfirmed()
       expect(mockMessageStore.delete).toHaveBeenCalledWith({
         id: 333,
@@ -263,10 +255,7 @@ describe('ModMessageButton', () => {
 
   describe('hold action', () => {
     it('calls messageStore.hold when hold prop is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 555 }),
-        hold: true,
-      })
+      const wrapper = mountComponent({ hold: true }, { id: 555 })
       await wrapper.vm.click()
       expect(mockMessageStore.hold).toHaveBeenCalledWith({ id: 555 })
     })
@@ -280,10 +269,7 @@ describe('ModMessageButton', () => {
 
   describe('release action', () => {
     it('calls messageStore.release when release prop is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 666 }),
-        release: true,
-      })
+      const wrapper = mountComponent({ release: true }, { id: 666 })
       await wrapper.vm.click()
       expect(mockMessageStore.release).toHaveBeenCalledWith({ id: 666 })
     })
@@ -303,10 +289,10 @@ describe('ModMessageButton', () => {
     })
 
     it('calls messageStore.spam when spamConfirmed is called', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 777, groups: [{ groupid: 888 }] }),
-        spam: true,
-      })
+      const wrapper = mountComponent(
+        { spam: true },
+        { id: 777, groups: [{ groupid: 888 }] }
+      )
       await wrapper.vm.spamConfirmed()
       expect(mockMessageStore.spam).toHaveBeenCalledWith({
         id: 777,
@@ -323,10 +309,7 @@ describe('ModMessageButton', () => {
 
   describe('approveedits action', () => {
     it('calls messageStore.approveedits when approveedits prop is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 999 }),
-        approveedits: true,
-      })
+      const wrapper = mountComponent({ approveedits: true }, { id: 999 })
       await wrapper.vm.click()
       expect(mockMessageStore.approveedits).toHaveBeenCalledWith({ id: 999 })
     })
@@ -340,10 +323,7 @@ describe('ModMessageButton', () => {
 
   describe('revertedits action', () => {
     it('calls messageStore.revertedits when revertedits prop is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ id: 101 }),
-        revertedits: true,
-      })
+      const wrapper = mountComponent({ revertedits: true }, { id: 101 })
       await wrapper.vm.click()
       expect(mockMessageStore.revertedits).toHaveBeenCalledWith({ id: 101 })
     })
@@ -356,10 +336,10 @@ describe('ModMessageButton', () => {
   })
 
   describe('reject action (standard message modal)', () => {
-    it('sets stdmsg with action Reject when reject prop is true', async () => {
+    it('sets stdmsgAction to Reject when reject prop is true', async () => {
       const wrapper = mountComponent({ reject: true })
       await wrapper.vm.click()
-      expect(wrapper.vm.stdmsg).toEqual({ action: 'Reject' })
+      expect(wrapper.vm.stdmsgAction).toBe('Reject')
     })
 
     it('shows stdmsg modal when reject prop is true', async () => {
@@ -370,10 +350,10 @@ describe('ModMessageButton', () => {
   })
 
   describe('leave action (standard message modal)', () => {
-    it('sets stdmsg with action Leave when leave prop is true', async () => {
+    it('sets stdmsgAction to Leave when leave prop is true', async () => {
       const wrapper = mountComponent({ leave: true })
       await wrapper.vm.click()
-      expect(wrapper.vm.stdmsg).toEqual({ action: 'Leave' })
+      expect(wrapper.vm.stdmsgAction).toBe('Leave')
     })
 
     it('shows stdmsg modal when leave prop is true', async () => {
@@ -391,20 +371,11 @@ describe('ModMessageButton', () => {
       expect(mockStdmsgStore.fetch).toHaveBeenCalledWith(42)
     })
 
-    it('sets stdmsg from fetched result', async () => {
-      mockStdmsgStore.fetch.mockResolvedValue({
-        id: 42,
-        title: 'Fetched Message',
-        action: 'Leave',
-      })
+    it('sets stdmsgId from prop after fetch', async () => {
       const wrapper = mountComponent({ stdmsgid: 42 })
       await wrapper.vm.click()
       await flushPromises()
-      expect(wrapper.vm.stdmsg).toEqual({
-        id: 42,
-        title: 'Fetched Message',
-        action: 'Leave',
-      })
+      expect(wrapper.vm.stdmsgId).toBe(42)
     })
 
     it('shows stdmsg modal when stdmsgid is set', async () => {
@@ -431,23 +402,22 @@ describe('ModMessageButton', () => {
 
   describe('modal rendering', () => {
     it('renders delete confirm modal when showDeleteModal is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ subject: 'Test Subject' }),
-        delete: true,
-      })
+      const wrapper = mountComponent(
+        { delete: true },
+        { subject: 'Test Subject' }
+      )
       await wrapper.vm.click()
       await flushPromises()
       expect(wrapper.find('.confirm-modal').exists()).toBe(true)
     })
 
     it('renders spam confirm modal when showSpamModal is true', async () => {
-      const wrapper = mountComponent({
-        message: createMessage({ subject: 'Test Subject' }),
-        spam: true,
-      })
+      const wrapper = mountComponent(
+        { spam: true },
+        { subject: 'Test Subject' }
+      )
       await wrapper.vm.click()
       await flushPromises()
-      // Need to check there are 2 confirm modals (delete hidden, spam shown)
       expect(wrapper.vm.showSpamModal).toBe(true)
     })
 
@@ -461,25 +431,21 @@ describe('ModMessageButton', () => {
 
   describe('edge cases', () => {
     it('handles message with empty groups array', () => {
-      const wrapper = mountComponent({
-        message: createMessage({ groups: [] }),
-      })
+      const wrapper = mountComponent({}, { groups: [] })
       expect(wrapper.vm.groupid).toBeNull()
     })
 
     it('handles message with undefined groups', () => {
-      const message = createMessage()
-      delete message.groups
-      const wrapper = mountComponent({ message })
+      const wrapper = mountComponent({}, { groups: undefined })
       expect(wrapper.vm.groupid).toBeNull()
     })
 
     it('handles click with no action props set', async () => {
       const wrapper = mountComponent()
-      // No action props, no stdmsgid - should show modal with null stdmsg
       await wrapper.vm.click()
       expect(wrapper.vm.showStdMsgModal).toBe(true)
-      expect(wrapper.vm.stdmsg).toBeNull()
+      expect(wrapper.vm.stdmsgId).toBeNull()
+      expect(wrapper.vm.stdmsgAction).toBeNull()
     })
   })
 })

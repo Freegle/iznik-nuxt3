@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import ModSupportChatList from '~/modtools/components/ModSupportChatList.vue'
 
@@ -17,6 +18,21 @@ describe('ModSupportChatList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    setActivePinia(createPinia())
+
+    globalThis.__mockChatStore = {
+      list: [],
+      listMT: [],
+      listByChatId: {},
+      messageById: () => null,
+      byChatId: () => null,
+      fetchMessages: async () => {},
+      fetchMT: async () => {},
+    }
+  })
+
+  afterEach(() => {
+    globalThis.__mockChatStore = null
   })
 
   function mountComponent(props = {}, options = {}) {
@@ -27,8 +43,8 @@ describe('ModSupportChatList', () => {
         stubs: {
           ModSupportChat: {
             template:
-              '<div class="support-chat" :data-chat-id="chat.id">{{ chat.name }}</div>',
-            props: ['chat', 'pov'],
+              '<div class="support-chat" :data-chat-id="chatid">Chat {{ chatid }}</div>',
+            props: ['chatid', 'pov'],
           },
           'infinite-loading': {
             template:
@@ -199,7 +215,7 @@ describe('ModSupportChatList', () => {
       // With the stub, we check the rendered output contains the chat name
       const chats = wrapper.findAll('.support-chat')
       expect(chats.length).toBeGreaterThan(0)
-      expect(chats[0].text()).toContain('Chat 1')
+      expect(chats[0].text()).toContain('Chat 1') // chatid=1 renders "Chat 1"
     })
 
     it('renders chats with correct pov', async () => {

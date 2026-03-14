@@ -192,7 +192,7 @@ describe('NewsAboutMe', () => {
       await wrapper.find('.b-button.primary').trigger('click')
       await flushPromises()
 
-      expect(mockFetchMe).toHaveBeenCalledWith(['me'], true)
+      expect(mockFetchMe).toHaveBeenCalledWith(true)
       expect(wrapper.find('.about-me-modal').exists()).toBe(true)
     })
   })

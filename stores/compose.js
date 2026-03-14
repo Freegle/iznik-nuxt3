@@ -86,7 +86,7 @@ export const useComposeStore = defineStore({
                   externaluid: attachment.ouruid,
                   externalmods: { ai: true },
                 })
-                if (result.ret === 0 && result.id) {
+                if (result.id) {
                   attids.push(result.id)
                 }
               } catch (e) {
@@ -114,9 +114,17 @@ export const useComposeStore = defineStore({
         email,
       }
 
-      const { id } = await this.$api.message.put(data)
+      const ret = await this.$api.message.put(data)
+
+      // For unauthenticated users, Go creates a user and returns auth tokens.
+      // Store them so the subsequent JoinAndPost call is authenticated.
+      if (ret.jwt && ret.persistent) {
+        const authStore = useAuthStore()
+        authStore.setAuth(ret.jwt, ret.persistent)
+      }
+
       this._progress++
-      return id
+      return ret.id
     },
     async submitDraft(id, email, options = {}) {
       console.log('Submit draft', id, email, options)
@@ -124,19 +132,16 @@ export const useComposeStore = defineStore({
         deadline: options.deadline,
         deliverypossible: options.deliverypossible,
         logError: (data) => {
-          // ret = 8 is posting prohibited, which is due to mod choice not a server error.
-          // ret = 9 is banned, ditto.
-          console.log('Post failed', data, data.ret, data.ret !== 8)
-          return data.ret !== 8 && data.ret !== 9
+          // 403 is posting prohibited or banned, which is due to mod choice not a server error.
+          console.log('Post failed', data)
+          return data?.error !== 403
         },
       })
       console.log('Returned', ret)
 
-      if (ret.ret === 0) {
-        // Fetch the submitted message - if we're on My Posts, for example, we want to update what we see.
-        const messageStore = useMessageStore()
-        messageStore.fetch(id, true)
-      }
+      // Fetch the submitted message - if we're on My Posts, for example, we want to update what we see.
+      const messageStore = useMessageStore()
+      messageStore.fetch(id, true)
 
       this._progress++
       return ret

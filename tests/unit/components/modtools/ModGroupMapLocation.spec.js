@@ -37,8 +37,14 @@ vi.mock('wicket', () => ({
 vi.mock('wicket/wicket-leaflet', () => ({}))
 
 describe('ModGroupMapLocation', () => {
+  const sampleLocationId = 123
+
   const sampleLocation = {
+    id: sampleLocationId,
     name: 'Test Location',
+    polygon: 'POLYGON((-1.5 53.0,-1.5 53.5,-1.0 53.5,-1.0 53.0,-1.5 53.0))',
+    lat: 53.25,
+    lng: -1.25,
     json: {
       type: 'Polygon',
       coordinates: [
@@ -202,14 +208,14 @@ describe('ModGroupMapLocation', () => {
     it('defines expected props', () => {
       // Document the expected props structure
       const expectedProps = {
-        location: { type: Object, required: true },
+        locationid: { type: Number, required: true },
         shade: { type: Boolean, required: false },
         labels: { type: Boolean, required: false },
         selected: { type: Boolean, required: false },
         selectable: { type: Boolean, required: false },
       }
 
-      expect(expectedProps.location.required).toBe(true)
+      expect(expectedProps.locationid.required).toBe(true)
       expect(expectedProps.shade.required).toBe(false)
       expect(expectedProps.labels.required).toBe(false)
       expect(expectedProps.selected.required).toBe(false)

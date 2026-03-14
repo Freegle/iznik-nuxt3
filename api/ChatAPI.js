@@ -6,11 +6,11 @@ export default class ChatAPI extends BaseAPI {
   }
 
   fetchMessagesMT(chatid, params) {
-    return this.$get(`/chat/rooms/${chatid}/messages`, params)
+    return this.$getv2(`/chat/${chatid}/message`, params)
   }
 
   async unseenCountMT() {
-    const { count } = await this.$get('/chatrooms', {
+    const { count } = await this.$getv2('/chatrooms', {
       count: true,
       chattypes: ['User2Mod', 'Mod2Mod'],
     })
@@ -18,11 +18,11 @@ export default class ChatAPI extends BaseAPI {
   }
 
   async fetchReviewChatsMT(params) {
-    return await this.$get(`/chatmessages`, params)
+    return await this.$getv2(`/chatmessages`, params)
   }
 
   async listChatsMT(params) {
-    return await this.$get('/chat/rooms', params)
+    return await this.$getv2('/chat/rooms', params)
   }
 
   async listChats(since, search, keepChat, logError) {
@@ -38,7 +38,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   fetchChatMT(chatid) {
-    return this.$get('/chatrooms', {
+    return this.$getv2('/chatrooms', {
       id: chatid,
       chattypes: ['User2Mod', 'Mod2Mod'],
     })
@@ -49,7 +49,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   markRead(chatid, lastmsg, allowback) {
-    return this.$post('/chatrooms', {
+    return this.$postv2('/chatrooms', {
       id: chatid,
       lastmsgseen: lastmsg,
       allowback,
@@ -57,11 +57,11 @@ export default class ChatAPI extends BaseAPI {
   }
 
   deleteMessage(messageId) {
-    return this.$del(`/chatmessages?id=${messageId}`)
+    return this.$delv2(`/chatmessages?id=${messageId}`)
   }
 
   openChat(params, logError) {
-    return this.$put('/chat/rooms', params, logError)
+    return this.$putv2('/chat/rooms', params, logError)
   }
 
   async send(data) {
@@ -69,30 +69,30 @@ export default class ChatAPI extends BaseAPI {
   }
 
   async sendMT(data) {
-    return await this.$post('/chatmessages', data)
+    return await this.$postv2('/chatmessages', data)
   }
 
   nudge(chatid) {
-    return this.$post('/chatrooms', {
+    return this.$postv2('/chatrooms', {
       id: chatid,
       action: 'Nudge',
     })
   }
 
   hideChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Closed' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Closed' })
   }
 
   blockChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Blocked' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Blocked' })
   }
 
   unHideChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Online' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Online' })
   }
 
   rsvp(id, chatid, value) {
-    return this.$patch('/chatmessages', {
+    return this.$patchv2('/chatmessages', {
       roomid: chatid,
       id,
       replyexpected: value,
@@ -100,10 +100,10 @@ export default class ChatAPI extends BaseAPI {
   }
 
   typing(chatid) {
-    return this.$post('/chatrooms', { id: chatid, action: 'Typing' })
+    return this.$postv2('/chatrooms', { id: chatid, action: 'Typing' })
   }
 
   referToSupport(chatid) {
-    return this.$post('/chatrooms', { id: chatid, action: 'ReferToSupport' })
+    return this.$postv2('/chatrooms', { id: chatid, action: 'ReferToSupport' })
   }
 }

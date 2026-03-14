@@ -3,7 +3,7 @@
     <ModSupportChat
       v-for="chat in chatsShown"
       :key="'chathistory-' + chat.id"
-      :chat="chat"
+      :chatid="chat.id"
       :pov="pov"
     />
     <infinite-loading :distance="10" @infinite="loadMoreChats">
@@ -14,7 +14,10 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useChatStore } from '~/stores/chat'
+
+const chatStore = useChatStore()
 
 const props = defineProps({
   chats: {
@@ -28,6 +31,18 @@ const props = defineProps({
   },
 })
 
+// Populate the chat store with chat objects so ModSupportChat can look them up by id.
+function populateStore(chats) {
+  if (chats) {
+    chats.forEach((c) => {
+      chatStore.listByChatId[c.id] = c
+    })
+  }
+}
+
+populateStore(props.chats)
+watch(() => props.chats, populateStore)
+
 const showChats = ref(0)
 
 const chatsShown = computed(() => {
@@ -36,7 +51,7 @@ const chatsShown = computed(() => {
 
 function loadMoreChats($state) {
   // We use an infinite load for the list because it's a lot of DOM to add at initial page load.
-  if (showChats.value < props.chats.length) {
+  if (props.chats && showChats.value < props.chats.length) {
     showChats.value += 10
     $state.loaded()
   } else {

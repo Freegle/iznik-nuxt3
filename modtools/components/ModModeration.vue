@@ -17,7 +17,7 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
@@ -25,14 +25,9 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  user: {
-    type: Object,
-    required: true,
-  },
   userid: {
     type: Number,
-    required: false,
-    default: 0,
+    required: true,
   },
   size: {
     type: String,
@@ -43,15 +38,24 @@ const props = defineProps({
 
 const userStore = useUserStore()
 
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
+
 const postingStatus = computed({
   get() {
     return props.membership.ourpostingstatus || 'MODERATED'
   },
   async set(val) {
     const groupid = props.membership.groupid ?? props.membership.id
-    const userid = props.userid ? props.userid : props.user.id
     await userStore.edit({
-      id: userid,
+      id: props.userid,
       groupid,
       ourPostingStatus: val,
     })
@@ -60,13 +64,12 @@ const postingStatus = computed({
 
 const trustlevel = computed({
   get() {
-    return props.user.trustlevel ? props.user.trustlevel : null
+    return user.value?.trustlevel ?? null
   },
   async set(val) {
     const groupid = props.membership.groupid ?? props.membership.id
-    const userid = props.userid ? props.userid : props.user.id
     await userStore.edit({
-      id: userid,
+      id: props.userid,
       groupid,
       trustlevel: val,
     })
@@ -92,6 +95,6 @@ const options = computed(() => {
 </script>
 <style scoped>
 .sel {
-  max-width: 200px;
+  width: auto;
 }
 </style>

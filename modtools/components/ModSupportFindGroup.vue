@@ -10,7 +10,7 @@
       "
       :disabled="loading"
     />
-    <div v-if="group && group.url">
+    <div v-if="group && group.nameshort">
       <h3 class="mt-2">
         {{ group.nameshort }}
       </h3>
@@ -22,15 +22,15 @@
       >
         {{ group.namedisplay }}
       </h4>
-      <div class="d-flex">
+      <div class="d-flex flex-wrap">
         <OurToggle
           :model-value="Boolean(group.publish)"
           :height="36"
-          :width="150"
+          :width="170"
           :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.ontn)"
@@ -39,16 +39,16 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onlovejunk)"
           :height="36"
-          :width="150"
+          :width="190"
           :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onmap)"
@@ -57,7 +57,7 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <b-form-group>
           <b-form-select
@@ -81,9 +81,9 @@
       >.
       <br />
       <br />
-      <ModClipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="groupUrl" class="mr-3 mb-1" :value="groupUrl" />
       Explore page:
-      <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
+      <ExternalLink :href="groupUrl">{{ groupUrl }}</ExternalLink>
       <br />
       <ModClipboard
         v-if="group.modsemail"
@@ -266,6 +266,11 @@ const group = computed(() => {
   return modGroupStore.get(groupid.value)
 })
 
+const groupUrl = computed(() => {
+  if (!group.value?.nameshort) return null
+  return 'https://www.ilovefreegle.org/explore/' + group.value.nameshort
+})
+
 const volunteers = computed(() => {
   return memberStore.getByGroup(groupid.value)
 })
@@ -340,7 +345,7 @@ watch(groupid, async (id) => {
 })
 
 async function loadallgroups(callback) {
-  await modGroupStore.listMT({ grouptype: 'Freegle' })
+  await modGroupStore.listMT({ grouptype: 'Freegle', support: true })
   if (callback) callback()
 }
 

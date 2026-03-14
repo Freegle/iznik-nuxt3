@@ -2,6 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModMessageRelated from '~/modtools/components/ModMessageRelated.vue'
 
+const { mockMessageStore } = vi.hoisted(() => {
+  const mockMessageStore = {
+    byId: vi.fn(),
+    fetch: vi.fn().mockResolvedValue(),
+  }
+  return { mockMessageStore }
+})
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
+}))
+
 describe('ModMessageRelated', () => {
   const createTestMessage = (overrides = {}) => ({
     id: 123,
@@ -10,10 +22,17 @@ describe('ModMessageRelated', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, messageOverrides = {}) {
+    const messageData = createTestMessage(messageOverrides)
+
+    mockMessageStore.byId.mockImplementation((id) => {
+      if (id === messageData.id) return messageData
+      return null
+    })
+
     return mount(ModMessageRelated, {
       props: {
-        message: createTestMessage(),
+        messageid: messageData.id,
         ...props,
       },
       global: {
@@ -60,9 +79,9 @@ describe('ModMessageRelated', () => {
   })
 
   describe('props', () => {
-    it('message prop is required', () => {
+    it('messageid prop is required', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeDefined()
+      expect(wrapper.props('messageid')).toBeDefined()
     })
   })
 
@@ -86,13 +105,14 @@ describe('ModMessageRelated', () => {
 
   describe('content display', () => {
     it('displays all message details in order', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        { messageid: 999 },
+        {
           id: 999,
           subject: 'Test Subject',
           arrival: '2024-06-01',
-        }),
-      })
+        }
+      )
       const text = wrapper.text()
       expect(text).toContain('Related to')
       expect(text).toContain('999')
@@ -102,50 +122,57 @@ describe('ModMessageRelated', () => {
 
     it('handles long subject text', () => {
       const longSubject = 'A'.repeat(200)
-      const wrapper = mountComponent({
-        message: createTestMessage({ subject: longSubject }),
-      })
+      const wrapper = mountComponent({}, { subject: longSubject })
       expect(wrapper.text()).toContain(longSubject)
     })
 
     it('handles subject with special characters', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        {},
+        {
           subject: 'Test <>&"\'',
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain('Test <>&')
     })
   })
 
   describe('edge cases', () => {
-    it('handles message with numeric id of 0', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ id: 0 }),
-      })
-      expect(wrapper.text()).toContain('0')
-    })
-
     it('handles empty subject', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ subject: '' }),
-      })
+      const wrapper = mountComponent({}, { subject: '' })
       const em = wrapper.find('em')
       expect(em.text()).toBe('')
     })
 
     it('handles null arrival time', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ arrival: null }),
-      })
+      const wrapper = mountComponent({}, { arrival: null })
       // timeago returns 'null ago' for null input
       expect(wrapper.text()).toContain('null ago')
     })
 
     it('handles missing arrival time', () => {
-      const message = createTestMessage()
-      delete message.arrival
-      const wrapper = mountComponent({ message })
+      const messageData = createTestMessage()
+      delete messageData.arrival
+
+      mockMessageStore.byId.mockImplementation((id) => {
+        if (id === messageData.id) return messageData
+        return null
+      })
+
+      const wrapper = mount(ModMessageRelated, {
+        props: { messageid: messageData.id },
+        global: {
+          mocks: {
+            timeago: (date) => `${date} ago`,
+          },
+          stubs: {
+            'v-icon': {
+              template: '<i :class="icon" />',
+              props: ['icon', 'scale'],
+            },
+          },
+        },
+      })
       // timeago returns 'undefined ago' for undefined input
       expect(wrapper.text()).toContain('undefined ago')
     })

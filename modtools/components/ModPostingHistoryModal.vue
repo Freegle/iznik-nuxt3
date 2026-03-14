@@ -2,7 +2,7 @@
   <div>
     <b-modal
       ref="modal"
-      :title="'Post Summary for ' + user.displayname"
+      :title="'Post Summary for ' + (user ? user.displayname : '#' + userid)"
       size="lg"
       no-stacking
     >
@@ -60,13 +60,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useGroupStore } from '~/stores/group'
+import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
   type: {
@@ -77,23 +78,35 @@ const props = defineProps({
 })
 
 const groupStore = useGroupStore()
+const userStore = useUserStore()
 const { modal, hide } = useOurModal()
+
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) {
+      userStore.fetchMT({ id: uid, info: true, emailhistory: true })
+    }
+  },
+  { immediate: true }
+)
 
 const groupid = ref(null)
 
 const messages = computed(() => {
   let ret = []
 
-  if (props.user && props.user.messagehistory) {
-    ret = props.user.messagehistory.filter((message) => {
+  if (user.value && user.value.messagehistory) {
+    ret = user.value.messagehistory.filter((message) => {
       return !props.type || props.type === message.type
     })
 
-    const allGroups = groupStore.list
-
     ret.forEach((message) => {
-      if (allGroups && allGroups[message.groupid]) {
-        message.groupname = allGroups[message.groupid].namedisplay
+      const group = groupStore.get(message.groupid)
+      if (group) {
+        message.groupname = group.namedisplay
       } else {
         message.groupname = '#' + message.groupid
       }

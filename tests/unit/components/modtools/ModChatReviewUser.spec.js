@@ -2,20 +2,35 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModChatReviewUser from '~/modtools/components/ModChatReviewUser.vue'
 
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModChatReviewUser', () => {
+  const defaultUser = {
+    id: 123,
+    displayname: 'Test User',
+    emails: [{ email: 'test@example.com', preferred: true, ourdomain: false }],
+    comments: [],
+  }
+
   const defaultProps = {
-    user: {
-      id: 123,
-      displayname: 'Test User',
-      emails: [
-        { email: 'test@example.com', preferred: true, ourdomain: false },
-      ],
-      comments: [],
-    },
+    userid: 123,
     groupid: 456,
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, userOverrides = null) {
+    const user = userOverrides
+      ? { ...defaultUser, ...userOverrides }
+      : defaultUser
+    mockUserStore.byId.mockReturnValue(user)
+
     return mount(ModChatReviewUser, {
       props: { ...defaultProps, ...props },
       global: {
@@ -37,11 +52,11 @@ describe('ModChatReviewUser', () => {
           },
           ModComment: {
             template: '<div class="comment" />',
-            props: ['comment', 'user'],
+            props: ['commentid', 'userid'],
           },
           ModCommentAddModal: {
             template: '<div class="add-modal" />',
-            props: ['user', 'groupid'],
+            props: ['userid', 'groupid'],
           },
         },
       },
@@ -50,6 +65,8 @@ describe('ModChatReviewUser', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(defaultUser)
+    mockUserStore.fetch.mockResolvedValue(defaultUser)
   })
 
   describe('rendering', () => {
@@ -69,23 +86,13 @@ describe('ModChatReviewUser', () => {
     })
 
     it('renders TN user id when present', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
-          tnuserid: 789,
-        },
-      })
+      const wrapper = mountComponent({}, { tnuserid: 789 })
       expect(wrapper.text()).toContain('TN user id')
       expect(wrapper.text()).toContain('789')
     })
 
     it('renders LoveJunk user id when present', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
-          ljuserid: 999,
-        },
-      })
+      const wrapper = mountComponent({}, { ljuserid: 999 })
       expect(wrapper.text()).toContain('LoveJunk user id')
       expect(wrapper.text()).toContain('999')
     })
@@ -96,15 +103,15 @@ describe('ModChatReviewUser', () => {
     })
 
     it('renders comments when user has comments', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
+      const wrapper = mountComponent(
+        {},
+        {
           comments: [
             { id: 1, user1: 'Comment 1' },
             { id: 2, user1: 'Comment 2' },
           ],
-        },
-      })
+        }
+      )
       expect(wrapper.findAll('.comment')).toHaveLength(2)
     })
   })
@@ -116,19 +123,14 @@ describe('ModChatReviewUser', () => {
     })
 
     it('returns null when user has no emails', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
-          emails: [],
-        },
-      })
+      const wrapper = mountComponent({}, { emails: [] })
       expect(wrapper.vm.email).toBe(null)
     })
 
     it('skips ourdomain emails', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
+      const wrapper = mountComponent(
+        {},
+        {
           emails: [
             {
               email: 'internal@ourdomain.com',
@@ -141,15 +143,15 @@ describe('ModChatReviewUser', () => {
               ourdomain: false,
             },
           ],
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe('external@example.com')
     })
 
     it('prefers preferred email', () => {
-      const wrapper = mountComponent({
-        user: {
-          ...defaultProps.user,
+      const wrapper = mountComponent(
+        {},
+        {
           emails: [
             { email: 'first@example.com', preferred: false, ourdomain: false },
             {
@@ -158,8 +160,8 @@ describe('ModChatReviewUser', () => {
               ourdomain: false,
             },
           ],
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe('preferred@example.com')
     })
 

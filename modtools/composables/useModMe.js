@@ -91,7 +91,7 @@ export function useModMe() {
       if (authStore.work) currentTotal += authStore.work.total
       if (chatStore) currentTotal += Math.min(99, chatStore.unreadCount)
       const { fetchMe } = useMe()
-      await fetchMe(true, ['work'])
+      await fetchMe(true)
       await modGroupStore.getModGroups()
 
       const chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0

@@ -2,10 +2,46 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModLog from '~/modtools/components/ModLog.vue'
 
+// Mock logs store
+const mockLogsStore = {
+  list: [],
+  byId: vi.fn(),
+}
+
+// Mock user store (used by ModLog for logUser/logByuser lookups)
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
+}
+
+// Mock message store (used by ModLog for logMessage lookups)
+const mockMessageStore = {
+  byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
+}
+
+vi.mock('~/stores/logs', () => ({
+  useLogsStore: () => mockLogsStore,
+}))
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
+}))
+
 describe('ModLog', () => {
   function createWrapper(log) {
+    // Store the log in the mock store's list and set up byId
+    mockLogsStore.list = [log]
+    mockLogsStore.byId.mockImplementation(
+      (id) => mockLogsStore.list.find((l) => l.id === id) || null
+    )
+
     return mount(ModLog, {
-      props: { log },
+      props: { logid: log.id },
       global: {
         stubs: {
           'b-row': {
@@ -17,20 +53,20 @@ describe('ModLog', () => {
           },
           ModLogUser: {
             template:
-              '<span class="mod-log-user" :data-id="user?.id">{{ user?.displayname }}</span>',
-            props: ['user'],
+              '<span class="mod-log-user" :data-id="userid">{{ userid }}</span>',
+            props: ['userid'],
           },
           ModLogGroup: {
             template: '<span class="mod-log-group">Group</span>',
-            props: ['log', 'tag'],
+            props: ['logid', 'tag'],
           },
           ModLogMessage: {
             template: '<span class="mod-log-message">Message</span>',
-            props: ['log', 'notext', 'tag'],
+            props: ['logid', 'notext', 'tag'],
           },
           ModLogStdMsg: {
             template: '<span class="mod-log-stdmsg">StdMsg</span>',
-            props: ['log'],
+            props: ['logid'],
           },
         },
       },
@@ -39,6 +75,9 @@ describe('ModLog', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockLogsStore.list = []
+    mockUserStore.byId.mockReturnValue(null)
+    mockMessageStore.byId.mockReturnValue(null)
   })
 
   describe('rendering', () => {
@@ -53,6 +92,32 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('formatted:2024-01-15T10:00:00Z')
       expect(wrapper.find('.mod-log-user').exists()).toBe(true)
       expect(wrapper.text()).toContain('Logged in')
+    })
+
+    it('renders nothing when log not found in store', () => {
+      mockLogsStore.list = []
+      mockLogsStore.byId.mockReturnValue(null)
+
+      const wrapper = mount(ModLog, {
+        props: { logid: 999 },
+        global: {
+          stubs: {
+            'b-row': { template: '<div class="row"><slot /></div>' },
+            'b-col': {
+              template: '<div class="col"><slot /></div>',
+              props: ['cols', 'lg'],
+            },
+            ModLogUser: { template: '<span />', props: ['userid'] },
+            ModLogGroup: { template: '<span />', props: ['logid', 'tag'] },
+            ModLogMessage: {
+              template: '<span />',
+              props: ['logid', 'notext', 'tag'],
+            },
+            ModLogStdMsg: { template: '<span />', props: ['logid'] },
+          },
+        },
+      })
+      expect(wrapper.find('.row').exists()).toBe(false)
     })
   })
 
@@ -94,14 +159,14 @@ describe('ModLog', () => {
     })
   })
 
-  describe('byuser computed', () => {
+  describe('logByuser computed', () => {
     it.each([
       [
         { id: 456, displayname: 'Mod User' },
         { id: 456, displayname: 'Mod User' },
         'returns log.byuser when present',
       ],
-      [undefined, undefined, 'returns undefined when log has no byuser'],
+      [undefined, null, 'returns null when log has no byuser'],
     ])('%s', (byuser, expected, _description) => {
       const wrapper = createWrapper({
         id: 1,
@@ -109,7 +174,7 @@ describe('ModLog', () => {
         subtype: 'Login',
         byuser,
       })
-      expect(wrapper.vm.byuser).toEqual(expected)
+      expect(wrapper.vm.logByuser).toEqual(expected)
     })
   })
 

@@ -1,22 +1,22 @@
 <template>
-  <div>
+  <div v-if="message">
     <div v-if="editreview" class="d-inline">
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="primary"
         icon="check"
         approveedits
         label="Accept Edit"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="danger"
         icon="times"
         revertedits
         label="Reject Edit"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="primary"
         icon="envelope"
         leave
@@ -26,21 +26,21 @@
     <div v-else-if="pending" class="d-inline">
       <ModMessageButton
         v-if="!cantpost"
-        :message="message"
+        :messageid="message.id"
         variant="primary"
         icon="check"
         approve
         label="Approve"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="warning"
         icon="times"
         reject
         label="Reject"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="danger"
         icon="trash-alt"
         delete
@@ -48,14 +48,14 @@
       />
       <ModMessageButton
         v-if="!message.heldby"
-        :message="message"
+        :messageid="message.id"
         variant="warning"
         icon="pause"
         hold
         label="Hold"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="danger"
         icon="ban"
         spam
@@ -64,28 +64,28 @@
     </div>
     <div v-else-if="approved" class="d-inline">
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="primary"
         icon="envelope"
         leave
         label="Blank Reply"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="danger"
         icon="trash-alt"
         delete
         label="Delete"
       />
       <ModMessageButton
-        :message="message"
+        :messageid="message.id"
         variant="danger"
         icon="ban"
         spam
         label="Delete as Spam"
       />
       <SpinButton
-        v-if="message.type === 'Offer' && !message.outcomes.length"
+        v-if="message.type === 'Offer' && !message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="check"
@@ -95,7 +95,7 @@
         @handle="outcome($event, 'Taken')"
       />
       <SpinButton
-        v-if="message.type === 'Wanted' && !message.outcomes.length"
+        v-if="message.type === 'Wanted' && !message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="check"
@@ -105,7 +105,7 @@
         @handle="outcome($event, 'Received')"
       />
       <SpinButton
-        v-if="!message.outcomes.length"
+        v-if="!message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="trash-alt"
@@ -123,7 +123,7 @@
         :icon="icon(stdmsg)"
         :label="stdmsg.title"
         :stdmsgid="stdmsg.id"
-        :message="message"
+        :messageid="message.id"
         :autosend="Boolean(stdmsg.autosend && allowAutoSend)"
       />
       <b-button
@@ -156,17 +156,18 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
+import { useModConfigStore } from '~/stores/modconfig'
 import { copyStdMsgs, icon, variant } from '~/composables/useStdMsgs'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
-  modconfig: {
-    type: Object,
+  modconfigid: {
+    type: Number,
     required: false,
     default: null,
   },
@@ -183,6 +184,22 @@ const props = defineProps({
 })
 
 const messageStore = useMessageStore()
+const modConfigStore = useModConfigStore()
+const modconfig = computed(
+  () => modConfigStore.configsById?.[props.modconfigid]
+)
+
+const message = computed(() => messageStore.byId(props.messageid))
+
+watch(
+  () => props.messageid,
+  async (newVal) => {
+    if (newVal && !messageStore.byId(newVal)) {
+      await messageStore.fetch(newVal)
+    }
+  },
+  { immediate: true }
+)
 
 const showRare = ref(false)
 const allowAutoSend = ref(true)
@@ -190,8 +207,8 @@ const allowAutoSend = ref(true)
 function hasCollection(coll) {
   let ret = false
 
-  if (props.message.groups) {
-    props.message.groups.forEach((group) => {
+  if (message.value?.groups) {
+    message.value.groups.forEach((group) => {
       if (group.collection === coll) {
         ret = true
       }
@@ -225,15 +242,15 @@ const validActions = computed(() => {
 })
 
 const stdmsgs = computed(() => {
-  if (props.modconfig) {
-    return copyStdMsgs(props.modconfig)
+  if (modconfig.value) {
+    return copyStdMsgs(modconfig.value)
   } else {
     return []
   }
 })
 
 const filterByAction = computed(() => {
-  if (props.modconfig) {
+  if (modconfig.value) {
     return stdmsgs.value.filter((stdmsg) => {
       return validActions.value.includes(stdmsg.action)
     })
@@ -243,7 +260,7 @@ const filterByAction = computed(() => {
 })
 
 const filtered = computed(() => {
-  if (props.modconfig) {
+  if (modconfig.value) {
     return filterByAction.value.filter((stdmsg) => {
       return showRare.value || !parseInt(stdmsg.rarelyused)
     })
@@ -259,7 +276,7 @@ const rareToShow = computed(() => {
 function outcome(callback, type) {
   messageStore.updateMT({
     action: 'Outcome',
-    id: props.message.id,
+    id: props.messageid,
     outcome: type,
   })
   if (callback) callback()

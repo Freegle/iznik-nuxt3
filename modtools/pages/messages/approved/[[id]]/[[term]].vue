@@ -21,9 +21,12 @@
       <ModtoolsViewControl misckey="modtoolsMessagesApprovedSummary" />
     </div>
     <div>
-      <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
+      <NoticeMessage v-if="loaded && !messages.length && !busy" class="mt-2">
         Nothing found. Almost always this is because the member or message
         doesn't exist (or has been very deleted).
+      </NoticeMessage>
+      <NoticeMessage v-else-if="!loaded" class="mt-2">
+        Please wait...
       </NoticeMessage>
       <ModMessages :group="group" />
       <infinite-loading
@@ -85,6 +88,7 @@ const {
 const chosengroupid = ref(0)
 const bump = ref(0)
 const urlOverride = ref(false)
+const loaded = ref(false)
 
 // Computed properties
 const id = computed(() => {
@@ -226,5 +230,6 @@ async function loadMore($state) {
     }
   }
   busy.value = false
+  loaded.value = true
 }
 </script>

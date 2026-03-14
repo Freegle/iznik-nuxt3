@@ -3,8 +3,18 @@ import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
 import ModMemberEngagement from '~/modtools/components/ModMemberEngagement.vue'
 
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModMemberEngagement', () => {
-  const createMember = (overrides = {}) => ({
+  const createUser = (overrides = {}) => ({
     id: 123,
     displayname: 'Test User',
     lastaccess: dayjs().subtract(10, 'days').toISOString(),
@@ -14,10 +24,13 @@ describe('ModMemberEngagement', () => {
   })
 
   function mountComponent(props = {}) {
+    const userData = props.member ? props.member : createUser()
+    const { member: _unused, ...restProps } = props
+    mockUserStore.byId.mockReturnValue(userData)
     return mount(ModMemberEngagement, {
       props: {
-        member: createMember(),
-        ...props,
+        userid: userData.id,
+        ...restProps,
       },
       global: {
         stubs: {
@@ -38,6 +51,8 @@ describe('ModMemberEngagement', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -47,17 +62,15 @@ describe('ModMemberEngagement', () => {
     })
 
     it('does not render content when member has no data', () => {
-      // member prop is required, but the template uses v-if="member"
-      // which handles falsy member gracefully
       const wrapper = mountComponent({
-        member: createMember({ lastaccess: null }),
+        member: createUser({ lastaccess: null }),
       })
       expect(wrapper.text()).not.toContain('Last active')
     })
 
     it('shows last active message when lastaccess exists', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(5, 'days').toISOString(),
         }),
       })
@@ -66,14 +79,14 @@ describe('ModMemberEngagement', () => {
 
     it('hides last active when lastaccess is null', () => {
       const wrapper = mountComponent({
-        member: createMember({ lastaccess: null }),
+        member: createUser({ lastaccess: null }),
       })
       expect(wrapper.text()).not.toContain('Last active:')
     })
 
     it('shows engagement badge', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Frequent' }),
+        member: createUser({ engagement: 'Frequent' }),
       })
       expect(wrapper.find('.badge').exists()).toBe(true)
       expect(wrapper.find('.badge').text()).toBe('Frequent')
@@ -81,14 +94,14 @@ describe('ModMemberEngagement', () => {
 
     it('shows ModSupporter when member is a supporter', () => {
       const wrapper = mountComponent({
-        member: createMember({ supporter: true }),
+        member: createUser({ supporter: true }),
       })
       expect(wrapper.find('.mod-supporter').exists()).toBe(true)
     })
 
     it('hides ModSupporter when member is not a supporter', () => {
       const wrapper = mountComponent({
-        member: createMember({ supporter: false }),
+        member: createUser({ supporter: false }),
       })
       expect(wrapper.find('.mod-supporter').exists()).toBe(false)
     })
@@ -97,7 +110,7 @@ describe('ModMemberEngagement', () => {
   describe('inactive computed', () => {
     it('returns true when lastaccess is more than 6 months ago', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(200, 'days').toISOString(),
         }),
       })
@@ -106,7 +119,7 @@ describe('ModMemberEngagement', () => {
 
     it('returns false when lastaccess is less than 6 months ago', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(100, 'days').toISOString(),
         }),
       })
@@ -115,7 +128,7 @@ describe('ModMemberEngagement', () => {
 
     it('returns false when lastaccess is exactly at the boundary (182 days)', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(182, 'days').toISOString(),
         }),
       })
@@ -125,7 +138,7 @@ describe('ModMemberEngagement', () => {
 
     it('returns true when lastaccess is exactly at the boundary (183 days)', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(183, 'days').toISOString(),
         }),
       })
@@ -135,7 +148,7 @@ describe('ModMemberEngagement', () => {
 
     it('returns falsy when member has no lastaccess', () => {
       const wrapper = mountComponent({
-        member: createMember({ lastaccess: null }),
+        member: createUser({ lastaccess: null }),
       })
       // The expression returns null/false/falsy when lastaccess is null
       expect(wrapper.vm.inactive).toBeFalsy()
@@ -143,7 +156,7 @@ describe('ModMemberEngagement', () => {
 
     it('shows warning message when inactive', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(200, 'days').toISOString(),
         }),
       })
@@ -152,7 +165,7 @@ describe('ModMemberEngagement', () => {
 
     it('applies text-danger class when inactive', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        member: createUser({
           lastaccess: dayjs().subtract(200, 'days').toISOString(),
         }),
       })
@@ -163,49 +176,49 @@ describe('ModMemberEngagement', () => {
   describe('engagement computed', () => {
     it('maps "At Risk" to "Dormant Soon"', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'At Risk' }),
+        member: createUser({ engagement: 'At Risk' }),
       })
       expect(wrapper.vm.engagement).toBe('Dormant Soon')
     })
 
     it('maps "Obsessed" to "Very Frequent"', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Obsessed' }),
+        member: createUser({ engagement: 'Obsessed' }),
       })
       expect(wrapper.vm.engagement).toBe('Very Frequent')
     })
 
     it('returns engagement value unchanged for other values', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Frequent' }),
+        member: createUser({ engagement: 'Frequent' }),
       })
       expect(wrapper.vm.engagement).toBe('Frequent')
     })
 
     it('returns "New" unchanged', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'New' }),
+        member: createUser({ engagement: 'New' }),
       })
       expect(wrapper.vm.engagement).toBe('New')
     })
 
     it('returns "Occasional" unchanged', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Occasional' }),
+        member: createUser({ engagement: 'Occasional' }),
       })
       expect(wrapper.vm.engagement).toBe('Occasional')
     })
 
     it('returns "Inactive" unchanged', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Inactive' }),
+        member: createUser({ engagement: 'Inactive' }),
       })
       expect(wrapper.vm.engagement).toBe('Inactive')
     })
 
     it('returns "Dormant" unchanged', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Dormant' }),
+        member: createUser({ engagement: 'Dormant' }),
       })
       expect(wrapper.vm.engagement).toBe('Dormant')
     })
@@ -214,56 +227,56 @@ describe('ModMemberEngagement', () => {
   describe('variant computed', () => {
     it('returns "info" for New engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'New' }),
+        member: createUser({ engagement: 'New' }),
       })
       expect(wrapper.vm.variant).toBe('info')
     })
 
     it('returns "secondary" for Occasional engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Occasional' }),
+        member: createUser({ engagement: 'Occasional' }),
       })
       expect(wrapper.vm.variant).toBe('secondary')
     })
 
     it('returns "primary" for Frequent engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Frequent' }),
+        member: createUser({ engagement: 'Frequent' }),
       })
       expect(wrapper.vm.variant).toBe('primary')
     })
 
     it('returns "danger" for Obsessed engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Obsessed' }),
+        member: createUser({ engagement: 'Obsessed' }),
       })
       expect(wrapper.vm.variant).toBe('danger')
     })
 
     it('returns "light" for Inactive engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Inactive' }),
+        member: createUser({ engagement: 'Inactive' }),
       })
       expect(wrapper.vm.variant).toBe('light')
     })
 
     it('returns "light" for AtRisk engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'AtRisk' }),
+        member: createUser({ engagement: 'AtRisk' }),
       })
       expect(wrapper.vm.variant).toBe('light')
     })
 
     it('returns "dark" for Dormant engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Dormant' }),
+        member: createUser({ engagement: 'Dormant' }),
       })
       expect(wrapper.vm.variant).toBe('dark')
     })
 
     it('returns "light" as default for unknown engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: 'Unknown' }),
+        member: createUser({ engagement: 'Unknown' }),
       })
       expect(wrapper.vm.variant).toBe('light')
     })
@@ -272,14 +285,14 @@ describe('ModMemberEngagement', () => {
   describe('edge cases', () => {
     it('handles member with undefined engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: undefined }),
+        member: createUser({ engagement: undefined }),
       })
       expect(wrapper.vm.variant).toBe('light')
     })
 
     it('handles member with empty string engagement', () => {
       const wrapper = mountComponent({
-        member: createMember({ engagement: '' }),
+        member: createUser({ engagement: '' }),
       })
       expect(wrapper.vm.variant).toBe('light')
     })

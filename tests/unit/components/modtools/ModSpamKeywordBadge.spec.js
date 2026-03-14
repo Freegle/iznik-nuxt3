@@ -6,24 +6,36 @@ import ModSpamKeywordBadge from '~/modtools/components/ModSpamKeywordBadge.vue'
 // Mock the store
 const mockDeleteSpamKeyword = vi.fn()
 
+const defaultSpamKeyword = {
+  id: 123,
+  word: 'spam_word',
+  type: 'Exact',
+  action: 'Spam',
+}
+
+// Mutable array so tests can swap the store data
+let mockSpamKeywords = [defaultSpamKeyword]
+
 vi.mock('~/stores/systemconfig', () => ({
   useSystemConfigStore: () => ({
     isLoading: false,
     deleteSpamKeyword: mockDeleteSpamKeyword,
+    get spam_keywords() {
+      return mockSpamKeywords
+    },
   }),
 }))
 
 describe('ModSpamKeywordBadge', () => {
   const defaultProps = {
-    spamKeyword: {
-      id: 123,
-      word: 'spam_word',
-      type: 'Exact',
-      action: 'Spam',
-    },
+    spamKeywordId: 123,
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, storeKeyword = null) {
+    if (storeKeyword) {
+      mockSpamKeywords = [storeKeyword]
+    }
+
     return mount(ModSpamKeywordBadge, {
       props: { ...defaultProps, ...props },
       global: {
@@ -55,6 +67,7 @@ describe('ModSpamKeywordBadge', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockDeleteSpamKeyword.mockResolvedValue()
+    mockSpamKeywords = [defaultSpamKeyword]
   })
 
   describe('rendering', () => {
@@ -64,9 +77,10 @@ describe('ModSpamKeywordBadge', () => {
     })
 
     it('shows REGEX prefix for regex type', () => {
-      const wrapper = mountComponent({
-        spamKeyword: { ...defaultProps.spamKeyword, type: 'Regex' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultSpamKeyword, type: 'Regex' }
+      )
       expect(wrapper.text()).toContain('REGEX:')
     })
 
@@ -93,9 +107,10 @@ describe('ModSpamKeywordBadge', () => {
     })
 
     it('spamKeywordVariant returns warning for Review action', () => {
-      const wrapper = mountComponent({
-        spamKeyword: { ...defaultProps.spamKeyword, action: 'Review' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultSpamKeyword, action: 'Review' }
+      )
       expect(wrapper.vm.spamKeywordVariant).toBe('warning')
     })
 
@@ -105,16 +120,18 @@ describe('ModSpamKeywordBadge', () => {
     })
 
     it('spamKeywordVariant returns success for Whitelist action', () => {
-      const wrapper = mountComponent({
-        spamKeyword: { ...defaultProps.spamKeyword, action: 'Whitelist' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultSpamKeyword, action: 'Whitelist' }
+      )
       expect(wrapper.vm.spamKeywordVariant).toBe('success')
     })
 
     it('spamKeywordVariant returns secondary for unknown action', () => {
-      const wrapper = mountComponent({
-        spamKeyword: { ...defaultProps.spamKeyword, action: 'Unknown' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultSpamKeyword, action: 'Unknown' }
+      )
       expect(wrapper.vm.spamKeywordVariant).toBe('secondary')
     })
   })

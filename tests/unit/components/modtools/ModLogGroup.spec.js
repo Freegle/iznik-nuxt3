@@ -2,6 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModLogGroup from '~/modtools/components/ModLogGroup.vue'
 
+// Mock logs store
+const mockLogsStore = {
+  list: [],
+  byId: vi.fn(),
+}
+
+vi.mock('~/stores/logs', () => ({
+  useLogsStore: () => mockLogsStore,
+}))
+
 // Mock useMe composable
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
@@ -14,14 +24,28 @@ vi.mock('~/composables/useMe', () => ({
 }))
 
 describe('ModLogGroup', () => {
-  function createWrapper(log = null, tag = null) {
+  function createWrapper(logData = null, tag = null) {
+    const logId = logData?.id || 1
+    const log = logData ? { id: logId, ...logData } : null
+
+    if (log) {
+      mockLogsStore.list = [log]
+      mockLogsStore.byId.mockImplementation(
+        (id) => mockLogsStore.list.find((l) => l.id === id) || null
+      )
+    } else {
+      mockLogsStore.list = []
+      mockLogsStore.byId.mockReturnValue(null)
+    }
+
     return mount(ModLogGroup, {
-      props: { log, tag },
+      props: { logid: logId, tag },
     })
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockLogsStore.list = []
   })
 
   describe('rendering', () => {
@@ -98,6 +122,7 @@ describe('ModLogGroup', () => {
         user: {
           applied: [
             {
+              groupid: 789,
               id: 789,
               nameshort: 'AppliedGroup',
               namedisplay: 'Applied Group',
@@ -108,12 +133,17 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.id).toBe(789)
     })
 
-    it('finds group in user.memberof array when groupid matches', () => {
+    it('finds group in user.memberships array when groupid matches', () => {
       const wrapper = createWrapper({
         groupid: 111,
         user: {
-          memberof: [
-            { id: 111, nameshort: 'MemberGroup', namedisplay: 'Member Group' },
+          memberships: [
+            {
+              groupid: 111,
+              id: 111,
+              nameshort: 'MemberGroup',
+              namedisplay: 'Member Group',
+            },
           ],
         },
       })
@@ -126,6 +156,7 @@ describe('ModLogGroup', () => {
         byuser: {
           applied: [
             {
+              groupid: 222,
               id: 222,
               nameshort: 'ByUserApplied',
               namedisplay: 'By User Applied',
@@ -136,12 +167,13 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.id).toBe(222)
     })
 
-    it('finds group in byuser.memberof array when user lookup fails', () => {
+    it('finds group in byuser.memberships array when user lookup fails', () => {
       const wrapper = createWrapper({
         groupid: 333,
         byuser: {
-          memberof: [
+          memberships: [
             {
+              groupid: 333,
               id: 333,
               nameshort: 'ByUserMember',
               namedisplay: 'By User Member',
@@ -202,13 +234,15 @@ describe('ModLogGroup', () => {
         user: {
           applied: [
             {
+              groupid: 444,
               id: 444,
               nameshort: 'AppliedFirst',
               namedisplay: 'Applied First',
             },
           ],
-          memberof: [
+          memberships: [
             {
+              groupid: 444,
               id: 444,
               nameshort: 'MemberSecond',
               namedisplay: 'Member Second',
@@ -220,13 +254,20 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.nameshort).toBe('AppliedFirst')
     })
 
-    it('falls back to memberof when not in applied', () => {
+    it('falls back to memberships when not in applied', () => {
       const wrapper = createWrapper({
         groupid: 555,
         user: {
-          applied: [{ id: 999, nameshort: 'Other', namedisplay: 'Other' }],
-          memberof: [
-            { id: 555, nameshort: 'InMemberof', namedisplay: 'In Memberof' },
+          applied: [
+            { groupid: 999, id: 999, nameshort: 'Other', namedisplay: 'Other' },
+          ],
+          memberships: [
+            {
+              groupid: 555,
+              id: 555,
+              nameshort: 'InMemberof',
+              namedisplay: 'In Memberof',
+            },
           ],
         },
       })
@@ -237,20 +278,25 @@ describe('ModLogGroup', () => {
       const wrapper = createWrapper({
         groupid: 666,
         user: {
-          memberof: [
-            { id: 666, nameshort: 'OnlyMember', namedisplay: 'Only Member' },
+          memberships: [
+            {
+              groupid: 666,
+              id: 666,
+              nameshort: 'OnlyMember',
+              namedisplay: 'Only Member',
+            },
           ],
         },
       })
       expect(wrapper.vm.loggroup.nameshort).toBe('OnlyMember')
     })
 
-    it('handles user with empty applied and memberof arrays', () => {
+    it('handles user with empty applied and memberships arrays', () => {
       const wrapper = createWrapper({
         groupid: 777,
         user: {
           applied: [],
-          memberof: [],
+          memberships: [],
         },
       })
       // Should fall back to myGroup or null
@@ -259,10 +305,13 @@ describe('ModLogGroup', () => {
   })
 
   describe('props', () => {
-    it('defaults log to null (but component requires log)', () => {
-      // The component always expects a log prop, so we test with a minimal log
-      const wrapper = mount(ModLogGroup, { props: { log: {} } })
-      expect(wrapper.props('log')).toEqual({})
+    it('accepts logid prop', () => {
+      mockLogsStore.list = [{ id: 42 }]
+      mockLogsStore.byId.mockImplementation(
+        (id) => mockLogsStore.list.find((l) => l.id === id) || null
+      )
+      const wrapper = mount(ModLogGroup, { props: { logid: 42 } })
+      expect(wrapper.props('logid')).toBe(42)
     })
   })
 
