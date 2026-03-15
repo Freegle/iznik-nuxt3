@@ -35,9 +35,12 @@ async function assertNoErrors(page) {
 }
 
 test.describe('ModTools Support Tools', () => {
-  test('Support Tools user search does not crash', async ({ page }) => {
+  test('Support Tools user search does not crash', async ({
+    page,
+    testEnv,
+  }) => {
     // Issue #8: Support Tools crashes on search
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -65,7 +68,7 @@ test.describe('ModTools Support Tools', () => {
         .isVisible({ timeout: timeouts.ui.appearance })
         .catch(() => false)
     ) {
-      await searchInput.first().fill('test@test.com')
+      await searchInput.first().fill(testEnv.user.email)
       // Wait a moment for search to execute
       await page.waitForTimeout(timeouts.ui.settleTime)
       await assertNoErrors(page)
@@ -74,9 +77,12 @@ test.describe('ModTools Support Tools', () => {
     expect(errors).toHaveLength(0)
   })
 
-  test('Support Tools community search returns results', async ({ page }) => {
+  test('Support Tools community search returns results', async ({
+    page,
+    testEnv,
+  }) => {
     // Issue #8: Support Tools community search broken
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {

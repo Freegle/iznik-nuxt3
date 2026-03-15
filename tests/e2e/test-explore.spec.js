@@ -4,13 +4,14 @@
  * Tests navigation to explore pages and join button functionality
  */
 const { test, expect } = require('./fixtures')
-const { environment, timeouts } = require('./config')
+const { timeouts } = require('./config')
 const { signUpViaHomepage } = require('./utils/user')
 
 test.describe('Explore Page Tests', () => {
   test('Navigate to explore page and test join button', async ({
     page,
     testEmail,
+    testEnv,
   }) => {
     // Sign up a new user first
     const displayName = 'Test User'
@@ -18,7 +19,7 @@ test.describe('Explore Page Tests', () => {
     expect(signupResult).toBeTruthy()
 
     // Navigate to the explore page with the configured test group
-    const explorePath = `/explore/${environment.testgroup}`
+    const explorePath = `/explore/${testEnv.group.name}`
     await page.gotoAndVerify(explorePath)
 
     // Wait for the page to load completely
@@ -47,11 +48,21 @@ test.describe('Explore Page Tests', () => {
       .filter({ visible: true })
       .first()
 
-    // Wait for the Leave button to be visible as confirmation of successful join
-    await leaveButton.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
+    // After clicking Join, wait for either Leave (success) or login modal (auth lost)
+    const loginModal = page.locator(
+      '#loginModal, .modal-dialog:has-text("Join the Reuse Revolution")'
+    )
+    await expect(leaveButton.or(loginModal)).toBeVisible({
+      timeout: timeouts.ui.appearance,
     })
+
+    if (await loginModal.isVisible().catch(() => false)) {
+      // Session was lost — dismiss modal and skip this test iteration
+      console.log('Login modal appeared after Join click — session lost')
+      throw new Error(
+        'Session lost during join — login modal appeared instead of Leave button'
+      )
+    }
 
     // Click the Leave button to test the leave functionality
     await leaveButton.click()
@@ -69,9 +80,9 @@ test.describe('Explore Page Tests', () => {
     })
   })
 
-  test('Explore page displays group information', async ({ page }) => {
+  test('Explore page displays group information', async ({ page, testEnv }) => {
     // Navigate to the explore page
-    const explorePath = `/explore/${environment.testgroup}`
+    const explorePath = `/explore/${testEnv.group.name}`
     await page.gotoAndVerify(explorePath)
 
     // Wait for content to load
@@ -79,7 +90,7 @@ test.describe('Explore Page Tests', () => {
 
     // Check that the page contains the group name in heading
     await page
-      .locator(`h4:has-text("${environment.testgroup}")`)
+      .locator(`h4:has-text("${testEnv.group.name}")`)
       .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
   })

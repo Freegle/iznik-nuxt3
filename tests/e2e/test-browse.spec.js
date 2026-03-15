@@ -4,15 +4,15 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts, environment } = require('./config')
+const { timeouts } = require('./config')
 const { signUpViaHomepage, loginViaHomepage } = require('./utils/user')
 
-// Helper: sign up and join FreeglePlayground.
-async function signUpAndJoinGroup(page, testEmail, userName) {
+// Helper: sign up and join a group.
+async function signUpAndJoinGroup(page, testEmail, userName, groupName) {
   const signupResult = await signUpViaHomepage(page, testEmail, userName)
   expect(signupResult).toBeTruthy()
 
-  await page.gotoAndVerify('/explore/FreeglePlayground', {
+  await page.gotoAndVerify(`/explore/${groupName}`, {
     timeout: timeouts.navigation.default,
   })
 
@@ -37,7 +37,7 @@ async function signUpAndJoinGroup(page, testEmail, userName) {
     const loginSuccess = await loginViaHomepage(page, testEmail)
     expect(loginSuccess).toBeTruthy()
     // Re-navigate to the explore page now that we're logged in
-    await page.gotoAndVerify('/explore/FreeglePlayground', {
+    await page.gotoAndVerify(`/explore/${groupName}`, {
       timeout: timeouts.navigation.default,
     })
   } catch {
@@ -60,16 +60,46 @@ async function signUpAndJoinGroup(page, testEmail, userName) {
   })
 
   if (await leaveButton.isVisible().catch(() => false)) {
-    console.log('Already a member of FreeglePlayground')
+    console.log(`Already a member of ${groupName}`)
     return
   }
 
   await joinButton.click()
-  await leaveButton.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.interaction,
+
+  // After clicking Join, either Leave appears (success) or a login modal appears (auth lost)
+  await expect(leaveButton.or(loginModal)).toBeVisible({
+    timeout: timeouts.ui.appearance,
   })
-  console.log('Successfully joined FreeglePlayground')
+
+  if (await loginModal.isVisible().catch(() => false)) {
+    console.log(
+      'Login modal appeared after Join click — session lost, logging in'
+    )
+    const closeButton = loginModal.locator(
+      '.btn-close, .close, button[aria-label="Close"]'
+    )
+    if ((await closeButton.count()) > 0) {
+      await closeButton.first().click()
+      await loginModal.waitFor({ state: 'hidden', timeout: 5000 })
+    }
+    const loginSuccess = await loginViaHomepage(page, testEmail)
+    expect(loginSuccess).toBeTruthy()
+    // Re-navigate and join
+    await page.gotoAndVerify(`/explore/${groupName}`, {
+      timeout: timeouts.navigation.default,
+    })
+    await expect(joinButton.or(leaveButton)).toBeVisible({
+      timeout: timeouts.ui.appearance,
+    })
+    if (await leaveButton.isVisible().catch(() => false)) {
+      console.log(`Already a member of ${groupName} after re-login`)
+      return
+    }
+    await joinButton.click()
+    await expect(leaveButton).toBeVisible({ timeout: timeouts.ui.appearance })
+  }
+
+  console.log(`Successfully joined ${groupName}`)
 }
 
 test.describe('Browse Page Tests', () => {
@@ -87,7 +117,6 @@ test.describe('Browse Page Tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by browse test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
       email: testEmail,
     })
 
@@ -151,8 +180,14 @@ test.describe('Browse Page Tests', () => {
     page,
     takeScreenshot,
     testEmail,
+    testEnv,
   }) => {
-    await signUpAndJoinGroup(page, testEmail, 'Search Test User')
+    await signUpAndJoinGroup(
+      page,
+      testEmail,
+      'Search Test User',
+      testEnv.group.name
+    )
 
     // Test search with search term in URL
     console.log('Testing browse page with search term in URL')
@@ -172,8 +207,14 @@ test.describe('Browse Page Tests', () => {
     page,
     takeScreenshot,
     testEmail,
+    testEnv,
   }) => {
-    await signUpAndJoinGroup(page, testEmail, 'Micro Test User')
+    await signUpAndJoinGroup(
+      page,
+      testEmail,
+      'Micro Test User',
+      testEnv.group.name
+    )
 
     // Navigate to browse page
     await page.gotoAndVerify('/browse', {
@@ -192,8 +233,14 @@ test.describe('Browse Page Tests', () => {
     page,
     takeScreenshot,
     testEmail,
+    testEnv,
   }) => {
-    await signUpAndJoinGroup(page, testEmail, 'Responsive Test User')
+    await signUpAndJoinGroup(
+      page,
+      testEmail,
+      'Responsive Test User',
+      testEnv.group.name
+    )
 
     // Test different viewport sizes
     const viewports = [
@@ -226,8 +273,14 @@ test.describe('Browse Page Tests', () => {
     page,
     takeScreenshot,
     testEmail,
+    testEnv,
   }) => {
-    await signUpAndJoinGroup(page, testEmail, 'Browse Test User')
+    await signUpAndJoinGroup(
+      page,
+      testEmail,
+      'Browse Test User',
+      testEnv.group.name
+    )
 
     // Test general browse page
     console.log('Testing general browse page')

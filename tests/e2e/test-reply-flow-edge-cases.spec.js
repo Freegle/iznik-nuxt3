@@ -10,7 +10,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -40,7 +40,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for page refresh recovery',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -108,7 +108,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for browser back recovery',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -189,7 +189,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem1,
         description: 'Test item 1 for message isolation',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
 
@@ -201,7 +201,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem2,
         description: 'Test item 2 for message isolation',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
 
@@ -285,7 +285,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for double-click prevention',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -367,7 +367,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for navbar login during compose',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()

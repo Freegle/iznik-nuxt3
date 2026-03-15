@@ -35,9 +35,12 @@ async function assertNoErrors(page) {
 }
 
 test.describe('ModTools Chat List', () => {
-  test('chat list does not crash with undefined error', async ({ page }) => {
+  test('chat list does not crash with undefined error', async ({
+    page,
+    testEnv,
+  }) => {
     // Issue #27: chat list crashes with undefined error
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -59,9 +62,10 @@ test.describe('ModTools Chat List', () => {
 
   test('chat list shows member names not group names for User2Mod chats', async ({
     page,
+    testEnv,
   }) => {
     // Issue #26: User2Mod chats show group name instead of member name
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/chats`, {
       timeout: timeouts.navigation.initial,

@@ -64,9 +64,10 @@ async function selectGroupWithPendingMessages(page, groupSelect) {
 test.describe('ModTools Pending Messages', () => {
   test('pending messages show text content, not "This message is blank"', async ({
     page,
+    testEnv,
   }) => {
     // Issue #29: pending messages display "This message is blank"
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -95,9 +96,10 @@ test.describe('ModTools Pending Messages', () => {
 
   test('pending messages show correct group membership, not "not on any community"', async ({
     page,
+    testEnv,
   }) => {
     // Issue #19: member info shows "not on any community"
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -124,9 +126,9 @@ test.describe('ModTools Pending Messages', () => {
     expect(bodyText).not.toContain('not on any community')
   })
 
-  test('notification count badge is reasonable', async ({ page }) => {
+  test('notification count badge is reasonable', async ({ page, testEnv }) => {
     // Issue #17: notification count is wildly wrong
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/modtools/dashboard`, {
       timeout: timeouts.navigation.initial,

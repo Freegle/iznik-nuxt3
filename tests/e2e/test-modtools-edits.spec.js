@@ -35,8 +35,8 @@ async function assertNoErrors(page) {
 }
 
 test.describe('ModTools Edits Page', () => {
-  test('edits page loads without errors', async ({ page }) => {
-    await loginViaModTools(page, 'testmod@test.com')
+  test('edits page loads without errors', async ({ page, testEnv }) => {
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/messages/edits`, {
       timeout: timeouts.navigation.initial,
@@ -63,8 +63,11 @@ test.describe('ModTools Edits Page', () => {
     expect(hasMessages || hasNoMessagesNotice).toBe(true)
   })
 
-  test('edits page shows group selector with work counts', async ({ page }) => {
-    await loginViaModTools(page, 'testmod@test.com')
+  test('edits page shows group selector with work counts', async ({
+    page,
+    testEnv,
+  }) => {
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/messages/edits`, {
       timeout: timeouts.navigation.initial,

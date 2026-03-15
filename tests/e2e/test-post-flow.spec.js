@@ -21,7 +21,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -76,7 +76,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -170,7 +170,7 @@ test.describe('Post flow tests', () => {
       type: 'WANTED',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -212,6 +212,7 @@ test.describe('Post flow tests', () => {
   test("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
+    testEnv,
     postMessage,
     withdrawPost,
   }) => {
@@ -223,7 +224,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -273,7 +274,7 @@ test.describe('Post flow tests', () => {
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    await postcodeInput.fill(environment.postcode)
+    await postcodeInput.fill(testEnv?.postcode || environment.postcode)
 
     // Wait for location confirmation
     const confirmationIcon = page.locator(

@@ -31,7 +31,7 @@ test.describe('Reply Flow - Logged In User', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for logged in reply from message page',
-      postcode: environment.postcode,
+
       email: posterEmail,
     })
     expect(result.id).toBeTruthy()
@@ -89,7 +89,7 @@ test.describe('Reply Flow - Logged In User', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for logged in reply from browse page',
-      postcode: environment.postcode,
+
       email: posterEmail,
     })
     expect(result.id).toBeTruthy()
@@ -146,7 +146,7 @@ test.describe('Reply Flow - Logged In User', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for logged in reply from explore page',
-      postcode: environment.postcode,
+
       email: posterEmail,
     })
     expect(result.id).toBeTruthy()

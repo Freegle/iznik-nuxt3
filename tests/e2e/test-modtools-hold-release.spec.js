@@ -2,8 +2,7 @@
 /**
  * Test that the Hold and Release buttons work on the ModTools pending page.
  *
- * Uses testmod@test.com (created by testenv.php) which is a moderator of
- * FreeglePlayground and FreeglePlayground2, with pending test messages on Playground2.
+ * Uses testEnv fixture for isolated test group and moderator.
  */
 
 const { test, expect } = require('./fixtures')
@@ -15,9 +14,10 @@ const MODTOOLS_URL = environment.modtoolsBaseUrl
 test.describe('ModTools hold and release message', () => {
   test('holding a pending message should show Release button, releasing should restore Hold button', async ({
     page,
+    testEnv,
   }) => {
     // Step 1: Log in via API and inject auth tokens
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     // Step 2: Navigate to pending messages
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {

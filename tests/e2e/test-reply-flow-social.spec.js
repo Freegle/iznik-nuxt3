@@ -8,11 +8,12 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
   signUpViaHomepage,
+  waitForEnabledSignInButton,
 } = require('./utils/user')
 const { clickReplyButton, clickSendAndWait } = require('./utils/reply-helpers')
 
@@ -30,7 +31,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
    * We can't automate the actual OAuth flow, but we CAN test that the
    * reply state survives the loginCount key bump that forces the re-render.
    */
-  test.skip('4.1 reply state survives loginCount key bump (social login simulation)', async ({
+  test('4.1 reply state survives loginCount key bump (social login simulation)', async ({
     page,
     postMessage,
     testEmail,
@@ -51,7 +52,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for social login simulation',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -81,75 +82,86 @@ test.describe('Reply Flow - Social Login Simulation', () => {
     // Now simulate what happens after social login completes:
     // We'll use the navbar login to actually authenticate, then verify state survived
 
-    // Click navbar login
-    const navbarLoginLink = page
-      .locator(
-        '.navbar button:has-text("Sign in"), .navbar .btn:has-text("Sign in")'
-      )
-      .first()
-    await navbarLoginLink.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-    await navbarLoginLink.click()
+    // Click navbar sign-in button using the test class (same pattern as loginViaHomepage)
+    const signInButton = await waitForEnabledSignInButton(page)
+    expect(signInButton).toBeTruthy()
+    await signInButton.click()
     console.log('[Test] Clicked navbar login (simulating social login popup)')
 
-    // Complete login via modal
-    const loginModal = page
-      .locator('.modal-content')
-      .filter({ hasText: 'Log in' })
-    await loginModal.waitFor({
+    // Wait for login modal to appear
+    await page.locator('#loginModal').first().waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
-    // Wait for email input to be fully rendered and interactive
-    const modalEmailInput = loginModal.locator('input[type="email"]')
-    await modalEmailInput.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-    // Clear any pre-filled value and use type() for more realistic input
+    // Define form field locators — scoped to #loginModal to avoid
+    // picking up the reply form's email input behind the modal
+    const modal = page.locator('#loginModal').first()
+    const modalEmailInput = modal
+      .locator('input[type="email"], input[name="email"]')
+      .first()
+    const passwordField = modal
+      .locator('input[type="password"], input[name="password"]')
+      .first()
+    const fullnameField = modal.locator('#fullname, input[name="fullname"]')
+    const loginLink = modal
+      .locator('.test-already-a-freegler')
+      .filter({ visible: true })
+      .first()
+
+    // Wait for modal form fields to be ready
+    await page.waitForFunction(
+      () => {
+        const modal = document.querySelector('#loginModal')
+        if (!modal) return false
+        const emailEl = modal.querySelector(
+          'input[type="email"], input[name="email"]'
+        )
+        const passwordEl = modal.querySelector(
+          'input[type="password"], input[name="password"]'
+        )
+        return emailEl && passwordEl
+      },
+      null,
+      { timeout: timeouts.ui.appearance }
+    )
+
+    // Check if we're in signup mode and switch to login mode if needed
+    const fullnameVisible = await fullnameField.isVisible().catch(() => false)
+    if (fullnameVisible) {
+      console.log('[Test] Modal opened in signup mode, switching to login')
+      const loginLinkVisible = await loginLink.isVisible().catch(() => false)
+      if (loginLinkVisible) {
+        await loginLink.click()
+        await fullnameField
+          .waitFor({ state: 'hidden', timeout: 3000 })
+          .catch(() => {
+            console.log('[Test] Mode switch may not have worked, continuing...')
+          })
+      }
+    }
+
+    // Fill email and password
     await modalEmailInput.clear()
     await modalEmailInput.type(loginEmail, { delay: 10 })
+    await passwordField.fill(DEFAULT_TEST_PASSWORD)
 
-    const passwordInput = loginModal.locator('input[type="password"]')
-    await passwordInput.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-    await passwordInput.fill(DEFAULT_TEST_PASSWORD)
-
-    // Small delay to let VeeForm validation settle
-    await page.waitForTimeout(timeouts.ui.settleTime)
-
-    // Press Enter to submit the form (more reliable than clicking button)
-    await passwordInput.press('Enter')
+    // Submit the form
+    await passwordField.press('Enter')
     console.log('[Test] Completed login (this triggers loginCount++)')
 
     // Wait for login modal to close
-    await loginModal.waitFor({
+    await page.locator('#loginModal').first().waitFor({
       state: 'hidden',
       timeout: timeouts.navigation.default,
     })
     console.log('[Test] Login modal closed')
 
-    // Wait briefly for login state to propagate (don't use networkidle due to background polling)
-    await page.waitForTimeout(2000)
-
-    // Verify login succeeded by checking for user elements
-    // Note: We can't reliably access Pinia state from browser context in Nuxt 3 production build
-    // so we verify login success via visible UI elements instead
-    const logoutLink = page.locator(
-      'a:has-text("Log out"), .test-user-dropdown'
-    )
-    try {
-      await logoutLink.waitFor({ state: 'visible', timeout: 5000 })
-      console.log('[Test] Login verified - user elements visible')
-    } catch {
-      // Might be on a different page, just continue
-      console.log('[Test] User elements not immediately visible, continuing...')
-    }
+    // Verify login succeeded by waiting for sign-in button to disappear
+    await expect(page.locator('.test-signinbutton').first()).not.toBeVisible({
+      timeout: timeouts.ui.appearance,
+    })
+    console.log('[Test] Login verified - sign-in button no longer visible')
 
     // The app has now re-rendered due to login (loginCount key change)
     // Verify the reply text survived the re-render

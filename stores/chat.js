@@ -227,8 +227,18 @@ export const useChatStore = defineStore({
             console.error('useChatStore fetchChat NOTHING', id)
           }
         } else {
-          const chat = await api(this.config).chat.fetchChat(id, false)
-          this.listByChatId[id] = chat
+          try {
+            const chat = await api(this.config).chat.fetchChat(id, false)
+            this.listByChatId[id] = chat
+          } catch (e) {
+            if (e?.response?.status === 404) {
+              // Chat was deleted — remove stale reference.
+              console.log('Chat 404, removing stale reference', id)
+              delete this.listByChatId[id]
+            } else {
+              throw e
+            }
+          }
         }
       }
     },

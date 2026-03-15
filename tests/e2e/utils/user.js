@@ -29,7 +29,8 @@ async function waitForAuthPersistence(page) {
         return false
       }
     },
-    { timeout: 30000 }
+    null,
+    { timeout: timeouts.ui.appearance }
   )
   console.log('Auth persisted to localStorage')
 }
@@ -72,31 +73,36 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
     const isDesktopVisible = await desktopLogout.isVisible().catch(() => false)
     const isMobileVisible = await mobileLogout.isVisible().catch(() => false)
 
-    if (isDesktopVisible) {
-      console.log('Clicking desktop logout button')
-      // Allow 401 errors from in-flight API requests that complete after logout
+    // Allow 401 errors from in-flight API requests that complete after logout
+    // (addAllowedErrorPattern only exists on fixture-enhanced pages)
+    if (typeof page.addAllowedErrorPattern === 'function') {
       page.addAllowedErrorPattern(
         /Failed to load resource: the server responded with a status of 401/
       )
+    }
+
+    if (isDesktopVisible) {
+      console.log('Clicking desktop logout button')
       await desktopLogout.click()
     } else if (isMobileVisible) {
       console.log('Clicking mobile logout button')
-      // Allow 401 errors from in-flight API requests that complete after logout
-      page.addAllowedErrorPattern(
-        /Failed to load resource: the server responded with a status of 401/
-      )
       await mobileLogout.click()
     } else {
-      console.log('No logout button visible — clearing cookies/storage')
-      await clearSessionData(page)
+      console.log('No logout button visible')
     }
+
+    // Always clear session data BEFORE navigating. If the logout button click
+    // didn't work (hydration race), the old cookies would be sent with the
+    // navigation request, causing the server to render an authenticated page
+    // whose in-flight API responses re-establish the session via Set-Cookie.
+    await clearSessionData(page)
 
     if (navigateToHome) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
     }
 
-    // Ensure cookies/storage are fully cleared after logout
+    // Clear again to catch any cookies set by the unauthenticated page load
     await clearSessionData(page)
 
     // Don't reset allowed error patterns here — the 401 response from in-flight
@@ -397,6 +403,8 @@ async function signUpViaHomepage(
   // Wait for successful registration
   console.log('Waiting for confirmation after registration')
 
+  let registrationSuccessful = false
+
   try {
     // Wait for redirect to explore, myposts, or browse page after successful registration
     await page.waitForURL(/\/(explore|myposts|browse)/, {
@@ -412,11 +420,7 @@ async function signUpViaHomepage(
       console.log('Redirected to browse page - registration successful')
     }
 
-    // Wait for auth to be persisted to localStorage before returning
-    // This ensures navigation to other pages preserves the logged-in state
-    await waitForAuthPersistence(page)
-
-    return true
+    registrationSuccessful = true
   } catch (error) {
     // If we're not redirected to explore, look for other success indicators
     const successIndicators = [
@@ -428,8 +432,6 @@ async function signUpViaHomepage(
       'text=welcome to freegle',
       'text=no community for your area',
     ]
-
-    let registrationSuccessful = false
 
     for (const indicator of successIndicators) {
       try {
@@ -451,14 +453,17 @@ async function signUpViaHomepage(
         // Continue to the next indicator
       }
     }
-
-    // If registration was successful via indicators, also wait for auth persistence
-    if (registrationSuccessful) {
-      await waitForAuthPersistence(page)
-    }
-
-    return registrationSuccessful
   }
+
+  // Wait for auth persistence AFTER determining success — outside the
+  // try/catch so a persistence timeout doesn't trigger the slow indicator loop.
+  // Auth MUST be persisted to localStorage for the session to survive hard
+  // navigation (gotoAndVerify). Without it, SSR renders unauthenticated pages.
+  if (registrationSuccessful) {
+    await waitForAuthPersistence(page)
+  }
+
+  return registrationSuccessful
 }
 
 /**
@@ -541,6 +546,7 @@ async function loginViaHomepage(
 
         return loginLinkVisible || formFieldsPresent
       },
+      null,
       { timeout: timeouts.ui.appearance }
     )
   } catch (error) {
@@ -1258,6 +1264,7 @@ async function loginViaModTools(page, email, password = 'freegle') {
       )
       return emailEl && passwordEl
     },
+    null,
     { timeout: timeouts.ui.appearance }
   )
 
@@ -1323,4 +1330,5 @@ module.exports = {
   logoutIfLoggedIn,
   getMyGroups,
   clearSessionData,
+  waitForEnabledSignInButton,
 }

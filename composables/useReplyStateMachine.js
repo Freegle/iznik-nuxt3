@@ -107,7 +107,7 @@
  *   ERROR          - Something went wrong
  */
 
-import { ref, computed, getCurrentInstance, nextTick } from 'vue'
+import { ref, computed, getCurrentInstance, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
@@ -835,7 +835,28 @@ export function useReplyStateMachine(messageId) {
   async function handleCreateChat(callback) {
     log('handleCreateChat() starting', { chatButtonRef: !!chatButtonRef.value })
 
-    await nextTick()
+    // After forced login, the component may still be re-mounting.
+    // Wait for setRefs() to provide the chatButtonRef (event-based, not timer-based).
+    if (!chatButtonRef.value) {
+      await Promise.race([
+        new Promise((resolve) => {
+          const stop = watch(chatButtonRef, (val) => {
+            if (val) {
+              stop()
+              resolve()
+            }
+          })
+          // Also resolve immediately if it became available during watch setup
+          if (chatButtonRef.value) {
+            stop()
+            resolve()
+          }
+        }),
+        // Timeout after 5 seconds — if the component hasn't mounted by then,
+        // fall through to the null check below.
+        new Promise((resolve) => setTimeout(resolve, 5000)),
+      ])
+    }
 
     if (!chatButtonRef.value) {
       logError('Chat button ref not available', null, state.value, messageId)

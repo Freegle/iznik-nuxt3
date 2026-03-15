@@ -5,7 +5,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts } = require('./config')
+const { timeouts } = require('./config')
 const { loginViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
 test.describe('User ratings tests', () => {
@@ -26,7 +26,7 @@ test.describe('User ratings tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Rating test post at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
