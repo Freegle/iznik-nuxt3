@@ -1319,6 +1319,14 @@ async function loginViaModTools(page, email, password = 'freegle') {
   // Wait for auth to persist to localStorage
   await waitForAuthPersistence(page)
 
+  // ModTools app.vue watches loginCount and calls reloadNuxtApp({ force: true })
+  // after login. This triggers a full page reload asynchronously. We must wait
+  // for it to complete, otherwise a subsequent page.goto() races with the reload
+  // and gets ERR_ABORTED.
+  await page.waitForLoadState('load', {
+    timeout: timeouts.navigation.default,
+  })
+
   return true
 }
 
