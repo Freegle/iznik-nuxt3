@@ -36,6 +36,35 @@ export default class UserAPI extends BaseAPI {
     return await this.$getv2('/user/' + id + '/publiclocation')
   }
 
+  // Support tools: per-user data endpoints (mod-only).
+  async fetchChatrooms(id) {
+    return await this.$getv2('/user/' + id + '/chatrooms')
+  }
+
+  async fetchEmailHistory(id) {
+    return await this.$getv2('/user/' + id + '/emailhistory')
+  }
+
+  async fetchBans(id) {
+    return await this.$getv2('/user/' + id + '/bans')
+  }
+
+  async fetchNewsfeed(id) {
+    return await this.$getv2('/user/' + id + '/newsfeed')
+  }
+
+  async fetchApplied(id) {
+    return await this.$getv2('/user/' + id + '/applied')
+  }
+
+  async fetchMembershipHistory(id) {
+    return await this.$getv2('/user/' + id + '/membershiphistory')
+  }
+
+  async fetchLogins(id) {
+    return await this.$getv2('/user/' + id + '/logins')
+  }
+
   rate(id, rating, reason, text) {
     return this.$postv2('/user', {
       ratee: id,
