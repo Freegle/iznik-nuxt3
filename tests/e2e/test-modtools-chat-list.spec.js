@@ -9,6 +9,29 @@ const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
+// Navigate to a ModTools page, handling the SSR auth redirect bounce.
+// The authuser.global middleware redirects to /login?return=<path> on first
+// SSR load (localStorage auth isn't available server-side), then client-side
+// auth loads and bounces back. Using domcontentloaded avoids ERR_ABORTED
+// from the redirect, and waitForURL ensures we land on the target.
+async function gotoModToolsPage(page, path) {
+  await page.goto(`${MODTOOLS_URL}${path}`, {
+    timeout: timeouts.navigation.initial,
+    waitUntil: 'domcontentloaded',
+  })
+
+  await page.waitForURL(
+    new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    {
+      timeout: timeouts.navigation.default,
+    }
+  )
+
+  await page.waitForLoadState('domcontentloaded', {
+    timeout: timeouts.navigation.default,
+  })
+}
+
 // Helper: dismiss any overlay modals (cake modal, etc.) that block interaction.
 async function dismissAllModals(page) {
   await page.evaluate(() => {
@@ -47,13 +70,7 @@ test.describe('ModTools Chat List', () => {
       errors.push(error.message)
     })
 
-    await page.goto(`${MODTOOLS_URL}/chats`, {
-      timeout: timeouts.navigation.initial,
-    })
-
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
-    })
+    await gotoModToolsPage(page, '/chats')
 
     await dismissAllModals(page)
     await assertNoErrors(page)
@@ -67,13 +84,7 @@ test.describe('ModTools Chat List', () => {
     // Issue #26: User2Mod chats show group name instead of member name
     await loginViaModTools(page, testEnv.mod.email)
 
-    await page.goto(`${MODTOOLS_URL}/chats`, {
-      timeout: timeouts.navigation.initial,
-    })
-
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
-    })
+    await gotoModToolsPage(page, '/chats')
 
     await dismissAllModals(page)
 
