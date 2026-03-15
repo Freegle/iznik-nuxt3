@@ -373,16 +373,13 @@ describe('ModSupportUser', () => {
     })
 
     it('chatsFiltered excludes Mod2Mod and sorts by date', async () => {
-      const wrapper = await mountComponent(
-        {},
-        {
-          chatrooms: [
-            { id: 1, chattype: 'Mod2Mod', lastdate: '2024-01-01' },
-            { id: 2, chattype: 'User2User', lastdate: '2024-01-15' },
-            { id: 3, chattype: 'User2Mod', lastdate: '2024-01-10' },
-          ],
-        }
-      )
+      mockApiFns.fetchChatrooms.mockResolvedValueOnce([
+        { id: 1, chattype: 'Mod2Mod', lastdate: '2024-01-01' },
+        { id: 2, chattype: 'User2User', lastdate: '2024-01-15' },
+        { id: 3, chattype: 'User2Mod', lastdate: '2024-01-10' },
+      ])
+      const wrapper = await mountComponent()
+      await flushPromises()
       const chats = wrapper.vm.chatsFiltered
       expect(chats).toHaveLength(2)
       expect(chats[0].id).toBe(2) // Most recent first
@@ -615,18 +612,15 @@ describe('ModSupportUser', () => {
 
   describe('bans display', () => {
     it('shows bans when present', async () => {
-      const wrapper = await mountComponent(
-        { expand: true },
+      mockApiFns.fetchBans.mockResolvedValueOnce([
         {
-          bans: [
-            {
-              group: 'TestGroup',
-              byemail: 'mod@test.com',
-              date: new Date().toISOString(),
-            },
-          ],
-        }
-      )
+          group: 'TestGroup',
+          byemail: 'mod@test.com',
+          date: new Date().toISOString(),
+        },
+      ])
+      const wrapper = await mountComponent({ expand: true })
+      await flushPromises()
       expect(wrapper.text()).toContain('Banned on')
       expect(wrapper.text()).toContain('TestGroup')
     })
