@@ -275,7 +275,15 @@ const templateDefaults = {
 const pendingcount = computed(() => {
   let count = 0
 
-  for (const g of myGroups.value || []) {
+  if (!Array.isArray(myGroups.value)) {
+    console.error(
+      'admins.vue pendingcount: myGroups.value is not iterable:',
+      typeof myGroups.value,
+      myGroups.value
+    )
+    return 0
+  }
+  for (const g of myGroups.value) {
     const group = modGroupStore.get(g.id)
     if (group) {
       if (

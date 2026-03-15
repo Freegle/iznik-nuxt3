@@ -228,6 +228,14 @@ const groupOptions = computed(() => {
     }
   }
 
+  if (!Array.isArray(sortedGroups.value)) {
+    console.error(
+      'ModGroupSelect groupOptions: sortedGroups.value is not iterable:',
+      typeof sortedGroups.value,
+      sortedGroups.value
+    )
+    return groupList
+  }
   for (const group of sortedGroups.value) {
     if (
       props.listall ||
