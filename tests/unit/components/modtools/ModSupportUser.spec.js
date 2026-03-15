@@ -3,6 +3,23 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ModSupportUser from '~/modtools/components/ModSupportUser.vue'
 
+// Mock the API module used by ModSupportUser for separate support data fetches.
+const mockApiFns = {
+  fetchChatrooms: vi.fn().mockResolvedValue([]),
+  fetchEmailHistory: vi.fn().mockResolvedValue([]),
+  fetchBans: vi.fn().mockResolvedValue([]),
+  fetchNewsfeed: vi.fn().mockResolvedValue([]),
+  fetchApplied: vi.fn().mockResolvedValue([]),
+  fetchMembershipHistory: vi.fn().mockResolvedValue([]),
+  fetchLogins: vi.fn().mockResolvedValue([]),
+}
+
+vi.mock('~/api', () => ({
+  default: () => ({
+    user: mockApiFns,
+  }),
+}))
+
 // Mock the user store
 const mockFetchMT = vi.fn()
 const mockFetch = vi.fn()
@@ -19,6 +36,7 @@ vi.mock('~/stores/user', () => ({
     edit: mockEdit,
     purge: mockPurge,
     addEmail: mockAddEmail,
+    config: {},
   }),
 }))
 
