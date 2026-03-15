@@ -68,7 +68,8 @@ const user = computed(() => userStore.byId(props.userid))
 watch(
   () => props.userid,
   (uid) => {
-    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+    if (uid && !userStore.byId(uid))
+      userStore.fetchMT({ id: uid, modtools: true })
   },
   { immediate: true }
 )

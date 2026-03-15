@@ -11,6 +11,7 @@
     <b-modal
       id="statusmmodal"
       ref="modal"
+      v-model="showModal"
       no-stacking
       size="lg"
       :title="'Platform Status: ' + headline"
@@ -69,6 +70,7 @@ const { supportOrAdmin } = useMe()
 const status = ref(null)
 const updated = ref(null)
 const tried = ref(false)
+const showModal = ref(false)
 let timer = null
 
 const outOfDate = computed(() => {
@@ -122,14 +124,13 @@ async function checkStatus() {
 }
 
 function clicked(e) {
-  modal.value.show()
+  showModal.value = true
   e.preventDefault()
   e.stopPropagation()
 }
 
 onMounted(() => {
   checkStatus()
-  hide()
 })
 
 onBeforeUnmount(() => {

@@ -303,18 +303,23 @@
               <!-- eslint-disable-next-line -->
               <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
               <div v-else-if="editreview">
-                <h4>Differences:</h4>
-                <ModDiff
-                  class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold"
-                  :old="oldBody"
-                  :new="newBody"
-                />
-                <h4>New version:</h4>
-                <div
-                  class="mb-3 rounded border border-success p-2 preline forcebreak font-weight-bold"
-                >
-                  {{ newBody }}
-                </div>
+                <template v-if="oldBody || newBody">
+                  <h4>Differences:</h4>
+                  <ModDiff
+                    class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold"
+                    :old="oldBody"
+                    :new="newBody"
+                  />
+                  <h4>New version:</h4>
+                  <div
+                    class="mb-3 rounded border border-success p-2 preline forcebreak font-weight-bold"
+                  >
+                    {{ newBody }}
+                  </div>
+                </template>
+                <p v-else class="text-muted">
+                  Subject changed (see above). No body text changes.
+                </p>
               </div>
               <div
                 v-else-if="!eBody"
