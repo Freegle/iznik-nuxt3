@@ -55,7 +55,11 @@ export default class SessionAPI extends BaseAPI {
   }
 
   logout() {
-    return this.$delv2('/session')
+    // Use a dedicated AbortController so this call is not killed by
+    // enterLogoutMode() which aborts the global controller.
+    return this.$delv2('/session', null, true, {
+      ownAbortController: new AbortController(),
+    })
   }
 
   lostPassword(email, log) {

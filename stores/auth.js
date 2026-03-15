@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { LoginError, SignUpError } from '~/api/APIErrors'
-import { abortAllPendingRequests } from '~/api/BaseAPI'
+import {
+  abortAllPendingRequests,
+  enterLogoutMode,
+  exitLogoutMode,
+} from '~/api/BaseAPI'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import api from '~/api'
@@ -143,7 +147,14 @@ export const useAuthStore = defineStore({
     async logout() {
       const mobileStore = useMobileStore()
 
-      this.abortPendingRequests()
+      // Enter logout mode: abort all in-flight requests AND keep the
+      // controller aborted so any NEW requests triggered by Vue
+      // re-rendering are also immediately killed.  Without this there is
+      // a race: DELETE /api/session deletes the DB row, but a group or
+      // user fetch initiated by a reactive watcher uses the still-valid
+      // JWT, arrives at the server after the session is deleted, and
+      // gets 401 → Sentry error.
+      enterLogoutMode()
 
       await this.$api.session.logout()
 
@@ -194,6 +205,9 @@ export const useAuthStore = defineStore({
       this.config = config
       this.loggedInEver = loggedInEver
       this.$api = api
+
+      // Restore normal request handling now that logout is complete.
+      exitLogoutMode()
     },
     async forget() {
       await this.$api.session.forget()

@@ -20,8 +20,30 @@ let requestId = 0
 // from arriving after an intentional logout.
 let globalAbortController = new AbortController()
 
+// When true, the global controller stays aborted so that any new requests
+// triggered by Vue re-rendering during logout are also immediately aborted.
+// This closes the race window between abortAllPendingRequests() and the
+// DELETE /api/session completing.
+let logoutInProgress = false
+
 export function abortAllPendingRequests() {
   globalAbortController.abort()
+
+  if (!logoutInProgress) {
+    globalAbortController = new AbortController()
+  }
+}
+
+// Enter logout mode: abort all requests and keep the controller aborted
+// so new requests from Vue re-rendering are also killed.
+export function enterLogoutMode() {
+  logoutInProgress = true
+  globalAbortController.abort()
+}
+
+// Exit logout mode and restore a fresh controller for normal operation.
+export function exitLogoutMode() {
+  logoutInProgress = false
   globalAbortController = new AbortController()
 }
 
@@ -159,7 +181,9 @@ export default class BaseAPI {
         body,
         method,
         headers,
-        signal: globalAbortController.signal,
+        signal: config.ownAbortController
+          ? config.ownAbortController.signal
+          : globalAbortController.signal,
       })
 
       if (data && data.jwt && data.persistent) {
@@ -315,13 +339,14 @@ export default class BaseAPI {
     )
   }
 
-  $delv2(path, data, logError = true) {
+  $delv2(path, data, logError = true, options = {}) {
     return this.$requestv2(
       'DELETE',
       path,
       {
         headers: { 'Content-Type': 'application/json' },
         params: data,
+        ...options,
       },
       logError
     )
