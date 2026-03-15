@@ -198,6 +198,12 @@ const showProfileModal = ref(false)
 
 // Initialize data
 const initialize = async () => {
+  // The Go API privacy filter zeroes out reply.userid when the viewer
+  // is not the message poster. Skip initialization in that case.
+  if (!props.reply.userid) {
+    return
+  }
+
   await userStore.fetch(props.reply.userid)
 
   const existingChat = chatStore.toUser(props.reply.userid)
