@@ -487,12 +487,16 @@ onMounted(() => {
     banned.value = true
   }
 
-  // Fetch full user data via V2 pattern - cached in userStore.
+  // Fetch full user data via V2 pattern. Force to ensure modtools data
+  // (memberships, emails, etc) is loaded even if a non-modtools fetch cached first.
   if (member.value?.userid) {
-    userStore.fetchMT({
-      id: member.value.userid,
-      info: true,
-    })
+    userStore.fetchMT(
+      {
+        id: member.value.userid,
+        info: true,
+      },
+      true
+    )
   }
 
   // V2 API returns heldby as a numeric ID — fetch the user so we can show their name.
