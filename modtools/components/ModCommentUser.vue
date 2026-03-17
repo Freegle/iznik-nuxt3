@@ -33,6 +33,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useCommentStore } from '~/modtools/stores/comment'
+import { getPreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
   commentid: {
@@ -44,17 +45,5 @@ const props = defineProps({
 const commentStore = useCommentStore()
 const comment = computed(() => commentStore.byId(props.commentid))
 
-const email = computed(() => {
-  let ret = null
-
-  if (!comment.value.user?.email && comment.value.user?.emails) {
-    comment.value.user.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
+const email = computed(() => getPreferredEmail(comment.value.user))
 </script>

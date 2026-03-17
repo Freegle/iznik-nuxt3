@@ -316,6 +316,7 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
   membershipid: {
@@ -367,21 +368,6 @@ const showModChatModal = ref(false)
 const banned = ref(false)
 const chatid = ref(0)
 
-const email = computed(() => {
-  // Email comes from full user data (fetched via userStore.fetchMT).
-  let ret = user.value?.email
-
-  if (!ret && user.value?.emails) {
-    user.value.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
-
 const groupid = computed(() => {
   return member.value?.groupid
 })
@@ -412,6 +398,8 @@ const user = computed(() => {
   const storeUser = userStore.list[member.value?.userid]
   return storeUser || member.value
 })
+
+const email = usePreferredEmail(user)
 
 // V2 API returns heldby as a numeric user ID, not an object.
 const heldByUser = computed(() => {

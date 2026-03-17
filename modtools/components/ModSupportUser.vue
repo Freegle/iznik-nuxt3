@@ -560,6 +560,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import ExternalLink from '~/components/ExternalLink'
 import api from '~/api'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const SHOW = 3
 
@@ -607,14 +608,7 @@ const profileRef = ref(null)
 const purgeConfirmRef = ref(null)
 const spamConfirm = ref(null)
 
-const preferredemail = computed(() => {
-  if (user.value.email) return user.value.email
-  if (!user.value.emails) return false
-  if (user.value.emails.length === 0) return false
-  const pref = user.value.emails.find((e) => e.preferred)
-  if (pref) return pref.email
-  return user.value.emails[0].email
-})
+const preferredemail = usePreferredEmail(user)
 
 const admin = computed(() => {
   return user.value && user.value.systemrole === 'Admin'

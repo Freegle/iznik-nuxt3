@@ -42,6 +42,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
   userid: {
@@ -76,19 +77,7 @@ watch(
 
 const showAddCommentModal = ref(false)
 
-const email = computed(() => {
-  let ret = null
-
-  if (user.value && user.value.emails) {
-    user.value.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
+const email = usePreferredEmail(user)
 
 function addAComment() {
   showAddCommentModal.value = true

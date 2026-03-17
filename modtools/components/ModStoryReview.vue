@@ -88,6 +88,7 @@ import { useGroupStore } from '@/stores/group'
 import { useStoryStore } from '@/stores/stories'
 import { useModMe } from '~/modtools/composables/useModMe'
 import { twem } from '~/composables/useTwem'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const { $api } = useNuxtApp()
 const userStore = useUserStore()
@@ -115,13 +116,7 @@ const storyUser = computed(() => {
   return story.value?.userid ? userStore.byId(story.value.userid) : null
 })
 
-const primaryEmail = computed(() => {
-  const u = storyUser.value
-  if (u?.emails?.length) {
-    return u.emails[0].email
-  }
-  return u?.email || null
-})
+const primaryEmail = usePreferredEmail(storyUser)
 
 const firstGroupId = computed(() => {
   const u = storyUser.value

@@ -163,6 +163,7 @@ import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useModMe } from '~/composables/useModMe'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const MEMBERSHIPS_SHOW = 3
 
@@ -268,23 +269,6 @@ const firstgrouppolygon = computed(() => {
   return null
 })
 
-const email = computed(() => {
-  let ret = null
-
-  if (user.value) {
-    ret = user.value.email
-    if (!ret && user.value.emails) {
-      user.value.emails.forEach((e) => {
-        if (!e.ourdomain && (!ret || e.preferred)) {
-          ret = e.email
-        }
-      })
-    }
-  }
-
-  return ret
-})
-
 const hiddenmemberofs = computed(() => {
   return allmemberships.value
     ? 0
@@ -315,6 +299,8 @@ const inactive = computed(() => {
 const user = computed(() => {
   return member.value ? userStore.byId(member.value.userid) : null
 })
+
+const email = usePreferredEmail(user)
 
 onMounted(() => {
   // Always force-fetch full user data with modtools info.

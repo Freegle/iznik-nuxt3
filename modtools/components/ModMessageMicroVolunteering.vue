@@ -55,6 +55,7 @@
 import { computed, onMounted, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
   messageid: {
@@ -98,19 +99,7 @@ const user = computed(() => {
     : null
 })
 
-const email = computed(() => {
-  let ret = null
-
-  if (user.value && user.value.emails) {
-    user.value.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
+const email = usePreferredEmail(user)
 
 onMounted(() => {
   if (microvolunteering.value?.userid) {

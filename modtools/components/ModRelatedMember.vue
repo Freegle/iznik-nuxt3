@@ -47,6 +47,7 @@
 import { computed } from 'vue'
 import dayjs from 'dayjs'
 import { useMemberStore } from '~/stores/member'
+import { getPreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const LONG_THRESHOLD = 4
 
@@ -84,18 +85,7 @@ function count(l, r) {
 }
 
 function getEmail(member) {
-  // Depending on which context we're used it, we might or might not have an email returned.
-  let ret = member.email
-
-  if (!member.email && member.emails) {
-    member.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
+  return getPreferredEmail(member)
 }
 
 function findLongest(str1, str2) {
