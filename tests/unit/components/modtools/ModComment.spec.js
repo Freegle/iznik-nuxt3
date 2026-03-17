@@ -35,6 +35,7 @@ const mockGroupStore = {
 }
 
 const mockUserStore = {
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
   byId: vi.fn(),
   deleteComment: vi.fn(),
@@ -314,10 +315,7 @@ describe('ModComment', () => {
       const wrapper = await createWrapper()
       await wrapper.vm.updateComments()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 123,
-        emailhistory: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
     })
 
     it('handles null comment fields gracefully', async () => {

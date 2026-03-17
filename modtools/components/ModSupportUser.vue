@@ -752,11 +752,7 @@ onMounted(async () => {
 async function fetchUser() {
   if (props.id) {
     // Fetch the user via fetchMT (returns core user data).
-    await userStore.fetchMT({
-      id: props.id,
-      modtools: true,
-      info: true,
-    })
+    await userStore.fetch(props.id)
     user.value = userStore.byId(props.id)
 
     // Fetch support-specific data via separate API calls in parallel.
@@ -796,11 +792,7 @@ function showLogsModal() {
 
 async function profile() {
   console.log('MSU profile', props.id)
-  await userStore.fetchMT({
-    // TODO Might need to be search: props.id
-    id: props.id,
-    info: true,
-  })
+  await userStore.fetch(props.id)
   showProfile.value = true
   profileRef.value?.show()
 }
@@ -861,10 +853,7 @@ async function updateComments() {
   const userid = user.value.userid ? user.value.userid : user.value.id
   console.log('updateComments', userid)
 
-  await userStore.fetchMT({
-    id: userid,
-    emailhistory: true,
-  })
+  await userStore.fetch(userid)
   await fetchUser()
 }
 </script>

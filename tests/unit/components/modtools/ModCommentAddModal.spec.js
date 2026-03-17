@@ -112,6 +112,7 @@ describe('ModCommentAddModal', () => {
     mockBump.value = 0
     mockContext.value = null
     mockCommentAdd.mockResolvedValue({})
+    mockUserStore.fetch.mockResolvedValue({})
     mockUserStore.fetchMT.mockResolvedValue({})
     mockUserStore.byId.mockReturnValue(createTestUser())
   })
@@ -326,7 +327,7 @@ describe('ModCommentAddModal', () => {
         })
       })
 
-      it('calls userStore.fetchMT with user id and emailhistory', async () => {
+      it('calls userStore.fetch with user id after save', async () => {
         const wrapper = mountComponent({
           userid: 555,
         })
@@ -334,10 +335,7 @@ describe('ModCommentAddModal', () => {
         await wrapper.vm.save()
         await flushPromises()
 
-        expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-          id: 555,
-          emailhistory: true,
-        })
+        expect(mockUserStore.fetch).toHaveBeenCalledWith(555)
       })
 
       it('resets context to null after save', async () => {
@@ -551,11 +549,11 @@ describe('ModCommentAddModal', () => {
       await expect(wrapper.vm.save()).rejects.toThrow('API Error')
     })
 
-    it('handles save when fetchMT fails gracefully', async () => {
-      mockUserStore.fetchMT.mockRejectedValueOnce(new Error('Fetch Error'))
+    it('handles save when fetch fails gracefully', async () => {
+      mockUserStore.fetch.mockRejectedValueOnce(new Error('Fetch Error'))
       const wrapper = mountComponent()
 
-      // The save method awaits fetchMT, so error will propagate
+      // The save method awaits fetch, so error will propagate
       await expect(wrapper.vm.save()).rejects.toThrow('Fetch Error')
     })
   })

@@ -339,13 +339,10 @@ describe('ModMemberActions', () => {
   })
 
   describe('commentadded method', () => {
-    it('fetches user with MT and emits event', async () => {
+    it('fetches user and emits event', async () => {
       const wrapper = mountComponent({ userid: 456 })
       await wrapper.vm.commentadded()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        emailhistory: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
       expect(wrapper.emitted('commentadded')).toBeTruthy()
     })
   })

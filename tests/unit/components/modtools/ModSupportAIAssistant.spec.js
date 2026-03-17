@@ -13,6 +13,7 @@ const mockUserStore = {
   list: {},
   clear: vi.fn(),
   fetchMT: vi.fn().mockResolvedValue({}),
+  searchUsers: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -31,6 +32,8 @@ describe('ModSupportAIAssistant', () => {
     mockUserStore.list = {}
     mockUserStore.clear.mockClear()
     mockUserStore.fetchMT.mockClear()
+    mockUserStore.searchUsers.mockClear()
+    mockUserStore.searchUsers.mockResolvedValue([])
 
     // Default fetch mock - sanitizer available
     mockFetch.mockResolvedValue({
@@ -179,10 +182,13 @@ describe('ModSupportAIAssistant', () => {
       wrapper.vm.userSearch = 'test@example.com'
       await nextTick()
 
-      // Mock the fetchMT to return users
-      mockUserStore.list = {
-        1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
-      }
+      // Mock searchUsers to populate the store list
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
+        }
+        return [{ id: 1, email: 'test@example.com', displayname: 'Test User' }]
+      })
 
       // Find and click search button
       const buttons = wrapper.findAll('button')
@@ -191,10 +197,7 @@ describe('ModSupportAIAssistant', () => {
       await flushPromises()
 
       expect(mockUserStore.clear).toHaveBeenCalled()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'test@example.com',
-        emailhistory: true,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('test@example.com')
     })
 
     it('does not search when search term is empty', async () => {
@@ -203,7 +206,7 @@ describe('ModSupportAIAssistant', () => {
       wrapper.vm.userSearch = ''
       await wrapper.vm.searchUsers()
 
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
 
     it('displays search results', async () => {
@@ -243,9 +246,12 @@ describe('ModSupportAIAssistant', () => {
       const wrapper = mountComponent()
 
       wrapper.vm.userSearch = 'test'
-      mockUserStore.list = {
-        1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
-      }
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
+        }
+        return [{ id: 1, email: 'test@example.com', displayname: 'Test User' }]
+      })
 
       await wrapper.vm.searchUsers()
       await flushPromises()

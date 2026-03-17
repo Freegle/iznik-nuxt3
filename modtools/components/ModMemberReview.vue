@@ -303,17 +303,8 @@ const user = computed(() => {
 const email = usePreferredEmail(user)
 
 onMounted(() => {
-  // Always force-fetch full user data with modtools info.
-  // Force is needed because child components (ModMemberReviewActions) may have already
-  // cached the user via the non-modtools fetch(), which lacks emails, location, and comments.
   if (member.value) {
-    userStore.fetchMT(
-      {
-        id: member.value.userid,
-        info: true,
-      },
-      true
-    )
+    userStore.fetch(member.value.userid)
   }
 })
 

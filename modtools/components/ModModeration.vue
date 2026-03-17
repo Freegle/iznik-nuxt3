@@ -19,6 +19,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 
 const props = defineProps({
   membership: {
@@ -37,6 +38,7 @@ const props = defineProps({
 })
 
 const userStore = useUserStore()
+const memberStore = useMemberStore()
 
 const user = computed(() => userStore.byId(props.userid))
 
@@ -54,8 +56,8 @@ const postingStatus = computed({
   },
   async set(val) {
     const groupid = props.membership.groupid ?? props.membership.id
-    await userStore.edit({
-      id: props.userid,
+    await memberStore.updateMembership({
+      userid: props.userid,
       groupid,
       ourPostingStatus: val,
     })
@@ -67,10 +69,8 @@ const trustlevel = computed({
     return user.value?.trustlevel ?? null
   },
   async set(val) {
-    const groupid = props.membership.groupid ?? props.membership.id
     await userStore.edit({
       id: props.userid,
-      groupid,
       trustlevel: val,
     })
   },

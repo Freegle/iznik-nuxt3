@@ -137,7 +137,7 @@ const groupName = computed(() => {
 
 onMounted(async () => {
   if (story.value?.userid) {
-    const u = await userStore.fetchMT({ id: story.value.userid })
+    const u = await userStore.fetch(story.value.userid)
     // Fetch the first group so we can show its name.
     if (u?.memberships?.length) {
       await groupStore.fetch(u.memberships[0].groupid)

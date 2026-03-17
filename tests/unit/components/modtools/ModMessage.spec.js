@@ -641,10 +641,7 @@ describe('ModMessage', () => {
     it('re-fetches user from store', () => {
       const wrapper = mountComponent()
       wrapper.vm.updateComments()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        modtools: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
   })
 

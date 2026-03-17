@@ -34,11 +34,8 @@ function check() {
       const userStore = useUserStore()
       userStore.clear()
 
-      console.log('check fetchMT', email)
-      const ret = await userStore.fetchMT({
-        search: email,
-        emailhistory: false,
-      })
+      console.log('check searchUsers', email)
+      const ret = await userStore.searchUsers(email)
 
       if (ret.length === 1) {
         if (

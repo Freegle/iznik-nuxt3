@@ -5,6 +5,7 @@ import ModMemberSummary from '~/modtools/components/ModMemberSummary.vue'
 // Mock user store
 const mockUserStore = {
   byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
 }
 
@@ -89,6 +90,7 @@ describe('ModMemberSummary', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
     mockUserStore.fetchMT.mockResolvedValue()
   })
 
@@ -307,11 +309,7 @@ describe('ModMemberSummary', () => {
         props: { userid: 789 },
         global: { stubs: mountStubs, mocks: mountMocks },
       })
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 789,
-        info: true,
-        emailhistory: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
 
     it('does not fetch when user already in store', () => {
@@ -320,7 +318,7 @@ describe('ModMemberSummary', () => {
         props: { userid: 789 },
         global: { stubs: mountStubs, mocks: mountMocks },
       })
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.fetch).not.toHaveBeenCalled()
     })
   })
 

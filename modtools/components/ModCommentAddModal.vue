@@ -154,10 +154,7 @@ async function save() {
     flag: flag.value,
   })
 
-  await userStore.fetchMT({
-    id: props.userid,
-    emailhistory: true,
-  })
+  await userStore.fetch(props.userid)
   context.value = null
   bump.value++
 

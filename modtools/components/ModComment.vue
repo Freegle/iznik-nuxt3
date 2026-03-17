@@ -138,10 +138,7 @@ const groupname = computed(() => {
 })
 
 async function updateComments() {
-  await userStore.fetchMT({
-    id: props.userid,
-    emailhistory: true,
-  })
+  await userStore.fetch(props.userid)
 
   const user = userStore.byId(props.userid)
   const savedCommentId = savedComment.value.id

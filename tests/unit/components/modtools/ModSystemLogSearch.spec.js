@@ -27,6 +27,7 @@ const mockUserStore = {
   list: {},
   clear: vi.fn(),
   fetchMT: vi.fn(),
+  searchUsers: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -104,6 +105,7 @@ describe('ModSystemLogSearch', () => {
     mockSystemLogsStore.loading = false
     mockUserStore.list = {}
     mockUserStore.fetchMT.mockResolvedValue()
+    mockUserStore.searchUsers.mockResolvedValue([])
   })
 
   describe('rendering', () => {
@@ -300,8 +302,10 @@ describe('ModSystemLogSearch', () => {
 
   describe('email lookup', () => {
     it('lookupEmail sets user ID from found user', async () => {
-      mockUserStore.list = { 123: { id: 123 } }
-      mockUserStore.fetchMT.mockResolvedValue()
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = { 123: { id: 123 } }
+        return [{ id: 123 }]
+      })
 
       const wrapper = mountComponent()
       wrapper.vm.emailInput = 'test@example.com'
@@ -311,8 +315,10 @@ describe('ModSystemLogSearch', () => {
     })
 
     it('lookupEmail sets error when no user found', async () => {
-      mockUserStore.list = {}
-      mockUserStore.fetchMT.mockResolvedValue()
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {}
+        return []
+      })
 
       const wrapper = mountComponent()
       wrapper.vm.emailInput = 'notfound@example.com'
@@ -322,11 +328,13 @@ describe('ModSystemLogSearch', () => {
     })
 
     it('lookupEmail handles multiple users', async () => {
-      mockUserStore.list = {
-        123: { id: 123 },
-        456: { id: 456 },
-      }
-      mockUserStore.fetchMT.mockResolvedValue()
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          123: { id: 123 },
+          456: { id: 456 },
+        }
+        return [{ id: 123 }, { id: 456 }]
+      })
 
       const wrapper = mountComponent()
       wrapper.vm.emailInput = 'shared@example.com'
@@ -340,11 +348,11 @@ describe('ModSystemLogSearch', () => {
       wrapper.vm.emailInput = ''
       await wrapper.vm.lookupEmail()
 
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
 
     it('lookupEmail handles fetch error', async () => {
-      mockUserStore.fetchMT.mockRejectedValue(new Error('Network error'))
+      mockUserStore.searchUsers.mockRejectedValue(new Error('Network error'))
 
       const wrapper = mountComponent()
       wrapper.vm.emailInput = 'test@example.com'
@@ -355,7 +363,7 @@ describe('ModSystemLogSearch', () => {
 
     it('lookupEmail shows spinner during lookup', async () => {
       let resolvePromise
-      mockUserStore.fetchMT.mockReturnValue(
+      mockUserStore.searchUsers.mockReturnValue(
         new Promise((resolve) => {
           resolvePromise = resolve
         })
@@ -367,7 +375,7 @@ describe('ModSystemLogSearch', () => {
 
       expect(wrapper.vm.lookingUpEmail).toBe(true)
 
-      resolvePromise()
+      resolvePromise([])
       await lookupPromise
 
       expect(wrapper.vm.lookingUpEmail).toBe(false)

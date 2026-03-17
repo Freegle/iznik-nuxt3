@@ -2,15 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import ModModeration from '~/modtools/components/ModModeration.vue'
 
-// Mock store
+// Mock stores
 const mockUserStore = {
   edit: vi.fn(),
   byId: vi.fn(),
   fetch: vi.fn().mockResolvedValue({}),
 }
 
+const mockMemberStore = {
+  updateMembership: vi.fn().mockResolvedValue(),
+}
+
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
+}))
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
 }))
 
 describe('ModModeration', () => {
@@ -119,8 +127,8 @@ describe('ModModeration', () => {
       wrapper.vm.postingStatus = 'PROHIBITED'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 111,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 111,
         groupid: 789,
         ourPostingStatus: 'PROHIBITED',
       })
@@ -137,8 +145,8 @@ describe('ModModeration', () => {
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 999,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 999,
         groupid: 789,
         ourPostingStatus: 'DEFAULT',
       })
@@ -155,8 +163,8 @@ describe('ModModeration', () => {
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 111,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 111,
         groupid: 555,
         ourPostingStatus: 'DEFAULT',
       })
@@ -191,7 +199,6 @@ describe('ModModeration', () => {
 
       expect(mockUserStore.edit).toHaveBeenCalledWith({
         id: 111,
-        groupid: 789,
         trustlevel: 'Advanced',
       })
     })
@@ -209,7 +216,6 @@ describe('ModModeration', () => {
 
       expect(mockUserStore.edit).toHaveBeenCalledWith({
         id: 888,
-        groupid: 789,
         trustlevel: 'Moderate',
       })
     })
@@ -301,7 +307,7 @@ describe('ModModeration', () => {
   describe('async setters', () => {
     it('setter is async and awaits edit call', async () => {
       let resolveEdit
-      mockUserStore.edit.mockReturnValue(
+      mockMemberStore.updateMembership.mockReturnValue(
         new Promise((resolve) => {
           resolveEdit = resolve
         })
@@ -312,8 +318,8 @@ describe('ModModeration', () => {
       // Directly set the computed property to test the async setter
       wrapper.vm.postingStatus = 'DEFAULT'
 
-      // Edit should be called immediately
-      expect(mockUserStore.edit).toHaveBeenCalled()
+      // updateMembership should be called immediately
+      expect(mockMemberStore.updateMembership).toHaveBeenCalled()
 
       // Resolve the edit
       resolveEdit({})
@@ -333,7 +339,7 @@ describe('ModModeration', () => {
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith(
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith(
         expect.objectContaining({ groupid: 200 })
       )
     })
@@ -349,7 +355,7 @@ describe('ModModeration', () => {
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith(
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith(
         expect.objectContaining({ groupid: 300 })
       )
     })

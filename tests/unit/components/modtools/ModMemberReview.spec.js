@@ -6,6 +6,7 @@ import ModMemberReview from '~/modtools/components/ModMemberReview.vue'
 // Mock stores
 const mockUserStore = {
   byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
 }
 
@@ -186,6 +187,7 @@ describe('ModMemberReview', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.byId.mockReturnValue(createUser())
+    mockUserStore.fetch.mockResolvedValue()
     mockUserStore.fetchMT.mockResolvedValue()
     mockMemberStore.get.mockReturnValue(null)
     mockMemberStore.list = {}
@@ -452,28 +454,16 @@ describe('ModMemberReview', () => {
   })
 
   describe('onMounted', () => {
-    it('fetches user with info when member exists', async () => {
+    it('fetches user when member exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith(
-        {
-          id: 456,
-          info: true,
-        },
-        true
-      )
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
 
-    it('fetches user with info even when member.info exists', async () => {
+    it('fetches user even when member.info exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith(
-        {
-          id: 456,
-          info: true,
-        },
-        true
-      )
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
   })
 

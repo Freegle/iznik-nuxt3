@@ -534,7 +534,7 @@ const showConfirmModal = ref(false)
 const showAddCommentModal = ref(false)
 
 if (chat.value?.user1id) {
-  await userStore.fetchMT({ id: chat.value.user1id })
+  await userStore.fetch(chat.value.user1id)
 }
 
 // Computed properties

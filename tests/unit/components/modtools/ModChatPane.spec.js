@@ -616,7 +616,7 @@ describe('ModChatPane', () => {
       await flushPromises()
 
       expect(mockChatStore.fetchMessages).toHaveBeenCalledWith(123)
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({ id: 789 })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
   })
 })

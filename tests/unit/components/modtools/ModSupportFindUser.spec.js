@@ -71,6 +71,7 @@ describe('ModSupportFindUser', () => {
     mockUserStore.list = {}
     mockUserStore.clear = vi.fn()
     mockUserStore.fetchMT = vi.fn().mockResolvedValue({})
+    mockUserStore.searchUsers = vi.fn().mockResolvedValue([])
   })
 
   describe('rendering', () => {
@@ -106,24 +107,24 @@ describe('ModSupportFindUser', () => {
     })
 
     it('automatically searches when id prop is provided', async () => {
-      mockUserStore.list = {
-        123: { id: 123, lastaccess: '2024-01-01T00:00:00Z' },
-      }
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          123: { id: 123, lastaccess: '2024-01-01T00:00:00Z' },
+        }
+        return [{ id: 123, lastaccess: '2024-01-01T00:00:00Z' }]
+      })
 
       mountComponent({ id: 123 })
       await flushPromises()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: '123',
-        emailhistory: true,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('123')
     })
 
     it('does not search when id prop is not provided', () => {
       mountComponent()
-      // Only clear is called, not fetchMT
+      // Only clear is called, not searchUsers
       expect(mockUserStore.clear).toHaveBeenCalled()
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
   })
 
@@ -132,14 +133,14 @@ describe('ModSupportFindUser', () => {
       const wrapper = mountComponent()
       wrapper.vm.searchuser = ''
       await wrapper.vm.usersearch()
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
 
     it('does not search when searchuser is null', async () => {
       const wrapper = mountComponent()
       wrapper.vm.searchuser = null
       await wrapper.vm.usersearch()
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
 
     it('trims whitespace from search value', async () => {
@@ -149,10 +150,7 @@ describe('ModSupportFindUser', () => {
       wrapper.vm.searchuser = '  test@example.com  '
       await wrapper.vm.usersearch()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'test@example.com',
-        emailhistory: true,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('test@example.com')
     })
 
     it('sets searching to true during search', async () => {
@@ -160,7 +158,7 @@ describe('ModSupportFindUser', () => {
 
       // Create a delayed promise
       let resolvePromise
-      mockUserStore.fetchMT = vi.fn().mockImplementation(() => {
+      mockUserStore.searchUsers = vi.fn().mockImplementation(() => {
         return new Promise((resolve) => {
           resolvePromise = resolve
         })
@@ -171,7 +169,7 @@ describe('ModSupportFindUser', () => {
 
       expect(wrapper.vm.searching).toBe(true)
 
-      resolvePromise({})
+      resolvePromise([])
       await searchPromise
 
       expect(wrapper.vm.searching).toBe(false)
@@ -384,7 +382,7 @@ describe('ModSupportFindUser', () => {
       // Manually call usersearch since keyup.enter.exact is complex to simulate
       await wrapper.vm.usersearch()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).toHaveBeenCalled()
     })
 
     it('disables input while searching', async () => {
@@ -513,10 +511,7 @@ describe('ModSupportFindUser', () => {
       wrapper.vm.searchuser = 12345
       await wrapper.vm.usersearch()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: '12345',
-        emailhistory: true,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('12345')
     })
 
     it('handles whitespace-only search value', async () => {
@@ -526,7 +521,7 @@ describe('ModSupportFindUser', () => {
       await wrapper.vm.usersearch()
 
       // After trim, empty string should not trigger search
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
   })
 })

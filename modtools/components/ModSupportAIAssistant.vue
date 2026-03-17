@@ -672,10 +672,7 @@ async function searchUsers() {
     const userStore = useUserStore()
     userStore.clear()
 
-    await userStore.fetchMT({
-      search: userSearch.value.trim(),
-      emailhistory: true,
-    })
+    await userStore.searchUsers(userSearch.value.trim())
 
     // Get results and sort by last access
     searchResults.value = Object.values(userStore.list)

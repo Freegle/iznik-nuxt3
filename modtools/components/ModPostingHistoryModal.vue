@@ -87,7 +87,7 @@ watch(
   () => props.userid,
   (uid) => {
     if (uid && !userStore.byId(uid)) {
-      userStore.fetchMT({ id: uid, info: true, emailhistory: true })
+      userStore.fetch(uid)
     }
   },
   { immediate: true }

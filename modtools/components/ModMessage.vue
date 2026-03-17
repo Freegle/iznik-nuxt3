@@ -686,7 +686,7 @@ watch(
   fromUserId,
   (uid) => {
     if (uid && !userStore.byId(uid)) {
-      userStore.fetchMT({ id: uid, modtools: true })
+      userStore.fetch(uid)
     }
   },
   { immediate: true }
@@ -1065,7 +1065,7 @@ function updateComments() {
   // fromUser is a computed from userStore.byId, so it auto-updates when the store changes.
   // Force a re-fetch to get updated comments.
   if (fromUserId.value) {
-    userStore.fetchMT({ id: fromUserId.value, modtools: true })
+    userStore.fetch(fromUserId.value)
   }
 }
 

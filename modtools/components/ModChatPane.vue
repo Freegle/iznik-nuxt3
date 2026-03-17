@@ -129,7 +129,7 @@ if (props.id) {
 
     if (chat.value.user1id) {
       const otheruid = chat.value.user1id
-      await userStore.fetchMT({ id: otheruid })
+      await userStore.fetch(otheruid)
       chat.value.otheruid = otheruid
     }
   }
@@ -186,7 +186,7 @@ watch(me, async (newVal, oldVal) => {
 
       if (chat?.value?.user1id) {
         const otheruid = chat.value.user1id
-        await userStore.fetchMT({ id: otheruid })
+        await userStore.fetch(otheruid)
         chat.value.otheruid = otheruid
       }
     }

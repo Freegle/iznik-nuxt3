@@ -323,7 +323,7 @@ async function validateCSVDonations(callback) {
     }
 
     // Check if the userid matches a valid user.
-    await userStore.fetchMT({ id: rowUserid })
+    await userStore.fetch(rowUserid)
 
     const user = userStore.byId(rowUserid)
 

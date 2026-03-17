@@ -8,6 +8,7 @@ import ModSupportCheckVolunteers from '~/modtools/components/ModSupportCheckVolu
 const mockUserStore = {
   clear: vi.fn(),
   fetchMT: vi.fn(),
+  searchUsers: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -36,7 +37,7 @@ describe('ModSupportCheckVolunteers', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserStore.fetchMT.mockResolvedValue([])
+    mockUserStore.searchUsers.mockResolvedValue([])
   })
 
   describe('rendering', () => {
@@ -123,7 +124,7 @@ describe('ModSupportCheckVolunteers', () => {
       wrapper.vm.results = [{ text: 'old result', error: false }]
       wrapper.vm.emails = 'test@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       expect(wrapper.vm.results).toEqual([])
@@ -133,7 +134,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'test@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       await flushPromises()
@@ -141,26 +142,23 @@ describe('ModSupportCheckVolunteers', () => {
       expect(mockUserStore.clear).toHaveBeenCalled()
     })
 
-    it('calls userStore.fetchMT with email and emailhistory=false', async () => {
+    it('calls userStore.searchUsers with email', async () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'test@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       await flushPromises()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'test@example.com',
-        emailhistory: false,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('test@example.com')
     })
 
     it('marks Admin users as volunteers', async () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'admin@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([
+      mockUserStore.searchUsers.mockResolvedValue([
         { id: 1, email: 'admin@example.com', systemrole: 'Admin' },
       ])
 
@@ -177,7 +175,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'mod@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([
+      mockUserStore.searchUsers.mockResolvedValue([
         { id: 2, email: 'mod@example.com', systemrole: 'Moderator' },
       ])
 
@@ -194,7 +192,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'support@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([
+      mockUserStore.searchUsers.mockResolvedValue([
         { id: 3, email: 'support@example.com', systemrole: 'Support' },
       ])
 
@@ -211,7 +209,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'user@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([
+      mockUserStore.searchUsers.mockResolvedValue([
         { id: 4, email: 'user@example.com', systemrole: 'User' },
       ])
 
@@ -228,7 +226,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'multi@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([
+      mockUserStore.searchUsers.mockResolvedValue([
         { id: 5, email: 'multi@example.com', systemrole: 'User' },
         { id: 6, email: 'multi@example.com', systemrole: 'Moderator' },
       ])
@@ -246,7 +244,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'notfound@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       await flushPromises()
@@ -261,7 +259,7 @@ describe('ModSupportCheckVolunteers', () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'first@example.com\nsecond@example.com'
 
-      mockUserStore.fetchMT
+      mockUserStore.searchUsers
         .mockResolvedValueOnce([
           { id: 1, email: 'first@example.com', systemrole: 'Admin' },
         ])
@@ -272,51 +270,49 @@ describe('ModSupportCheckVolunteers', () => {
       wrapper.vm.check()
       await flushPromises()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledTimes(2)
+      expect(mockUserStore.searchUsers).toHaveBeenCalledTimes(2)
     })
 
     it('trims whitespace from emails', async () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = '  trimmed@example.com  '
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       await flushPromises()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'trimmed@example.com',
-        emailhistory: false,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith(
+        'trimmed@example.com'
+      )
     })
 
     it('skips empty lines', async () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'first@example.com\n\n\nsecond@example.com'
 
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       wrapper.vm.check()
       await flushPromises()
 
-      // Should only call fetchMT for non-empty lines
-      expect(mockUserStore.fetchMT).toHaveBeenCalledTimes(2)
+      // Should only call searchUsers for non-empty lines
+      expect(mockUserStore.searchUsers).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('button click', () => {
-    it('calls userStore.fetchMT when button is clicked', async () => {
+    it('calls userStore.searchUsers when button is clicked', async () => {
       const wrapper = mountComponent()
       wrapper.vm.emails = 'click@example.com'
-      mockUserStore.fetchMT.mockResolvedValue([])
+      mockUserStore.searchUsers.mockResolvedValue([])
 
       await wrapper.find('button').trigger('click')
       await flushPromises()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'click@example.com',
-        emailhistory: false,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith(
+        'click@example.com'
+      )
     })
   })
 

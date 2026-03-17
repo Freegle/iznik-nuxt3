@@ -37,7 +37,7 @@
         <b-button
           v-if="!addedId"
           variant="primary"
-          :disabled="!email"
+          :disabled="!validEmail"
           @click="add"
         >
           Add
@@ -47,7 +47,7 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
@@ -65,6 +65,10 @@ const { modal, show, hide } = useOurModal()
 
 const email = ref(null)
 const addedId = ref(null)
+
+const validEmail = computed(() => {
+  return email.value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)
+})
 
 async function add() {
   addedId.value = await userStore.add({

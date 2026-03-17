@@ -298,10 +298,7 @@ async function lookupEmail() {
 
   try {
     userStore.clear()
-    await userStore.fetchMT({
-      search: email,
-      emailhistory: true,
-    })
+    await userStore.searchUsers(email)
 
     const users = Object.values(userStore.list)
     if (users.length === 0) {

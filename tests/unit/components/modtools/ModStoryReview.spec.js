@@ -19,6 +19,7 @@ globalThis.useNuxtApp = () => ({
 /* Mock stores */
 const mockUserStore = {
   byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(null),
   fetchMT: vi.fn().mockResolvedValue(null),
 }
 
@@ -150,6 +151,7 @@ describe('ModStoryReview', () => {
     mockStoryData = {}
     // Default: user found in store
     mockUserStore.byId.mockReturnValue(defaultUser)
+    mockUserStore.fetch.mockResolvedValue(defaultUser)
     mockUserStore.fetchMT.mockResolvedValue(defaultUser)
     mockGroupStore.get.mockReturnValue(defaultGroup)
     mockGroupStore.fetch.mockResolvedValue(defaultGroup)
@@ -551,11 +553,11 @@ describe('ModStoryReview', () => {
     it('fetches user from store on mount', async () => {
       mountComponent({ story: createStory({ userid: 789 }) })
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({ id: 789 })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
 
     it('fetches group after user fetch when user has memberships', async () => {
-      mockUserStore.fetchMT.mockResolvedValue(defaultUser)
+      mockUserStore.fetch.mockResolvedValue(defaultUser)
       mountComponent({ story: createStory({ userid: 789 }) })
       await flushPromises()
       expect(mockGroupStore.fetch).toHaveBeenCalledWith(456)
@@ -564,7 +566,7 @@ describe('ModStoryReview', () => {
     it('does not fetch when story has no userid', async () => {
       mountComponent({ story: createStory({ userid: null }) })
       await flushPromises()
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.fetch).not.toHaveBeenCalled()
     })
   })
 

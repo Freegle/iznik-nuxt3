@@ -171,10 +171,7 @@ async function addAComment() {
 }
 
 async function commentadded() {
-  await userStore.fetchMT({
-    id: props.userid,
-    emailhistory: true,
-  })
+  await userStore.fetch(props.userid)
 
   emit('commentadded')
 }

@@ -5,6 +5,7 @@ import ModMember from '~/modtools/components/ModMember.vue'
 
 // Mock stores
 const mockUserStore = {
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
   edit: vi.fn(),
   list: {},
@@ -266,6 +267,7 @@ describe('ModMember', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.fetch.mockResolvedValue()
     mockUserStore.fetchMT.mockResolvedValue()
     mockUserStore.edit.mockResolvedValue()
     mockUserStore.list = {}

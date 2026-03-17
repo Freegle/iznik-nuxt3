@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import api from '~/api'
+import { useMiscStore } from '~/stores/misc'
 
 // Debounce delay for batching user fetches (ms)
 const BATCH_DELAY = 50
@@ -32,20 +33,17 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.exists
     },
-    async fetchMT(params, force = false) {
-      // id, info, search, emailhistory
-      if (params.search) {
-        // User search goes to the dedicated search endpoint.
-        const data = await api(this.config).user.search(params.search)
-        if (data?.users) {
-          for (const user of data.users) {
-            this.list[user.id] = user
-          }
-          return data.users
+    async searchUsers(searchTerm) {
+      const data = await api(this.config).user.search(searchTerm)
+      if (data?.users) {
+        for (const user of data.users) {
+          this.list[user.id] = user
         }
-        return []
+        return data.users
       }
-
+      return []
+    },
+    async fetchMT(params, force = false) {
       const id = parseInt(params.id)
       if (!force && id && this.list[id]) {
         return this.list[id]
@@ -71,6 +69,14 @@ export const useUserStore = defineStore({
         console.log('USEUSERSTORE FETCH ID NULL')
         console.trace()
         return
+      }
+
+      // In modtools context, always use fetchMT so we get emails, memberships,
+      // location, comments etc. This avoids stale cache from non-modtools fetches
+      // and means components don't need to choose between fetch/fetchMT.
+      const miscStore = useMiscStore()
+      if (miscStore.modtools) {
+        return this.fetchMT({ id, info: true }, force)
       }
 
       // If already cached and not forcing, return immediately

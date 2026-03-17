@@ -531,7 +531,7 @@ describe('ModChatFooter', () => {
     it('fetches user data when chat has user1id', async () => {
       mockChat.value = createChat({ user1id: 789 })
       await mountComponent()
-      expect(mockUserStore.fetchMT).toHaveBeenCalled()
+      expect(mockUserStore.fetch).toHaveBeenCalled()
     })
   })
 
