@@ -49,18 +49,36 @@ export const useUserStore = defineStore({
         return this.list[id]
       }
 
+      // Deduplicate concurrent fetches for the same ID.
+      if (id && this.fetching[id]) {
+        await this.fetching[id]
+        return this.list[id]
+      }
+
       params.info = true
       params.modtools = true
-      const { user, users } = await api(this.config).user.fetchMT(params)
-      if (user) {
-        this.list[user.id] = user
-        return user
+
+      const fetchPromise = api(this.config).user.fetchMT(params)
+      if (id) {
+        this.fetching[id] = fetchPromise
       }
-      if (users) {
-        for (const user of users) {
+
+      try {
+        const { user, users } = await fetchPromise
+        if (user) {
           this.list[user.id] = user
+          return user
         }
-        return users
+        if (users) {
+          for (const user of users) {
+            this.list[user.id] = user
+          }
+          return users
+        }
+      } finally {
+        if (id) {
+          delete this.fetching[id]
+        }
       }
     },
     async fetch(id, force) {

@@ -1289,14 +1289,24 @@ function photoAdd() {
 }
 
 async function findHomeGroup() {
-  if (message.value && message.value.lat && message.value.lng) {
+  if (!message.value) return
+
+  // Prefer nearby groups from the message API (computed from original unblurred coords).
+  const msgGroups = message.value.location?.groupsnear
+  if (msgGroups && msgGroups.length) {
+    homegroup.value = msgGroups[0].namedisplay
+    homegroupontn.value = msgGroups[0].ontn
+    return
+  }
+
+  // Fallback: look up from (blurred) lat/lng via location API.
+  if (message.value.lat && message.value.lng) {
     const loc = await locationStore.fetch({
       lat: message.value.lat,
       lng: message.value.lng,
     })
 
     if (loc && loc.groupsnear && loc.groupsnear.length) {
-      // The group might not be on TN.
       homegroup.value = loc.groupsnear[0].namedisplay
       homegroupontn.value = loc.groupsnear[0].ontn
     }
