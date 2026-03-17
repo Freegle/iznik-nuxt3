@@ -25,15 +25,11 @@
               @reload="reload"
             />
           </div>
-          <b-button
-            v-if="message.bymailid || message.msgid"
-            size="lg"
-            variant="white"
-            class="ml-2"
-            @click="showOriginal = true"
-          >
-            <v-icon icon="info-circle" /> View original email
-          </b-button>
+          <div v-if="message.bymailid || message.msgid">
+            <b-button variant="white" class="ml-2" @click="showOriginal = true">
+              <v-icon icon="info-circle" /> View original email
+            </b-button>
+          </div>
         </div>
       </b-card-header>
       <b-card-body>
