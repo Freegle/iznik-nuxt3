@@ -264,7 +264,7 @@ const firstgrouppolygon = computed(() => {
   if (sortedMemberOf.value.length > 0) {
     const group = sortedMemberOf.value[0]
     const modgroup = modGroupStore.get(group.id)
-    if (modgroup) return modgroup.poly
+    if (modgroup) return modgroup.poly || modgroup.polyofficial
   }
   return null
 })

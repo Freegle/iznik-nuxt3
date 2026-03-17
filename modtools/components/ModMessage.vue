@@ -380,7 +380,7 @@
               :centerat="{ lat: group.lat, lng: group.lng }"
               :position="{ lat: position.lat, lng: position.lng }"
               locked
-              :boundary="group.poly"
+              :boundary="group.poly || group.polyofficial"
               :height="150"
             />
           </b-col>
