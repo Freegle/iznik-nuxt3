@@ -165,12 +165,10 @@ export const useMemberStore = defineStore({
     },
 
     async spamignore(params) {
-      await api(this.config).user.save({
-        id: params.userid,
-        groupid: params.groupid,
-        suspectcount: 0,
-        suspectreason: null,
-      })
+      await api(this.config).memberships.reviewIgnore(
+        params.userid,
+        params.groupid
+      )
     },
 
     async remove(userid, groupid, membershipid) {

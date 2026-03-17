@@ -125,6 +125,14 @@ export default class MembershipsAPI extends BaseAPI {
     })
   }
 
+  reviewIgnore(userid, groupid) {
+    return this.$postv2('/memberships', {
+      action: 'ReviewIgnore',
+      userid,
+      groupid,
+    })
+  }
+
   reviewHold(membershipid, groupid) {
     return this.$postv2('/memberships', {
       action: 'ReviewHold',

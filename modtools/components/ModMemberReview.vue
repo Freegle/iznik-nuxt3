@@ -197,14 +197,28 @@ const isLJ = computed(() => {
 })
 
 const allmemberof = computed(() => {
+  // Start with flagged memberships from the member store (have review data).
   let ms = []
 
   if (member.value && member.value.memberships) {
-    ms = member.value.memberships
+    ms = [...member.value.memberships]
   }
 
-  if (!ms) {
-    return []
+  // Merge in ALL memberships from the user store (fetched via fetchMT).
+  // This shows groups the user is on that aren't flagged for review.
+  if (user.value && user.value.memberships) {
+    const existingGroupIds = new Set(ms.map((m) => parseInt(m.id)))
+
+    user.value.memberships.forEach((um) => {
+      if (!existingGroupIds.has(parseInt(um.groupid))) {
+        ms.push({
+          id: um.groupid,
+          membershipid: um.id,
+          added: um.added,
+          role: um.role,
+        })
+      }
+    })
   }
 
   return ms
@@ -303,12 +317,17 @@ const user = computed(() => {
 })
 
 onMounted(() => {
-  // Always fetch full user data with info for display.
+  // Always force-fetch full user data with modtools info.
+  // Force is needed because child components (ModMemberReviewActions) may have already
+  // cached the user via the non-modtools fetch(), which lacks emails, location, and comments.
   if (member.value) {
-    userStore.fetchMT({
-      id: member.value.userid,
-      info: true,
-    })
+    userStore.fetchMT(
+      {
+        id: member.value.userid,
+        info: true,
+      },
+      true
+    )
   }
 })
 

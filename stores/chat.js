@@ -250,11 +250,7 @@ export const useChatStore = defineStore({
           // limit: 10, // NO: so new messages are picked up
           modtools: true,
         }
-        const { chatmessages } = await api(this.config).chat.fetchMessagesMT(
-          id,
-          params
-        )
-        messages = chatmessages
+        messages = await api(this.config).chat.fetchMessagesMT(id, params)
       } else {
         messages = await api(this.config).chat.fetchMessages(id)
       }
