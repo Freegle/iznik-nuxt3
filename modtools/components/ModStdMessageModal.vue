@@ -671,8 +671,8 @@ async function process(callback) {
       stdmsg.value.newdelstatus !== 'UNCHANGED'
     ) {
       changingNewDelStatus.value = true
-      await userStore.edit({
-        id: userid.value,
+      await memberStore.updateMembership({
+        userid: userid.value,
         groupid: groupid.value,
         emailfrequency: emailfrequency.value,
       })
@@ -685,8 +685,8 @@ async function process(callback) {
       stdmsg.value.newmodstatus !== 'UNCHANGED'
     ) {
       changingNewModStatus.value = true
-      await userStore.edit({
-        id: userid.value,
+      await memberStore.updateMembership({
+        userid: userid.value,
         groupid: groupid.value,
         ourPostingStatus: stdmsg.value.newmodstatus,
       })

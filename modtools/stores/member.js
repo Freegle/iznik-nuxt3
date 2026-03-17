@@ -171,6 +171,10 @@ export const useMemberStore = defineStore({
       )
     },
 
+    async updateMembership(params) {
+      await api(this.config).memberships.save(params)
+    },
+
     async remove(userid, groupid, membershipid) {
       // membershipid may be undefined
       // Remove approved member.

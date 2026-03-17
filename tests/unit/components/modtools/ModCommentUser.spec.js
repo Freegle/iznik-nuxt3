@@ -143,7 +143,7 @@ describe('ModCommentUser', () => {
       expect(wrapper.vm.email).toBe(null)
     })
 
-    it('returns null when user has email property set', () => {
+    it('returns user.email when set', () => {
       const wrapper = mountComponent(
         {},
         {
@@ -153,7 +153,7 @@ describe('ModCommentUser', () => {
           },
         }
       )
-      expect(wrapper.vm.email).toBe(null)
+      expect(wrapper.vm.email).toBe('direct@example.com')
     })
 
     it('skips ourdomain emails', () => {

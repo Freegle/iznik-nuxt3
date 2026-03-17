@@ -234,6 +234,17 @@ describe('ModSupportUser', () => {
     mockEdit.mockResolvedValue()
     mockPurge.mockResolvedValue()
     mockAddEmail.mockResolvedValue()
+
+    // Re-establish default API mock implementations cleared by clearAllMocks.
+    // Without these, the mocks return undefined and .then() chains in
+    // fetchUser() throw TypeError.
+    mockApiFns.fetchChatrooms.mockResolvedValue([])
+    mockApiFns.fetchEmailHistory.mockResolvedValue([])
+    mockApiFns.fetchBans.mockResolvedValue([])
+    mockApiFns.fetchNewsfeed.mockResolvedValue([])
+    mockApiFns.fetchApplied.mockResolvedValue([])
+    mockApiFns.fetchMembershipHistory.mockResolvedValue([])
+    mockApiFns.fetchLogins.mockResolvedValue([])
   })
 
   describe('rendering', () => {

@@ -455,19 +455,25 @@ describe('ModMemberReview', () => {
     it('fetches user with info when member exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        info: true,
-      })
+      expect(mockUserStore.fetchMT).toHaveBeenCalledWith(
+        {
+          id: 456,
+          info: true,
+        },
+        true
+      )
     })
 
     it('fetches user with info even when member.info exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        info: true,
-      })
+      expect(mockUserStore.fetchMT).toHaveBeenCalledWith(
+        {
+          id: 456,
+          info: true,
+        },
+        true
+      )
     })
   })
 
