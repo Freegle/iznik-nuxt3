@@ -4,7 +4,7 @@ import api from '~/api'
 export const useAdminsStore = defineStore({
   id: 'admins',
   state: () => ({
-    list: [],
+    list: {},
   }),
   actions: {
     init(config) {
@@ -12,7 +12,7 @@ export const useAdminsStore = defineStore({
       this.$api = api(config)
     },
     clear() {
-      this.list = []
+      this.list = {}
     },
     clearAdmin(id) {
       delete this.list[id]

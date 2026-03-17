@@ -293,7 +293,7 @@ const pendingcount = computed(() => {
 })
 
 const pending = computed(() => {
-  return adminsStore.list
+  return Object.values(adminsStore.list)
     .filter((a) => a.pending)
     .sort(function (a, b) {
       return new Date(b.created).getTime() - new Date(a.created).getTime()
@@ -301,7 +301,7 @@ const pending = computed(() => {
 })
 
 const previous = computed(() => {
-  return adminsStore.list
+  return Object.values(adminsStore.list)
     .filter((a) => !a.pending)
     .sort(function (a, b) {
       return new Date(b.created).getTime() - new Date(a.created).getTime()
