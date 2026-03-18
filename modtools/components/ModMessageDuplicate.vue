@@ -8,8 +8,8 @@
     </nuxt-link>
     -
     <em>{{ message.subject }}</em>
-    {{ timeago(message.arrival) }}
-    <span v-if="message.outcome">, now {{ message.outcome }}</span
+    {{ timeago(message.arrival)
+    }}<span v-if="latestOutcome">, now {{ latestOutcome }}</span
     ><span v-else>, still open</span>
     <span v-if="isPending" class="text-muted"> (pending)</span>
   </div>
@@ -25,6 +25,14 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+})
+
+const latestOutcome = computed(() => {
+  if (!message.value) return null
+  // Check singular outcome (from messagehistory) or outcomes array (from message store).
+  if (message.value.outcome) return message.value.outcome
+  if (message.value.outcomes?.length) return message.value.outcomes[0].outcome
+  return null
 })
 
 const message = computed(() => {

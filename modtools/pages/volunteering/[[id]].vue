@@ -4,6 +4,7 @@
       v-for="volunteering in volunteerings"
       :key="'volunteeringlist-' + volunteering.id"
       class="p-0 mt-2"
+      style="min-height: 100px"
     >
       <ModVolunteerOpportunity
         :id="volunteering.id"

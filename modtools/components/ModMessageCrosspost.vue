@@ -7,15 +7,11 @@
       <nuxt-link :to="'/message/' + message.id">
         <em>{{ message.subject }}</em>
         {{ timeago(message.arrival) }} on <em>{{ groupname }}</em>
-      </nuxt-link>
-    </span>
-    <span v-if="collection && collection != 'Approved'">
-      <span class="text-muted">in</span>
-      <span class="text-danger">
-        {{ collection }}
-      </span>
-    </span>
-    <span v-else-if="message.outcome">, now {{ message.outcome }}</span
+      </nuxt-link> </span
+    ><span v-if="collection && collection != 'Approved'"
+      ><span class="text-muted"> in</span>
+      <span class="text-danger">{{ collection }}</span></span
+    ><span v-else-if="latestOutcome">, now {{ latestOutcome }}</span
     ><span v-else class="text-normal">, still open</span>
   </div>
 </template>
@@ -36,6 +32,13 @@ const groupStore = useGroupStore()
 
 const message = computed(() => {
   return messageStore.byId(props.messageid)
+})
+
+const latestOutcome = computed(() => {
+  if (!message.value) return null
+  if (message.value.outcome) return message.value.outcome
+  if (message.value.outcomes?.length) return message.value.outcomes[0].outcome
+  return null
 })
 
 const messageGroupId = computed(() => {

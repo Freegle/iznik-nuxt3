@@ -44,14 +44,11 @@ const props = defineProps({
 })
 
 const active = computed(() => {
-  if (
-    props.volunteer &&
-    props.volunteer.settings &&
-    (props.volunteer.settings.active || !('active' in props.volunteer.settings))
-  ) {
-    return true
-  }
-
-  return false
+  if (!props.volunteer) return false
+  // No settings or no active key means default = Active.
+  // Only Backup if settings.active is explicitly 0 or false.
+  if (!props.volunteer.settings) return true
+  if (!('active' in props.volunteer.settings)) return true
+  return !!props.volunteer.settings.active
 })
 </script>
