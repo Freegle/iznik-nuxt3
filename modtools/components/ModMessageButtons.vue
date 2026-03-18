@@ -1,5 +1,5 @@
 <template>
-  <div v-if="message && isModOfAnyGroup">
+  <div v-if="message">
     <div v-if="editreview" class="d-inline">
       <ModMessageButton
         :messageid="message.id"
@@ -160,7 +160,6 @@ import { ref, computed, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useModConfigStore } from '~/stores/modconfig'
 import { copyStdMsgs, icon, variant } from '~/composables/useStdMsgs'
-import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
   messageid: {
@@ -185,7 +184,6 @@ const props = defineProps({
 })
 
 const messageStore = useMessageStore()
-const { amAModOn } = useModMe()
 const modConfigStore = useModConfigStore()
 const modconfig = computed(
   () => modConfigStore.configsById?.[props.modconfigid]
@@ -202,12 +200,6 @@ watch(
   },
   { immediate: true }
 )
-
-// Only show action buttons if we moderate at least one of the message's groups.
-const isModOfAnyGroup = computed(() => {
-  if (!message.value?.groups) return false
-  return message.value.groups.some((g) => amAModOn(g.groupid))
-})
 
 const showRare = ref(false)
 const allowAutoSend = ref(true)
