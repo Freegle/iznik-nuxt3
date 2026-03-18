@@ -778,15 +778,11 @@ function newsfeedDisplayMessage(nf) {
 
 async function fetchUser() {
   if (props.id) {
-    // Fetch the user via fetchMT (returns core user data).
+    // Fetch the user with modtools extras (messagehistory, publiclocation, etc.)
     try {
-      await userStore.fetch(props.id)
+      await userStore.fetchMT({ id: props.id, modtools: true }, true)
     } catch (e) {
-      console.error(
-        'ModSupportUser: userStore.fetch failed',
-        props.id,
-        e?.message || e
-      )
+      console.error('ModSupportUser: fetchMT failed', props.id, e?.message || e)
     }
     user.value = userStore.byId(props.id)
 

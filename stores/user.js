@@ -35,11 +35,12 @@ export const useUserStore = defineStore({
     },
     async searchUsers(searchTerm) {
       const data = await api(this.config).user.search(searchTerm)
-      if (data?.users) {
-        for (const user of data.users) {
-          this.list[user.id] = user
-        }
-        return data.users
+      if (data?.users?.length) {
+        // V2 API returns user IDs; fetch each user with modtools data.
+        await Promise.all(
+          data.users.map((id) => this.fetchMT({ id, modtools: true }, true))
+        )
+        return data.users.map((id) => this.list[id]).filter(Boolean)
       }
       return []
     },

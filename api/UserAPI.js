@@ -19,7 +19,8 @@ export default class UserAPI extends BaseAPI {
   }
 
   async fetchMT(params) {
-    const data = await this.$getv2('/user/fetchmt', params)
+    const { id, ...rest } = params
+    const data = await this.$getv2('/user/' + id, { modtools: true, ...rest })
     // Go returns the user directly; wrap for store compatibility
     return { user: data }
   }
