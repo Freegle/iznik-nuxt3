@@ -462,7 +462,7 @@
                 class="line-clamp-2"
                 :style="{ strike: newsfeed.hidden || newsfeed.deleted }"
               >
-                {{ newsfeed.message }}
+                {{ newsfeedDisplayMessage(newsfeed) }}
               </div>
               <div v-if="newsfeed.hidden" class="small">
                 Hidden by
@@ -748,6 +748,18 @@ onMounted(async () => {
     await fetchUser()
   }
 })
+
+function newsfeedDisplayMessage(nf) {
+  if (nf.type === 'Noticeboard' && nf.message && nf.message.startsWith('{')) {
+    try {
+      const data = JSON.parse(nf.message)
+      return data.name || nf.message
+    } catch {
+      return nf.message
+    }
+  }
+  return nf.message
+}
 
 async function fetchUser() {
   if (props.id) {
