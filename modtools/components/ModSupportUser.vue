@@ -761,10 +761,7 @@ const chatmodstatus = computed({
 
 onMounted(async () => {
   expanded.value = props.expand
-  user.value = userStore.byId(props.id)
-  if (user.value) {
-    await fetchUser()
-  }
+  await fetchUser()
 })
 
 function newsfeedDisplayMessage(nf) {
