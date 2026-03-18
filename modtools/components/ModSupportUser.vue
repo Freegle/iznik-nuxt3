@@ -779,7 +779,15 @@ function newsfeedDisplayMessage(nf) {
 async function fetchUser() {
   if (props.id) {
     // Fetch the user via fetchMT (returns core user data).
-    await userStore.fetch(props.id)
+    try {
+      await userStore.fetch(props.id)
+    } catch (e) {
+      console.error(
+        'ModSupportUser: userStore.fetch failed',
+        props.id,
+        e?.message || e
+      )
+    }
     user.value = userStore.byId(props.id)
 
     // Fetch support-specific data via separate API calls in parallel.
