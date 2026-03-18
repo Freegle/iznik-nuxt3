@@ -442,10 +442,7 @@
             Suppressed
           </b-form-select-option>
         </b-form-select>
-        <div
-          v-for="newsfeed in supportNewsfeed"
-          :key="'newsfeed-' + newsfeed.id"
-        >
+        <div v-for="newsfeed in newsfeedShown" :key="'newsfeed-' + newsfeed.id">
           <div class="d-flex">
             <div class="mr-2">
               <ExternalLink
@@ -479,6 +476,14 @@
             </div>
           </div>
         </div>
+        <b-button
+          v-if="!showAllNewsfeed && newsfeedUnshown"
+          variant="white"
+          class="mt-1"
+          @click="showAllNewsfeed = true"
+        >
+          Show +{{ newsfeedUnshown }}
+        </b-button>
       </div>
       <h3 class="mt-2">Recent Emails</h3>
       <div v-if="emailHistoriesShown.length">
@@ -585,6 +590,7 @@ const showAllMemberships = ref(false)
 const showAllMembershipHistories = ref(false)
 const showAllMessageHistories = ref(false)
 const showAllEmailHistories = ref(false)
+const showAllNewsfeed = ref(false)
 const showSpamModal = ref(false)
 const newpassword = ref(null)
 const newemail = ref(null)
@@ -673,6 +679,18 @@ const membershipHistoriesUnshown = computed(() => {
       ? membershiphistories.value.length - SHOW
       : 0
   return ret
+})
+
+const newsfeedShown = computed(() => {
+  return showAllNewsfeed.value
+    ? supportNewsfeed.value
+    : supportNewsfeed.value.slice(0, SHOW)
+})
+
+const newsfeedUnshown = computed(() => {
+  return supportNewsfeed.value.length > SHOW
+    ? supportNewsfeed.value.length - SHOW
+    : 0
 })
 
 const messageHistoriesShown = computed(() => {
