@@ -97,6 +97,16 @@ test.describe('ModTools hold and release message', () => {
     // Step 3: Scope Hold/Release to the first message card
     const firstCard = messageCards.first()
 
+    // Ensure clean state: if message was left held by a previous run, release it.
+    const existingRelease = firstCard.locator('button:has-text("Release")')
+    if (await existingRelease.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await existingRelease.click()
+      // Wait for Hold button to reappear after release
+      await firstCard
+        .locator('button:has-text("Hold")')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    }
+
     // Find and click the Hold button within the first card
     const holdButton = firstCard.locator('button:has-text("Hold")')
     await expect(holdButton).toBeVisible({
