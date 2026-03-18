@@ -408,7 +408,6 @@ onMounted(async () => {
   // don't show the login modal as it would conflict.
   const me = authStore.user
   if (!me || !me.id) {
-    const route = useRoute()
     if (!route.query?.u || !route.query?.k) {
       authStore.forceLogin = true
       loginModal.value?.show()
