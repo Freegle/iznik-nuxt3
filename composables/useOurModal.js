@@ -45,7 +45,10 @@ export function useOurModal() {
     }
   })
 
-  onUnmounted(unregisterNavigationGuard)
+  onUnmounted(() => {
+    isShown.value = false
+    unregisterNavigationGuard()
+  })
 
   return { modal, show, hide }
 }

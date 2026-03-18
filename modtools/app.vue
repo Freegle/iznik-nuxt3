@@ -170,27 +170,8 @@ watch(loginCount, async () => {
   }
 })
 
-try {
-  if (route.query.u && route.query.k) {
-    // We are impersonating.
-    try {
-      // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
-      // an incognito tab while impersonating.
-      await authStore.clearRelated()
-
-      // Log in using the username and key.
-      await authStore.login({
-        u: route.query.u,
-        k: route.query.k,
-      })
-    } catch (e) {
-      // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
-      console.log('Login failed', e)
-    }
-  }
-} catch (e) {
-  console.error('Error fetching user', e)
-}
+// u/k impersonation login is handled in modtools/pages/login.vue.
+// The auth middleware redirects to /login with u/k preserved in query params.
 
 if (process.client) {
   if (typeof window !== 'undefined') {

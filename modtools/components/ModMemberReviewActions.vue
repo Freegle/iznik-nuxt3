@@ -136,16 +136,35 @@ const { amAModOn } = useModMe()
 const removeConfirm = ref(null)
 
 const membership = computed(() => {
+  // First check the member store (has review data for flagged memberships).
   const members = Object.values(memberStore.list)
   const member = members.find(
     (m) => parseInt(m.userid) === parseInt(props.userid)
   )
-  if (!member || !member.memberships) return null
-  return (
-    member.memberships.find(
+  if (member && member.memberships) {
+    const found = member.memberships.find(
       (ms) => parseInt(ms.membershipid) === parseInt(props.membershipid)
-    ) || null
-  )
+    )
+    if (found) return found
+  }
+
+  // Fall back to the user store for non-flagged memberships (cross-group display).
+  const user = userStore.byId(props.userid)
+  if (user && user.memberships) {
+    const um = user.memberships.find(
+      (ms) => parseInt(ms.id) === parseInt(props.membershipid)
+    )
+    if (um) {
+      return {
+        id: um.groupid,
+        membershipid: um.id,
+        added: um.added,
+        role: um.role,
+      }
+    }
+  }
+
+  return null
 })
 
 const user = computed(() => userStore.byId(props.userid))

@@ -403,11 +403,16 @@ onMounted(async () => {
     await authStore.fetchUser()
   }
 
-  // If not logged in then show loginModal and force it to stay open
+  // If not logged in then show loginModal and force it to stay open.
+  // But if u/k params are present, the login page handles authentication —
+  // don't show the login modal as it would conflict.
   const me = authStore.user
   if (!me || !me.id) {
-    authStore.forceLogin = true
-    loginModal.value.show()
+    const route = useRoute()
+    if (!route.query?.u || !route.query?.k) {
+      authStore.forceLogin = true
+      loginModal.value?.show()
+    }
     return
   }
 
