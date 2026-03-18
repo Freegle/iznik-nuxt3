@@ -4,6 +4,7 @@
       v-for="event in events"
       :key="'eventlist-' + event.id"
       class="p-0 mt-2"
+      style="min-height: 100px"
     >
       <ModCommunityEvent :eventid="event.id" />
     </div>
