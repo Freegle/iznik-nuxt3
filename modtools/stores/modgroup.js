@@ -39,7 +39,7 @@ export const useModGroupStore = defineStore({
         const authStore = useAuthStore()
 
         // If user has changed then clear groupStore
-        if (authStore.groups.length === 0) {
+        if (!authStore.groups || authStore.groups.length === 0) {
           groupStore.clear()
           this.clear()
         }
@@ -75,7 +75,7 @@ export const useModGroupStore = defineStore({
         // Go through all my groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
         // this.getting = []
-        for (const g of Object.values(authStore.groups)) {
+        for (const g of Object.values(authStore.groups || [])) {
           this.fetchIfNeedBeMT(g.groupid)
         }
       } catch (e) {
