@@ -583,7 +583,7 @@ const props = defineProps({
 
 const userStore = useUserStore()
 
-const user = ref(null)
+const user = computed(() => userStore.byId(props.id))
 const expanded = ref(true)
 const purgeConfirm = ref(false)
 const showAllMemberships = ref(false)
@@ -784,7 +784,6 @@ async function fetchUser() {
     } catch (e) {
       console.error('ModSupportUser: fetchMT failed', props.id, e?.message || e)
     }
-    user.value = userStore.byId(props.id)
 
     // Fetch support-specific data via separate API calls in parallel.
     const userApi = api(userStore.config).user
