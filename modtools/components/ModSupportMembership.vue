@@ -177,7 +177,7 @@ async function changePostingStatus() {
   const params = {
     userid: props.userid,
     groupid: groupid.value,
-    ourpostingstatus: membership.value?.ourpostingstatus,
+    ourPostingStatus: membership.value?.ourpostingstatus,
   }
 
   await memberStore.update(params)
