@@ -647,7 +647,7 @@ const membershipsUnshown = computed(() => {
 })
 
 const otherEmails = computed(() => {
-  return user.value.emails.filter((e) => {
+  return (user.value?.emails || []).filter((e) => {
     return e.email !== user.value.email && !e.ourdomain
   })
 })
