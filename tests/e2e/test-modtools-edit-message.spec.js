@@ -11,18 +11,30 @@ const { loginViaModTools } = require('./utils/user')
 const MODTOOLS_URL = 'http://modtools-prod-local.localhost'
 
 async function dismissAllModals(page) {
-  await page.evaluate(() => {
-    document
-      .querySelectorAll('.modal.show, .modal[style*="display: block"]')
-      .forEach((el) => {
-        el.classList.remove('show')
-        el.style.display = 'none'
+  // Dismiss modals and wait for backdrop to be fully removed.
+  // Vue may re-render backdrops, so retry until clear.
+  for (let i = 0; i < 5; i++) {
+    const removed = await page.evaluate(() => {
+      let found = false
+      document
+        .querySelectorAll('.modal.show, .modal[style*="display: block"]')
+        .forEach((el) => {
+          el.classList.remove('show')
+          el.style.display = 'none'
+          found = true
+        })
+      document.querySelectorAll('.modal-backdrop').forEach((el) => {
+        el.remove()
+        found = true
       })
-    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
-    document.body.classList.remove('modal-open')
-    document.body.style.removeProperty('overflow')
-    document.body.style.removeProperty('padding-right')
-  })
+      document.body.classList.remove('modal-open')
+      document.body.style.removeProperty('overflow')
+      document.body.style.removeProperty('padding-right')
+      return found
+    })
+    if (!removed) break
+    await page.waitForTimeout(300)
+  }
 }
 
 async function selectGroupWithPendingMessages(page, groupSelect) {
