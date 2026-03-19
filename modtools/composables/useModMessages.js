@@ -132,18 +132,27 @@ export function setupModMessages(reset) {
     // console.log('uMM getMessages',params.limit)
     // params.debug = 'uMM getMessages',
     messageStore.clear()
-    await messageStore.fetchMessagesMT(params)
-
-    // Force them to show.
-    let messages
-
-    if (groupid.value) {
-      messages = messageStore.getByGroup(groupid.value)
-    } else {
-      messages = messageStore.all
+    listingIds.value = new Set()
+    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    if (fetchedIds) {
+      fetchedIds.forEach((id) => listingIds.value.add(id))
     }
 
-    show.value = messages.length
+    // Force them to show.
+    let msgs
+
+    if (groupid.value) {
+      msgs = messageStore.getByGroup(groupid.value)
+    } else {
+      msgs = messageStore.all
+    }
+
+    // Filter to listing IDs only.
+    if (listingIds.value.size > 0) {
+      msgs = msgs.filter((m) => listingIds.value.has(m.id))
+    }
+
+    show.value = msgs.length
   }
 
   const work = computed(() => {
