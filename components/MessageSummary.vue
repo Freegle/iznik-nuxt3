@@ -255,7 +255,8 @@ function expand(e) {
 .message-summary-mobile {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px $color-black-opacity-12;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+  border-radius: var(--radius-md, 0.375rem);
   cursor: pointer;
   background: $color-white;
   display: flex;
