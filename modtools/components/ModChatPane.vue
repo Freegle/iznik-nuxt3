@@ -127,8 +127,8 @@ if (props.id) {
     // Fetch the messages.  No need to wait, as we might already have the messages in store.
     chatStore.fetchMessages(props.id)
 
-    if (chat.value.user1id) {
-      const otheruid = chat.value.user1id
+    const otheruid = chat.value.otheruid || chat.value.user1id
+    if (otheruid) {
       await userStore.fetch(otheruid)
       chat.value.otheruid = otheruid
     }

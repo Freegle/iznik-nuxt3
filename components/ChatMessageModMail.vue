@@ -50,7 +50,7 @@
                   />
                 </span>
               </div>
-              <div v-if="chatmessage.refmsgid && refmsg">
+              <div v-if="chatmessage.refmsgid && refmsg && !miscStore.modtools">
                 <hr />
                 <p>
                   If you have been asked to edit and resend this message, you
@@ -95,6 +95,7 @@ import { ref, computed } from 'vue'
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
 import { useComposeStore } from '~/stores/compose'
+import { useMiscStore } from '~/stores/misc'
 import {
   fetchReferencedMessage,
   useChatMessageBase,
@@ -134,6 +135,7 @@ const { chat, chatmessage, emessage, refmsg, me, myid, realMe } =
   useChatMessageBase(props.chatid, props.id, props.pov)
 
 const composeStore = useComposeStore()
+const miscStore = useMiscStore()
 const contactGroupId = ref(null)
 
 // Setup
