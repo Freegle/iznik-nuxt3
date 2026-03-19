@@ -161,12 +161,10 @@ test.describe('ModTools Support Tools', () => {
       timeout: timeouts.navigation.slowPage,
     })
 
-    // The test user should have at least one membership.
-    // Wait for actual membership content to appear (group name or role text).
-    const membershipContent = page.locator(
-      'text=Member, text=Moderator, text=Owner'
-    )
-    await expect(membershipContent.first()).toBeVisible({
+    // The test user was created as a Member of the test group.
+    // The membership card heading shows the role icon + group name.
+    const membershipCard = page.locator(`h4:has-text("${testEnv.group.name}")`)
+    await expect(membershipCard.first()).toBeVisible({
       timeout: timeouts.navigation.slowPage,
     })
 

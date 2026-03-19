@@ -192,21 +192,27 @@ const test = base.test.extend({
         .replace('test-', '')
         .replace(/-/g, '')
 
-      // Read pre-generated environments (created before test run)
-      const envsPath = path.join(__dirname, 'test-envs.json')
+      // Create isolated test environment on demand via the status API.
+      // The API calls create-test-env.php which is idempotent.
+      // Playwright container uses host network, so use localhost:8081 (mapped port)
+      const statusUrl = process.env.STATUS_API_URL || 'http://localhost:8081'
       try {
-        const envsData = JSON.parse(fs.readFileSync(envsPath, 'utf-8'))
-        const env = envsData[prefix]
-        if (env) {
+        const resp = await fetch(`${statusUrl}/api/tests/env/${prefix}`)
+        if (resp.ok) {
+          const env = await resp.json()
           console.log(
-            `Test environment loaded: group=${env.group.name}, mod=${env.mod.email}`
+            `Test environment created: group=${env.group.name}, mod=${env.mod.email}`
           )
           await use(env)
           return
         }
-        console.warn(`No pre-generated environment for prefix "${prefix}"`)
+        console.warn(
+          `Failed to create test env for "${prefix}": ${
+            resp.status
+          } ${await resp.text()}`
+        )
       } catch (error) {
-        console.error(`Failed to read test-envs.json: ${error.message}`)
+        console.error(`Test env API error for "${prefix}": ${error.message}`)
       }
 
       // Fall back to shared FreeglePlayground environment
