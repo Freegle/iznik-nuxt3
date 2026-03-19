@@ -49,7 +49,7 @@ vi.mock('~/composables/useModMessages', () => ({
 const mockMessageStore = {
   list: {},
   context: null,
-  fetchMessagesMT: vi.fn().mockResolvedValue({}),
+  fetchMessagesMT: vi.fn().mockResolvedValue([]),
   clearContext: vi.fn(),
   clear: vi.fn(),
 }
