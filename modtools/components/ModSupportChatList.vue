@@ -6,16 +6,22 @@
       :chatid="chat.id"
       :pov="pov"
     />
-    <infinite-loading :distance="10" @infinite="loadMoreChats">
-      <template #complete>
-        <notice-message v-if="!chatsShown?.length"> No chats. </notice-message>
-      </template>
-    </infinite-loading>
+    <b-button
+      v-if="!showAll && chatsUnshown"
+      variant="white"
+      class="mt-1"
+      @click="showAll = true"
+    >
+      Show +{{ chatsUnshown }}
+    </b-button>
+    <notice-message v-if="!props.chats?.length"> No chats. </notice-message>
   </div>
 </template>
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useChatStore } from '~/stores/chat'
+
+const SHOW = 3
 
 const chatStore = useChatStore()
 
@@ -43,19 +49,15 @@ function populateStore(chats) {
 populateStore(props.chats)
 watch(() => props.chats, populateStore)
 
-const showChats = ref(10)
+const showAll = ref(false)
 
 const chatsShown = computed(() => {
-  return props.chats ? props.chats.slice(0, showChats.value) : []
+  if (!props.chats) return []
+  return showAll.value ? props.chats : props.chats.slice(0, SHOW)
 })
 
-function loadMoreChats($state) {
-  // We use an infinite load for the list because it's a lot of DOM to add at initial page load.
-  if (props.chats && showChats.value < props.chats.length) {
-    showChats.value += 10
-    $state.loaded()
-  } else {
-    $state.complete()
-  }
-}
+const chatsUnshown = computed(() => {
+  if (!props.chats || props.chats.length <= SHOW) return 0
+  return props.chats.length - SHOW
+})
 </script>
