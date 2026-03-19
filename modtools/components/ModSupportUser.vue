@@ -330,14 +330,25 @@
       <div v-if="membershipHistoriesShown.length">
         <div
           v-for="membershiphistory in membershipHistoriesShown"
-          :key="'membershiphistory-' + membershiphistory.added"
+          :key="
+            'membershiphistory-' +
+            (membershiphistory.timestamp || membershiphistory.added)
+          "
         >
           {{ membershiphistory.nameshort }}
           <span
             class="text-muted"
-            :title="membershiphistory.added.toLocaleString()"
+            :title="
+              (
+                membershiphistory.timestamp ||
+                membershiphistory.added ||
+                ''
+              ).toLocaleString()
+            "
           >
-            {{ timeago(membershiphistory.added) }}
+            {{
+              timeago(membershiphistory.timestamp || membershiphistory.added)
+            }}
           </span>
         </div>
         <b-button
