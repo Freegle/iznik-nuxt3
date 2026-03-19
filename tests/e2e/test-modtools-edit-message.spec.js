@@ -25,32 +25,61 @@ async function dismissAllModals(page) {
   })
 }
 
+async function selectGroupWithPendingMessages(page, groupSelect) {
+  let targetGroupValue = null
+  await expect
+    .poll(
+      async () => {
+        const options = await groupSelect.locator('option').all()
+        for (const option of options) {
+          const text = await option.textContent()
+          const value = await option.getAttribute('value')
+          if (value && value !== '0' && /\(\d+\)/.test(text)) {
+            targetGroupValue = value
+            return true
+          }
+        }
+        return false
+      },
+      {
+        message: 'Waiting for group options with pending message counts',
+        timeout: timeouts.navigation.slowPage,
+      }
+    )
+    .toBe(true)
+  await groupSelect.selectOption(targetGroupValue)
+  return targetGroupValue
+}
+
 test.describe('ModTools Edit Message', () => {
   test('editing a pending message title should save successfully', async ({
     page,
     testEnv,
   }) => {
-    // testEnv.pending.offer is a pre-created pending message ID
     expect(testEnv.pending.offer).toBeTruthy()
     console.log(
-      `Using pre-created pending message ${testEnv.pending.offer} on group ${testEnv.group.name}`
+      `Using pending message ${testEnv.pending.offer} on group ${testEnv.group.name}`
     )
 
-    // Log into ModTools as the moderator
     await loginViaModTools(page, testEnv.mod.email)
 
-    // Navigate to pending messages for the test group
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
     })
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
+
+    const groupSelect = page.locator('#communitieslist')
+    await expect(groupSelect).toBeVisible({
+      timeout: timeouts.navigation.slowPage,
     })
+
     await dismissAllModals(page)
 
-    // Wait for a message card to appear
-    const messageCard = page.locator('.card, .message-card').first()
-    await expect(messageCard).toBeVisible({
+    // Select a group that has pending messages
+    await selectGroupWithPendingMessages(page, groupSelect)
+
+    // Wait for message cards to appear
+    const messageCards = page.locator('.card')
+    await expect(messageCards.first()).toBeVisible({
       timeout: timeouts.navigation.slowPage,
     })
 
@@ -61,7 +90,8 @@ test.describe('ModTools Edit Message', () => {
     await expect(editButton).toBeVisible({ timeout: timeouts.ui.appearance })
     await editButton.click()
 
-    // Wait for the edit form — the subject input appears
+    // Wait for the edit form — the subject input appears (either well-structured
+    // item/location inputs or a plain subject input with size="lg")
     const subjectInput = page
       .locator('input[size="lg"], input.form-control-lg')
       .first()
@@ -83,14 +113,16 @@ test.describe('ModTools Edit Message', () => {
     await expect(saveButton).toBeVisible({ timeout: timeouts.ui.appearance })
     await saveButton.click()
 
-    // Wait for edit mode to close — the Save button should disappear
-    // If it doesn't disappear within timeout, the save failed (spinner stuck)
+    // Wait for edit mode to close — the Save button should disappear.
+    // If it doesn't, the save failed (spinner stuck — bug we're testing for).
     await expect(saveButton).not.toBeVisible({
       timeout: timeouts.api.default,
     })
 
-    // Verify the new subject is displayed
-    await expect(page.locator(`text=${newSubject}`).first()).toBeVisible({
+    // Verify the edited text appears in the page. For well-structured messages,
+    // the subject is rebuilt as "TYPE: item (location)", so the item name
+    // should appear somewhere in the message display.
+    await expect(page.locator(`text=/${newSubject}/i`).first()).toBeVisible({
       timeout: timeouts.ui.appearance,
     })
 
