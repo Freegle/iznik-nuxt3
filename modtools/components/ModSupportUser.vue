@@ -272,10 +272,10 @@
       <div v-if="memberships && memberships.length">
         <div
           v-for="membership in memberships"
-          :key="'membership-' + membership.membershipid"
+          :key="'membership-' + membership.id"
         >
           <ModSupportMembership
-            :membershipid="membership.membershipid"
+            :membershipid="membership.id"
             :userid="user.id"
             @fetchuser="fetchUser"
           />
