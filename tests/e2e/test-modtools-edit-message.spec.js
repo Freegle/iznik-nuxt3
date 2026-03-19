@@ -100,7 +100,9 @@ test.describe('ModTools Edit Message', () => {
       .locator('button:has-text("Edit"), .btn:has-text("Edit")')
       .first()
     await expect(editButton).toBeVisible({ timeout: timeouts.ui.appearance })
-    await editButton.click()
+    // force: true bypasses actionability check — modal backdrop from login
+    // can persist through dismissAllModals retries due to Vue re-rendering.
+    await editButton.click({ force: true })
 
     // Wait for the edit form — the subject input appears (either well-structured
     // item/location inputs or a plain subject input with size="lg")
