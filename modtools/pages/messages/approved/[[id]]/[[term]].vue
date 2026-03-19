@@ -219,7 +219,10 @@ async function loadMore($state) {
     params.context = context.value
     params.limit = messages.value.length + distance.value
 
-    await messageStore.fetchMessagesMT(params)
+    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    if (fetchedIds) {
+      fetchedIds.forEach((id) => modMessages.listingIds.value.add(id))
+    }
     context.value = messageStore.context
 
     if (currentCount === Object.keys(messageStore.list).length) {

@@ -518,6 +518,8 @@ export const useMessageStore = defineStore({
           }
         })
       )
+
+      return messageIDs
     },
     async fetchMT(params) {
       const message = await api(this.config).message.fetchMT(params)

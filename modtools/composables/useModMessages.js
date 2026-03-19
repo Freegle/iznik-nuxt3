@@ -24,6 +24,7 @@ const workType = ref(null)
 const show = ref(0)
 
 const collection = ref(null)
+const listingIds = ref(new Set())
 const messageTerm = ref(null)
 const memberTerm = ref(null)
 const nextAfterRemoved = ref(null)
@@ -45,6 +46,13 @@ const messages = computed(() => {
     messages = messageStore.getByGroup(groupid.value)
   } else {
     messages = messageStore.all
+  }
+
+  // Filter to only messages from the current listing request.
+  // The store accumulates messages from various sources (user history,
+  // crossposts, other pages) — only show ones from our listing.
+  if (listingIds.value.size > 0) {
+    messages = messages.filter((m) => listingIds.value.has(m.id))
   }
   // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
@@ -94,6 +102,7 @@ export function setupModMessages(reset) {
     limit.value = 10
     workType.value = null
     show.value = 0
+    listingIds.value = new Set()
 
     collection.value = null
     messageTerm.value = null
@@ -237,6 +246,7 @@ export function setupModMessages(reset) {
     summarykey,
     summary,
     messages,
+    listingIds,
     visibleMessages,
     work,
     getMessages,

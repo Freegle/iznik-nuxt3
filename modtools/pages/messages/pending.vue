@@ -85,6 +85,7 @@ const {
   distance,
   summarykey,
   messages,
+  listingIds,
   visibleMessages,
   nextAfterRemoved,
   getMessages,
@@ -256,7 +257,10 @@ async function loadMore($state) {
       limit: messages.value.length + distance.value,
     }
 
-    await messageStore.fetchMessagesMT(params)
+    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    if (fetchedIds) {
+      fetchedIds.forEach((id) => listingIds.value.add(id))
+    }
     context.value = messageStore.context
 
     if (currentCount === Object.keys(messageStore.list).length) {
