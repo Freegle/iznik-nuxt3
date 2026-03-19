@@ -34,6 +34,7 @@
 @import 'bootstrap/scss/mixins/_breakpoints.scss';
 @import 'typography';
 @import 'buttons';
+@import '_design-tokens';
 
 html {
   scroll-behavior: smooth;

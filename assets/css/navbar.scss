@@ -140,47 +140,19 @@ svg.fa-icon {
   color: $color-black;
 }
 
-.newsbadge {
-  position: absolute;
-  top: 2px;
-  right: 10px;
-  font-size: 11px;
-  background-color: $colour-secondary !important;
-  color: white !important;
-}
-
-.mypostsbadge {
-  position: absolute;
-  top: 2px;
-  right: 4px;
-  font-size: 11px;
-  background-color: $colour-secondary !important;
-  color: white !important;
-}
-
-.communityeventsbadge {
-  position: absolute;
-  top: 2px;
-  right: -2px;
-  font-size: 11px;
-  background-color: $colour-secondary !important;
-  color: white !important;
-}
-
+// Consolidated navbar badge -- replaces browsebadge, mypostsbadge, newsbadge,
+// communityeventsbadge, volunteeropportunitiesbadge (which only differed in `right` offset)
+.nav-badge,
+.browsebadge,
+.mypostsbadge,
+.newsbadge,
+.communityeventsbadge,
 .volunteeropportunitiesbadge {
   position: absolute;
   top: 2px;
-  right: 9px;
+  right: 0;
   font-size: 11px;
   background-color: $colour-secondary !important;
   color: white !important;
-}
-
-.browsebadge {
-  position: absolute;
-  top: 2px;
-  right: -6px;
-  font-size: 11px;
-  background-color: $colour-secondary !important;
-  color: white !important;
+  transform: translateX(50%);
 }
