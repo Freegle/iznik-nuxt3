@@ -1131,53 +1131,56 @@ function startEdit() {
 async function save() {
   saving.value = true
 
-  const attids = []
+  try {
+    const attids = []
 
-  if (Array.isArray(attachments.value)) {
-    for (const att of attachments.value) {
-      attids.push(att.id)
+    if (Array.isArray(attachments.value)) {
+      for (const att of attachments.value) {
+        attids.push(att.id)
+      }
     }
-  }
 
-  if (editmessage.value.item && editmessage.value.location) {
-    // Well-structured message
-    await messageStore.patch({
-      id: editmessage.value.id,
-      msgtype: editmessage.value.type,
-      item: editmessage.value.item.name,
-      location: editmessage.value.location.name,
-      attachments: attids,
-      textbody: editmessage.value.textbody,
-    })
-  } else {
-    // Not
-    await messageStore.patch({
-      id: editmessage.value.id,
-      msgtype: editmessage.value.type,
-      subject: editmessage.value.subject,
-      attachments: attids,
-      textbody: editmessage.value.textbody,
-    })
-  }
-
-  let alreadyon = false
-
-  editmessage.value.groups.forEach((g) => {
-    if (g.groupid === editgroup.value) {
-      alreadyon = true
+    if (editmessage.value.item && editmessage.value.location) {
+      // Well-structured message
+      await messageStore.patch({
+        id: editmessage.value.id,
+        msgtype: editmessage.value.type,
+        item: editmessage.value.item.name,
+        location: editmessage.value.location.name,
+        attachments: attids,
+        textbody: editmessage.value.textbody,
+      })
+    } else {
+      // Not well-structured
+      await messageStore.patch({
+        id: editmessage.value.id,
+        msgtype: editmessage.value.type,
+        subject: editmessage.value.subject,
+        attachments: attids,
+        textbody: editmessage.value.textbody,
+      })
     }
-  })
 
-  if (!alreadyon) {
-    await messageStore.move({
-      id: editmessage.value.id,
-      groupid: editgroup.value,
+    let alreadyon = false
+
+    editmessage.value.groups.forEach((g) => {
+      if (g.groupid === editgroup.value) {
+        alreadyon = true
+      }
     })
-  }
 
-  saving.value = false
-  editing.value = false
-  miscStore.modtoolsediting = false
+    if (!alreadyon) {
+      await messageStore.move({
+        id: editmessage.value.id,
+        groupid: editgroup.value,
+      })
+    }
+
+    editing.value = false
+    miscStore.modtoolsediting = false
+  } finally {
+    saving.value = false
+  }
 }
 
 function settingsChange(param, val) {
