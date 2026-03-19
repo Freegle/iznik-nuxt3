@@ -127,6 +127,18 @@ export default defineNuxtPlugin(() => {
     const target = event.target
     if (!target || target === document.body) return
 
+    // Scroll events use document.scrollingElement as target, which is
+    // document.documentElement — extractElementInfo rejects that as
+    // "non-meaningful". Log scroll events directly with page context.
+    if (type === 'scroll') {
+      logInteraction({
+        type,
+        scrollY: event.scrollY,
+        scrollPercent: event.scrollPercent,
+      })
+      return
+    }
+
     const info = extractElementInfo(target)
     if (!info) return // Ignore non-meaningful elements.
 
@@ -135,10 +147,6 @@ export default defineNuxtPlugin(() => {
       ...info,
       ...(event.direction && { direction: event.direction }),
       ...(event.distance && { distance: event.distance }),
-      ...(event.scrollY !== undefined && {
-        scrollY: event.scrollY,
-        scrollPercent: event.scrollPercent,
-      }),
     })
   }
 
