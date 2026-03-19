@@ -135,11 +135,16 @@ const membership = computed(() => {
   }
 
   return (
-    user.memberships.find((m) => m.membershipid === props.membershipid) || null
+    user.memberships.find(
+      (m) =>
+        m.id === props.membershipid || m.membershipid === props.membershipid
+    ) || null
   )
 })
 
-const groupid = computed(() => membership.value?.id)
+const groupid = computed(
+  () => membership.value?.groupid || membership.value?.id
+)
 
 async function changeEvents(newval) {
   const params = {
