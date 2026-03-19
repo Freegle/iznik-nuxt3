@@ -318,8 +318,18 @@ describe('ModSupportUser', () => {
         {
           email: null,
           emails: [
-            { id: 1, email: 'other@test.com', preferred: false },
-            { id: 2, email: 'preferred@test.com', preferred: true },
+            {
+              id: 1,
+              email: 'other@test.com',
+              preferred: false,
+              added: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 2,
+              email: 'preferred@test.com',
+              preferred: true,
+              added: '2024-01-02T00:00:00Z',
+            },
           ],
         }
       )
@@ -332,8 +342,18 @@ describe('ModSupportUser', () => {
         {
           email: null,
           emails: [
-            { id: 1, email: 'first@test.com', preferred: false },
-            { id: 2, email: 'second@test.com', preferred: false },
+            {
+              id: 1,
+              email: 'first@test.com',
+              preferred: false,
+              added: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 2,
+              email: 'second@test.com',
+              preferred: false,
+              added: '2024-01-02T00:00:00Z',
+            },
           ],
         }
       )
@@ -373,9 +393,18 @@ describe('ModSupportUser', () => {
         {
           email: 'primary@test.com',
           emails: [
-            { id: 1, email: 'primary@test.com' },
-            { id: 2, email: 'other@test.com' },
-            { id: 3, email: 'freegle@users.ilovefreegle.org', ourdomain: true },
+            {
+              id: 1,
+              email: 'primary@test.com',
+              added: '2024-01-01T00:00:00Z',
+            },
+            { id: 2, email: 'other@test.com', added: '2024-01-02T00:00:00Z' },
+            {
+              id: 3,
+              email: 'freegle@users.ilovefreegle.org',
+              ourdomain: true,
+              added: '2024-01-03T00:00:00Z',
+            },
           ],
         }
       )

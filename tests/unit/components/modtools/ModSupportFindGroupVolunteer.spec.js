@@ -145,13 +145,13 @@ describe('ModSupportFindGroupVolunteer', () => {
       expect(wrapper.vm.active).toBe(false)
     })
 
-    it('returns false when volunteer.settings is null', () => {
+    it('returns true when volunteer.settings is null (default active)', () => {
       const wrapper = mountComponent({
         volunteer: createVolunteer({
           settings: null,
         }),
       })
-      expect(wrapper.vm.active).toBe(false)
+      expect(wrapper.vm.active).toBe(true)
     })
 
     // Note: Passing null for a required Object prop would trigger a Vue warning,
@@ -271,7 +271,8 @@ describe('ModSupportFindGroupVolunteer', () => {
         groupid: 1,
       })
       expect(wrapper.find('.row').exists()).toBe(true)
-      expect(wrapper.vm.active).toBe(false)
+      // null settings means default = Active
+      expect(wrapper.vm.active).toBe(true)
     })
 
     it('handles empty settings object', () => {

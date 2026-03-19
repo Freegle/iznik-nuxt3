@@ -35,8 +35,7 @@ describe('ModSupportChatList', () => {
     globalThis.__mockChatStore = null
   })
 
-  function mountComponent(props = {}, options = {}) {
-    const { triggerInfinite = true } = options
+  function mountComponent(props = {}) {
     return mount(ModSupportChatList, {
       props: { ...defaultProps, ...props },
       global: {
@@ -46,22 +45,12 @@ describe('ModSupportChatList', () => {
               '<div class="support-chat" :data-chat-id="chatid">Chat {{ chatid }}</div>',
             props: ['chatid', 'pov'],
           },
-          'infinite-loading': {
-            template:
-              '<div class="infinite-loading"><slot name="complete" /></div>',
-            emits: ['infinite'],
-            mounted() {
-              // Only trigger if option is set (default: true for most tests)
-              if (triggerInfinite) {
-                this.$emit('infinite', {
-                  loaded: () => {},
-                  complete: () => {},
-                })
-              }
-            },
-          },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',
+          },
+          'b-button': {
+            template:
+              '<button class="b-button" @click="$emit(\'click\')"><slot /></button>',
           },
         },
       },
@@ -69,9 +58,10 @@ describe('ModSupportChatList', () => {
   }
 
   describe('rendering', () => {
-    it('renders infinite-loading component', () => {
+    it('renders ModSupportChat components for initial chats', () => {
       const wrapper = mountComponent()
-      expect(wrapper.find('.infinite-loading').exists()).toBe(true)
+      const chats = wrapper.findAll('.support-chat')
+      expect(chats.length).toBe(3)
     })
   })
 
@@ -89,7 +79,6 @@ describe('ModSupportChatList', () => {
         global: {
           stubs: {
             ModSupportChat: true,
-            'infinite-loading': true,
             NoticeMessage: true,
           },
         },
@@ -106,134 +95,141 @@ describe('ModSupportChatList', () => {
   })
 
   describe('computed: chatsShown', () => {
-    it('returns empty array when chats is empty', async () => {
-      const wrapper = mountComponent(
-        {
-          chats: [],
-        },
-        { triggerInfinite: false }
-      )
-      wrapper.vm.showChats = 10
-      await nextTick()
+    it('returns empty array when chats is empty', () => {
+      const wrapper = mountComponent({ chats: [] })
       expect(wrapper.vm.chatsShown).toEqual([])
     })
 
-    it('returns empty array when showChats is 0', async () => {
+    it('returns first SHOW(3) chats initially', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 0
-      await nextTick()
-      expect(wrapper.vm.chatsShown).toEqual([])
-    })
-
-    it('returns sliced chats based on showChats', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.showChats = 2
-      await nextTick()
-      expect(wrapper.vm.chatsShown.length).toBe(2)
+      expect(wrapper.vm.chatsShown.length).toBe(3)
       expect(wrapper.vm.chatsShown[0].id).toBe(1)
       expect(wrapper.vm.chatsShown[1].id).toBe(2)
+      expect(wrapper.vm.chatsShown[2].id).toBe(3)
     })
 
-    it('returns all chats when showChats exceeds array length', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.showChats = 100
-      await nextTick()
-      expect(wrapper.vm.chatsShown.length).toBe(3)
-    })
-  })
-
-  describe('loadMoreChats', () => {
-    it('increases showChats by 10 when more chats available', () => {
-      // Create more than 10 chats
-      const manyChats = Array.from({ length: 25 }, (_, i) => ({
+    it('returns only SHOW(3) chats when there are more than 3', () => {
+      const manyChats = Array.from({ length: 6 }, (_, i) => ({
         id: i + 1,
         name: `Chat ${i + 1}`,
         chattype: 'User2User',
       }))
 
-      const wrapper = mountComponent({
-        chats: manyChats,
-      })
-      wrapper.vm.showChats = 5
-
-      const state = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
-
-      wrapper.vm.loadMoreChats(state)
-
-      expect(wrapper.vm.showChats).toBe(15)
-      expect(state.loaded).toHaveBeenCalled()
-      expect(state.complete).not.toHaveBeenCalled()
+      const wrapper = mountComponent({ chats: manyChats })
+      expect(wrapper.vm.chatsShown.length).toBe(3)
     })
 
-    it('calls complete when all chats are shown', () => {
+    it('returns all chats when showAll is true', async () => {
+      const manyChats = Array.from({ length: 6 }, (_, i) => ({
+        id: i + 1,
+        name: `Chat ${i + 1}`,
+        chattype: 'User2User',
+      }))
+
+      const wrapper = mountComponent({ chats: manyChats })
+      wrapper.vm.showAll = true
+      await nextTick()
+      expect(wrapper.vm.chatsShown.length).toBe(6)
+    })
+  })
+
+  describe('computed: chatsUnshown', () => {
+    it('returns 0 when chats length <= SHOW(3)', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 3 // Same as chats.length
-
-      const state = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
-
-      wrapper.vm.loadMoreChats(state)
-
-      expect(state.complete).toHaveBeenCalled()
-      expect(state.loaded).not.toHaveBeenCalled()
+      expect(wrapper.vm.chatsUnshown).toBe(0)
     })
 
-    it('calls complete when showChats exceeds chats length', () => {
+    it('returns count of hidden chats when more than SHOW(3)', () => {
+      const manyChats = Array.from({ length: 7 }, (_, i) => ({
+        id: i + 1,
+        name: `Chat ${i + 1}`,
+        chattype: 'User2User',
+      }))
+
+      const wrapper = mountComponent({ chats: manyChats })
+      expect(wrapper.vm.chatsUnshown).toBe(4)
+    })
+
+    it('returns 0 when chats is empty', () => {
+      const wrapper = mountComponent({ chats: [] })
+      expect(wrapper.vm.chatsUnshown).toBe(0)
+    })
+  })
+
+  describe('Show +N button', () => {
+    it('does not show button when chats <= SHOW(3)', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 10 // More than 3 chats
+      expect(wrapper.find('.b-button').exists()).toBe(false)
+    })
 
-      const state = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
+    it('shows button with correct count when chats > SHOW(3)', () => {
+      const manyChats = Array.from({ length: 8 }, (_, i) => ({
+        id: i + 1,
+        name: `Chat ${i + 1}`,
+        chattype: 'User2User',
+      }))
 
-      wrapper.vm.loadMoreChats(state)
+      const wrapper = mountComponent({ chats: manyChats })
+      const button = wrapper.find('.b-button')
+      expect(button.exists()).toBe(true)
+      expect(button.text()).toContain('Show +5')
+    })
 
-      expect(state.complete).toHaveBeenCalled()
+    it('clicking the button reveals all chats', async () => {
+      const manyChats = Array.from({ length: 8 }, (_, i) => ({
+        id: i + 1,
+        name: `Chat ${i + 1}`,
+        chattype: 'User2User',
+      }))
+
+      const wrapper = mountComponent({ chats: manyChats })
+      expect(wrapper.findAll('.support-chat').length).toBe(3)
+
+      await wrapper.find('.b-button').trigger('click')
+      await nextTick()
+
+      expect(wrapper.findAll('.support-chat').length).toBe(8)
+    })
+
+    it('hides the button after clicking', async () => {
+      const manyChats = Array.from({ length: 8 }, (_, i) => ({
+        id: i + 1,
+        name: `Chat ${i + 1}`,
+        chattype: 'User2User',
+      }))
+
+      const wrapper = mountComponent({ chats: manyChats })
+      expect(wrapper.find('.b-button').exists()).toBe(true)
+
+      await wrapper.find('.b-button').trigger('click')
+      await nextTick()
+
+      expect(wrapper.find('.b-button').exists()).toBe(false)
     })
   })
 
   describe('ModSupportChat rendering', () => {
-    it('renders a ModSupportChat for each visible chat', async () => {
+    it('renders a ModSupportChat for each visible chat', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 3
-      await nextTick()
-
       const chats = wrapper.findAll('.support-chat')
       expect(chats.length).toBe(3)
     })
 
-    it('passes chat data to ModSupportChat via stub', async () => {
+    it('passes chat data to ModSupportChat via stub', () => {
       const wrapper = mountComponent()
-      await nextTick()
-
-      // With the stub, we check the rendered output contains the chat name
       const chats = wrapper.findAll('.support-chat')
       expect(chats.length).toBeGreaterThan(0)
-      expect(chats[0].text()).toContain('Chat 1') // chatid=1 renders "Chat 1"
+      expect(chats[0].text()).toContain('Chat 1')
     })
 
-    it('renders chats with correct pov', async () => {
-      const wrapper = mountComponent({
-        pov: 555,
-      })
-      await nextTick()
-
-      // The stub doesn't expose props, but we verify chats are rendered
+    it('renders chats with correct pov', () => {
+      const wrapper = mountComponent({ pov: 555 })
       const chats = wrapper.findAll('.support-chat')
       expect(chats.length).toBeGreaterThan(0)
     })
 
-    it('uses correct key for each chat', async () => {
+    it('uses correct key for each chat', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 3
-      await nextTick()
-
       const chats = wrapper.findAll('.support-chat')
       expect(chats[0].attributes('data-chat-id')).toBe('1')
       expect(chats[1].attributes('data-chat-id')).toBe('2')
@@ -242,87 +238,45 @@ describe('ModSupportChatList', () => {
   })
 
   describe('empty state', () => {
-    it('shows "No chats" message when chatsShown is empty', async () => {
-      const wrapper = mountComponent({
-        chats: [],
-      })
-      wrapper.vm.showChats = 0
-      await nextTick()
-
+    it('shows "No chats" message when chats is empty', () => {
+      const wrapper = mountComponent({ chats: [] })
       expect(wrapper.text()).toContain('No chats')
     })
 
-    it('does not show "No chats" when there are visible chats', async () => {
+    it('does not show "No chats" when there are visible chats', () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 3
-      await nextTick()
-
-      // The complete slot is only shown when infinite loading completes
-      // but with chats shown, it shouldn't display "No chats"
       const noticeMessages = wrapper.findAll('.notice-message')
       const noChatsMessages = noticeMessages.filter((n) =>
         n.text().includes('No chats')
       )
-      // This depends on how infinite-loading renders the complete slot
-      // In real scenario, complete slot shows after all items loaded
-      // We just verify the filter works and doesn't crash
-      expect(noChatsMessages).toBeDefined()
-    })
-  })
-
-  describe('incremental loading', () => {
-    it('starts with showChats at 0 before infinite load triggers', () => {
-      // Use triggerInfinite: false to prevent auto-load
-      const wrapper = mountComponent({}, { triggerInfinite: false })
-      expect(wrapper.vm.showChats).toBe(0)
-    })
-
-    it('progressively loads more chats', () => {
-      const manyChats = Array.from({ length: 50 }, (_, i) => ({
-        id: i + 1,
-        name: `Chat ${i + 1}`,
-        chattype: 'User2User',
-      }))
-
-      // Use triggerInfinite: false so we can control loading manually
-      const wrapper = mountComponent(
-        {
-          chats: manyChats,
-        },
-        { triggerInfinite: false }
-      )
-
-      const state = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
-
-      // First load
-      wrapper.vm.loadMoreChats(state)
-      expect(wrapper.vm.showChats).toBe(10)
-      expect(wrapper.vm.chatsShown.length).toBe(10)
-
-      // Second load
-      wrapper.vm.loadMoreChats(state)
-      expect(wrapper.vm.showChats).toBe(20)
-      expect(wrapper.vm.chatsShown.length).toBe(20)
-
-      // Third load
-      wrapper.vm.loadMoreChats(state)
-      expect(wrapper.vm.showChats).toBe(30)
-      expect(wrapper.vm.chatsShown.length).toBe(30)
+      expect(noChatsMessages.length).toBe(0)
     })
   })
 
   describe('chats array updates', () => {
     it('updates chatsShown when chats prop changes', async () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 10
-      await nextTick()
-
       expect(wrapper.vm.chatsShown.length).toBe(3)
 
-      // Update chats prop
+      await wrapper.setProps({
+        chats: [
+          ...defaultChats,
+          { id: 4, name: 'Chat 4', chattype: 'User2User' },
+          { id: 5, name: 'Chat 5', chattype: 'User2User' },
+        ],
+      })
+
+      // Still only shows SHOW(3) because showAll is false
+      expect(wrapper.vm.chatsShown.length).toBe(3)
+      // But chatsUnshown now reflects the extra items
+      expect(wrapper.vm.chatsUnshown).toBe(2)
+    })
+
+    it('shows all new chats when showAll is true', async () => {
+      const wrapper = mountComponent()
+      wrapper.vm.showAll = true
+      await nextTick()
+
       await wrapper.setProps({
         chats: [
           ...defaultChats,
@@ -336,46 +290,30 @@ describe('ModSupportChatList', () => {
 
     it('handles empty array update', async () => {
       const wrapper = mountComponent()
-      wrapper.vm.showChats = 10
-      await nextTick()
-
-      await wrapper.setProps({
-        chats: [],
-      })
-
+      await wrapper.setProps({ chats: [] })
       expect(wrapper.vm.chatsShown.length).toBe(0)
     })
   })
 
   describe('pov propagation', () => {
     it('updates pov when prop changes', async () => {
-      const wrapper = mountComponent({
-        pov: 100,
-      })
-      await nextTick()
-
+      const wrapper = mountComponent({ pov: 100 })
       expect(wrapper.props('pov')).toBe(100)
 
       await wrapper.setProps({ pov: 200 })
-
       expect(wrapper.props('pov')).toBe(200)
     })
   })
 
   describe('chat ordering', () => {
-    it('preserves the order of chats from props', async () => {
+    it('preserves the order of chats from props', () => {
       const orderedChats = [
         { id: 5, name: 'Fifth Chat' },
         { id: 2, name: 'Second Chat' },
         { id: 8, name: 'Eighth Chat' },
       ]
 
-      const wrapper = mountComponent({
-        chats: orderedChats,
-      })
-      wrapper.vm.showChats = 3
-      await nextTick()
-
+      const wrapper = mountComponent({ chats: orderedChats })
       const chats = wrapper.findAll('.support-chat')
       expect(chats[0].attributes('data-chat-id')).toBe('5')
       expect(chats[1].attributes('data-chat-id')).toBe('2')
@@ -386,44 +324,43 @@ describe('ModSupportChatList', () => {
   describe('edge cases', () => {
     it('handles empty chats array gracefully', () => {
       const wrapper = mount(ModSupportChatList, {
-        props: {
-          chats: [],
-        },
+        props: { chats: [] },
         global: {
           stubs: {
             ModSupportChat: true,
-            'infinite-loading': {
-              template:
-                '<div class="infinite-loading"><slot name="complete" /></div>',
-            },
             NoticeMessage: {
               template: '<div class="notice-message"><slot /></div>',
             },
           },
         },
       })
-
-      // Should not throw and should return empty array
-      expect(wrapper.vm.chatsShown).toEqual([])
-    })
-
-    it('handles negative showChats value', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.showChats = -5
-      await nextTick()
-
-      // slice with negative should return empty array
       expect(wrapper.vm.chatsShown).toEqual([])
     })
   })
 
-  describe('infinite loading distance', () => {
-    it('has infinite-loading with distance attribute', () => {
-      // This tests that the template has the :distance="10" attribute
-      // which is used by infinite-loading to determine when to trigger
+  describe('store population', () => {
+    it('populates chat store with chat objects on mount', () => {
+      mountComponent()
+      expect(globalThis.__mockChatStore.listByChatId[1]).toEqual(
+        defaultChats[0]
+      )
+      expect(globalThis.__mockChatStore.listByChatId[2]).toEqual(
+        defaultChats[1]
+      )
+      expect(globalThis.__mockChatStore.listByChatId[3]).toEqual(
+        defaultChats[2]
+      )
+    })
+
+    it('updates chat store when chats prop changes', async () => {
       const wrapper = mountComponent()
-      const infiniteLoading = wrapper.find('.infinite-loading')
-      expect(infiniteLoading.exists()).toBe(true)
+      const newChat = { id: 99, name: 'New Chat', chattype: 'User2Mod' }
+
+      await wrapper.setProps({
+        chats: [...defaultChats, newChat],
+      })
+
+      expect(globalThis.__mockChatStore.listByChatId[99]).toEqual(newChat)
     })
   })
 })
