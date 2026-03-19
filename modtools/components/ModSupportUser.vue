@@ -219,7 +219,7 @@
         </b-col>
       </b-row>
       <h3 class="mt-2">Logins</h3>
-      <ModMemberLogins :userid="user.id" />
+      <ModMemberLogins :userid="user.id" :logins="supportLogins" />
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input

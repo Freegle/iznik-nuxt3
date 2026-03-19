@@ -99,4 +99,38 @@ describe('ModMemberLogins', () => {
       expect(wrapper.text()).toContain('login')
     })
   })
+
+  describe('logins prop', () => {
+    it('uses logins prop over user store data', () => {
+      const userData = createUser({
+        logins: [{ id: 1, type: 'Native', lastaccess: '2024-01-01' }],
+      })
+      mockUserStore.byId.mockReturnValue(userData)
+      const wrapper = mount(ModMemberLogins, {
+        props: {
+          userid: userData.id,
+          logins: [
+            { id: 10, type: 'Google', lastaccess: '2024-06-01' },
+            { id: 11, type: 'Facebook', lastaccess: '2024-06-02' },
+          ],
+        },
+        global: {
+          stubs: {
+            'b-badge': {
+              template:
+                '<span class="badge" :class="\'badge-\' + variant"><slot /></span>',
+              props: ['variant'],
+            },
+          },
+          mocks: {
+            timeago: vi.fn((date) => '2 days ago'),
+          },
+        },
+      })
+      // Should show 2 badges from prop, not 1 from store
+      expect(wrapper.findAll('.badge').length).toBe(2)
+      expect(wrapper.text()).toContain('Google')
+      expect(wrapper.text()).toContain('Facebook')
+    })
+  })
 })

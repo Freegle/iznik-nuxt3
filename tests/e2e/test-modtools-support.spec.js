@@ -124,4 +124,52 @@ test.describe('ModTools Support Tools', () => {
 
     expect(errors).toHaveLength(0)
   })
+
+  test('Support Tools user record shows memberships after search', async ({
+    page,
+    testEnv,
+  }) => {
+    // Discourse #181/#192/#197: User record showing no memberships/data
+    await loginViaModTools(page, testEnv.mod.email)
+
+    await page.goto(`${MODTOOLS_URL}/support`, {
+      timeout: timeouts.navigation.initial,
+    })
+
+    await page.waitForLoadState('domcontentloaded', {
+      timeout: timeouts.navigation.default,
+    })
+
+    await dismissAllModals(page)
+
+    // Search for the test user
+    const searchInput = page.locator(
+      'input[placeholder*="search" i], input[placeholder*="user" i], input[placeholder*="email" i], input[type="search"], input[type="text"]'
+    )
+
+    await searchInput.first().fill(testEnv.user.email)
+
+    // Click Find user
+    const findButton = page.locator('button:has-text("Find user")')
+    await findButton.click()
+
+    // Wait for the Memberships heading to be visible (indicates user data loaded)
+    const membershipsHeader = page.locator(
+      'h3:has-text("Memberships"), h4:has-text("Memberships")'
+    )
+    await expect(membershipsHeader.first()).toBeVisible({
+      timeout: timeouts.navigation.slowPage,
+    })
+
+    // The test user should have at least one membership.
+    // Wait for actual membership content to appear (group name or role text).
+    const membershipContent = page.locator(
+      'text=Member, text=Moderator, text=Owner'
+    )
+    await expect(membershipContent.first()).toBeVisible({
+      timeout: timeouts.navigation.slowPage,
+    })
+
+    await assertNoErrors(page)
+  })
 })

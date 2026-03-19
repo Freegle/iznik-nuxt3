@@ -67,7 +67,7 @@
           </b-form-group>
           <b-form-group label="Moderation status:" class="mr-5">
             <!-- eslint-disable-next-line -->
-            <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
+            <b-form-select v-model="postingStatus" @change="changePostingStatus">
               <option value="MODERATED">Moderated</option>
               <option value="DEFAULT">Group Settings</option>
               <option value="PROHIBITED">Can't Post</option>
@@ -146,6 +146,15 @@ const groupid = computed(
   () => membership.value?.groupid || membership.value?.id
 )
 
+const postingStatus = computed({
+  get: () => membership.value?.ourpostingstatus || 'DEFAULT',
+  set: (val) => {
+    if (membership.value) {
+      membership.value.ourpostingstatus = val
+    }
+  },
+})
+
 async function changeEvents(newval) {
   const params = {
     userid: props.userid,
@@ -178,11 +187,10 @@ async function changeFrequency() {
 }
 
 async function changePostingStatus() {
-  // membership.ourpostingstatus has new value via v-model
   const params = {
     userid: props.userid,
     groupid: groupid.value,
-    ourPostingStatus: membership.value?.ourpostingstatus,
+    ourPostingStatus: postingStatus.value,
   }
 
   await memberStore.update(params)

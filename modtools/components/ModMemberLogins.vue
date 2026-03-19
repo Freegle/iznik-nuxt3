@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-badge
-      v-for="l in user?.logins"
+      v-for="l in displayLogins"
       :key="'login-' + l.id"
       variant="info"
       class="border border-info rounded p-1 mr-1"
@@ -19,6 +19,11 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  logins: {
+    type: Array,
+    required: false,
+    default: null,
+  },
 })
 
 const userStore = useUserStore()
@@ -31,6 +36,8 @@ watch(
   },
   { immediate: true }
 )
+
+const displayLogins = computed(() => props.logins || user.value?.logins || [])
 
 function loginType(type) {
   switch (type) {

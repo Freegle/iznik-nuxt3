@@ -270,7 +270,7 @@ describe('ModSupportMembership', () => {
       expect(mockMemberStore.update).toHaveBeenCalledWith({
         userid: 456,
         groupid: 100,
-        ourpostingstatus: 'MODERATED',
+        ourPostingStatus: 'MODERATED',
       })
     })
 
@@ -284,6 +284,25 @@ describe('ModSupportMembership', () => {
       await select.setValue('PROHIBITED')
 
       expect(mockMemberStore.update).toHaveBeenCalled()
+    })
+
+    it('defaults null ourpostingstatus to DEFAULT', async () => {
+      const wrapper = mountComponent(
+        { userid: 456, membershipid: 200 },
+        { id: 100, membershipid: 200, ourpostingstatus: null }
+      )
+
+      // The select should show DEFAULT (Group Settings) when ourpostingstatus is null
+      const select = wrapper.findAll('select')[1]
+      expect(select.element.value).toBe('DEFAULT')
+
+      // Changing should send the new value
+      await wrapper.vm.changePostingStatus()
+      expect(mockMemberStore.update).toHaveBeenCalledWith({
+        userid: 456,
+        groupid: 100,
+        ourPostingStatus: 'DEFAULT',
+      })
     })
   })
 
