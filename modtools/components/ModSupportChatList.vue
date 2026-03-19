@@ -43,7 +43,7 @@ function populateStore(chats) {
 populateStore(props.chats)
 watch(() => props.chats, populateStore)
 
-const showChats = ref(0)
+const showChats = ref(10)
 
 const chatsShown = computed(() => {
   return props.chats ? props.chats.slice(0, showChats.value) : []
