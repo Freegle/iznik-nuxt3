@@ -31,6 +31,7 @@ export default defineNuxtConfig({
     public: {
       VERSION: version,
       BUILD_DATE: new Date().toLocaleString('en-GB'),
+      SITE: 'MT',
     },
   },
   vite: {
