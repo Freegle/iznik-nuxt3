@@ -781,11 +781,12 @@ if (me.value) {
 }
 
 .photo-btn {
-  background: $color-gray--lighter;
-  color: $color-gray--darker;
+  background: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-900);
 
   &:hover {
-    background: darken($color-gray--lighter, 5%);
+    background: var(--color-gray-300);
   }
 }
 
