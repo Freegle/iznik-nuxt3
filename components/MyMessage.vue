@@ -752,7 +752,7 @@ onMounted(async () => {
 
 .message-card {
   background: white;
-  border-radius: 0;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }

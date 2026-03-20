@@ -340,18 +340,18 @@ const sort = computed({
 :deep(.form-control),
 :deep(select),
 :deep(input) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
 :deep(.input-group) {
   .form-control,
   .btn {
-    border-radius: 0 !important;
+    border-radius: var(--radius-sm, 0.375rem) !important;
   }
 }
 
 :deep(.btn) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
 // Compact labels for mobile

@@ -1060,7 +1060,7 @@ onMounted(() => {
   max-height: calc(50vh - 120px);
   overflow-y: auto !important;
   border: 1px solid $color-gray--light;
-  border-radius: 0;
+  border-radius: var(--radius-md, 0.5rem);
   padding: 10px 12px;
   font-size: 0.9rem;
   resize: none;

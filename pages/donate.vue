@@ -240,7 +240,7 @@ useHead(
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -269,7 +269,7 @@ useHead(
 }
 
 .donate-subtitle {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
 }
 
@@ -325,7 +325,7 @@ useHead(
 
 .donate-info {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
