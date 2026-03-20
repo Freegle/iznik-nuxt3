@@ -115,6 +115,8 @@ test.describe('ModTools Edit Message', () => {
       .locator('button:has-text("Edit"), .btn:has-text("Edit")')
       .first()
     await expect(editButton).toBeVisible({ timeout: timeouts.ui.appearance })
+    // Dismiss any late-appearing modals before clicking
+    await dismissAllModals(page)
     await editButton.click()
 
     // Wait for the edit form — the subject input appears (either well-structured
