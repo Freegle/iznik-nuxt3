@@ -23,7 +23,16 @@
         <b-button
           v-if="showSummaryDetails"
           variant="link"
-          :to="'/message/' + message.id"
+          :to="
+            modinfo && group.groupid
+              ? '/messages/' +
+                (group.collection || 'approved').toLowerCase() +
+                '/' +
+                group.groupid +
+                '/' +
+                message.id
+              : '/message/' + message.id
+          "
           class="text-faded text-decoration-none p-0 ms-2"
           size="xs"
         >
