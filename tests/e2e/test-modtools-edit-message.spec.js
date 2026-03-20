@@ -86,6 +86,21 @@ test.describe('ModTools Edit Message', () => {
 
     await dismissAllModals(page)
 
+    // Ensure no modal backdrop remains — wait until it's gone from the DOM.
+    await page
+      .waitForFunction(() => !document.querySelector('.modal-backdrop'), {
+        timeout: 10000,
+      })
+      .catch(() => {
+        // If still there after waiting, force-remove it
+        page.evaluate(() => {
+          document
+            .querySelectorAll('.modal-backdrop')
+            .forEach((el) => el.remove())
+          document.body.classList.remove('modal-open')
+        })
+      })
+
     // Select a group that has pending messages
     await selectGroupWithPendingMessages(page, groupSelect)
 
@@ -100,9 +115,7 @@ test.describe('ModTools Edit Message', () => {
       .locator('button:has-text("Edit"), .btn:has-text("Edit")')
       .first()
     await expect(editButton).toBeVisible({ timeout: timeouts.ui.appearance })
-    // force: true bypasses actionability check — modal backdrop from login
-    // can persist through dismissAllModals retries due to Vue re-rendering.
-    await editButton.click({ force: true })
+    await editButton.click()
 
     // Wait for the edit form — the subject input appears (either well-structured
     // item/location inputs or a plain subject input with size="lg")
