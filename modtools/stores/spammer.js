@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import api from '~/api'
 import { fetchMe } from '~/composables/useMe'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 
 export const useSpammerStore = defineStore({
   id: 'spammer',
@@ -69,6 +70,7 @@ export const useSpammerStore = defineStore({
 
     addAll(items) {
       const userStore = useUserStore()
+      const memberStore = useMemberStore()
 
       items.forEach((item) => {
         // Build a user object from the user store, decorated with spammer info.
@@ -111,6 +113,10 @@ export const useSpammerStore = defineStore({
             },
           }
         }
+
+        // Populate the member store so ModMember can find this entry.
+        // The spammers page passes spammer.user.id as membershipid to ModMember.
+        memberStore.list[item.user.id] = item.user
 
         const existing = this.list.findIndex((obj) => {
           return parseInt(obj.id) === parseInt(item.id)
