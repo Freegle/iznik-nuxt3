@@ -87,6 +87,7 @@ const otheruserName = computed(() => {
   display: grid;
   grid-template-rows: auto;
   grid-template-columns: 20px 1fr 130px 3fr 130px;
+  gap: 0 8px;
 
   @include media-breakpoint-down(sm) {
     grid-template-rows: auto auto auto auto;
