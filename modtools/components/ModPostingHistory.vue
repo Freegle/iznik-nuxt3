@@ -108,7 +108,7 @@ function countType(typeArg) {
 
   if (user.value?.messagehistory) {
     user.value.messagehistory.forEach((entry) => {
-      if (entry.type === typeArg) {
+      if (entry.type === typeArg && entry.daysago < 31 && !entry.deleted) {
         count++
       }
     })
