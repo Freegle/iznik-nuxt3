@@ -184,13 +184,12 @@ onMounted(() => {
 }
 
 .clear-link {
-  color: #9ca3af;
+  color: #6b7280;
   font-size: 0.85rem;
-  text-decoration: none;
+  text-decoration: underline;
 
   &:hover {
-    color: #6b7280;
-    text-decoration: underline;
+    color: #374151;
   }
 }
 
