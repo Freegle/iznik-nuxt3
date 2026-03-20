@@ -42,7 +42,7 @@ const similar = computed(() => {
 </script>
 <style scoped lang="scss">
 .selected {
-  background-color: $colour-secondary !important;
+  background-color: $color-secondary !important;
   border-color: $color-blue--2 !important;
   color: $color-white !important;
 }

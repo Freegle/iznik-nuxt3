@@ -269,7 +269,7 @@ const upcomingTrysts = computed(() => {
   margin-bottom: 12px;
   background: white;
   border: 1px solid $color-gray--light;
-  color: $colour-success;
+  color: $color-success;
   font-weight: 500;
   font-size: 0.9rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -423,21 +423,21 @@ const upcomingTrysts = computed(() => {
   }
 
   &--give {
-    background: $colour-success;
+    background: $color-success;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-success, 5%);
+      background: darken($color-success, 5%);
       color: $color-white;
     }
   }
 
   &--find {
-    background: $colour-secondary;
+    background: $color-secondary;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-secondary, 5%);
+      background: darken($color-secondary, 5%);
       color: $color-white;
     }
   }

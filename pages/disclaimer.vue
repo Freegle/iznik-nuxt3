@@ -165,8 +165,8 @@ useHead(
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba($colour-success-fg, 0.1);
-  color: $colour-success-fg;
+  background: rgba($color-success-fg, 0.1);
+  color: $color-success-fg;
   font-size: 1.25rem;
 
   &--safety {

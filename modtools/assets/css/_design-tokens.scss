@@ -10,22 +10,22 @@
 
 :root {
   // ── Brand / Primary ───────────────────────────────────────────────
-  --color-primary: #{$colour-success};           // #338808
-  --color-primary-hover: #{$colour-success-hover}; // #51a91e
+  --color-primary: #{$color-success};           // #338808
+  --color-primary-hover: #{$color-success-hover}; // #51a91e
   --color-primary-light: #{$color-green--light};  // #E6ffE6
-  --color-primary-dark: #{$colour-header};        // #1d6607
+  --color-primary-dark: #{$color-header};        // #1d6607
   --color-primary-surface: #{$color-green--bg-gradient}; // #f0f7ed
   --color-primary-bg: #{$color-green-background}; // #61AE24 (navbar, brand bg)
 
   // ── Accent / Info ─────────────────────────────────────────────────
-  --color-accent: #{$colour-secondary};           // #00A1CB
-  --color-accent-light: #{$colour-info-bg};       // #d9edf7
+  --color-accent: #{$color-secondary};           // #00A1CB
+  --color-accent-light: #{$color-info-bg};       // #d9edf7
 
   // ── Semantic ──────────────────────────────────────────────────────
-  --color-warning: #{$colour-warning};            // #e38d13
+  --color-warning: #{$color-warning};            // #e38d13
   --color-danger: #dc3545;
-  --color-success-bg: #{$colour-success-bg};      // #d6e9c6
-  --color-success-fg: #{$colour-success-fg};      // #3c763d
+  --color-success-bg: #{$color-success-bg};      // #d6e9c6
+  --color-success-fg: #{$color-success-fg};      // #3c763d
   --color-link: #2563eb;
   --color-link-hover: #1d4ed8;
 

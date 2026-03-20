@@ -145,7 +145,7 @@
   padding: 0.25rem 0.5rem;
 
   &:hover {
-    color: $colour-success;
+    color: $color-success;
   }
 }
 

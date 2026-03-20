@@ -143,8 +143,8 @@ const iconName = computed(() => {
   color: $color-yellow-3;
 
   .chat-notice__icon {
-    background-color: rgba($colour-warning, 0.2);
-    color: $colour-warning;
+    background-color: rgba($color-warning, 0.2);
+    color: $color-warning;
   }
 
   .chat-notice__dismiss {

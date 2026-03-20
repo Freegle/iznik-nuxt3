@@ -186,13 +186,13 @@ async function report() {
 .report-item-preview {
   background: $color-gray-3;
   padding: 0.75rem 1rem;
-  border-left: 3px solid $colour-success;
+  border-left: 3px solid $color-success;
 }
 
 .preview-type {
   font-size: 0.7rem;
   font-weight: 600;
-  color: $colour-success;
+  color: $color-success;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -226,8 +226,8 @@ async function report() {
     background-color: $color-white;
 
     &:checked {
-      background-color: $colour-success;
-      border-color: $colour-success;
+      background-color: $color-success;
+      border-color: $color-success;
     }
   }
 }

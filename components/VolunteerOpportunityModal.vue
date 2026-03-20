@@ -856,7 +856,7 @@ function rotateRight() {
   }
 
   .detail-icon {
-    color: $colour-success;
+    color: $color-success;
     width: 1rem;
     margin-top: 0.2em;
     flex-shrink: 0;

@@ -325,12 +325,12 @@ onBeforeUnmount(() => {
 
 .slogan-line1 {
   display: block;
-  color: $colour-header;
+  color: $color-header;
 }
 
 .slogan-line2 {
   display: block;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .hero-subtitle {
@@ -365,12 +365,12 @@ onBeforeUnmount(() => {
 }
 
 .action-btn--give {
-  background: $colour-success;
+  background: $color-success;
   color: white;
-  box-shadow: 0 2px 8px rgba($colour-success, 0.3);
+  box-shadow: 0 2px 8px rgba($color-success, 0.3);
 
   &:hover {
-    background: darken($colour-success, 5%);
+    background: darken($color-success, 5%);
     color: white;
     text-decoration: none;
   }
@@ -409,7 +409,7 @@ onBeforeUnmount(() => {
 }
 
 .browse-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 0.85rem;
 }
 
@@ -431,9 +431,9 @@ onBeforeUnmount(() => {
     }
 
     &:focus {
-      border-color: $colour-success;
+      border-color: $color-success;
       background: $color-white;
-      box-shadow: 0 0 0 2px rgba($colour-success, 0.15);
+      box-shadow: 0 0 0 2px rgba($color-success, 0.15);
     }
   }
 

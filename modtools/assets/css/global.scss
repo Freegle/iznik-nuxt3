@@ -47,21 +47,21 @@ html {
 }
 
 .bg-success {
-  background-color: $colour-success-bg !important;
-  color: $colour-success-fg !important;
+  background-color: $color-success-bg !important;
+  color: $color-success-fg !important;
 }
 
 .card-header.bg-success {
-  border-bottom: 1px solid $colour-success-bg;
+  border-bottom: 1px solid $color-success-bg;
 }
 
 .bg-info {
-  background-color: $colour-info-bg !important;
-  color: $colour-info-fg !important;
+  background-color: $color-info-bg !important;
+  color: $color-info-fg !important;
 }
 
 .badge.bg-info {
-  background-color: $colour-secondary !important;
+  background-color: $color-secondary !important;
   color: white !important;
 }
 
@@ -71,17 +71,17 @@ html {
 }
 
 .border-info {
-  border-color: $colour-info-bg !important;
+  border-color: $color-info-bg !important;
 }
 
 .card-header.bg-info {
-  border-bottom: 1px solid $colour-info-bg;
+  border-bottom: 1px solid $color-info-bg;
 }
 
 div[variant="success"] .card-header {
-  color: $colour-success-fg;
+  color: $color-success-fg;
   background-color: $color-green--light;
-  border-color: $colour-success-bg;
+  border-color: $color-success-bg;
 }
 
 .truncate {
@@ -475,7 +475,7 @@ label {
 }
 
 .ourBackLight {
-  background-color: $colour-success-bg !important;
+  background-color: $color-success-bg !important;
 }
 
 .v-popper--theme-mentionable {

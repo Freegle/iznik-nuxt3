@@ -349,7 +349,7 @@ const replyTimeText = computed(() => {
 }
 
 .volunteer-badge {
-  background: $colour-success;
+  background: $color-success;
   color: $color-white;
   padding: 0.15rem 0.5rem;
   border-radius: 1rem;
@@ -392,7 +392,7 @@ const replyTimeText = computed(() => {
   gap: 0.3rem;
   font-size: 0.8rem;
   color: $color-white;
-  background: $colour-success;
+  background: $color-success;
   padding: 0.25rem 0.65rem;
   border-radius: 1rem;
   margin-top: 0.35rem;
@@ -479,7 +479,7 @@ const replyTimeText = computed(() => {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .stat-label {
@@ -536,7 +536,7 @@ const replyTimeText = computed(() => {
 
 .about-quote {
   background: $color-gray--lighter;
-  border-left: 3px solid $colour-success;
+  border-left: 3px solid $color-success;
   padding: 1rem;
   margin: 0;
   font-style: italic;
@@ -551,7 +551,7 @@ const replyTimeText = computed(() => {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   background: #fff3cd;
-  border-left: 3px solid $colour-warning;
+  border-left: 3px solid $color-warning;
   margin-bottom: 1rem;
   font-size: 0.85rem;
   color: #856404;
@@ -574,11 +574,11 @@ const replyTimeText = computed(() => {
 
 .section-icon {
   &.offer {
-    color: $colour-success;
+    color: $color-success;
   }
 
   &.wanted {
-    color: $colour-secondary;
+    color: $color-secondary;
   }
 }
 

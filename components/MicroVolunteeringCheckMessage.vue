@@ -481,7 +481,7 @@ async function approve(callback) {
   transition: border-color 0.2s;
 
   &.completed {
-    border-left-color: $colour-success;
+    border-left-color: $color-success;
   }
 
   &.disabled {
@@ -500,7 +500,7 @@ async function approve(callback) {
 .step-number {
   width: 24px;
   height: 24px;
-  background: $colour-success;
+  background: $color-success;
   color: $color-white;
   display: flex;
   align-items: center;
@@ -516,7 +516,7 @@ async function approve(callback) {
 }
 
 .step-check {
-  color: $colour-success;
+  color: $color-success;
 }
 
 .step-content {
@@ -542,14 +542,14 @@ async function approve(callback) {
   text-align: left;
 
   &:hover {
-    border-color: $colour-success;
-    background: lighten($colour-success, 45%);
+    border-color: $color-success;
+    background: lighten($color-success, 45%);
   }
 
   &.active {
-    border-color: $colour-success;
-    background: lighten($colour-success, 40%);
-    color: darken($colour-success, 15%);
+    border-color: $color-success;
+    background: lighten($color-success, 40%);
+    color: darken($color-success, 15%);
     font-weight: 600;
   }
 }
@@ -558,7 +558,7 @@ async function approve(callback) {
   border: 2px solid $color-gray-3;
 
   &:focus {
-    border-color: $colour-success;
+    border-color: $color-success;
     box-shadow: none;
   }
 

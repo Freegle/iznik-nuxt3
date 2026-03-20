@@ -520,7 +520,7 @@ const markRead = async () => {
   .userinfo {
     grid-column: 3 / 5;
     grid-row: 2 / 3;
-    color: $colour-info-fg;
+    color: $color-info-fg;
     padding-top: 0.25rem;
 
     @include media-breakpoint-up(md) {

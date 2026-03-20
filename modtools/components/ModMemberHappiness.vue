@@ -128,7 +128,7 @@ function visibilityChanged(visible) {
 //@import 'color-vars';
 
 .card-header.bg-success {
-  background-color: $colour-success-fg !important;
+  background-color: $color-success-fg !important;
   color: white !important;
 }
 </style>

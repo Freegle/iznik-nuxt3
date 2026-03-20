@@ -122,7 +122,7 @@ if (volunteerOpportunities.length > 0) {
 
 .summary-count {
   flex-shrink: 0;
-  color: $colour-success;
+  color: $color-success;
   font-size: 0.85rem;
   text-decoration: none;
 

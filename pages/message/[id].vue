@@ -247,7 +247,7 @@ onMounted(async () => {
 
 .error-icon {
   font-size: 3rem;
-  color: $colour-success;
+  color: $color-success;
   margin-bottom: 1rem;
 }
 

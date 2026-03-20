@@ -118,7 +118,7 @@ async function setPassword(callback) {
 
   .welcome-icon {
     font-size: 2.5rem;
-    color: $colour-success;
+    color: $color-success;
     margin-bottom: 0.75rem;
   }
 
@@ -152,7 +152,7 @@ async function setPassword(callback) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   .header-icon {
-    color: $colour-success;
+    color: $color-success;
   }
 
   .header-title {
@@ -185,7 +185,7 @@ async function setPassword(callback) {
   .password-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: $colour-success;
+    color: $color-success;
     letter-spacing: 0.1em;
   }
 }

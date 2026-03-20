@@ -1545,6 +1545,6 @@ select {
 
 .card {
   border-width: medium;
-  border-color: $colour-success-border;
+  border-color: $color-success-border;
 }
 </style>

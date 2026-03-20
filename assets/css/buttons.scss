@@ -21,7 +21,7 @@ button {
   color: $color-white !important;
 
   &:hover {
-    border-color: $colour-success !important;
+    border-color: $color-success !important;
   }
 
   &:disabled {
@@ -93,9 +93,9 @@ button {
 }
 
 .btn-warning {
-  background-color: $colour-warning !important;
+  background-color: $color-warning !important;
   background-image: none !important;
-  border-color: $colour-warning !important;
+  border-color: $color-warning !important;
   color: $color-white !important;
   -webkit-font-smoothing: antialiased !important;
 }

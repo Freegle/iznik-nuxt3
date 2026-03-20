@@ -698,11 +698,11 @@ async function unmute() {
 }
 
 .send-btn {
-  background: $colour-success;
+  background: $color-success;
   color: white;
 
   &:hover:not(:disabled) {
-    background: darken($colour-success, 8%);
+    background: darken($color-success, 8%);
   }
 }
 

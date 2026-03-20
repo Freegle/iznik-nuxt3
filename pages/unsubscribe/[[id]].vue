@@ -454,11 +454,11 @@ onMounted(() => {
   }
 
   &--primary {
-    background: $colour-success;
+    background: $color-success;
     color: white;
 
     &:hover {
-      background: darken($colour-success, 5%);
+      background: darken($color-success, 5%);
       color: white;
     }
   }

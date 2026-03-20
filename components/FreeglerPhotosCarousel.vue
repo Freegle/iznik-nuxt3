@@ -252,11 +252,11 @@ onBeforeUnmount(() => {
 
 .slogan-line1 {
   display: block;
-  color: $colour-header;
+  color: $color-header;
 }
 
 .slogan-line2 {
   display: block;
-  color: $colour-success;
+  color: $color-success;
 }
 </style>

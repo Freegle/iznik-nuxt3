@@ -196,7 +196,7 @@ function rotateRight(e) {
 
   &.primary {
     :deep(img) {
-      box-shadow: 0 0 0 3px $colour-success;
+      box-shadow: 0 0 0 3px $color-success;
     }
   }
 }
@@ -228,7 +228,7 @@ function rotateRight(e) {
   position: absolute;
   bottom: 4px;
   left: 4px;
-  background-color: $colour-info-fg;
+  background-color: $color-info-fg;
   color: white;
   font-size: 10px;
   font-weight: bold;

@@ -247,15 +247,15 @@ function noMethods() {
   border-left: 3px solid $color-green-background;
 
   &.success {
-    background: lighten($colour-success, 45%);
-    border-left-color: $colour-success;
+    background: lighten($color-success, 45%);
+    border-left-color: $color-success;
     flex-direction: row;
     align-items: center;
   }
 }
 
 .status-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 1.25rem;
   margin-right: 0.5rem;
 }
@@ -263,7 +263,7 @@ function noMethods() {
 .donor-status {
   display: flex;
   align-items: center;
-  color: $colour-success;
+  color: $color-success;
   font-weight: 600;
 
   .heart-icon {

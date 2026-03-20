@@ -936,7 +936,7 @@ onMounted(() => {
 .fa-mob {
   height: 1.25rem;
   width: 100%;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .shrink {
@@ -1001,7 +1001,7 @@ onMounted(() => {
   }
 
   .action-icon {
-    color: $colour-success;
+    color: $color-success;
     font-size: 1rem;
   }
 }

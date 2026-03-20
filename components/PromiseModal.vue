@@ -445,7 +445,7 @@ function clearTryst() {
 }
 
 .section-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 1rem;
 }
 

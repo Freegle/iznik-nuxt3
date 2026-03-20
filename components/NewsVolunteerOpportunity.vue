@@ -188,8 +188,8 @@ try {
 .type-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba($colour-success, 0.1);
-  color: $colour-success;
+  background: rgba($color-success, 0.1);
+  color: $color-success;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;

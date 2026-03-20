@@ -1898,7 +1898,7 @@ onUnmounted(() => {
   color: inherit;
   background: $color-white;
   border: 1px solid $color-gray--light;
-  border-left: 3px solid $colour-info-fg;
+  border-left: 3px solid $color-info-fg;
   cursor: pointer;
 
   &:hover {

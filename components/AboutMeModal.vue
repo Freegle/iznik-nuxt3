@@ -103,7 +103,7 @@ async function save() {
 
   .header-icon {
     font-size: 2.5rem;
-    color: $colour-success;
+    color: $color-success;
     margin-bottom: 0.75rem;
   }
 
@@ -140,7 +140,7 @@ async function save() {
   margin-bottom: 1rem;
 
   .hint-icon {
-    color: $colour-success;
+    color: $color-success;
     flex-shrink: 0;
   }
 }

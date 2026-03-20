@@ -20,9 +20,9 @@ defineProps({
 }
 
 .notice--primary {
-  background-color: $colour-success-bg;
-  border-left-color: $colour-success;
-  color: $colour-success-fg;
+  background-color: $color-success-bg;
+  border-left-color: $color-success;
+  color: $color-success-fg;
 }
 
 .notice--info {

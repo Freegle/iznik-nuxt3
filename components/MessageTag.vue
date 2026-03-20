@@ -95,7 +95,7 @@ const tagForGroup = computed(() => {
 .tagbadge {
   left: 10px;
   top: 10px;
-  background-color: $colour-success-fg;
+  background-color: $color-success-fg;
   font-size: 1.25rem;
   color: white;
   border-radius: 4px;

@@ -44,7 +44,7 @@ const adsEnabled = p2?.length && parseInt(p2[0].value)
 }
 
 .cta-link {
-  color: $colour-success;
+  color: $color-success;
   font-weight: 600;
   text-decoration: none;
 

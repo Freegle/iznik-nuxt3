@@ -50,6 +50,6 @@ function loadMore($state) {
 </script>
 <style scoped lang="scss">
 .community__link {
-  color: $colour-header;
+  color: $color-header;
 }
 </style>

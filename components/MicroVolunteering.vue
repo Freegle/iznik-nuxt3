@@ -417,7 +417,7 @@ onMounted(async () => {
 }
 
 :deep(.modal-header) {
-  background: $colour-success;
+  background: $color-success;
   color: $color-white;
 
   h1 {

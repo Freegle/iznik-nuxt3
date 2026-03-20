@@ -135,14 +135,14 @@ function showModal() {
 }
 
 .header-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 1.1rem;
 }
 
 .header-title {
   font-weight: 600;
   font-size: 1rem;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .add-btn {
@@ -150,7 +150,7 @@ function showModal() {
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: $colour-success;
+  background: $color-success;
   color: white;
   border: none;
   font-weight: 500;
@@ -159,7 +159,7 @@ function showModal() {
   transition: background 0.2s;
 
   &:hover {
-    background: darken($colour-success, 8%);
+    background: darken($color-success, 8%);
   }
 }
 

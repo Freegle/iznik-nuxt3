@@ -62,7 +62,7 @@ function confirm() {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  background: rgba($colour-secondary, 0.1);
+  background: rgba($color-secondary, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,7 +70,7 @@ function confirm() {
 
 .nudge-icon {
   font-size: 1.5rem;
-  color: $colour-secondary;
+  color: $color-secondary;
 }
 
 .nudge-text {

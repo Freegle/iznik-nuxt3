@@ -556,7 +556,7 @@ const markRead = async () => {
       flex: none;
       grid-column: 3 / 5;
       grid-row: 2 / 3;
-      color: $colour-info-fg;
+      color: $color-info-fg;
       padding-top: 0.25rem;
       font-size: inherit;
     }
@@ -616,7 +616,7 @@ pre {
   :deep(.btn-link) {
     padding: 4px 8px;
     font-size: 0.75rem;
-    color: $colour-success;
+    color: $color-success;
     text-decoration: none;
 
     &:hover {

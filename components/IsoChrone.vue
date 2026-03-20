@@ -353,7 +353,7 @@ watch(minutes, (newVal) => {
   background: $color-white;
   padding: 0.75rem;
   margin-bottom: 0.5rem;
-  border-left: 3px solid $colour-success;
+  border-left: 3px solid $color-success;
 }
 
 .isochrone-header {
@@ -383,7 +383,7 @@ watch(minutes, (newVal) => {
 .link-btn {
   background: none;
   border: none;
-  color: $colour-secondary;
+  color: $color-secondary;
   font-size: 0.8rem;
   cursor: pointer;
   padding: 0;
@@ -424,7 +424,7 @@ watch(minutes, (newVal) => {
 .range-slider {
   flex: 1;
   height: 6px;
-  accent-color: $colour-success;
+  accent-color: $color-success;
   cursor: pointer;
 }
 
@@ -459,8 +459,8 @@ watch(minutes, (newVal) => {
   }
 
   &.active {
-    background: $colour-success;
-    border-color: $colour-success;
+    background: $color-success;
+    border-color: $color-success;
     color: $color-white;
   }
 }

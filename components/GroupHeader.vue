@@ -610,7 +610,7 @@ async function join(callback) {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0 0 0.25rem 0;
-  color: $colour-header;
+  color: $color-header;
   line-height: 1.2;
 }
 
@@ -636,11 +636,11 @@ async function join(callback) {
   align-items: center;
 
   :deep(svg) {
-    color: $colour-success;
+    color: $color-success;
   }
 
   strong {
-    color: $colour-success;
+    color: $color-success;
     margin-right: 0.2rem;
   }
 }
@@ -680,21 +680,21 @@ async function join(callback) {
   }
 
   &--give {
-    background: $colour-success;
+    background: $color-success;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-success, 5%);
+      background: darken($color-success, 5%);
       color: $color-white;
     }
   }
 
   &--find {
-    background: $colour-secondary;
+    background: $color-secondary;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-secondary, 5%);
+      background: darken($color-secondary, 5%);
       color: $color-white;
     }
   }
@@ -720,7 +720,7 @@ async function join(callback) {
   }
 
   &__more {
-    color: $colour-success;
+    color: $color-success;
     text-decoration: none;
     margin-left: 0.25rem;
 
@@ -755,15 +755,15 @@ async function join(callback) {
 
   a {
     font-size: 0.8rem;
-    color: $colour-success;
+    color: $color-success;
     text-decoration: none;
     display: flex;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    background: rgba($colour-success, 0.08);
+    background: rgba($color-success, 0.08);
 
     &:hover {
-      background: rgba($colour-success, 0.15);
+      background: rgba($color-success, 0.15);
     }
   }
 }

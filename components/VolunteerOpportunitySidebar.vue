@@ -52,6 +52,6 @@ function loadMore($state) {
 </script>
 <style scoped lang="scss">
 .volunteer__link {
-  color: $colour-header;
+  color: $color-header;
 }
 </style>

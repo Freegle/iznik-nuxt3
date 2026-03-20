@@ -146,7 +146,7 @@ function donateTime() {
 
   .option-icon {
     font-size: 1.5rem;
-    color: $colour-success;
+    color: $color-success;
     margin-bottom: 0.5rem;
   }
 
