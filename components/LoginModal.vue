@@ -160,7 +160,7 @@
           </b-alert>
         </b-form>
         <div v-if="!signUp" class="text-center mt-2">
-          <a href="#" class="small text-muted" @click.prevent="forgot">
+          <a href="#" class="forgot-link" @click.prevent="forgot">
             Forgot password?
           </a>
         </div>
@@ -1034,6 +1034,11 @@ $color-apple: #000000;
   font-size: 0.875rem;
   font-weight: normal;
   text-align: right;
+
+  :deep(.btn) {
+    font-weight: 600;
+    border-width: 2px;
+  }
 }
 
 .signin-container {
@@ -1073,7 +1078,7 @@ $color-apple: #000000;
   padding: 0;
   margin-bottom: 0.5rem;
   color: $color-white;
-  border-radius: var(--radius-md, 0.375rem);
+  border-radius: 4px; // Social sign-in brand guidelines require rectangular or minimal rounding
 }
 
 .social-button:disabled {
@@ -1182,5 +1187,15 @@ $color-apple: #000000;
 
 .verytop .modal-title {
   width: 100%;
+}
+
+.forgot-link {
+  font-size: 0.875rem;
+  color: var(--color-link);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>
