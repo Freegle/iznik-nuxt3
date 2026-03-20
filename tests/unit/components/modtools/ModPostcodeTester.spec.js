@@ -353,7 +353,7 @@ describe('ModPostcodeTester', () => {
       expect(wrapper.find('.mt-2').exists()).toBe(true)
     })
 
-    it('has font-weight-bold class on Community label', async () => {
+    it('has fw-bold class on Community label', async () => {
       const wrapper = mountComponent()
       const postcodeData = {
         name: 'EH1 1AA',
@@ -364,14 +364,14 @@ describe('ModPostcodeTester', () => {
       const postcodeComponent = wrapper.findComponent(PostCodeStub)
       await postcodeComponent.vm.$emit('selected', postcodeData)
 
-      const boldElements = wrapper.findAll('.font-weight-bold')
+      const boldElements = wrapper.findAll('.fw-bold')
       const communityLabel = boldElements.find((el) =>
         el.text().includes('Community:')
       )
       expect(communityLabel).toBeTruthy()
     })
 
-    it('has font-weight-bold class on Area label', async () => {
+    it('has fw-bold class on Area label', async () => {
       const wrapper = mountComponent()
       const postcodeData = {
         name: 'EH1 1AA',
@@ -382,7 +382,7 @@ describe('ModPostcodeTester', () => {
       const postcodeComponent = wrapper.findComponent(PostCodeStub)
       await postcodeComponent.vm.$emit('selected', postcodeData)
 
-      const boldElements = wrapper.findAll('.font-weight-bold')
+      const boldElements = wrapper.findAll('.fw-bold')
       const areaLabel = boldElements.find((el) => el.text().includes('Area:'))
       expect(areaLabel).toBeTruthy()
     })

@@ -93,9 +93,9 @@ describe('ModMenuItemLeft', () => {
       expect(wrapper.text()).toContain('Members')
     })
 
-    it('applies pl-1 class to container', () => {
+    it('applies ps-1 class to container', () => {
       const wrapper = mountModMenuItemLeft()
-      expect(wrapper.find('div').classes()).toContain('pl-1')
+      expect(wrapper.find('div').classes()).toContain('ps-1')
     })
   })
 
@@ -126,14 +126,14 @@ describe('ModMenuItemLeft', () => {
   })
 
   describe('indent prop', () => {
-    it('does not add pl-3 span when indent is false', () => {
+    it('does not add ps-3 span when indent is false', () => {
       const wrapper = mountModMenuItemLeft({ indent: false })
-      expect(wrapper.find('span.pl-3').exists()).toBe(false)
+      expect(wrapper.find('span.ps-3').exists()).toBe(false)
     })
 
-    it('adds pl-3 span when indent is true', () => {
+    it('adds ps-3 span when indent is true', () => {
       const wrapper = mountModMenuItemLeft({ indent: true })
-      expect(wrapper.find('span.pl-3').exists()).toBe(true)
+      expect(wrapper.find('span.ps-3').exists()).toBe(true)
     })
   })
 

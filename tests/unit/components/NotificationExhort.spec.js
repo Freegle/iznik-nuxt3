@@ -98,7 +98,7 @@ describe('NotificationExhort', () => {
       }
       const wrapper = await createWrapper()
       expect(wrapper.text()).toContain('Title only')
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(false)
+      expect(wrapper.find('.fw-bold').exists()).toBe(false)
     })
 
     it('displays notification ago time', async () => {

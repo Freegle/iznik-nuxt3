@@ -24,7 +24,7 @@ vi.mock('~/stores/misc', () => ({
 // Create test component that mirrors ModZoomStock logic
 const ModZoomStockTest = {
   template: `
-    <div class="font-weight-bold">
+    <div class="fw-bold">
       <div v-if="now" class="d-flex now-message">
         <a href="https://zoom.us/j/test" class="text-warning">ZoomStock happening now till 5pm!</a>
       </div>
@@ -119,7 +119,7 @@ describe('ModZoomStock', () => {
   describe('rendering', () => {
     it('renders a container div', () => {
       const wrapper = mountComponent()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows one of the three possible states', async () => {
