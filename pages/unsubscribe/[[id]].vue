@@ -148,9 +148,9 @@
                 </p>
                 <div class="d-flex justify-content-between flex-wrap">
                   <nuxt-link to="/settings" no-prefetch>
-                    <b-button size="lg" variant="primary" class="mb-2 mr-2">
+                    <b-button size="lg" variant="primary" class="mb-2 me-2">
                       <v-icon icon="cog" />
-                      <span class="ml-1"> Get fewer emails </span>
+                      <span class="ms-1"> Get fewer emails </span>
                     </b-button>
                   </nuxt-link>
                   <b-button
@@ -160,7 +160,7 @@
                     @click="unsubscribe"
                   >
                     <v-icon icon="trash-alt" />
-                    <span class="ml-1"> Leave Freegle completely </span>
+                    <span class="ms-1"> Leave Freegle completely </span>
                   </b-button>
                 </div>
               </template>
@@ -176,10 +176,10 @@
                 class="mb-2"
               />
               <div class="d-flex justify-content-between flex-wrap mt-4">
-                <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
+                <nuxt-link to="/settings" no-prefetch class="mb-2 me-2">
                   <b-button size="lg" variant="primary">
                     <v-icon icon="cog" />
-                    <span class="ml-1"> Get fewer emails </span>
+                    <span class="ms-1"> Get fewer emails </span>
                   </b-button>
                 </nuxt-link>
                 <SpinButton
@@ -410,7 +410,7 @@ onMounted(() => {
 .mobile-body {
   background: $color-white;
   padding: 1rem;
-  box-shadow: 0 1px 4px $color-black-opacity-08;
+  box-shadow: var(--shadow-sm);
 }
 
 .mobile-section {
@@ -419,7 +419,7 @@ onMounted(() => {
   &__label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 0.5rem;
   }
 }
@@ -447,18 +447,18 @@ onMounted(() => {
   border: none;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background var(--transition-fast);
 
   &:active {
     transform: scale(0.98);
   }
 
   &--primary {
-    background: $colour-success;
+    background: $color-success;
     color: white;
 
     &:hover {
-      background: darken($colour-success, 5%);
+      background: darken($color-success, 5%);
       color: white;
     }
   }
@@ -476,7 +476,7 @@ onMounted(() => {
 
 .mobile-help {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-align: center;
   margin: 1rem 0 0 0;
 }

@@ -3,13 +3,13 @@
     <div class="d-flex flex-column justify-content-start">
       <ProfileImage
         image="/icon.png"
-        class="mr-1 mb-1 ml-1 inline"
+        class="me-1 mb-1 ms-1 inline"
         is-thumbnail
         size="lg"
       />
     </div>
     <div class="d-flex flex-column">
-      <div class="font-weight-bold">Tell us about yourself!</div>
+      <div class="fw-bold">Tell us about yourself!</div>
       <div v-if="!notification.text">
         <p>
           You can introduce to other freeglers by telling us a bit about you.

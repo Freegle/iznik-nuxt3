@@ -43,7 +43,7 @@
         visible area is shown in light blue.
       </p>
       <div class="d-flex">
-        <label class="mr-2"> Just the group </label>
+        <label class="me-2"> Just the group </label>
         <b-form-input
           v-model="scale"
           class="w-100"
@@ -52,7 +52,7 @@
           max="30000"
           step="100"
         />
-        <label class="ml-2"> Further away </label>
+        <label class="ms-2"> Further away </label>
         <SpinButton
           icon-name="save"
           label="Save"

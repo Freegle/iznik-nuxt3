@@ -23,7 +23,7 @@
             <b-form-select
               v-model="selectedAddress"
               :options="addressOptions"
-              class="mb-2 font-weight-bold"
+              class="mb-2 fw-bold"
             />
           </b-col>
           <b-col cols="12" sm="4">
@@ -116,7 +116,7 @@
               <b-form-select
                 v-model="selectedProperty"
                 :options="propertyOptions"
-                class="mb-2 font-weight-bold"
+                class="mb-2 fw-bold"
               />
             </b-col>
             <b-col cols="12" sm="4">
@@ -133,7 +133,7 @@
       </div>
     </template>
     <template #footer>
-      <b-button v-if="!props.choose" variant="white" class="mr-2" @click="hide">
+      <b-button v-if="!props.choose" variant="white" class="me-2" @click="hide">
         Close
       </b-button>
       <div v-else>
@@ -141,7 +141,7 @@
         <b-button
           variant="primary"
           :disabled="!selectedAddress"
-          class="ml-2"
+          class="ms-2"
           @click="chooseIt"
         >
           Send this Address

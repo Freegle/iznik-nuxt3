@@ -138,7 +138,7 @@
             spelling and try again.
           </p>
           <b-button variant="primary" size="lg" href="/">
-            <v-icon icon="home" class="mr-2" />
+            <v-icon icon="home" class="me-2" />
             Go to Homepage
           </b-button>
         </div>
@@ -197,9 +197,10 @@ onMounted(async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .birthday-page {
-  background: white;
+  background: $color-white;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -696,7 +697,7 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 30px;
   padding: 3rem 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px $color-black-opacity-20;
   backdrop-filter: blur(10px);
 }
 
@@ -724,7 +725,7 @@ onMounted(async () => {
   animation: rainbowShift 3s ease-in-out infinite;
   padding: 1rem 3rem;
   border-radius: 100px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px $color-black-opacity-20;
 }
 
 #birthday-cake:before {
@@ -775,7 +776,8 @@ onMounted(async () => {
   border-radius: 50%;
   z-index: 2;
   top: -45px;
-  box-shadow: inset -5px -1px #fff, inset -70px 2px rgba(255, 255, 255, 0.1);
+  box-shadow: inset -5px -1px $color-white,
+    inset -70px 2px rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -834,8 +836,8 @@ onMounted(async () => {
 .age-number {
   font-size: 4rem;
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: $color-white;
+  text-shadow: 2px 2px 4px $color-black-opacity-50;
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -854,7 +856,7 @@ onMounted(async () => {
   width: 35px;
   height: 35px;
   filter: brightness(1.8) contrast(1.3)
-    drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.7));
+    drop-shadow(2px 2px 4px $color-black-opacity-70);
   z-index: 10;
 }
 
@@ -862,7 +864,7 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 2px;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-top: 1rem;
   text-align: center;
 }
@@ -870,14 +872,14 @@ onMounted(async () => {
 .birthday-title {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 4px $color-black-opacity-10;
 }
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -888,13 +890,13 @@ onMounted(async () => {
 .cta-heading {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .cta-text {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -909,7 +911,7 @@ onMounted(async () => {
 
 /* Ensure monthly checkbox has red border */
 :deep(.form-check-input) {
-  border: 1px solid red !important;
+  border: 1px solid $color-red !important;
 }
 
 /* Impact Section */
@@ -950,20 +952,20 @@ onMounted(async () => {
 .section-title {
   font-size: 3rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .section-subtitle {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
 }
 
 .impact-card {
-  background: white;
+  background: $color-white;
   border-radius: 20px;
   padding: 3rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px $color-black-opacity-10;
   margin-bottom: 2rem;
 }
 
@@ -980,17 +982,18 @@ onMounted(async () => {
   padding: 2rem;
   background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
   border-radius: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-slow),
+    box-shadow var(--transition-slow);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px $color-black-opacity-10;
 }
 
 .stat-icon {
   background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  color: $color-white;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -1008,24 +1011,24 @@ onMounted(async () => {
 .stat-number {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 1rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
 .celebration-message {
-  background: linear-gradient(135deg, #2d3748, #1a202c);
+  background: linear-gradient(135deg, $color-gray--darker, #1a202c);
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
-  color: white;
+  color: $color-white;
   box-shadow: 0 15px 40px rgba(45, 55, 72, 0.4);
-  border: 2px solid #4a5568;
+  border: 2px solid var(--color-gray-600);
 }
 
 .message-content h3 {

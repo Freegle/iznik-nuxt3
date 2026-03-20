@@ -1,5 +1,5 @@
 <template>
-  <div class="font-weight-bold">
+  <div class="fw-bold">
     <!-- DONE -->
     <div v-if="now" class="d-flex">
       <!-- eslint-disable-next-line-->

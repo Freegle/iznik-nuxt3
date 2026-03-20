@@ -12,12 +12,12 @@
       </p>
       <PostCode :find="false" @selected="postcodeSelect" />
       <div v-if="postcode" class="mt-2">
-        <p class="font-weight-bold">Community:</p>
+        <p class="fw-bold">Community:</p>
         <p v-if="postcode.groupsnear && postcode.groupsnear.length">
           {{ postcode.groupsnear[0].namedisplay }}
         </p>
         <p v-else>No community found</p>
-        <p class="font-weight-bold">Area:</p>
+        <p class="fw-bold">Area:</p>
         <p v-if="postcode.areaname">
           {{ postcode.areaname }}
         </p>

@@ -58,9 +58,7 @@
             src="/signinbuttons/facebook-logo.png"
             class="social-button__image"
           />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Facebook</span
-          >
+          <span class="p-2 text--medium fw-bold">Continue with Facebook</span>
         </b-button>
         <b-button
           v-if="isiOS"
@@ -72,7 +70,7 @@
             src="signinbuttons/Apple_logo_white.svg"
             class="social-button__image"
           />
-          <span class="p-2 social-button__text font-weight-bold"
+          <span class="p-2 social-button__text fw-bold"
             >Sign in with Apple</span
           >
         </b-button>
@@ -85,9 +83,7 @@
             src="/signinbuttons/google-logo.svg"
             class="social-button__image"
           />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Google</span
-          >
+          <span class="p-2 text--medium fw-bold">Continue with Google</span>
         </b-button>
         <div
           v-else
@@ -164,7 +160,7 @@
           </b-alert>
         </b-form>
         <div v-if="!signUp" class="text-center mt-2">
-          <a href="#" class="small text-muted" @click.prevent="forgot">
+          <a href="#" class="forgot-link" @click.prevent="forgot">
             Forgot password?
           </a>
         </div>
@@ -1038,6 +1034,11 @@ $color-apple: #000000;
   font-size: 0.875rem;
   font-weight: normal;
   text-align: right;
+
+  :deep(.btn) {
+    font-weight: 600;
+    border-width: 2px;
+  }
 }
 
 .signin-container {
@@ -1077,6 +1078,7 @@ $color-apple: #000000;
   padding: 0;
   margin-bottom: 0.5rem;
   color: $color-white;
+  border-radius: 4px; // Social sign-in brand guidelines require rectangular or minimal rounding
 }
 
 .social-button:disabled {
@@ -1114,8 +1116,8 @@ $color-apple: #000000;
 
 .social-button--google-app {
   border: 1px solid $color-gray--light;
-  background-color: #fff;
-  color: #3c4043;
+  background-color: $color-white;
+  color: var(--color-gray-700);
 }
 
 :deep(.social-button--google > div) {
@@ -1185,5 +1187,15 @@ $color-apple: #000000;
 
 .verytop .modal-title {
   width: 100%;
+}
+
+.forgot-link {
+  font-size: 0.875rem;
+  color: var(--color-link);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>

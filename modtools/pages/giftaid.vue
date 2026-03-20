@@ -29,7 +29,7 @@
             }}
             {{ result.fullname }}&nbsp; (<ExternalLink
               :href="'mailto:' + result.email"
-              class="text-muted small mt-1 mr-1 ml-1"
+              class="text-muted small mt-1 me-1 ms-1"
             >
               {{ result.email }} </ExternalLink
             >) user ID&nbsp;<v-icon icon="hashtag" class="text-muted mt-1" />{{
@@ -56,7 +56,7 @@
           <div
             v-for="d in result.donations"
             :key="'donation-' + d.id"
-            class="pl-4 small"
+            class="ps-4 small"
           >
             &bull;&nbsp;&pound;{{ d.GrossAmount }} on
             {{ dateshort(d.timestamp) }}
@@ -163,9 +163,7 @@
       :giftaid="giftaid"
       class="mt-1"
     />
-    <p v-if="!giftaids.length" class="mt-2 font-weight-bold">
-      No gift aid to review.
-    </p>
+    <p v-if="!giftaids.length" class="mt-2 fw-bold">No gift aid to review.</p>
   </b-container>
 </template>
 <script setup>

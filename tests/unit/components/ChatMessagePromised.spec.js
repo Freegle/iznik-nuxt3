@@ -284,7 +284,7 @@ describe('ChatMessagePromised', () => {
     it('shows bold message when recent', async () => {
       mockChatmessage.value.secondsago = 30
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows bold message when id > lastmsgseen', async () => {
@@ -292,7 +292,7 @@ describe('ChatMessagePromised', () => {
       mockChatmessage.value.id = 100
       mockChat.value.lastmsgseen = 50
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows normal text when old message', async () => {

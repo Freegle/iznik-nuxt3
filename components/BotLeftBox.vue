@@ -88,7 +88,7 @@ import ExternalLink from './ExternalLink'
   width: 1.5rem;
   height: 1.5rem;
   color: $gray-500;
-  transition: color 0.15s ease;
+  transition: color var(--transition-fast);
 
   &:hover {
     color: $gray-700;

@@ -1,18 +1,18 @@
 <template>
   <b-badge
     :variant="worrywordVariant"
-    class="mr-2 mb-2 p-2"
+    class="me-2 mb-2 p-2"
     style="font-size: 0.9rem"
   >
-    <small v-if="isRegexPattern" class="mr-1 text-muted">REGEX:</small>
-    <small v-if="worryword.type !== 'Review'" class="mr-1 text-muted"
+    <small v-if="isRegexPattern" class="me-1 text-muted">REGEX:</small>
+    <small v-if="worryword.type !== 'Review'" class="me-1 text-muted"
       >{{ worryword.type.toUpperCase() }}:</small
     >
     {{ displayText }}
     <b-button
       size="sm"
       variant="outline-danger"
-      class="ml-2 p-1"
+      class="ms-2 p-1"
       :disabled="isLoading"
       @click="confirmDelete"
     >

@@ -1,11 +1,9 @@
 <template>
   <div>
     <b-row>
-      <b-col cols="3" lg="2" class="font-weight-bold"> Date / Time </b-col>
-      <b-col cols="9" lg="4" class="forcebreak font-weight-bold"> User </b-col>
-      <b-col cols="12" lg="6" class="forcebreak font-weight-bold">
-        Action
-      </b-col>
+      <b-col cols="3" lg="2" class="fw-bold"> Date / Time </b-col>
+      <b-col cols="9" lg="4" class="forcebreak fw-bold"> User </b-col>
+      <b-col cols="12" lg="6" class="forcebreak fw-bold"> Action </b-col>
     </b-row>
 
     <hr class="d-block d-md-none" />

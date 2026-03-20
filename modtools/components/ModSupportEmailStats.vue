@@ -7,7 +7,7 @@
         <b-button
           variant="link"
           size="sm"
-          class="p-0 ml-1"
+          class="p-0 ms-1"
           @click="showInfoModal = true"
         >
           How does tracking work?
@@ -71,7 +71,7 @@
 
       <h6 class="mt-4">Which Metrics Are Reliable?</h6>
       <div class="d-flex align-items-center mb-2">
-        <span class="reliability-badge reliable mr-2">Reliable</span>
+        <span class="reliability-badge reliable me-2">Reliable</span>
         <strong>Click Rate, Bounce Rate</strong>
       </div>
       <p class="small text-muted mb-3">
@@ -80,7 +80,7 @@
       </p>
 
       <div class="d-flex align-items-center mb-2">
-        <span class="reliability-badge unreliable mr-2">Underestimated</span>
+        <span class="reliability-badge unreliable me-2">Underestimated</span>
         <strong>Open Rate, Click-to-Open Rate</strong>
       </div>
       <p class="small text-muted">
@@ -192,7 +192,7 @@
             v-if="emailTrackingStore.timeSeriesLoading"
             class="chart-loading"
           >
-            <b-spinner small class="mr-2" />
+            <b-spinner small class="me-2" />
             Loading chart data...
           </div>
           <div
@@ -219,7 +219,7 @@
             v-if="emailTrackingStore.statsByTypeLoading"
             class="chart-loading"
           >
-            <b-spinner small class="mr-2" />
+            <b-spinner small class="me-2" />
             Loading chart data...
           </div>
           <div
@@ -333,22 +333,22 @@
                         >replies + reply-clicks</small
                       >
                     </td>
-                    <td class="text-purple font-weight-bold action-rate-value">
+                    <td class="text-purple fw-bold action-rate-value">
                       {{ ampResponseRateTotal }}%
                     </td>
-                    <td class="font-weight-bold action-rate-value">
+                    <td class="fw-bold action-rate-value">
                       {{ nonAMPResponseRateTotal }}%
                     </td>
                   </tr>
                   <tr class="reply-breakdown">
-                    <td class="text-muted smaller pl-4">via AMP form</td>
+                    <td class="text-muted smaller ps-4">via AMP form</td>
                     <td class="text-purple smaller">
                       {{ formattedAMPStats.ampReplyViaAMPRate }}%
                     </td>
                     <td class="smaller text-muted">-</td>
                   </tr>
                   <tr class="reply-breakdown">
-                    <td class="text-muted smaller pl-4">via email</td>
+                    <td class="text-muted smaller ps-4">via email</td>
                     <td class="text-purple smaller">
                       {{ formattedAMPStats.ampReplyViaEmailRate }}%
                     </td>
@@ -357,7 +357,7 @@
                     </td>
                   </tr>
                   <tr class="reply-breakdown">
-                    <td class="text-muted smaller pl-4">via web</td>
+                    <td class="text-muted smaller ps-4">via web</td>
                     <td class="text-purple smaller">
                       {{ formattedAMPStats.ampReplyClickRate }}%
                     </td>
@@ -483,7 +483,7 @@
           v-if="emailTrackingStore.clickedLinksLoading"
           class="text-center py-3"
         >
-          <b-spinner small class="mr-2" />
+          <b-spinner small class="me-2" />
           Loading clicked links...
         </div>
         <div
@@ -578,14 +578,14 @@
     </p>
 
     <b-form class="user-form mb-3" @submit.prevent="fetchUserEmails">
-      <label class="filter-label mr-2">User:</label>
+      <label class="filter-label me-2">User:</label>
       <b-form-input
         v-model="userIdOrEmail"
         type="text"
         size="sm"
         placeholder="ID or email"
         style="width: 200px"
-        class="mr-2"
+        class="me-2"
       />
       <b-button
         type="submit"
@@ -594,7 +594,7 @@
         :disabled="!userIdOrEmail || emailTrackingStore.userEmailsLoading"
       >
         <span v-if="emailTrackingStore.userEmailsLoading">
-          <b-spinner small class="mr-1" />
+          <b-spinner small class="me-1" />
           Loading...
         </span>
         <span v-else>Load History</span>
@@ -645,7 +645,7 @@
         <template #cell(clicked_at)="data">
           <span v-if="data.value" class="text-info">
             {{ formatEmailDate(data.value) }}
-            <b-badge variant="info" class="ml-1">
+            <b-badge variant="info" class="ms-1">
               {{ data.item.links_clicked }} clicks
             </b-badge>
           </span>
@@ -673,7 +673,7 @@
         @click="loadMoreUserEmails"
       >
         <span v-if="emailTrackingStore.userEmailsLoading">
-          <b-spinner small class="mr-1" />
+          <b-spinner small class="me-1" />
           Loading...
         </span>
         <span v-else>Load More</span>
@@ -1351,7 +1351,7 @@ function getVolumeChartOptions() {
   border-radius: 3px;
 }
 
-.pl-3 {
+.ps-3 {
   padding-left: 1rem;
 }
 </style>

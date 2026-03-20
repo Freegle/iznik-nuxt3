@@ -98,7 +98,7 @@
     <div v-else>
       <div class="p-3 bg-light">
         <div class="d-flex flex-wrap align-items-center mb-3">
-          <ModGroupSelect v-model="groupid" systemwide listall class="mr-3" />
+          <ModGroupSelect v-model="groupid" systemwide listall class="me-3" />
           <button class="btn btn-secondary btn-sm" @click="backToSelector">
             ← Back to Run Selection
           </button>

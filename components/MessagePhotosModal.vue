@@ -461,13 +461,15 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .fullscreen-viewer {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #000;
+  background: $color-black;
   z-index: 10000;
   display: flex;
   flex-direction: column;
@@ -486,7 +488,7 @@ onUnmounted(() => {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
+  color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,7 +508,7 @@ onUnmounted(() => {
   margin: 1rem;
   padding: 0.5rem 0.75rem;
   background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  color: $color-white;
   border-radius: 1rem;
   font-size: 0.875rem;
   z-index: 10001;
@@ -524,7 +526,7 @@ onUnmounted(() => {
   will-change: transform;
 
   &.transitioning {
-    transition: transform 0.3s ease-out;
+    transition: transform var(--transition-slow) ease-out;
   }
 }
 
@@ -548,14 +550,15 @@ onUnmounted(() => {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
+  color: $color-white;
   cursor: pointer;
   z-index: 10001;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.2s, background 0.2s;
+  transition: opacity var(--transition-normal),
+    background var(--transition-normal);
   font-size: 1.25rem;
 
   &:hover {
@@ -609,10 +612,11 @@ onUnmounted(() => {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background var(--transition-normal),
+    transform var(--transition-normal);
 
   &.active {
-    background: #fff;
+    background: $color-white;
     transform: scale(1.25);
   }
 }
@@ -652,6 +656,7 @@ onUnmounted(() => {
   justify-content: center;
   font-size: 0.875rem;
   padding: 0;
+  transition: all var(--transition-fast);
 
   &:hover:not(:disabled) {
     color: white;
@@ -680,7 +685,7 @@ onUnmounted(() => {
     right: 0;
     height: 4px;
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 
@@ -689,7 +694,7 @@ onUnmounted(() => {
   left: 0;
   height: 4px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 2px;
+  border-radius: var(--radius-sm, 0.375rem);
   pointer-events: none;
 }
 
@@ -701,7 +706,7 @@ onUnmounted(() => {
   background: white;
   transform: translateX(-50%);
   pointer-events: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .zoom-level {
@@ -712,10 +717,10 @@ onUnmounted(() => {
 }
 
 :deep(.pinchwrapper) {
-  background: #000;
+  background: $color-black;
 }
 
 :deep(.zoompinch) {
-  background: #000;
+  background: $color-black;
 }
 </style>

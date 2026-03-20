@@ -17,7 +17,7 @@
             v-if="time"
             v-model="current.starttime"
             type="time"
-            class="ml-2"
+            class="ms-2"
             placeholder="Choose a time"
             list="times"
           />
@@ -36,7 +36,7 @@
             v-if="time"
             v-model="current.endtime"
             type="time"
-            class="ml-2"
+            class="ms-2"
             placeholder="Choose a time"
             list="times"
           />
@@ -181,8 +181,8 @@ watch(
 </script>
 <style scoped lang="scss">
 .form__element {
-  border: 1px solid $color-green--lighter;
-  border-radius: 0.25rem;
+  border: 1px solid $color-success-border;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .date__label {

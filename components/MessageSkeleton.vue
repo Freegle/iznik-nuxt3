@@ -31,7 +31,7 @@
 .message-skeleton {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px $color-black-opacity-12;
+  box-shadow: var(--shadow-md);
   background: $color-white;
 
   @include media-breakpoint-up(lg) {
@@ -39,7 +39,7 @@
     flex-direction: row;
     max-height: 200px;
     border: 1px solid $color-gray--light;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -75,7 +75,7 @@
     min-height: 0;
     border: 1px solid $color-gray--light;
     border-top: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
   }
 
   @include media-breakpoint-up(lg) {
@@ -102,6 +102,7 @@
   width: 55px;
   height: 1.5rem;
   background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .skeleton-title-group {

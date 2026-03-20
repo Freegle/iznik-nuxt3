@@ -179,14 +179,14 @@ describe('ModSupportFindGroupVolunteer', () => {
       expect(wrapper.text()).not.toContain('(Active)')
     })
 
-    it('applies font-weight-bold class to Active text', () => {
+    it('applies fw-bold class to Active text', () => {
       const wrapper = mountComponent({
         volunteer: createVolunteer({
           settings: { active: true },
         }),
       })
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
-      expect(wrapper.find('.font-weight-bold').text()).toContain('(Active)')
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').text()).toContain('(Active)')
     })
 
     it('applies text-muted class to Backup text', () => {

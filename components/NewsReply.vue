@@ -52,7 +52,7 @@
       >
         <ProfileImage
           :image="reply.profile?.paththumb"
-          class="ml-1 mr-2 mt-1 mb-1 inline"
+          class="ms-1 me-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
           :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
@@ -60,14 +60,14 @@
       </div>
       <div class="align-top reply-content">
         <span
-          class="text-success font-weight-bold clickme"
+          class="text-success fw-bold clickme"
           title="Click to see their profile"
           @click="showInfo"
           >{{ reply.displayname }}</span
         >
         <span
           :class="
-            'font-weight-bold preline forcebreak text--small nopara ml-1 ' +
+            'fw-bold preline forcebreak text--small nopara ms-1 ' +
             (reply.deleted ? 'strike' : '')
           "
         >
@@ -75,7 +75,7 @@
             :search-words="threadUsers"
             :text="emessage"
             :max-chars="500"
-            class="font-weight-bold preline forcebreak text--small d-inline"
+            class="fw-bold preline forcebreak text--small d-inline"
           />
           <br />
         </span>
@@ -103,11 +103,11 @@
           />
         </div>
         <div v-if="userid" class="text-muted align-items-center">
-          <span class="text-muted small mr-1">
+          <span class="text-muted small me-1">
             <span class="d-none d-md-inline">{{ replyaddedago }}</span>
             <span class="d-md-none">{{ replyaddedagoShort }}</span>
           </span>
-          <NewsUserInfo :id="id" class="mr-1 d-inline" />
+          <NewsUserInfo :id="id" class="me-1 d-inline" />
         </div>
         <div class="reply-actions">
           <button class="reply-action" @click="replyReply">
@@ -170,16 +170,16 @@
       :reply-to="reply.id"
       :depth="depth + 1"
     />
-    <div v-if="showReplyBox" class="mb-2 pb-1 ml-4">
+    <div v-if="showReplyBox" class="mb-2 pb-1 ms-4">
       <div v-if="enterNewLine" class="w-100">
         <OurAtTa
           ref="at"
           :members="tagusers"
-          class="pl-2 input-group"
+          class="ps-2 input-group"
           :filter-match="filterMatch"
         >
           <template #prepend>
-            <span class="input-group-text pl-1 pr-1">
+            <span class="input-group-text ps-1 pe-1">
               <ProfileImage
                 v-if="me.profile.path"
                 :image="me.profile.path"
@@ -209,12 +209,12 @@
         <OurAtTa
           ref="at"
           :members="tagusers"
-          class="pl-2 input-group"
+          class="ps-2 input-group"
           :filter-match="filterMatch"
         >
           <b-input-group>
             <slot name="prepend">
-              <span class="input-group-text pl-1 pr-1">
+              <span class="input-group-text ps-1 pe-1">
                 <ProfileImage
                   v-if="me.profile.path"
                   :image="me.profile.path"
@@ -265,7 +265,7 @@
       :modifiers="imagemods"
       alt="ChitChat Photo"
       width="100"
-      class="mt-1 ml-4 image__uploaded"
+      class="mt-1 ms-4 image__uploaded"
     />
     <OurUploader
       v-if="uploading"
@@ -720,6 +720,7 @@ function showReplyPhotoModal() {
   :deep(.btn) {
     padding: 0.25rem 0.375rem;
     line-height: 1;
+    transition: all var(--transition-fast);
 
     &:hover {
       background: $color-gray--lighter;
@@ -740,6 +741,7 @@ function showReplyPhotoModal() {
     background: transparent;
     border: none;
     cursor: pointer;
+    transition: all var(--transition-fast);
 
     &:hover {
       background: $color-gray--lighter;
@@ -776,11 +778,12 @@ function showReplyPhotoModal() {
   min-height: 1.75rem;
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  color: $color-blue--base;
+  color: var(--color-link);
   font-size: 0.85rem;
   line-height: 1.2;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 
   /* Smaller on xs screens */
   @include media-breakpoint-down(xs) {
@@ -792,7 +795,7 @@ function showReplyPhotoModal() {
   &:hover {
     background: rgba(0, 0, 0, 0.03);
     border-color: rgba(0, 0, 0, 0.2);
-    color: darken($color-blue--base, 10%);
+    color: color-mix(in srgb, var(--color-link) 100%, black 10%);
   }
 
   .action-icon {
@@ -800,7 +803,7 @@ function showReplyPhotoModal() {
   }
 
   &.loved {
-    color: $color-blue--base;
+    color: var(--color-link);
   }
 
   &.love-count {
@@ -817,13 +820,14 @@ function showReplyPhotoModal() {
   min-height: 1.75rem !important;
   background: transparent !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: $color-blue--base !important;
+  color: var(--color-link) !important;
   font-size: 0.85rem !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
   text-decoration: none !important;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 
   /* Respect Bootstrap display classes but use flexbox when visible */
   &.d-sm-inline {
@@ -851,7 +855,7 @@ function showReplyPhotoModal() {
   &:hover {
     background: rgba(0, 0, 0, 0.03) !important;
     border-color: rgba(0, 0, 0, 0.2) !important;
-    color: darken($color-blue--base, 10%) !important;
+    color: color-mix(in srgb, var(--color-link) 100%, black 10%) !important;
   }
 
   span {
@@ -861,8 +865,8 @@ function showReplyPhotoModal() {
 
 .reply-textarea {
   flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid $color-gray-4;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 0.5rem;
   font-size: 0.9rem;
   min-height: 32px;
@@ -887,11 +891,11 @@ function showReplyPhotoModal() {
   padding: 0.375rem 0.625rem;
   background: $color-gray--lighter;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);

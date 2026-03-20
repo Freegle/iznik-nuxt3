@@ -5,7 +5,7 @@
       tagbadge: true,
       tagdef: def,
       'tagbadge--wanted': isWanted,
-      'font-weight-bold': true,
+      'fw-bold': true,
       forcebreak: true,
       'text-wrap': true,
       'text-start': true,
@@ -95,10 +95,10 @@ const tagForGroup = computed(() => {
 .tagbadge {
   left: 10px;
   top: 10px;
-  background-color: $color-green--mid;
+  background-color: $color-success-fg;
   font-size: 1.25rem;
   color: white;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   text-transform: uppercase;
   max-width: calc(100% - 20px);
   z-index: 5;

@@ -419,7 +419,7 @@ function unpromise() {
 
 .chat-time {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   flex-shrink: 0;
   margin-left: auto;
   padding-left: 8px;
@@ -431,7 +431,7 @@ function unpromise() {
   gap: 10px;
   padding: 10px 12px;
   background: $color-gray--lighter;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   cursor: pointer;
 
   &--unread {
@@ -446,7 +446,7 @@ function unpromise() {
 
 .chat-text {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -459,13 +459,13 @@ function unpromise() {
   gap: 4px;
   padding: 6px 12px;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   white-space: nowrap;
-  background: $color-gray--dark;
+  background: var(--color-gray-600);
   color: white;
   flex-shrink: 0;
 
@@ -514,11 +514,11 @@ function unpromise() {
   gap: 4px;
   padding: 6px 10px;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   white-space: nowrap;
 
   &--primary {

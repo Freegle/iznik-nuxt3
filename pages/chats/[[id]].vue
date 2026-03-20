@@ -102,7 +102,7 @@
                       <b-badge
                         v-if="closedCount"
                         variant="danger"
-                        class="closedCount mr-1"
+                        class="closedCount me-1"
                         title="Closed chats with unread messages"
                       >
                         {{ closedCount }}
@@ -206,7 +206,7 @@
           >
             <p
               v-if="!visibleChats?.length && !closedChats?.length"
-              class="ml-2"
+              class="ms-2"
             >
               <span v-if="searching" class="pulsate"> Searching... </span>
               <span v-else> No chats to show. </span>
@@ -217,7 +217,7 @@
             />
           </VisibleWhen>
         </b-col>
-        <b-col cols="0" xl="3" class="p-0 pl-1">
+        <b-col cols="0" xl="3" class="p-0 ps-1">
           <VisibleWhen :at="['xl', 'xxl']">
             <SidebarRight
               show-job-opportunities
@@ -596,6 +596,10 @@ async function searchMore() {
   border-left: 3px solid $color-green-background;
 }
 
+.chat {
+  transition: all var(--transition-fast);
+}
+
 .chat:hover {
   background-color: rgba(0, 0, 0, 0.02);
 }
@@ -606,8 +610,8 @@ async function searchMore() {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #fafafa;
-  border-bottom: 1px solid #eee;
+  background: var(--color-gray-50);
+  border-bottom: 1px solid $color-gray-3;
 }
 
 .search-form {
@@ -623,15 +627,15 @@ async function searchMore() {
 .search-icon {
   position: absolute;
   left: 10px;
-  color: #999;
+  color: $color-gray--base;
   font-size: 0.85rem;
   pointer-events: none;
 }
 
 .search-input {
   padding-left: 32px !important;
-  border-radius: 20px !important;
-  border: 1px solid #e0e0e0 !important;
+  border-radius: var(--radius-xl, 1.25rem) !important;
+  border: 1px solid $color-gray-4 !important;
   background: white !important;
   font-size: 0.9rem !important;
   height: 36px !important;
@@ -648,13 +652,13 @@ async function searchMore() {
   gap: 6px;
   padding: 8px 12px;
   background: transparent;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  color: #666;
+  border: 1px solid $color-gray--light;
+  border-radius: var(--radius-xl, 1.25rem);
+  color: var(--color-gray-600);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
   white-space: nowrap;
 
   &:hover {
@@ -685,13 +689,13 @@ async function searchMore() {
 .empty-state-text {
   font-size: 1rem;
   font-weight: 600;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 4px;
 }
 
 .empty-state-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
@@ -710,13 +714,13 @@ async function searchMore() {
   gap: 6px;
   padding: 8px 16px;
   background: transparent;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  color: #666;
+  border: 1px solid $color-gray-4;
+  border-radius: var(--radius-xl, 1.25rem);
+  color: var(--color-gray-600);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 
   .action-icon {
     font-size: 0.85rem;
@@ -844,7 +848,7 @@ async function searchMore() {
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .back-icon {

@@ -305,9 +305,9 @@ const brokenProfileImage = (e) => {
   grid-column: 1 / 2;
   translate: 3px 3px;
   background-color: $color-white;
-  color: $colour-success;
+  color: $color-success;
   padding: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .ProfileImage__moderator--sm {
@@ -365,8 +365,8 @@ const brokenProfileImage = (e) => {
 }
 
 :deep(.ourBorder img) {
-  border: 2px solid $color-gray--dark;
-  background-color: $color-gray--dark;
+  border: 2px solid var(--color-gray-600);
+  background-color: var(--color-gray-600);
 }
 
 .circle {

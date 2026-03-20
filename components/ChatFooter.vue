@@ -210,7 +210,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          class="ml-1 mr-2"
+          class="ms-1 me-2"
           @click="promise(null)"
         >
           <v-icon
@@ -224,7 +224,7 @@
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
           disabled
-          class="mr-2"
+          class="me-2"
           @click="addressBook"
         >
           <v-icon
@@ -237,7 +237,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          class="mr-2"
+          class="me-2"
           @click="spamReport"
         >
           <v-icon
@@ -255,7 +255,7 @@
             otheruser &&
             !tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudge"
         >
           <v-icon
@@ -270,7 +270,7 @@
           v-if="
             chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudgeTooSoon"
         >
           <v-icon
@@ -929,14 +929,14 @@ onMounted(() => {
   text-align: center !important;
   font-size: 0.65rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 2px;
 }
 
 .fa-mob {
   height: 1.25rem;
   width: 100%;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .shrink {
@@ -978,17 +978,17 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background-color: $color-gray--lighter;
-  border: 1px solid $color-gray--light;
-  color: $color-gray--darker;
+  background-color: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-900);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 
   &:hover {
-    background-color: darken($color-gray--lighter, 5%);
-    border-color: $color-gray--normal;
+    background-color: var(--color-gray-300);
+    border-color: var(--color-gray-400);
   }
 
   &:active {
@@ -1001,7 +1001,7 @@ onMounted(() => {
   }
 
   .action-icon {
-    color: $colour-success;
+    color: $color-success;
     font-size: 1rem;
   }
 }
@@ -1060,11 +1060,11 @@ onMounted(() => {
   max-height: calc(50vh - 120px);
   overflow-y: auto !important;
   border: 1px solid $color-gray--light;
-  border-radius: 0;
+  border-radius: var(--radius-md, 0.5rem);
   padding: 10px 12px;
   font-size: 0.9rem;
   resize: none;
-  background-color: #fafafa;
+  background-color: var(--color-gray-50);
 
   &:focus {
     outline: none;
@@ -1088,8 +1088,8 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 4px 6px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+    border-radius: var(--radius-sm, 0.375rem);
+    transition: background-color var(--transition-normal);
     cursor: pointer;
     min-width: 44px;
 

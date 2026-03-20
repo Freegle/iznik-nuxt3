@@ -240,15 +240,15 @@ useHead(
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
 
 .section-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -269,7 +269,7 @@ useHead(
 }
 
 .donate-subtitle {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
 }
 
@@ -297,14 +297,16 @@ useHead(
   color: $color-green-background;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &:first-child {
     border-right: 1px solid $color-green-background;
+    border-radius: var(--radius-md, 0.5rem) 0 0 var(--radius-md, 0.5rem);
   }
 
   &:last-child {
     border-left: 1px solid $color-green-background;
+    border-radius: 0 var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0;
   }
 
   &.active {
@@ -323,7 +325,7 @@ useHead(
 
 .donate-info {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
@@ -359,7 +361,7 @@ useHead(
 .donate-option {
   padding: 1rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   margin-bottom: 1rem;
 
   h3 {
@@ -377,7 +379,7 @@ useHead(
 
 .reference-note {
   font-size: 0.85rem !important;
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
 }
 
 .reference {
@@ -389,8 +391,12 @@ useHead(
   text-align: center;
   font-size: 0.9rem;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #f8fdf5 0%, #f0f9e8 100%);
-  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-surface) 0%,
+    #f0f9e8 100%
+  );
+  border-radius: var(--radius-md, 0.5rem);
   margin-bottom: 0;
 }
 
@@ -410,9 +416,9 @@ useHead(
   align-items: center;
   padding: 1rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);

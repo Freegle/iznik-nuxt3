@@ -55,8 +55,8 @@ function markSeen() {
   background: linear-gradient(
     to right,
     transparent,
-    rgba($colour-secondary, 0.3),
-    rgba($colour-secondary, 0.3),
+    rgba($color-secondary, 0.3),
+    rgba($color-secondary, 0.3),
     transparent
   );
 }
@@ -72,27 +72,28 @@ function markSeen() {
 
 .unread-icon {
   font-size: 0.9rem;
-  color: $colour-secondary;
+  color: $color-secondary;
 }
 
 .unread-text {
   font-size: 0.8rem;
   font-weight: 600;
-  color: $colour-secondary;
+  color: $color-secondary;
 }
 
 .mark-seen-btn {
   font-size: 0.75rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
+  transition: all var(--transition-fast);
 
   &:hover {
-    color: $colour-secondary;
+    color: $color-secondary;
   }
 }
 </style>

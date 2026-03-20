@@ -53,14 +53,15 @@
   height: 58px;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-normal),
+    box-shadow var(--transition-normal);
   animation: fab-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 
   &:active {
     transform: scale(0.92);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-md);
   }
 }
 

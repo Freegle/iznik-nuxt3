@@ -126,9 +126,9 @@ describe('MicroVolunteeringSimilarTerm', () => {
   })
 
   describe('button styling', () => {
-    it('all buttons have font-weight-bold class', () => {
+    it('all buttons have fw-bold class', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('button').classes()).toContain('font-weight-bold')
+      expect(wrapper.find('button').classes()).toContain('fw-bold')
     })
 
     it('all buttons have white variant', () => {

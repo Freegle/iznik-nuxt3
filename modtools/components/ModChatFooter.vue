@@ -134,7 +134,7 @@
           <b-button
             v-b-tooltip="'Promise an item to this member'"
             variant="secondary"
-            class="ml-1 mr-2"
+            class="ms-1 me-2"
             @click="promise(null)"
           >
             <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
@@ -142,7 +142,7 @@
           <b-button
             v-b-tooltip="'Send your address'"
             variant="secondary"
-            class="mr-2"
+            class="me-2"
             @click="addressBook"
           >
             <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
@@ -151,7 +151,7 @@
             v-if="!tooSoonToNudge"
             v-b-tooltip="'Waiting for a reply?  Nudge this member.'"
             variant="secondary"
-            class="mr-2"
+            class="me-2"
             @click="nudge"
           >
             <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
@@ -163,7 +163,7 @@
             "
             class="d-inline"
           >
-            <b-button variant="secondary" class="mr-2" @click="nudgeTooSoon">
+            <b-button variant="secondary" class="me-2" @click="nudgeTooSoon">
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
@@ -201,7 +201,7 @@
         <SpinButton
           size="md"
           variant="primary"
-          class="float-end ml-2 mr-2"
+          class="float-end ms-2 me-2"
           :button-title="sending ? 'Sending...' : 'Send'"
           label="Send"
           icon-name="angle-double-right"
@@ -222,7 +222,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          class="ml-1 mr-2"
+          class="ms-1 me-2"
           @click="promise(null)"
         >
           <v-icon
@@ -236,7 +236,7 @@
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
           disabled
-          class="mr-2"
+          class="me-2"
           @click="addressBook"
         >
           <v-icon
@@ -249,7 +249,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          class="mr-2"
+          class="me-2"
           @click="spamReport"
         >
           <v-icon
@@ -263,7 +263,7 @@
         <external-link
           v-if="chat && chat.chattype === 'User2Mod' && mod"
           href="https://discourse.ilovefreegle.org/c/central"
-          class="nocolor mr-2"
+          class="nocolor me-2"
         >
           <v-icon
             scale="2"
@@ -275,7 +275,7 @@
         </external-link>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          class="mr-2"
+          class="me-2"
           @click="confirmReferToSupport"
         >
           <v-icon
@@ -288,7 +288,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          class="mr-2"
+          class="me-2"
           @click="addAComment"
         >
           <v-icon
@@ -306,7 +306,7 @@
             otheruser &&
             !tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudge"
         >
           <v-icon
@@ -321,7 +321,7 @@
           v-if="
             chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudgeTooSoon"
         >
           <v-icon

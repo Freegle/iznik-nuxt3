@@ -77,13 +77,13 @@
                 <v-icon
                   v-for="i in done"
                   :key="'hearta-' + i"
-                  class="mr-1 text-danger"
+                  class="me-1 text-danger"
                   icon="heart"
                 />
                 <v-icon
                   v-for="i in todo"
                   :key="'heartb-' + i"
-                  class="mr-1 text-faded"
+                  class="me-1 text-faded"
                   icon="heart"
                 />
               </span>

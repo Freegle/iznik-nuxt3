@@ -82,7 +82,9 @@
         <li>Dev server must be running (docker-compose up)</li>
         <li>Check firewall allows port 3002</li>
       </ul>
-      <p style="margin-top: 10px; font-size: 12px; color: #999">
+      <p
+        style="margin-top: 10px; font-size: 12px; color: var(--color-gray-400)"
+      >
         This dev app is built on CircleCI and can be installed alongside the
         production Freegle app.
       </p>
@@ -207,11 +209,13 @@ async function scanQR() {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .dev-connect {
   min-height: 100vh;
   background: linear-gradient(135deg, #5cb85c 0%, #3d8b3d 100%);
   padding: 20px;
-  color: white;
+  color: $color-white;
 }
 
 .header {
@@ -231,47 +235,47 @@ async function scanQR() {
 }
 
 .card {
-  background: white;
-  border-radius: 16px;
+  background: $color-white;
+  border-radius: var(--radius-xl, 1.25rem);
   padding: 20px;
   margin-bottom: 16px;
-  color: #333;
+  color: $color-gray--darker;
 
   h3 {
     font-size: 18px;
     margin-bottom: 12px;
-    color: #333;
+    color: $color-gray--darker;
   }
 
   .help-text {
     font-size: 14px;
-    color: #666;
+    color: $color-gray--normal;
     margin-bottom: 12px;
 
     code {
-      background: #f0f0f0;
+      background: $color-gray--lighter;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: var(--radius-sm, 0.375rem);
     }
   }
 
   .saved-url {
     font-family: monospace;
-    background: #f5f5f5;
+    background: $color-gray--lighter;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-md, 0.5rem);
     margin-bottom: 12px;
     word-break: break-all;
   }
 
   &.help {
-    background: rgba(255, 255, 255, 0.9);
+    background: $color-white-opacity-90;
 
     ul {
       margin: 0;
       padding-left: 20px;
       font-size: 14px;
-      color: #666;
+      color: $color-gray--normal;
     }
 
     li {
@@ -281,7 +285,7 @@ async function scanQR() {
     .note {
       margin-top: 12px;
       font-size: 13px;
-      color: #dc3545;
+      color: $color-red;
     }
   }
 }
@@ -291,7 +295,7 @@ async function scanQR() {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   margin-bottom: 16px;
 
   .status-icon {
@@ -313,7 +317,7 @@ async function scanQR() {
   }
 
   &.error {
-    background: rgba(220, 53, 69, 0.3);
+    background: rgba($color-red, 0.3);
   }
 }
 </style>

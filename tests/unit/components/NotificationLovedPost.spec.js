@@ -108,7 +108,7 @@ describe('NotificationLovedPost', () => {
 
     it('displays user name in bold', async () => {
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').text()).toBe('Jane Doe')
+      expect(wrapper.find('.fw-bold').text()).toBe('Jane Doe')
     })
 
     it('displays loves your post text for non-noticeboard', async () => {

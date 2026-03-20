@@ -58,9 +58,9 @@ describe('MessageTag', () => {
       expect(wrapper.find('.tagbadge').exists()).toBe(true)
     })
 
-    it('applies font-weight-bold class', () => {
+    it('applies fw-bold class', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
   })
 

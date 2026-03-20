@@ -7,7 +7,7 @@
       v-else-if="newsfeed.message && emessage"
       :text="emessage"
       :max-chars="512"
-      class="font-weight-bold preline forcebreak nopara"
+      class="fw-bold preline forcebreak nopara"
     />
     <div>
       <OurUploadedImage

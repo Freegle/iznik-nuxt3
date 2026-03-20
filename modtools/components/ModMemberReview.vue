@@ -12,7 +12,7 @@
           <ProfileImage
             :image="member.profile?.turl || member.profile?.paththumb"
             :name="member.displayname"
-            class="ml-1 mb-1 inline"
+            class="ms-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
@@ -124,7 +124,7 @@
           :memberid="member.id"
           :membership="m"
           :member="member"
-          class="p-1 mr-1"
+          class="p-1 me-1"
           @forcerefresh="forcerefresh"
         />
         <b-badge

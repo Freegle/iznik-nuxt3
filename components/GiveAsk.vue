@@ -7,10 +7,10 @@
     }"
   >
     <div class="d-flex justify-content-between flex-wrap">
-      <b-button to="/give" variant="primary" class="topbutton m-1 ml-2">
+      <b-button to="/give" variant="primary" class="topbutton m-1 ms-2">
         <v-icon icon="gift" />&nbsp;Give
       </b-button>
-      <b-button to="/find" variant="primary" class="topbutton m-1 mr-2">
+      <b-button to="/find" variant="primary" class="topbutton m-1 me-2">
         <v-icon icon="shopping-cart" />&nbsp;Ask
       </b-button>
     </div>

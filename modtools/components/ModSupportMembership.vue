@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-card no-body>
-      <b-card-body class="pl-3 pr-2 pt-2 pb-0">
+      <b-card-body class="ps-3 pe-2 pt-2 pb-0">
         <b-row>
           <b-col cols="12" md="4">
             <div>
@@ -53,7 +53,7 @@
           </b-col>
         </b-row>
         <div class="d-flex flex-wrap pt-1">
-          <b-form-group label="OFFER and WANTED posts:" class="mr-5">
+          <b-form-group label="OFFER and WANTED posts:" class="me-5">
             <!-- eslint-disable-next-line -->
             <b-form-select v-model="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">Immediately</option>
@@ -65,7 +65,7 @@
               <option value="0">Never</option>
             </b-form-select>
           </b-form-group>
-          <b-form-group label="Moderation status:" class="mr-5">
+          <b-form-group label="Moderation status:" class="me-5">
             <!-- eslint-disable-next-line -->
             <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
               <option value="MODERATED">Moderated</option>
@@ -73,7 +73,7 @@
               <option value="PROHIBITED">Can't Post</option>
             </b-form-select>
           </b-form-group>
-          <b-form-group label="Community Event mails:" class="mr-5">
+          <b-form-group label="Community Event mails:" class="me-5">
             <OurToggle
               :model-value="Boolean(membership.eventsallowed)"
               class="mt-2"

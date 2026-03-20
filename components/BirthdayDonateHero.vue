@@ -819,7 +819,7 @@ const groupProfile = computed(() => {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 2px;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-top: 1rem;
   text-align: center;
 }
@@ -827,14 +827,14 @@ const groupProfile = computed(() => {
 .birthday-title {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -862,7 +862,7 @@ const groupProfile = computed(() => {
 
 .heart-icon {
   font-size: 4rem;
-  color: #e53e3e;
+  color: var(--color-danger);
   animation: heartBeat 1.5s infinite;
 }
 
@@ -887,14 +887,14 @@ const groupProfile = computed(() => {
 .thank-you-title {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .thank-you-subtitle {
   font-size: 1.5rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -924,13 +924,13 @@ const groupProfile = computed(() => {
 .cta-heading {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .cta-text {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 

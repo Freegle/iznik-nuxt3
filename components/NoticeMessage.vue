@@ -17,12 +17,13 @@ defineProps({
 <style scoped lang="scss">
 .notice {
   border-left: 4px solid;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .notice--primary {
-  background-color: $colour-success-bg;
-  border-left-color: $colour-success;
-  color: $colour-success-fg;
+  background-color: $color-success-bg;
+  border-left-color: $color-success;
+  color: $color-success-fg;
 }
 
 .notice--info {

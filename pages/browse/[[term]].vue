@@ -3,7 +3,7 @@
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">Browse items</h1>
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="p-0 pr-1">
+        <b-col cols="0" lg="3" class="p-0 pe-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarLeft
               ad-unit-path="/22794232631/freegle_home_left"
@@ -47,7 +47,7 @@
               v-if="browseView === 'nearby' && !isochrones.length"
               variant="warning"
             >
-              <p class="font-weight-bold">
+              <p class="fw-bold">
                 What's your postcode? We'll show you posts nearby.
               </p>
               <PostCode @selected="savePostcode" />
@@ -90,7 +90,7 @@
             @donation-click="onBirthdayDonationClick"
           />
         </b-col>
-        <b-col cols="0" md="2" lg="3" class="p-0 pl-1">
+        <b-col cols="0" md="2" lg="3" class="p-0 ps-1">
           <div class="d-flex justify-content-end">
             <VisibleWhen
               :not="['xs', 'sm', 'md', 'lg']"
@@ -649,8 +649,8 @@ if (existingHomepage !== 'mygroups') {
 
 .selection__wrapper {
   background-color: $color-blue--x-light;
-  border: 1px solid $color-blue-x-light2;
-  border-radius: 3px;
+  border: 1px solid #BEE5EB;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .typeSelect {

@@ -51,7 +51,7 @@
       <div v-if="showGroups" class="bg-white pt-3">
         <div v-if="showRegions">
           <div class="d-flex flex-wrap justify-content-center pb-4">
-            <div v-for="r in regions" :key="r" class="p-0 mt-2 ml-2 mr-2">
+            <div v-for="r in regions" :key="r" class="p-0 mt-2 ms-2 me-2">
               <b-button variant="secondary" :to="'/explore/region/' + r">
                 {{ r }}
               </b-button>
@@ -616,6 +616,7 @@ function searched() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .postcode {
   position: absolute;
@@ -626,7 +627,7 @@ function searched() {
 
 .community__text {
   /* Need to override the h2 as it has higher specificity */
-  color: #212529 !important;
+  color: $color-gray--darker !important;
 }
 
 .shrink {

@@ -8,7 +8,7 @@
       </p>
       <div class="d-flex flex-wrap justify-content-between mb-2">
         <div>
-          <label class="font-weight-bold"> New Postcode: </label>
+          <label class="fw-bold"> New Postcode: </label>
           <PostCode
             v-if="!id"
             :value="pcname"
@@ -18,7 +18,7 @@
           />
         </div>
         <div>
-          <label class="font-weight-bold"> Nickname (e.g. Work): </label>
+          <label class="fw-bold"> Nickname (e.g. Work): </label>
           <b-form-input
             v-model="nickname"
             placeholder="Where is this?"
@@ -353,7 +353,7 @@ watch(minutes, (newVal) => {
   background: $color-white;
   padding: 0.75rem;
   margin-bottom: 0.5rem;
-  border-left: 3px solid $colour-success;
+  border-left: 3px solid $color-success;
 }
 
 .isochrone-header {
@@ -372,7 +372,7 @@ watch(minutes, (newVal) => {
 .postcode-hint {
   font-weight: 400;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .header-actions {
@@ -383,7 +383,7 @@ watch(minutes, (newVal) => {
 .link-btn {
   background: none;
   border: none;
-  color: $colour-secondary;
+  color: $color-secondary;
   font-size: 0.8rem;
   cursor: pointer;
   padding: 0;
@@ -408,9 +408,11 @@ watch(minutes, (newVal) => {
   justify-content: center;
   background: $color-gray--lighter;
   border: 1px solid $color-gray-3;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);
@@ -424,7 +426,7 @@ watch(minutes, (newVal) => {
 .range-slider {
   flex: 1;
   height: 6px;
-  accent-color: $colour-success;
+  accent-color: $color-success;
   cursor: pointer;
 }
 
@@ -450,17 +452,17 @@ watch(minutes, (newVal) => {
   justify-content: center;
   background: $color-gray--lighter;
   border: 1px solid $color-gray-3;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);
   }
 
   &.active {
-    background: $colour-success;
-    border-color: $colour-success;
+    background: $color-success;
+    border-color: $color-success;
     color: $color-white;
   }
 }

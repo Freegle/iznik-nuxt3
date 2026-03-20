@@ -1,7 +1,7 @@
 <template>
   <div :class="getClass">
     <!-- eslint-disable-next-line -->
-    <span v-if="indent" class="pl-3" /><nuxt-link :to="link" @mousedown.native="click">{{ name }}</nuxt-link>
+    <span v-if="indent" class="ps-3" /><nuxt-link :to="link" @mousedown.native="click">{{ name }}</nuxt-link>
     <b-badge v-if="count && getCount(count)" :variant="countVariant">
       {{ getCount(count) }}
     </b-badge>
@@ -61,7 +61,7 @@ const getClass = computed(() => {
   const linklen = props.link.length
   if (linklen > 1 && route.path.substr(0, linklen) === props.link)
     linkmatch = true
-  return 'pl-1 ' + (linkmatch ? 'active' : '')
+  return 'ps-1 ' + (linkmatch ? 'active' : '')
 })
 
 function getCount(types) {

@@ -11,7 +11,7 @@
           :id="uniqueId"
           :key="bump"
           ref="paypalbutton"
-          class="mr-2"
+          class="me-2"
           @click="suppress"
         />
         <div v-if="text">{{ text }}</div>

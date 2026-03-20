@@ -19,7 +19,7 @@
           autocomplete="username email"
           :placeholder="'Email address ' + (required ? '' : '(Optional)')"
         />
-        <ErrorMessage name="email" class="text-danger font-weight-bold" />
+        <ErrorMessage name="email" class="text-danger fw-bold" />
       </VeeForm>
     </b-form-group>
     <div

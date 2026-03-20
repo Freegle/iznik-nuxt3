@@ -208,7 +208,7 @@ function brokenImage() {
   bottom: 10px;
   background-color: $color-gray--darker;
   color: white;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -226,7 +226,7 @@ function brokenImage() {
   background: rgba(128, 128, 128, 0.6);
   color: rgba(255, 255, 255, 0.9);
   padding: 0.25rem 0.5rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 0.375rem);
   font-size: 0.85rem;
   font-weight: 500;
   z-index: 100;

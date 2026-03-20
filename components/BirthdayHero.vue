@@ -396,6 +396,7 @@ const localVolunteersText = computed(() => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .birthday-hero {
   position: relative;
@@ -908,7 +909,7 @@ const localVolunteersText = computed(() => {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 2px;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-top: 1rem;
   text-align: center;
 }
@@ -916,7 +917,7 @@ const localVolunteersText = computed(() => {
 .birthday-title {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -935,14 +936,14 @@ const localVolunteersText = computed(() => {
 }
 
 .volunteer-avatar {
-  border: 2px solid #fff;
+  border: 2px solid $color-white;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .volunteers-text {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 0;
   font-style: italic;
   text-align: center;
@@ -950,7 +951,7 @@ const localVolunteersText = computed(() => {
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -961,13 +962,13 @@ const localVolunteersText = computed(() => {
 .cta-heading {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .cta-text {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -999,7 +1000,7 @@ const localVolunteersText = computed(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-size: 1.1rem;
   font-weight: 500;
-  color: #4a5568;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.5rem;

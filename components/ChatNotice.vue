@@ -72,7 +72,7 @@ const iconName = computed(() => {
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   margin: 8px;
   font-size: 0.85rem;
   line-height: 1.4;
@@ -115,8 +115,8 @@ const iconName = computed(() => {
   background: transparent;
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.2s;
-  border-radius: 4px;
+  transition: opacity var(--transition-normal);
+  border-radius: var(--radius-sm, 0.375rem);
 
   &:hover {
     opacity: 1;
@@ -139,30 +139,30 @@ const iconName = computed(() => {
 }
 
 .chat-notice--warning {
-  background-color: #fff8e6;
-  color: #8a6d00;
+  background-color: $color-yellow-1;
+  color: $color-yellow-3;
 
   .chat-notice__icon {
-    background-color: rgba(#d4a000, 0.2);
-    color: #d4a000;
+    background-color: rgba($color-warning, 0.2);
+    color: $color-warning;
   }
 
   .chat-notice__dismiss {
-    color: #8a6d00;
+    color: $color-yellow-3;
   }
 }
 
 .chat-notice--danger {
-  background-color: #fce8e8;
-  color: #a11a1a;
+  background-color: $color-red--lighter;
+  color: $color-red--dark;
 
   .chat-notice__icon {
-    background-color: rgba(#c62828, 0.15);
-    color: #c62828;
+    background-color: rgba($color-red--dark, 0.15);
+    color: $color-red--dark;
   }
 
   .chat-notice__dismiss {
-    color: #a11a1a;
+    color: $color-red--dark;
   }
 }
 </style>

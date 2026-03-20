@@ -66,6 +66,8 @@ const progressWidth = computed(() => {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .app-progress-dots {
   display: flex;
   justify-content: space-between;
@@ -92,7 +94,7 @@ const progressWidth = computed(() => {
   justify-content: center;
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   margin-bottom: 0.5rem;
 }
 
@@ -107,46 +109,46 @@ const progressWidth = computed(() => {
 .step-label {
   font-size: 0.75rem;
   text-align: center;
-  color: #6c757d;
-  transition: color 0.3s ease;
+  color: $color-gray--normal;
+  transition: color var(--transition-slow);
 }
 
 // Step states
 .step-completed {
   .step-dot {
-    background: #28a745;
-    color: #fff;
-    border: 2px solid #28a745;
+    background: $color-success;
+    color: $color-white;
+    border: 2px solid $color-success;
   }
 
   .step-label {
-    color: #28a745;
+    color: $color-success;
   }
 }
 
 .step-active {
   .step-dot {
-    background: #007bff;
-    color: #fff;
-    border: 2px solid #007bff;
+    background: $color-blue--bright;
+    color: $color-white;
+    border: 2px solid $color-blue--bright;
     box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
   }
 
   .step-label {
-    color: #007bff;
+    color: $color-blue--bright;
     font-weight: 600;
   }
 }
 
 .step-pending {
   .step-dot {
-    background: #fff;
-    color: #adb5bd;
-    border: 2px solid #dee2e6;
+    background: $color-white;
+    color: var(--color-gray-400);
+    border: 2px solid var(--color-gray-300);
   }
 
   .step-label {
-    color: #adb5bd;
+    color: var(--color-gray-400);
   }
 }
 
@@ -157,13 +159,13 @@ const progressWidth = computed(() => {
   left: calc(1rem + 16px);
   right: calc(1rem + 16px);
   height: 2px;
-  background: #dee2e6;
+  background: var(--color-gray-300);
   z-index: 0;
 }
 
 .progress-line-fill {
   height: 100%;
-  background: #28a745;
-  transition: width 0.3s ease;
+  background: $color-success;
+  transition: width var(--transition-slow);
 }
 </style>

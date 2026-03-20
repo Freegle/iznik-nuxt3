@@ -125,9 +125,9 @@ describe('ChatButton', () => {
       expect(wrapper.props('variant')).toBe('primary')
     })
 
-    it('defaults titleClass to ml-1', () => {
+    it('defaults titleClass to ms-1', () => {
       const wrapper = createWrapper()
-      expect(wrapper.props('titleClass')).toBe('ml-1')
+      expect(wrapper.props('titleClass')).toBe('ms-1')
     })
 
     it('accepts custom variant', () => {

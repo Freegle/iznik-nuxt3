@@ -31,9 +31,9 @@
         class="d-flex justify-content-start"
       >
         <!-- eslint-disable-next-line -->
-        <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+        <b-form-select v-model="message.type" :options="typeOptions" class="type me-1" size="lg" />
         <!-- eslint-disable-next-line -->
-        <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
+        <b-form-input v-model="message.item.name" size="lg" class="me-1" />
         <b-input-group>
           <PostCode
             :value="message.location.name"

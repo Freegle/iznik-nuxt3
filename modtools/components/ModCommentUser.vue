@@ -9,7 +9,7 @@
         <ProfileImage
           :image="comment.user.profile?.turl || comment.user.profile?.paththumb"
           :name="comment.user.displayname"
-          class="ml-1 mb-1 inline"
+          class="ms-1 mb-1 inline"
           is-thumbnail
           size="sm"
         />

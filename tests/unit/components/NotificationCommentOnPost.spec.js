@@ -112,7 +112,7 @@ describe('NotificationCommentOnPost', () => {
 
     it('displays user name in bold', async () => {
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').text()).toBe('John Smith')
+      expect(wrapper.find('.fw-bold').text()).toBe('John Smith')
     })
 
     it('displays commented text', async () => {

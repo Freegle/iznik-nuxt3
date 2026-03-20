@@ -501,7 +501,7 @@ describe('ModChatPane', () => {
       const prompt = wrapper.find('p.text-center')
       expect(prompt.exists()).toBe(true)
       expect(prompt.classes()).toContain('text-info')
-      expect(prompt.classes()).toContain('font-weight-bold')
+      expect(prompt.classes()).toContain('fw-bold')
     })
   })
 

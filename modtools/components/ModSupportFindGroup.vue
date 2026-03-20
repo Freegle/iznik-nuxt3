@@ -30,7 +30,7 @@
           :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }"
           disabled
-          class="mr-2"
+          class="me-2"
         />
         <OurToggle
           :model-value="Boolean(group.ontn)"
@@ -39,7 +39,7 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
           disabled
-          class="mr-2"
+          class="me-2"
         />
         <OurToggle
           :model-value="Boolean(group.onlovejunk)"
@@ -48,7 +48,7 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }"
           disabled
-          class="mr-2"
+          class="me-2"
         />
         <OurToggle
           :model-value="Boolean(group.onmap)"
@@ -57,13 +57,13 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled
-          class="mr-2"
+          class="me-2"
         />
         <b-form-group>
           <b-form-select
             v-model="region"
             :options="regionOptions"
-            class="font-weight-bold ml-1"
+            class="fw-bold ms-1"
           />
         </b-form-group>
       </div>
@@ -81,13 +81,13 @@
       >.
       <br />
       <br />
-      <ModClipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="group.url" class="me-3 mb-1" :value="group.url" />
       Explore page:
       <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
       <br />
       <ModClipboard
         v-if="group.modsemail"
-        class="mr-3 mb-1"
+        class="me-3 mb-1"
         :value="group.modsemail"
       />
       Volunteers email:
@@ -96,7 +96,7 @@
       <br />
       <ModClipboard
         v-if="group.groupemail"
-        class="mr-3 mb-1"
+        class="me-3 mb-1"
         :value="group.groupemail"
       />
       Posting address:
@@ -111,7 +111,7 @@
         >
           <div v-if="facebook.type === 'Page'">
             <ModClipboard
-              class="mr-3 mb-1"
+              class="me-3 mb-1"
               :value="'https://facebook.com/pg/' + facebook.id"
             />
             Facebook:
@@ -143,20 +143,20 @@
       <h4 class="mt-2">Centre</h4>
       <p>Lat/lng of group centre:</p>
       <div class="d-flex">
-        <b-form-input v-model="group.lat" type="number" class="mr-2" />
-        <b-form-input v-model="group.lng" type="number" class="mr-2" />
+        <b-form-input v-model="group.lat" type="number" class="me-2" />
+        <b-form-input v-model="group.lng" type="number" class="me-2" />
       </div>
       <p class="mt-2">Additional centre for large groups:</p>
       <div class="d-flex">
         <b-form-input
           v-model="group.altlat"
           type="number"
-          class="mr-2 flex-shrink-1"
+          class="me-2 flex-shrink-1"
         />
         <b-form-input
           v-model="group.altlng"
           type="number"
-          class="mr-2 flex-shrink-1"
+          class="me-2 flex-shrink-1"
         />
       </div>
       <SpinButton
@@ -196,7 +196,7 @@
         :font-size="14"
         :labels="{ checked: 'Local Volunteers', unchecked: 'Caretakers' }"
         disabled
-        class="mr-2"
+        class="me-2"
       />
       <Spinner v-if="fetchingVolunteers" :size="50" class="d-block" />
       <ModSupportFindGroupVolunteer

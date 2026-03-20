@@ -17,7 +17,7 @@
         :disabled="disabled || user.id === myid"
         :class="{
           mine: user.info.ratings.Mine === 'Up',
-          'mr-1': true,
+          'me-1': true,
         }"
         @click.stop="up"
       >
@@ -32,7 +32,7 @@
         :disabled="disabled || user.id === myid"
         :class="{
           mine: user.info.ratings.Mine === 'Down',
-          'ml-1': true,
+          'ms-1': true,
         }"
         @click.stop="down"
       >
@@ -237,6 +237,7 @@ const onModalRated = () => {
 <style scoped lang="scss">
 .btn {
   margin: 1px;
+  transition: all var(--transition-fast);
 
   &.mine,
   &:hover {

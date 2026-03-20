@@ -2,10 +2,7 @@
   <div
     class="adFallback ourBackLight w-100 text-center d-flex flex-column justify-content-center"
   >
-    <nuxt-link
-      to="/donate"
-      class="nodecor text-primary-emphasis font-weight-bold"
-    >
+    <nuxt-link to="/donate" class="nodecor text-primary-emphasis fw-bold">
       <span v-if="me?.donated">
         Thank you for donating to help keep Freegle running.
       </span>

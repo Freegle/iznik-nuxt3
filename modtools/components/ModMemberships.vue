@@ -14,9 +14,7 @@
         <span
           :class="
             'small ' +
-            (daysago(m.added) < 31
-              ? 'text-danger font-weight-bold'
-              : 'text-muted')
+            (daysago(m.added) < 31 ? 'text-danger fw-bold' : 'text-muted')
           "
           >{{ timeago(m.added) }}</span
         >
@@ -45,9 +43,7 @@
         <span
           :class="
             'small ' +
-            (daysago(m.added) < 31
-              ? 'text-danger font-weight-bold'
-              : 'text-muted')
+            (daysago(m.added) < 31 ? 'text-danger fw-bold' : 'text-muted')
           "
           >joined {{ timeago(m.added) }}</span
         >

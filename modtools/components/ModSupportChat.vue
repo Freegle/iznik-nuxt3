@@ -3,12 +3,12 @@
     <div class="type">
       <v-icon
         v-if="chat.chattype === 'User2User'"
-        class="text-success pr-1"
+        class="text-success pe-1"
         icon="user"
       />
       <v-icon
         v-else-if="chat.chattype === 'User2Mod' || chat.chattype === 'Mod2Mod'"
-        class="text-warning pr-1 mb-2"
+        class="text-warning pe-1 mb-2"
         icon="crown"
       />
     </div>

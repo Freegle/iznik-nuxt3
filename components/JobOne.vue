@@ -315,6 +315,7 @@ function filterNonsense(val) {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .job-item {
   margin-bottom: 0.5rem;
@@ -338,7 +339,7 @@ function filterNonsense(val) {
   padding: 0.5rem;
   background: $white;
   border-bottom: 1px solid $gray-200;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
 
   @include media-breakpoint-up(sm) {
     gap: 0.75rem;
@@ -454,7 +455,8 @@ function filterNonsense(val) {
   background: $white;
   border: 1px solid $gray-200;
   overflow: hidden;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -465,12 +467,12 @@ function filterNonsense(val) {
   }
 
   &:hover {
-    border-color: #61ae24;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: $color-green-background;
+    box-shadow: var(--shadow-md);
   }
 
   &--highlight {
-    border-left: 3px solid #61ae24;
+    border-left: 3px solid $color-green-background;
   }
 }
 
@@ -544,7 +546,7 @@ function filterNonsense(val) {
 .job-category {
   display: inline-block;
   padding: 0.15rem 0.5rem;
-  background: #61ae24;
+  background: $color-green-background;
   color: $white;
   font-weight: 500;
   white-space: nowrap;

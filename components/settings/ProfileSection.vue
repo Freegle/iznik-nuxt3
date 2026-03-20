@@ -284,8 +284,8 @@ watch(
 
 .settings-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -348,7 +348,7 @@ watch(
   text-align: center;
   padding: 1rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .photo-container {
@@ -364,7 +364,7 @@ watch(
 }
 
 .rotate-btn {
-  background: $color-gray--dark;
+  background: var(--color-gray-600);
   color: white;
   border: none;
   border-radius: 50%;
@@ -374,6 +374,7 @@ watch(
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-green-background;
@@ -383,7 +384,7 @@ watch(
 .uploader-container {
   background: white;
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .supporter-section {
@@ -407,8 +408,12 @@ watch(
 
 .about-section {
   padding: 1.25rem;
-  background: linear-gradient(135deg, #f8fdf5 0%, #f0f9e8 100%);
-  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-surface) 0%,
+    #f0f9e8 100%
+  );
+  border-radius: var(--radius-md, 0.5rem);
   border: 1px solid rgba($color-green-background, 0.15);
 }
 
@@ -450,7 +455,7 @@ watch(
 
 .empty-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1rem;
 }
 

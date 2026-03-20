@@ -6,7 +6,7 @@
     </NoticeMessage>
 
     <div v-if="systemConfigStore.isLoading" class="text-center">
-      <b-spinner class="mr-2" />
+      <b-spinner class="me-2" />
       Loading worry words...
     </div>
 

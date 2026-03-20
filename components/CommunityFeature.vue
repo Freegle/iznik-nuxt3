@@ -135,14 +135,14 @@ function showModal() {
 }
 
 .header-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 1.1rem;
 }
 
 .header-title {
   font-weight: 600;
   font-size: 1rem;
-  color: $colour-success;
+  color: $color-success;
 }
 
 .add-btn {
@@ -150,16 +150,17 @@ function showModal() {
   align-items: center;
   gap: 0.375rem;
   padding: 0.375rem 0.75rem;
-  background: $colour-success;
+  background: $color-success;
   color: white;
   border: none;
+  border-radius: var(--radius-sm, 0.375rem);
   font-weight: 500;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 
   &:hover {
-    background: darken($colour-success, 8%);
+    background: darken($color-success, 8%);
   }
 }
 
@@ -170,7 +171,7 @@ function showModal() {
 .feature-description {
   text-align: center;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 }
 
@@ -178,7 +179,7 @@ function showModal() {
   text-align: center;
   padding: 0.5rem;
   margin: 0;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 :deep(a) {

@@ -129,7 +129,7 @@ function noMethods() {
 
 .adsoff-content {
   background: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
@@ -229,7 +229,7 @@ function noMethods() {
 
 .monthly-note {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
   font-style: italic;
 }
@@ -247,15 +247,15 @@ function noMethods() {
   border-left: 3px solid $color-green-background;
 
   &.success {
-    background: lighten($colour-success, 45%);
-    border-left-color: $colour-success;
+    background: lighten($color-success, 45%);
+    border-left-color: $color-success;
     flex-direction: row;
     align-items: center;
   }
 }
 
 .status-icon {
-  color: $colour-success;
+  color: $color-success;
   font-size: 1.25rem;
   margin-right: 0.5rem;
 }
@@ -263,11 +263,11 @@ function noMethods() {
 .donor-status {
   display: flex;
   align-items: center;
-  color: $colour-success;
+  color: $color-success;
   font-weight: 600;
 
   .heart-icon {
-    color: #e74c3c;
+    color: var(--color-danger);
     margin-right: 0.5rem;
   }
 }
@@ -279,7 +279,7 @@ function noMethods() {
 
 .other-ways {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 
   a {
@@ -312,7 +312,7 @@ function noMethods() {
 .thermometer-label {
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

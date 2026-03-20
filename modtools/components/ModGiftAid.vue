@@ -1,7 +1,7 @@
 <template>
   <div v-if="!hide">
     <b-row>
-      <b-col cols="6" md="3" class="pl-3">
+      <b-col cols="6" md="3" class="ps-3">
         <div>
           <b-form-input
             v-model="editgiftaid.fullname"

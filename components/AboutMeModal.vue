@@ -103,7 +103,7 @@ async function save() {
 
   .header-icon {
     font-size: 2.5rem;
-    color: $colour-success;
+    color: $color-success;
     margin-bottom: 0.75rem;
   }
 
@@ -116,7 +116,7 @@ async function save() {
 
   .header-subtitle {
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -134,13 +134,13 @@ async function save() {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   padding: 0.75rem;
   background: $color-gray--lighter;
   margin-bottom: 1rem;
 
   .hint-icon {
-    color: $colour-success;
+    color: $color-success;
     flex-shrink: 0;
   }
 }
@@ -153,7 +153,7 @@ async function save() {
   font-size: 0.85rem;
 
   .suggestions-label {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-weight: 500;
   }
 
@@ -161,6 +161,7 @@ async function save() {
     background: $color-gray--lighter;
     padding: 0.25rem 0.75rem;
     color: $color-gray--darker;
+    border-radius: var(--radius-sm, 0.25rem);
   }
 }
 
@@ -173,8 +174,9 @@ async function save() {
   background: $color-gray--lighter;
 
   .cancel-btn {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-decoration: none;
+    transition: all var(--transition-fast);
 
     &:hover {
       color: $color-gray--darker;

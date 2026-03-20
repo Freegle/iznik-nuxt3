@@ -67,18 +67,14 @@
       <NoticeMessage v-if="notAllowed" variant="danger" class="mt-2">
         You are not allowed to post on this community.
       </NoticeMessage>
-      <NoticeMessage
-        v-else-if="unvalidatedEmail"
-        variant="danger"
-        class="mt-2"
-      >
+      <NoticeMessage v-else-if="unvalidatedEmail" variant="danger" class="mt-2">
         You tried to post using an email address which has not yet been
         validated. Please check your mailbox (including spam) and validate the
         email, then try again.
       </NoticeMessage>
       <NoticeMessage v-else-if="wentWrong" variant="danger" class="mt-2">
-        Something went wrong. Please try again, and if this keeps happening
-        then contact
+        Something went wrong. Please try again, and if this keeps happening then
+        contact
         <ExternalLink href="mailto:support@ilovefreegle.org">
           support </ExternalLink
         >.
@@ -209,12 +205,13 @@ async function submitOffer() {
 
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
 .app-give-whereami {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: $color-white;
   padding-bottom: 80px;
 
   &.has-sticky-ad {
@@ -245,7 +242,7 @@ async function submitOffer() {
 
 .page-subtitle {
   text-align: center;
-  color: #6c757d;
+  color: $color-gray--normal;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
 }
@@ -258,7 +255,7 @@ async function submitOffer() {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .no-groups-notice {
@@ -269,11 +266,11 @@ async function submitOffer() {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .section-subtitle {
-  color: #6c757d;
+  color: $color-gray--normal;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -284,12 +281,12 @@ async function submitOffer() {
 
 .terms-text {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: $color-gray--normal;
   margin-top: 1rem;
   line-height: 1.4;
 
   a {
-    color: #28a745;
+    color: $color-success;
   }
 }
 
@@ -299,8 +296,8 @@ async function submitOffer() {
   left: 0;
   right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #fff;
+  border-top: 1px solid $color-gray-3;
+  background: $color-white;
   z-index: 100;
 
   &.has-sticky-ad {
