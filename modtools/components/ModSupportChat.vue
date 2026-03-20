@@ -17,9 +17,11 @@
     </div>
     <ModChatViewButton :id="chat.id" :pov="pov" class="button" />
     <div class="name d-flex">
-      {{ chat.name }}&nbsp;
-      <span v-if="otheruser" class="text-muted">
-        <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{ otheruser }}
+      {{ otheruserName }}&nbsp;
+      <span v-if="otheruserid" class="text-muted">
+        <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+          otheruserid
+        }}
       </span>
     </div>
     <div class="time">
@@ -35,8 +37,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useChatStore } from '~/stores/chat'
+import { useUserStore } from '~/stores/user'
 
 const chatStore = useChatStore()
+const userStore = useUserStore()
 
 const props = defineProps({
   chatid: {
@@ -52,12 +56,25 @@ const props = defineProps({
 
 const chat = computed(() => chatStore.byChatId(props.chatid))
 
-const otheruser = computed(() => {
+const otheruserid = computed(() => {
   if (!chat.value || chat.value.chattype !== 'User2User') {
     return null
   } else {
     return chat.value.user1 === props.pov ? chat.value.user2 : chat.value.user1
   }
+})
+
+// Fetch the other user so we can show their displayname.
+if (otheruserid.value) {
+  userStore.fetch(otheruserid.value)
+}
+
+const otheruserName = computed(() => {
+  if (otheruserid.value) {
+    const u = userStore.byId(otheruserid.value)
+    return u?.displayname || chat.value?.name || ''
+  }
+  return chat.value?.name || ''
 })
 </script>
 <style scoped lang="scss">
