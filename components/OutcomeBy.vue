@@ -315,7 +315,7 @@ option {
 }
 
 .btn[aria-pressed='true'] {
-  box-shadow: 0px 0px 5px 2px $color-blue--base !important;
+  box-shadow: 0px 0px 5px 2px var(--color-link) !important;
 }
 
 select {

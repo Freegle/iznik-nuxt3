@@ -37,17 +37,14 @@ $color-gray-3: #E9ECEF;
 $color-gray-4: #CED4DA;
 
 // ── Blue palette ────────────────────────────────────────────────────────────
+// Link color is now #2563eb via --color-link in _design-tokens.scss
 $color-blue--x-light: #D1ECF1;
-$color-blue-x-light2: #BEE5EB;
 $color-blue--light: #4895DD;
-$color-blue--base: #0000FF;          // Legacy link color (see bootstrap-custom for override)
 $color-blue--1: #0C5460;
-$color-blue--2: #204D74;
 $color-blue--bright: #007BFF;
 
 // ── Yellow / Warning ────────────────────────────────────────────────────────
 $color-yellow--light: #F9F7EC;
-$color-yellow--dark: #FBE8AA;        // Wizard progress
 $color-yellow-1: #FFF6DB;            // Notice warning background
 $color-yellow-3: #674E04;            // Notice warning text
 
@@ -67,18 +64,13 @@ $color-black: #000;
 $color-purple: purple;
 $color-gold: darkgoldenrod;
 
-// ── White opacity variants (used) ───────────────────────────────────────────
-$color-white-opacity-25: rgba(255, 255, 255, 0.25);
+// ── White opacity variants ───────────────────────────────────────────────────
 $color-white-opacity-50: rgba(255, 255, 255, 0.5);
 $color-white-opacity-75: rgba(255, 255, 255, 0.75);
-$color-white-opacity-80: rgba(255, 255, 255, 0.8);
 $color-white-opacity-90: rgba(255, 255, 255, 0.9);
-$color-white-opacity-95: rgba(255, 255, 255, 0.95);
 
-// ── Black opacity variants (used) ──────────────────────────────────────────
-$color-black-opacity-08: rgba(0, 0, 0, 0.08);
+// ── Black opacity variants ──────────────────────────────────────────────────
 $color-black-opacity-10: rgba(0, 0, 0, 0.1);
-$color-black-opacity-12: rgba(0, 0, 0, 0.12);
 $color-black-opacity-15: rgba(0, 0, 0, 0.15);
 $color-black-opacity-20: rgba(0, 0, 0, 0.2);
 $color-black-opacity-30: rgba(0, 0, 0, 0.3);

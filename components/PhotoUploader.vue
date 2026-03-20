@@ -915,7 +915,7 @@ onBeforeUnmount(() => {
 
 .circle-bg {
   fill: none;
-  stroke: $color-white-opacity-25;
+  stroke: rgba(255, 255, 255, 0.25);
   stroke-width: 3;
 }
 

@@ -43,7 +43,7 @@ const similar = computed(() => {
 <style scoped lang="scss">
 .selected {
   background-color: $color-secondary !important;
-  border-color: $color-blue--2 !important;
+  border-color: #204D74 !important;
   color: $color-white !important;
   border-radius: var(--radius-md, 0.375rem);
 }

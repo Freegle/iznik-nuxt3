@@ -909,7 +909,7 @@ function rotateRight() {
     }
 
     a {
-      color: $color-blue--base;
+      color: var(--color-link);
       text-decoration: none;
 
       &:hover {

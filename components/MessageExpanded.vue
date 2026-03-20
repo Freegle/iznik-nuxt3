@@ -1333,7 +1333,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  background: $color-white-opacity-25;
+  background: rgba(255, 255, 255, 0.25);
   color: $color-white;
   padding: 0.15rem 0.4rem;
   border-radius: 1rem;
@@ -1411,7 +1411,7 @@ onUnmounted(() => {
   }
 
   &:not(.active):hover {
-    border-color: $color-white-opacity-80;
+    border-color: rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -1571,7 +1571,7 @@ onUnmounted(() => {
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: $color-white-opacity-25;
+  background: rgba(255, 255, 255, 0.25);
   color: $color-white;
   display: flex;
   align-items: center;
@@ -1695,7 +1695,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 7rem; /* Above title-overlay which has ~6rem height */
   right: 1rem;
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   color: $color-gray--darker;
   padding: 0.4rem 0.6rem;
@@ -2200,7 +2200,7 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
   border: none;
   color: $color-gray--darker;
   display: flex;

@@ -218,8 +218,8 @@ initialize()
 .type-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba($color-blue--base, 0.1);
-  color: $color-blue--base;
+  background: color-mix(in srgb, var(--color-link) 10%, transparent);
+  color: var(--color-link);
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;

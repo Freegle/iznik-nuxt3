@@ -694,7 +694,7 @@ onMounted(async () => {
 }
 
 .celebration-header {
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 30px;
   padding: 3rem 2rem;
   box-shadow: 0 20px 60px $color-black-opacity-20;
@@ -919,7 +919,7 @@ onMounted(async () => {
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0),
-    $color-white-opacity-95
+    rgba(255, 255, 255, 0.95)
   );
   padding: 4rem 0;
   position: relative;
@@ -1048,7 +1048,7 @@ onMounted(async () => {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* Responsive Design */

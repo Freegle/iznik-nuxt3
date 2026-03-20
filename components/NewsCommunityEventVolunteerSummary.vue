@@ -93,7 +93,7 @@ if (volunteerOpportunities.length > 0) {
   font-weight: 500;
 
   .header-icon {
-    color: $color-blue--base;
+    color: var(--color-link);
   }
 }
 
@@ -111,7 +111,7 @@ if (volunteerOpportunities.length > 0) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: $color-blue--base;
+  color: var(--color-link);
   font-size: 0.9rem;
   text-decoration: none;
 

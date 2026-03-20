@@ -778,7 +778,7 @@ function showReplyPhotoModal() {
   min-height: 1.75rem;
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  color: $color-blue--base;
+  color: var(--color-link);
   font-size: 0.85rem;
   line-height: 1.2;
   cursor: pointer;
@@ -795,7 +795,7 @@ function showReplyPhotoModal() {
   &:hover {
     background: rgba(0, 0, 0, 0.03);
     border-color: rgba(0, 0, 0, 0.2);
-    color: darken($color-blue--base, 10%);
+    color: color-mix(in srgb, var(--color-link) 100%, black 10%);
   }
 
   .action-icon {
@@ -803,7 +803,7 @@ function showReplyPhotoModal() {
   }
 
   &.loved {
-    color: $color-blue--base;
+    color: var(--color-link);
   }
 
   &.love-count {
@@ -820,7 +820,7 @@ function showReplyPhotoModal() {
   min-height: 1.75rem !important;
   background: transparent !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: $color-blue--base !important;
+  color: var(--color-link) !important;
   font-size: 0.85rem !important;
   line-height: 1.2 !important;
   font-weight: 400 !important;
@@ -855,7 +855,7 @@ function showReplyPhotoModal() {
   &:hover {
     background: rgba(0, 0, 0, 0.03) !important;
     border-color: rgba(0, 0, 0, 0.2) !important;
-    color: darken($color-blue--base, 10%) !important;
+    color: color-mix(in srgb, var(--color-link) 100%, black 10%) !important;
   }
 
   span {

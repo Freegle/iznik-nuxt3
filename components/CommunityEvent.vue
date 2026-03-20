@@ -260,7 +260,7 @@ function showEventModal() {
 .event-card__title {
   flex: 1;
   min-width: 0;
-  color: $color-blue--base;
+  color: var(--color-link);
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;

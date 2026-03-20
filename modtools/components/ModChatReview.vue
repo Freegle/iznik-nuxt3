@@ -429,7 +429,7 @@ async function redactEmails(callback) {
 //@import 'color-vars';
 
 .highlight {
-  color: $color-blue--base;
+  color: var(--color-link);
   background-color: initial;
 }
 </style>

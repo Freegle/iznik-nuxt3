@@ -87,7 +87,7 @@ function triggerReadMore(e, b) {
 </script>
 <style scoped lang="scss">
 :deep(.highlight) {
-  color: $color-blue--base !important;
+  color: var(--color-link) !important;
   background-color: initial !important;
 }
 </style>

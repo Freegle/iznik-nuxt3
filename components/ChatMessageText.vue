@@ -226,7 +226,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 /* Chat link styling for ModTools - uses :deep() since content is rendered via v-html */
 :deep(.chat-link) {
-  color: $color-blue--base;
+  color: var(--color-link);
   text-decoration: underline;
 
   &:hover {
@@ -236,7 +236,7 @@ onMounted(async () => {
 
 /* Email highlight styling for ModTools - matches the Highlighter component */
 :deep(.highlight) {
-  color: $color-blue--base;
+  color: var(--color-link);
   background-color: initial;
 }
 

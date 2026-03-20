@@ -849,7 +849,7 @@ watch(
   }
 
   .detail-icon {
-    color: $color-blue--base;
+    color: var(--color-link);
     width: 1rem;
     margin-top: 0.2em;
     flex-shrink: 0;
@@ -901,7 +901,7 @@ watch(
     }
 
     a {
-      color: $color-blue--base;
+      color: var(--color-link);
       text-decoration: none;
 
       &:hover {
