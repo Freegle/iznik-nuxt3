@@ -1,14 +1,28 @@
 # Freegle Style Board
 
-A comprehensive inventory of the visual design system as it currently exists, with recommendations for a modernized, consolidated design language.
+A comprehensive inventory of the visual design system, aligned with 2026 web design trends for a warm, welcoming community site serving an older demographic.
+
+## Design Direction
+
+**Target feel**: Warm, friendly, trustworthy, accessible. Like a community noticeboard in a village hall, not a tech startup.
+
+**2026 trends applied**:
+- Warm off-white backgrounds (#faf9f7) instead of cool whites - reduces visual fatigue
+- Larger border-radius (8-12px) for soft, approachable feel
+- Earthy greens (perfect for environmental charity)
+- Higher contrast for accessibility (WCAG 4.5:1 minimum)
+- Subtle shadows for depth without harshness
+- Source Sans Pro font - humanist, readable, friendly
+
+**Pantone Cloud Dancer** (warm inviting neutral) influence on the gray scale - shifted from cool blue-grays to warmer tones.
 
 ---
 
 ## 1. Color Palette
 
-### Current State
+### Current State (Post-Modernization)
 
-The project defines **115 lines** of color variables across `_color-vars.scss`. There are two naming conventions (`$colour-*` British spelling for legacy, `$color-*` American spelling for newer), 11+ green variants, and 27 opacity helpers.
+The project uses ~52 color variables in `_color-vars.scss` with consistent `$color-*` American spelling. CSS custom properties in `_design-tokens.scss` provide runtime theming support.
 
 #### Primary / Brand Colors (Current)
 
