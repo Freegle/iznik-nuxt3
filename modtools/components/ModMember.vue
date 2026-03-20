@@ -576,6 +576,6 @@ async function showChat() {
 </script>
 <style scoped lang="scss">
 .text-link {
-  color: $link-color;
+  color: var(--color-link);
 }
 </style>
