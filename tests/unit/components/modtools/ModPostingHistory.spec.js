@@ -18,9 +18,9 @@ describe('ModPostingHistory', () => {
     id: 123,
     modmails: 2,
     messagehistory: [
-      { id: 1, type: 'Offer', subject: 'Free sofa' },
-      { id: 2, type: 'Offer', subject: 'Free table' },
-      { id: 3, type: 'Wanted', subject: 'Looking for chair' },
+      { id: 1, type: 'Offer', subject: 'Free sofa', daysago: 5 },
+      { id: 2, type: 'Offer', subject: 'Free table', daysago: 10 },
+      { id: 3, type: 'Wanted', subject: 'Looking for chair', daysago: 15 },
     ],
     info: {
       replies: 5,
@@ -450,12 +450,12 @@ describe('ModPostingHistory', () => {
         {},
         {
           messagehistory: [
-            { id: 1, type: 'Offer' },
-            { id: 2, type: 'Wanted' },
-            { id: 3, type: 'Offer' },
-            { id: 4, type: 'Offer' },
-            { id: 5, type: 'Wanted' },
-            { id: 6, type: 'Other' },
+            { id: 1, type: 'Offer', daysago: 1 },
+            { id: 2, type: 'Wanted', daysago: 2 },
+            { id: 3, type: 'Offer', daysago: 3 },
+            { id: 4, type: 'Offer', daysago: 4 },
+            { id: 5, type: 'Wanted', daysago: 5 },
+            { id: 6, type: 'Other', daysago: 6 },
           ],
         }
       )
@@ -501,8 +501,8 @@ describe('ModPostingHistory', () => {
         {},
         {
           messagehistory: [
-            { id: 1, type: 'Offer' },
-            { id: 2, type: 'Wanted' },
+            { id: 1, type: 'Offer', daysago: 1 },
+            { id: 2, type: 'Wanted', daysago: 2 },
           ],
         }
       )

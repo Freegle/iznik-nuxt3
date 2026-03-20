@@ -4,35 +4,43 @@ import { defineComponent, h, Suspense, nextTick } from 'vue'
 import ModChatModal from '~/modtools/components/ModChatModal.vue'
 
 // Use vi.hoisted to ensure mocks are available during module hoisting
-const { mockChatStore, mockModalShow, mockModalHide, mockChatMessages } =
-  vi.hoisted(() => {
-    const { ref } = require('vue')
-    const mockChatStore = {
-      fetchChat: vi.fn().mockResolvedValue({}),
-      fetchMessages: vi.fn().mockResolvedValue({}),
-      byChatId: vi.fn(),
-      messagesById: vi.fn().mockReturnValue([]),
-    }
-    const mockModalShow = vi.fn()
-    const mockModalHide = vi.fn()
-    const mockChatMessages = ref([])
+const {
+  mockChatStore,
+  mockModalShow,
+  mockModalHide,
+  mockChatMessages,
+  mockUserStore,
+} = vi.hoisted(() => {
+  const { ref } = require('vue')
+  const mockChatStore = {
+    fetchChat: vi.fn().mockResolvedValue({}),
+    fetchMessages: vi.fn().mockResolvedValue({}),
+    byChatId: vi.fn(),
+    messagesById: vi.fn().mockReturnValue([]),
+  }
+  const mockModalShow = vi.fn()
+  const mockModalHide = vi.fn()
+  const mockChatMessages = ref([])
+  const mockUserStore = {
+    byId: vi.fn().mockReturnValue(null),
+    fetch: vi.fn().mockResolvedValue({}),
+  }
 
-    return {
-      mockChatStore,
-      mockModalShow,
-      mockModalHide,
-      mockChatMessages,
-    }
-  })
+  return {
+    mockChatStore,
+    mockModalShow,
+    mockModalHide,
+    mockChatMessages,
+    mockUserStore,
+  }
+})
 
 vi.mock('~/stores/chat', () => ({
   useChatStore: () => mockChatStore,
 }))
 
 vi.mock('~/stores/user', () => ({
-  useUserStore: () => ({
-    byId: vi.fn(),
-  }),
+  useUserStore: () => mockUserStore,
 }))
 
 vi.mock('~/stores/auth', () => ({
@@ -77,10 +85,12 @@ describe('ModChatModal', () => {
     ...overrides,
   })
 
+  // V2 API returns numeric IDs for user1/user2 (not objects).
+  // The component resolves them via userStore.byId().
   const createChat = (overrides = {}) => ({
     id: 123,
-    user1: createUser({ id: 456, displayname: 'User One' }),
-    user2: createUser({ id: 789, displayname: 'User Two' }),
+    user1: 456,
+    user2: 789,
     group: null,
     ...overrides,
   })
@@ -164,6 +174,15 @@ describe('ModChatModal', () => {
     return wrapper.findComponent(ModChatModal)
   }
 
+  // Helper to register user objects in the mock user store so byId returns them.
+  function registerUsers(...users) {
+    const userMap = {}
+    users.forEach((u) => {
+      if (u) userMap[u.id] = u
+    })
+    mockUserStore.byId.mockImplementation((id) => userMap[id] || null)
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockChatStore.byChatId.mockReturnValue(null)
@@ -171,6 +190,8 @@ describe('ModChatModal', () => {
     mockChatStore.fetchChat.mockResolvedValue({})
     mockChatStore.fetchMessages.mockResolvedValue({})
     mockChatMessages.value = []
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue({})
   })
 
   describe('rendering', () => {
@@ -224,10 +245,10 @@ describe('ModChatModal', () => {
 
   describe('header display', () => {
     it('displays user2 displayname when pov is user1', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'POV User' }),
-        user2: createUser({ id: 789, displayname: 'Other User' }),
-      })
+      const povUser = createUser({ id: 456, displayname: 'POV User' })
+      const otherUser = createUser({ id: 789, displayname: 'Other User' })
+      registerUsers(povUser, otherUser)
+      const chat = createChat({ user1: 456, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ id: 123, pov: 456 })
@@ -240,10 +261,10 @@ describe('ModChatModal', () => {
     })
 
     it('displays user1 displayname when pov is user2', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'First User' }),
-        user2: createUser({ id: 789, displayname: 'Second User' }),
-      })
+      const firstUser = createUser({ id: 456, displayname: 'First User' })
+      const secondUser = createUser({ id: 789, displayname: 'Second User' })
+      registerUsers(firstUser, secondUser)
+      const chat = createChat({ user1: 456, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ id: 123, pov: 789 })
@@ -256,10 +277,10 @@ describe('ModChatModal', () => {
     })
 
     it('displays user IDs with hashtag icons', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'User One' }),
-        user2: createUser({ id: 789, displayname: 'User Two' }),
-      })
+      const u1 = createUser({ id: 456, displayname: 'User One' })
+      const u2 = createUser({ id: 789, displayname: 'User Two' })
+      registerUsers(u1, u2)
+      const chat = createChat({ user1: 456, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ id: 123, pov: 456 })
@@ -274,14 +295,14 @@ describe('ModChatModal', () => {
     })
 
     it('displays LJ user ID when user has ljuserid', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'User One' }),
-        user2: createUser({
-          id: 789,
-          displayname: 'User Two',
-          ljuserid: 12345,
-        }),
+      const u1 = createUser({ id: 456, displayname: 'User One' })
+      const u2 = createUser({
+        id: 789,
+        displayname: 'User Two',
+        ljuserid: 12345,
       })
+      registerUsers(u1, u2)
+      const chat = createChat({ user1: 456, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ id: 123, pov: 456 })
@@ -295,15 +316,15 @@ describe('ModChatModal', () => {
     })
 
     it('displays TN user ID when user has tnuserid but no ljuserid', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'User One' }),
-        user2: createUser({
-          id: 789,
-          displayname: 'User Two',
-          ljuserid: null,
-          tnuserid: 67890,
-        }),
+      const u1 = createUser({ id: 456, displayname: 'User One' })
+      const u2 = createUser({
+        id: 789,
+        displayname: 'User Two',
+        ljuserid: null,
+        tnuserid: 67890,
       })
+      registerUsers(u1, u2)
+      const chat = createChat({ user1: 456, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ id: 123, pov: 456 })
@@ -332,10 +353,9 @@ describe('ModChatModal', () => {
     })
 
     it('does not display user2 when user1.id equals user2.id (non-pov view)', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'Same User' }),
-        user2: createUser({ id: 456, displayname: 'Same User' }),
-      })
+      const sameUser = createUser({ id: 456, displayname: 'Same User' })
+      registerUsers(sameUser)
+      const chat = createChat({ user1: 456, user2: 456 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       // pov !== user1.id to trigger the else branch
@@ -359,32 +379,33 @@ describe('ModChatModal', () => {
         expect(component.vm.user1).toBe(null)
       })
 
-      it('returns user2 when pov matches user1.id', async () => {
-        const chat = createChat({
-          user1: createUser({ id: 456, displayname: 'First' }),
-          user2: createUser({ id: 789, displayname: 'Second' }),
-        })
+      it('returns the "other" user when pov matches user1.id', async () => {
+        const first = createUser({ id: 456, displayname: 'First' })
+        const second = createUser({ id: 789, displayname: 'Second' })
+        registerUsers(first, second)
+        const chat = createChat({ user1: 456, user2: 789 })
 
         const wrapper = await mountComponent({ id: 123, pov: 456 })
         const component = getModChatModal(wrapper)
         component.vm.chat2 = chat
         await nextTick()
 
-        expect(component.vm.user1).toEqual(chat.user2)
+        // When pov matches user1, user1 computed shows user2 (the "other")
+        expect(component.vm.user1).toEqual(second)
       })
 
       it('returns user1 when pov does not match user1.id', async () => {
-        const chat = createChat({
-          user1: createUser({ id: 456, displayname: 'First' }),
-          user2: createUser({ id: 789, displayname: 'Second' }),
-        })
+        const first = createUser({ id: 456, displayname: 'First' })
+        const second = createUser({ id: 789, displayname: 'Second' })
+        registerUsers(first, second)
+        const chat = createChat({ user1: 456, user2: 789 })
 
         const wrapper = await mountComponent({ id: 123, pov: 789 })
         const component = getModChatModal(wrapper)
         component.vm.chat2 = chat
         await nextTick()
 
-        expect(component.vm.user1).toEqual(chat.user1)
+        expect(component.vm.user1).toEqual(first)
       })
     })
 
@@ -396,31 +417,31 @@ describe('ModChatModal', () => {
       })
 
       it('returns user2 when pov matches user2.id', async () => {
-        const chat = createChat({
-          user1: createUser({ id: 456, displayname: 'First' }),
-          user2: createUser({ id: 789, displayname: 'Second' }),
-        })
+        const first = createUser({ id: 456, displayname: 'First' })
+        const second = createUser({ id: 789, displayname: 'Second' })
+        registerUsers(first, second)
+        const chat = createChat({ user1: 456, user2: 789 })
 
         const wrapper = await mountComponent({ id: 123, pov: 789 })
         const component = getModChatModal(wrapper)
         component.vm.chat2 = chat
         await nextTick()
 
-        expect(component.vm.user2).toEqual(chat.user2)
+        expect(component.vm.user2).toEqual(second)
       })
 
       it('returns user1 when pov does not match user2.id', async () => {
-        const chat = createChat({
-          user1: createUser({ id: 456, displayname: 'First' }),
-          user2: createUser({ id: 789, displayname: 'Second' }),
-        })
+        const first = createUser({ id: 456, displayname: 'First' })
+        const second = createUser({ id: 789, displayname: 'Second' })
+        registerUsers(first, second)
+        const chat = createChat({ user1: 456, user2: 789 })
 
         const wrapper = await mountComponent({ id: 123, pov: 456 })
         const component = getModChatModal(wrapper)
         component.vm.chat2 = chat
         await nextTick()
 
-        expect(component.vm.user2).toEqual(chat.user1)
+        expect(component.vm.user2).toEqual(first)
       })
     })
   })
@@ -585,10 +606,9 @@ describe('ModChatModal', () => {
 
   describe('edge cases', () => {
     it('handles chat with null user1', async () => {
-      const chat = createChat({
-        user1: null,
-        user2: createUser({ id: 789, displayname: 'Only User' }),
-      })
+      const onlyUser = createUser({ id: 789, displayname: 'Only User' })
+      registerUsers(onlyUser)
+      const chat = createChat({ user1: null, user2: 789 })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent()
@@ -601,10 +621,9 @@ describe('ModChatModal', () => {
     })
 
     it('handles chat with null user2 by falling back to user1', async () => {
-      const chat = createChat({
-        user1: createUser({ id: 456, displayname: 'Only User' }),
-        user2: null,
-      })
+      const onlyUser = createUser({ id: 456, displayname: 'Only User' })
+      registerUsers(onlyUser)
+      const chat = createChat({ user1: 456, user2: null })
       mockChatStore.byChatId.mockReturnValue(chat)
 
       const wrapper = await mountComponent({ pov: 456 })
@@ -613,7 +632,7 @@ describe('ModChatModal', () => {
       await nextTick()
 
       // When user2 is null, the computed property falls back to user1
-      expect(component.vm.user2).toEqual(chat.user1)
+      expect(component.vm.user2).toEqual(onlyUser)
     })
 
     it('handles empty chat messages array', async () => {

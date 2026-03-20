@@ -5,6 +5,15 @@ import { nextTick } from 'vue'
 import ModSupportChat from '~/modtools/components/ModSupportChat.vue'
 import { useChatStore } from '~/stores/chat'
 
+const mockUserStore = {
+  byId: vi.fn().mockReturnValue(null),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModSupportChat', () => {
   const defaultChat = {
     id: 123,
@@ -24,6 +33,8 @@ describe('ModSupportChat', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue({})
     setActivePinia(createPinia())
 
     const store = {
@@ -157,7 +168,7 @@ describe('ModSupportChat', () => {
   })
 
   describe('computed properties', () => {
-    describe('otheruser', () => {
+    describe('otheruserid', () => {
       it('returns user2 when pov equals user1', () => {
         const wrapper = mountComponent(
           { chatid: 123, pov: 100 },
@@ -168,7 +179,7 @@ describe('ModSupportChat', () => {
             user2: 200,
           }
         )
-        expect(wrapper.vm.otheruser).toBe(200)
+        expect(wrapper.vm.otheruserid).toBe(200)
       })
 
       it('returns user1 when pov equals user2', () => {
@@ -181,7 +192,7 @@ describe('ModSupportChat', () => {
             user2: 200,
           }
         )
-        expect(wrapper.vm.otheruser).toBe(100)
+        expect(wrapper.vm.otheruserid).toBe(100)
       })
 
       it('returns null for non-User2User chat types', () => {
@@ -194,13 +205,13 @@ describe('ModSupportChat', () => {
             user2: 200,
           }
         )
-        expect(wrapper.vm.otheruser).toBeNull()
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
 
       it('returns null when chat is not found in store', () => {
         chatStore.listByChatId = {}
         const wrapper = mountComponent({ chatid: 999 })
-        expect(wrapper.vm.otheruser).toBeNull()
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
 
       it('returns null for Mod2Mod chat type', () => {
@@ -213,7 +224,7 @@ describe('ModSupportChat', () => {
             user2: 200,
           }
         )
-        expect(wrapper.vm.otheruser).toBeNull()
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
     })
   })
@@ -350,7 +361,7 @@ describe('ModSupportChat', () => {
         }
       )
       // When user1 is missing and pov doesn't match undefined, returns user1 (undefined)
-      expect(wrapper.vm.otheruser).toBeUndefined()
+      expect(wrapper.vm.otheruserid).toBeUndefined()
     })
 
     it('handles chat without user2', () => {
@@ -363,7 +374,7 @@ describe('ModSupportChat', () => {
           user1: 100,
         }
       )
-      expect(wrapper.vm.otheruser).toBeUndefined()
+      expect(wrapper.vm.otheruserid).toBeUndefined()
     })
 
     it('handles chat without name', () => {

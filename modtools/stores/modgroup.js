@@ -75,8 +75,11 @@ export const useModGroupStore = defineStore({
         // Go through all my groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
         // this.getting = []
-        for (const g of Object.values(authStore.groups || [])) {
-          this.fetchIfNeedBeMT(g.groupid)
+        const groups = authStore.groups
+        if (groups && typeof groups === 'object') {
+          for (const g of Object.values(groups)) {
+            this.fetchIfNeedBeMT(g.groupid)
+          }
         }
       } catch (e) {
         console.error('getModGroups() fail', e.message)
