@@ -301,10 +301,12 @@ useHead(
 
   &:first-child {
     border-right: 1px solid $color-green-background;
+    border-radius: var(--radius-md, 0.5rem) 0 0 var(--radius-md, 0.5rem);
   }
 
   &:last-child {
     border-left: 1px solid $color-green-background;
+    border-radius: 0 var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0;
   }
 
   &.active {

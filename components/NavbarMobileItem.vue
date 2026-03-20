@@ -142,10 +142,12 @@ defineEmits(['click', 'mousedown'])
 
   &.badge-info {
     background: #17a2b8;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 
   &.badge-danger {
     background: #ef5350;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 

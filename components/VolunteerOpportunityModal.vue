@@ -843,6 +843,7 @@ function rotateRight() {
   background: $color-gray--lighter;
   padding: 1rem;
   margin-bottom: 1rem;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .detail-item {

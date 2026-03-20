@@ -414,6 +414,7 @@ const replyTimeText = computed(() => {
   background: $color-white;
   padding: 0 0.75rem;
   line-height: 1;
+  border-radius: var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0 0;
 }
 
 .stats-box-title-text {
@@ -570,6 +571,7 @@ const replyTimeText = computed(() => {
   background: $color-gray--lighter;
   font-weight: 600;
   color: $color-gray--darker;
+  border-radius: var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0 0;
 }
 
 .section-icon {

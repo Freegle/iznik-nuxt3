@@ -102,6 +102,7 @@
   width: 55px;
   height: 1.5rem;
   background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .skeleton-title-group {

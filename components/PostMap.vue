@@ -976,6 +976,8 @@ function dragEnd(e) {
   top: 0px;
   left: 0;
   border: 1px solid $color-gray--light;
+  border-radius: var(--radius-md, 0.5rem);
+  overflow: hidden;
 }
 
 :deep(.leaflet-control-geocoder) {

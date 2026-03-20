@@ -187,6 +187,7 @@ async function report() {
   background: $color-gray-3;
   padding: 0.75rem 1rem;
   border-left: 3px solid $color-success;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .preview-type {

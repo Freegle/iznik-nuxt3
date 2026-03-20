@@ -722,6 +722,7 @@ onBeforeUnmount(() => {
   font-size: 0.75rem;
   color: $color-gray--darker;
   font-weight: 500;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .stat-icon {

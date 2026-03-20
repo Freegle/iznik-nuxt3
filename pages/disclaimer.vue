@@ -156,6 +156,7 @@ useHead(
 .disclaimer__section--alert {
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   border-left: 3px solid $danger;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .disclaimer__icon {
