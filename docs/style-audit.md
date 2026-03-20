@@ -196,37 +196,62 @@ The stories page is a long wall of alternating green header bars and white conte
 | -- | Variable naming standardization | DONE - `$colour-*` → `$color-*` across 58 files |
 | -- | Remove unused color variables | DONE - 28 variables removed |
 
+### Round 3: Comprehensive Token Migration (2026-03-20)
+
+Systematic sweep of ~400 hardcoded values across 131 files:
+
+| Category | Replacements | Files | Notes |
+|----------|-------------|-------|-------|
+| Border-radius | ~90 | 60+ | All px values → `var(--radius-sm/md/lg/xl)` |
+| Box-shadows | ~95 | 65+ | All rgba → `var(--shadow-sm/md/lg/xl)` |
+| Transitions | 125 durations + 26 missing hovers | 62 | `0.2s` → `var(--transition-normal)` etc. |
+| Colors (SCSS) | ~200 | 39+ | Hex → `$color-*` variables |
+| Colors (templates/JS) | ~20 | 10+ | Inline hex → `var(--color-*)` |
+
+Additional fixes:
+- Landing page: hero glass card border-radius + shadow, location input double-border
+- Photo count pills: added missing border-radius on MessageSummary/MicroVolunteering
+- Autocomplete dropdown: modernized (font-family, shadow, radius, hover states)
+- Social login buttons: 4px radius (brand guidelines)
+- Login modal: bolder switch button, visible forgot-password link
+- Chat page: strengthened Photo button and text contrast
+- Navbar badges: restored per-badge right offsets (consolidation broke icon overlap)
+- btn-white/btn-default: strengthened border from gray-300 to gray-400
+- Modtools: synced design tokens, fixed ModMember.vue undefined SCSS variable
+
+New design tokens added:
+- `--radius-xl: 1.25rem` (chat bubbles, hero cards)
+- `--shadow-xl: 0 10px 30px rgba(0,0,0,0.15)` (modals, overlays)
+- `--transition-slow: 300ms ease-in-out` (transforms, layout)
+
 ### Remaining Issues
 
-#### Still Needed (P2-P3)
+#### Still Needed
 
-1. **~150 components still have hardcoded hex colors** - Only 4 of the worst offenders fixed. The long tail of hardcoded `#f8f9fa`, `#dee2e6`, `#6c757d` etc. remains across 150+ files. These should gradually be migrated to use SCSS variables or CSS custom properties.
+1. **`!important` proliferation** (PARKED) - 538 declarations across 72 files. Proper fix requires specificity restructuring. High risk of layout breakage.
 
-2. **`!important` proliferation** - Still 40+ `!important` declarations in global CSS. These exist because of Bootstrap specificity conflicts. Proper fix requires restructuring how Bootstrap overrides are applied (using higher-specificity selectors or `:where()` to lower Bootstrap specificity).
+2. **Typography scale enforcement** (PARKED) - 45% of font-sizes off the defined 7-step scale. Needs visual regression testing infrastructure before changes.
 
-3. **No dark mode foundation** - CSS custom properties are now in place, but no actual dark mode color scheme is defined. Adding `@media (prefers-color-scheme: dark)` overrides for the custom properties would be straightforward.
+3. **No dark mode foundation** - CSS custom properties are now in place. Adding `@media (prefers-color-scheme: dark)` overrides would be straightforward.
 
-4. **Stories page visual monotony** - While story cards now have rounded corners and shadows, the page is still a long wall of green-on-white cards with minimal visual variation.
+4. **Stories page visual monotony** - Still a wall of identical green-on-white cards.
 
-5. **Inconsistent icon sizing** - Custom `.fa-8-75x`, `.fa-0-8x`, `.fa-1-5x`, `.fa-1-75x`, `.fa-bh` classes suggest ad-hoc sizing. Should use a defined scale.
+5. **Inconsistent icon sizing** - Custom `.fa-8-75x`, `.fa-0-8x` etc. Should use a defined scale.
 
-6. **Form label `!important` on bold** - `label { font-weight: bold !important; }` globally prevents any lighter-weight label styling.
+6. **Form label `font-weight: bold`** - Global `!important` prevents lighter-weight labels.
 
-7. **Homepage item cards** - The `MessageSummary` cards have rounded corners but don't use the design token shadow variables consistently (some have inline `rgba()` shadows).
+### Metrics After Round 3
 
-### Metrics After Modernization
-
-| Metric | Before | After | Target |
-|--------|--------|-------|--------|
-| Color variables defined | 115 lines (80+) | 87 lines (~52) | ~25 semantic tokens |
-| Unused variables | 28+ | 0 | 0 |
-| Green variants | 11 | 8 | 5 |
-| Components with hardcoded hex | 158 (26.7%) | ~150 (~25%) | <10% |
-| `!important` in global CSS | 40+ | 35+ | <10 |
-| Bootstrap 4 compat shims | 97 lines | 0 | 0 |
-| Near-duplicate utility classes | 5 badge classes | 1 | 1 |
-| CSS custom properties | 8 | 25+ | 25+ |
-| Naming consistency | Mixed colour/color | 100% $color-* | 100% |
-| Border radius enabled | No | Yes | Yes |
-| Shadow system | None | 3-level scale | 3-level scale |
-| Link color modern | #0000FF | #2563eb | Modern blue |
+| Metric | Before | Round 2 | Round 3 | Target |
+|--------|--------|---------|---------|--------|
+| Color variables defined | 115 (80+) | 87 (~52) | 87 (~52) | ~25 tokens |
+| Components with hardcoded hex | 158 (26.7%) | ~150 (~25%) | ~30 (~5%) | <10% |
+| Hardcoded box-shadow | 115+ | 115+ | ~20 (focus rings only) | 0 reachable |
+| Hardcoded border-radius | 150+ | 150+ | ~10 (intentional) | 0 reachable |
+| Hardcoded transition durations | 109 | 109 | ~10 (non-standard easing) | 0 reachable |
+| `!important` in global CSS | 40+ | 35+ | 35+ | <10 (parked) |
+| Bootstrap 4 compat shims | 97 lines | 0 | 0 | 0 |
+| CSS custom properties | 8 | 25+ | 30+ | 30+ |
+| Shadow system | None | 3-level | 4-level | 4-level |
+| Transition tokens | None | 2 | 3 | 3 |
+| Border radius tokens | 3 | 3 | 4 | 4 |
