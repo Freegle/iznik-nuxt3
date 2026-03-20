@@ -115,10 +115,9 @@ const mounted = ref(false)
 
 console.warn('UserRatings: Fetching user data for id:', props.id)
 
-// Fetch user data - show cached immediately, then refresh in background.
-// These are fire-and-forget - the computed will reactively update when store changes.
+// Fetch user data if not already cached. Don't force-refresh — that replaces the
+// store entry and triggers a reactive cascade that causes ChatHeader to flash blank.
 userStore.fetch(props.id)
-userStore.fetch(props.id, true)
 
 onMounted(() => {
   mounted.value = true
