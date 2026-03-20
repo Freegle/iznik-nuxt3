@@ -978,17 +978,17 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background-color: $color-gray--lighter;
-  border: 1px solid $color-gray--light;
-  color: $color-gray--darker;
+  background-color: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-900);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
 
   &:hover {
-    background-color: darken($color-gray--lighter, 5%);
-    border-color: $color-gray--normal;
+    background-color: var(--color-gray-300);
+    border-color: var(--color-gray-400);
   }
 
   &:active {

@@ -245,7 +245,7 @@ onMounted(() => {
 
 .chat-time {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-500);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .snippet {
   font-size: 0.875rem;
-  color: $color-gray--normal;
+  color: var(--color-gray-600);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
