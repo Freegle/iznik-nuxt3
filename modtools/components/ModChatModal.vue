@@ -151,6 +151,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
   id: {
@@ -168,42 +169,46 @@ const emit = defineEmits(['hidden'])
 const { modal, hide } = useOurModal()
 
 const { chatStore, chatmessages } = await setupChat(props.id)
+const userStore = useUserStore()
 const chat2 = ref(null)
 
-// Construct basic user details by hand. u1settings and u2settings also available
-// Depending on our p.o.v. we may need to swap user1 and user2
-const user1 = computed(() => {
-  let ret = null
+// Resolve user1/user2 IDs to full user objects from the user store.
+// V2 API returns numeric IDs; V1 returned nested objects.
+function resolveUserId(val) {
+  if (!val) return null
+  if (typeof val === 'object') return val.id
+  return parseInt(val)
+}
 
-  if (chat2.value) {
-    if (chat2.value.user1 && chat2.value.user1.id === props.pov) {
-      ret = chat2.value.user2
-    } else {
-      ret = chat2.value.user1
-    }
-  }
-  return ret
+const user1 = computed(() => {
+  if (!chat2.value) return null
+  const u1id = resolveUserId(chat2.value.user1)
+  const u2id = resolveUserId(chat2.value.user2)
+  // Show the "other" user on the left — swap if pov matches user1
+  const id = u1id === props.pov ? u2id : u1id
+  return id ? userStore.byId(id) : null
 })
 
 const user2 = computed(() => {
-  let ret = null
-
-  if (chat2.value) {
-    if (chat2.value.user2 && chat2.value.user2.id === props.pov) {
-      ret = chat2.value.user2
-    } else {
-      ret = chat2.value.user1
-    }
-  }
-
-  return ret
+  if (!chat2.value) return null
+  const u1id = resolveUserId(chat2.value.user1)
+  const u2id = resolveUserId(chat2.value.user2)
+  // Show the pov user on the right
+  const id = u2id === props.pov ? u2id : u1id
+  return id ? userStore.byId(id) : null
 })
 
 async function show() {
-  // await chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, props.id)
   await chatStore.fetchChat(props.id)
   await chatStore.fetchMessages(props.id)
   chat2.value = chatStore.byChatId(props.id)
+
+  // Fetch both users so we have displayname, ljuserid etc.
+  const u1id = resolveUserId(chat2.value?.user1)
+  const u2id = resolveUserId(chat2.value?.user2)
+  if (u1id) userStore.fetch(u1id)
+  if (u2id) userStore.fetch(u2id)
+
   modal.value.show()
 }
 

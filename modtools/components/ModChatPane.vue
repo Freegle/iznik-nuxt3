@@ -37,7 +37,10 @@
               v-if="index < messagesToShow"
               :id="chatmessage.id"
               :chatid="chatmessage.chatid"
-              :pov="chat?.user1id"
+              :pov="
+                chat?.user1id ||
+                (typeof chat?.user1 === 'number' ? chat.user1 : null)
+              "
               :last="
                 chatmessage.id === chatmessages[chatmessages.length - 1].id
               "

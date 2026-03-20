@@ -245,14 +245,22 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
   // otheruser needs to be pov-aware for User2User chats viewed by moderators
   const otheruserComputed = computed(() => {
-    // For User2User chats with pov, determine the "other" user relative to pov
+    // For User2User chats with pov, determine the "other" user relative to pov.
+    // V2 API returns user1/user2 as numeric IDs; V1 returned nested objects.
     if (pov && chat.value?.chattype === 'User2User') {
-      if (pov === chat.value?.user1id || pov === chat.value?.user1?.id) {
-        // pov is user1, so other user is user2
-        return chat.value?.user2 || userStore.byId(chat.value?.user2id)
+      const u1id =
+        chat.value?.user1id ||
+        chat.value?.user1?.id ||
+        (typeof chat.value?.user1 === 'number' ? chat.value.user1 : null)
+      const u2id =
+        chat.value?.user2id ||
+        chat.value?.user2?.id ||
+        (typeof chat.value?.user2 === 'number' ? chat.value.user2 : null)
+
+      if (pov === u1id) {
+        return u2id ? userStore.byId(u2id) : null
       } else {
-        // pov is user2, so other user is user1
-        return chat.value?.user1 || userStore.byId(chat.value?.user1id)
+        return u1id ? userStore.byId(u1id) : null
       }
     }
     // Default: use the shared otheruser
