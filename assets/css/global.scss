@@ -51,6 +51,19 @@ body {
   background-color: var(--color-page-bg, #faf9f7);
 }
 
+// Default radius for all buttons — modern design expects rounded interactive elements.
+// Input-group children are excluded (Bootstrap handles their first/last child radius).
+// Override with border-radius: 0 only when intentionally square (e.g. toolbar flush buttons).
+button:not(.input-group button):not([class*="btn"]) {
+  border-radius: var(--radius-sm, 0.375rem);
+}
+
+// Standalone images get slight rounding. Edge-to-edge images inside cards
+// inherit the card's overflow:hidden so they clip to the card radius.
+img:not([class*="avatar"]):not([class*="profile"]):not(picture img) {
+  border-radius: var(--radius-sm, 0.375rem);
+}
+
 .strike {
   text-decoration: line-through;
   text-decoration-style: double;

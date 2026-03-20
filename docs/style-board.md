@@ -96,14 +96,30 @@ Enabled globally via `$enable-rounded: true`. Four token levels:
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--radius-sm` | 0.375rem (6px) | Tags, badges, small controls |
+| `--radius-sm` | 0.375rem (6px) | Tags, badges, small controls, standalone images |
 | `--radius-md` | 0.5rem (8px) | Buttons, inputs, cards |
 | `--radius-lg` | 0.75rem (12px) | Section cards, modals |
 | `--radius-xl` | 1.25rem (20px) | Chat bubbles, hero cards, pills |
 
 Bootstrap values: `$border-radius: 0.5rem`, `$border-radius-sm: 0.375rem`, `$border-radius-lg: 0.75rem`.
 
-Social sign-in buttons use `4px` per platform brand guidelines.
+### What gets rounded vs square
+
+**Rounded** (default for interactive and container elements):
+- All buttons (global rule applies `--radius-sm` to bare `<button>` elements)
+- Form inputs, selects, textareas (via Bootstrap `$enable-rounded`)
+- Cards, modals, dropdowns, tooltips, popovers
+- Badges, pills, tags
+- Standalone images and thumbnails (`--radius-sm`)
+- Chat bubbles (`--radius-xl`)
+
+**Square or minimal** (intentional exceptions):
+- Social sign-in buttons (4px per platform brand guidelines)
+- Full-bleed images inside cards (inherit card's `overflow: hidden` clip)
+- Left-border accent bars (e.g. green bar on blockquotes)
+- Progress bars
+- Table cells
+- Input-group internal edges (Bootstrap handles first/last child radius)
 
 ---
 
