@@ -21,7 +21,7 @@
             :font-size="14"
             :sync="true"
             :labels="{ checked: 'Yes', unchecked: 'No' }"
-            color="#61AE24"
+            :color="toggleColor"
             @change="changeGiftAidToggle"
           />
         </div>
@@ -198,6 +198,9 @@ const addressStore = useAddressStore()
 const giftAidStore = useGiftAidStore()
 const authStore = useAuthStore()
 const { me } = useMe()
+
+// Brand color for toggle switch
+const toggleColor = '#61AE24'
 
 const triedToSubmit = ref(false)
 const saved = ref(false)

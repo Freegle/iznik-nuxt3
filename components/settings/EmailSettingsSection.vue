@@ -87,7 +87,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotification($event, 'email')"
             />
           </div>
@@ -99,7 +99,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotification($event, 'emailmine')"
             />
           </div>
@@ -111,7 +111,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotifChitchat"
             />
           </div>
@@ -123,7 +123,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeRelevant"
             />
           </div>
@@ -135,7 +135,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNewsletter"
             />
           </div>
@@ -147,7 +147,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeEngagement"
             />
           </div>
@@ -178,6 +178,9 @@ const { me, myGroups } = useMe()
 const emit = defineEmits(['update'])
 
 const authStore = useAuthStore()
+
+// Brand color for toggle switches
+const toggleColor = '#61AE24'
 
 // State
 const showAdvanced = ref(false)
