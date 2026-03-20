@@ -187,4 +187,3 @@ Font Awesome SVG icons via `vue-awesome`. Custom size classes exist for specific
 
 - **Typography scale**: ~45% of font-size declarations use off-scale values. Needs visual regression testing before enforcing the 7-step scale.
 - **`!important` cleanup**: 538 declarations. Requires specificity restructuring, especially in buttons.scss.
-- **Green consolidation**: 8 green variants in `_color-vars.scss` could reduce further. `$color-green--light-alt` (#00FF00), `$color-green--lighter` (#CDE4DA), and `$color-green--medium` (#84CF96) are each used in ≤3 files.

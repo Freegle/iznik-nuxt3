@@ -319,7 +319,7 @@ const deleteMessage = async () => {
     ) {
     background: $color-green--light;
     color: $color-gray--darker;
-    border: 1px solid $color-green--medium;
+    border: 1px solid $color-success-border;
     box-shadow: var(--shadow-sm);
   }
 

@@ -181,7 +181,7 @@ watch(
 </script>
 <style scoped lang="scss">
 .form__element {
-  border: 1px solid $color-green--lighter;
+  border: 1px solid $color-success-border;
   border-radius: var(--radius-sm, 0.375rem);
 }
 

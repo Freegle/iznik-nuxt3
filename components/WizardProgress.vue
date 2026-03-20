@@ -102,11 +102,11 @@ defineProps({
 }
 
 .active .wizard__dot {
-  background: $color-green--medium;
+  background: $color-success;
 }
 
 .active .wizard__dot::after {
-  background: $color-green--light-alt;
+  background: $color-green-background;
 }
 
 .wizard__info {
