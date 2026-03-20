@@ -9,7 +9,7 @@
   font-size: 12px;
   padding: 5px;
   border: 1px black;
-  border-radius: 5px;
+  border-radius: var(--radius-sm, 0.375rem);
   animation: 15s fadeIn;
   visibility: visible !important;
 }
@@ -320,7 +320,7 @@ form {
   padding: 0.5rem 1rem;
   font-size: 1.5rem;
   line-height: 2;
-  border-radius: 0.3rem;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 // Move the attribution slightly to make way for resizers if present
@@ -508,7 +508,7 @@ form {
 
 // Modals: stronger shadow
 .modal-content {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
 }
 
 // Dropdowns: medium shadow

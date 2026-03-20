@@ -211,6 +211,7 @@ function leaveGroup(callback) {
   color: $color-gray--dark;
   padding: 0;
   font-size: 0.85rem;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $color-red;

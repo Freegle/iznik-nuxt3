@@ -82,7 +82,9 @@
         <li>Dev server must be running (docker-compose up)</li>
         <li>Check firewall allows port 3002</li>
       </ul>
-      <p style="margin-top: 10px; font-size: 12px; color: #999">
+      <p
+        style="margin-top: 10px; font-size: 12px; color: var(--color-gray-400)"
+      >
         This dev app is built on CircleCI and can be installed alongside the
         production Freegle app.
       </p>
@@ -234,7 +236,7 @@ async function scanQR() {
 
 .card {
   background: $color-white;
-  border-radius: 16px;
+  border-radius: var(--radius-xl, 1.25rem);
   padding: 20px;
   margin-bottom: 16px;
   color: $color-gray--darker;
@@ -253,7 +255,7 @@ async function scanQR() {
     code {
       background: $color-gray--lighter;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: var(--radius-sm, 0.375rem);
     }
   }
 
@@ -261,7 +263,7 @@ async function scanQR() {
     font-family: monospace;
     background: $color-gray--lighter;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--radius-md, 0.5rem);
     margin-bottom: 12px;
     word-break: break-all;
   }
@@ -293,7 +295,7 @@ async function scanQR() {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   margin-bottom: 16px;
 
   .status-icon {

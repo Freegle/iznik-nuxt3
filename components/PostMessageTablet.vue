@@ -271,7 +271,7 @@ function $id(type) {
 .photo-section {
   background: $color-white;
   padding: 1.25rem;
-  box-shadow: 0 2px 8px $color-black-opacity-08;
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
 }
@@ -286,7 +286,7 @@ function $id(type) {
 .detail-card {
   background: $color-white;
   padding: 1.25rem;
-  box-shadow: 0 2px 8px $color-black-opacity-08;
+  box-shadow: var(--shadow-md);
   border-radius: var(--radius-md, 0.375rem);
 }
 
@@ -314,7 +314,7 @@ function $id(type) {
     font-size: 1.1rem;
     padding: 0.75rem 1rem;
     border: 2px solid $color-gray-4;
-    transition: border-color 0.2s;
+    transition: border-color var(--transition-normal);
 
     &:focus {
       border-color: $color-green-background;
@@ -333,7 +333,7 @@ function $id(type) {
   border: 2px solid $color-gray-4;
   resize: vertical;
   min-height: 120px;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
 
   &:focus {
     border-color: $color-green-background;

@@ -176,6 +176,7 @@ async function save() {
   .cancel-btn {
     color: $color-gray--dark;
     text-decoration: none;
+    transition: all var(--transition-fast);
 
     &:hover {
       color: $color-gray--darker;

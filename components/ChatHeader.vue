@@ -503,7 +503,7 @@ const markRead = async () => {
     display: block;
     background-color: $color-blue--x-light;
     border: 1px solid $color-gray--light;
-    box-shadow: 0px 4px 2px -2px $color-black-opacity-60 !important;
+    box-shadow: var(--shadow-lg) !important;
     padding: 0;
   }
 }

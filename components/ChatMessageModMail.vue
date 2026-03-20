@@ -187,7 +187,7 @@ async function repost() {
 <style scoped lang="scss">
 .chatMessage {
   border: 1px solid $color-gray--light;
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding-top: 2px;
   padding-bottom: 2px;
   padding-left: 4px;

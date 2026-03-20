@@ -307,7 +307,7 @@ const brokenProfileImage = (e) => {
   background-color: $color-white;
   color: $color-success;
   padding: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .ProfileImage__moderator--sm {

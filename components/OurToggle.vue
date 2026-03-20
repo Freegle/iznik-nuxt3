@@ -71,16 +71,16 @@ watch(currentValue, (newVal) => {
 .green {
   --toggle-bg-on: #{$color-green-background};
   --toggle-border-on: #{$color-green-background};
-  --toggle-bg-off: #e0e0e0;
-  --toggle-border-off: #e0e0e0;
+  --toggle-bg-off: #{$color-gray-4};
+  --toggle-border-off: #{$color-gray-4};
 }
 
 // ModTools green variant
 .modgreen {
-  --toggle-bg-on: #338808;
-  --toggle-border-on: #338808;
-  --toggle-bg-off: #e0e0e0;
-  --toggle-border-off: #e0e0e0;
+  --toggle-bg-on: #{$color-success};
+  --toggle-border-on: #{$color-success};
+  --toggle-bg-off: #{$color-gray-4};
+  --toggle-border-off: #{$color-gray-4};
 }
 
 // Size variants
@@ -100,7 +100,7 @@ watch(currentValue, (newVal) => {
 :deep(.toggle-container) {
   border: none !important;
   border-radius: 999px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 
   &:focus {
     box-shadow: 0 0 0 2px rgba($color-green-background, 0.2);
@@ -132,12 +132,12 @@ watch(currentValue, (newVal) => {
   border-color: var(--toggle-border-off);
   padding-left: 2rem;
   padding-right: 0.5rem;
-  color: #666;
+  color: $color-gray--dark;
 }
 
 :deep(.toggle-handle) {
   background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 :deep(.toggle-handle-on),

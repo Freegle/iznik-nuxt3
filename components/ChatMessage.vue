@@ -259,7 +259,7 @@ const deleteMessage = async () => {
 
 .selected {
   border: 1px solid $color-blue--bright;
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -271,7 +271,7 @@ const deleteMessage = async () => {
 }
 
 :deep(.card) {
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
 }
 
 :deep(.chatMessage) {
@@ -282,7 +282,7 @@ const deleteMessage = async () => {
   // Only apply bubble styling to simple messages without cards
   &:not(:has(.messagecard)) {
     border: none;
-    border-radius: 20px;
+    border-radius: var(--radius-xl, 1.25rem);
     padding: 8px 14px;
     max-width: 85%;
 
@@ -295,20 +295,20 @@ const deleteMessage = async () => {
   // Messages with cards get simpler styling
   &:has(.messagecard) {
     border: 1px solid $color-gray--light;
-    border-radius: 10px;
+    border-radius: var(--radius-lg, 0.75rem);
     padding: 8px;
     max-width: 100%;
   }
 }
 
 :deep(.chatMessage__owner) {
-  background-color: #ffffff;
-  color: #000000;
+  background-color: $color-white;
+  color: $color-black;
 
   // Only add border/shadow to simple messages
   &:not(:has(.messagecard)) {
     border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -320,7 +320,7 @@ const deleteMessage = async () => {
     background: $color-green--light;
     color: $color-gray--darker;
     border: 1px solid $color-green--medium;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
   }
 
   .chatMessage {

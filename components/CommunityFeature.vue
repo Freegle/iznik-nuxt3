@@ -156,7 +156,7 @@ function showModal() {
   font-weight: 500;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 
   &:hover {
     background: darken($color-success, 8%);

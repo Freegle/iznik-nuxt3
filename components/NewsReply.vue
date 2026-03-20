@@ -720,6 +720,7 @@ function showReplyPhotoModal() {
   :deep(.btn) {
     padding: 0.25rem 0.375rem;
     line-height: 1;
+    transition: all var(--transition-fast);
 
     &:hover {
       background: $color-gray--lighter;
@@ -740,6 +741,7 @@ function showReplyPhotoModal() {
     background: transparent;
     border: none;
     cursor: pointer;
+    transition: all var(--transition-fast);
 
     &:hover {
       background: $color-gray--lighter;
@@ -780,7 +782,8 @@ function showReplyPhotoModal() {
   font-size: 0.85rem;
   line-height: 1.2;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 
   /* Smaller on xs screens */
   @include media-breakpoint-down(xs) {
@@ -823,7 +826,8 @@ function showReplyPhotoModal() {
   font-weight: 400 !important;
   text-decoration: none !important;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
 
   /* Respect Bootstrap display classes but use flexbox when visible */
   &.d-sm-inline {
@@ -861,8 +865,8 @@ function showReplyPhotoModal() {
 
 .reply-textarea {
   flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid $color-gray-4;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 0.5rem;
   font-size: 0.9rem;
   min-height: 32px;
@@ -887,11 +891,11 @@ function showReplyPhotoModal() {
   padding: 0.375rem 0.625rem;
   background: $color-gray--lighter;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);

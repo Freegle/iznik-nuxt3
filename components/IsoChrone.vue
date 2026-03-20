@@ -411,6 +411,7 @@ watch(minutes, (newVal) => {
   color: $color-gray--darker;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);
@@ -452,7 +453,7 @@ watch(minutes, (newVal) => {
   border: 1px solid $color-gray-3;
   color: $color-gray--dark;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);

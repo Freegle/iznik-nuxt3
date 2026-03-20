@@ -47,7 +47,7 @@ if (process.client) {
 
 useHead({
   bodyAttrs: {
-    style: 'background-color: #f8f9fa',
+    style: 'background-color: var(--color-gray-50)',
   },
 })
 

@@ -864,7 +864,7 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 2px;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-top: 1rem;
   text-align: center;
 }
@@ -872,14 +872,14 @@ onMounted(async () => {
 .birthday-title {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px $color-black-opacity-10;
 }
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: #4a5568;
+  color: $color-gray--dark;
   margin-bottom: 0;
 }
 
@@ -890,13 +890,13 @@ onMounted(async () => {
 .cta-heading {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .cta-text {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: $color-gray--dark;
   margin-bottom: 2rem;
 }
 
@@ -952,13 +952,13 @@ onMounted(async () => {
 .section-title {
   font-size: 3rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1rem;
 }
 
 .section-subtitle {
   font-size: 1.3rem;
-  color: #4a5568;
+  color: $color-gray--dark;
 }
 
 .impact-card {
@@ -982,7 +982,8 @@ onMounted(async () => {
   padding: 2rem;
   background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
   border-radius: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-slow),
+    box-shadow var(--transition-slow);
 }
 
 .stat-card:hover {
@@ -1010,24 +1011,24 @@ onMounted(async () => {
 .stat-number {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 1rem;
-  color: #4a5568;
+  color: $color-gray--dark;
   margin: 0;
 }
 
 .celebration-message {
-  background: linear-gradient(135deg, #2d3748, #1a202c);
+  background: linear-gradient(135deg, $color-gray--darker, #1a202c);
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
   color: $color-white;
   box-shadow: 0 15px 40px rgba(45, 55, 72, 0.4);
-  border: 2px solid #4a5568;
+  border: 2px solid $color-gray--dark;
 }
 
 .message-content h3 {

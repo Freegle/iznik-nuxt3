@@ -311,7 +311,7 @@ async function approve(callback) {
 /* Modern message card styling */
 .message-card {
   overflow: hidden;
-  box-shadow: 0 2px 8px $color-black-opacity-12;
+  box-shadow: var(--shadow-md);
   background: $color-white;
   margin-bottom: 1rem;
 }
@@ -478,7 +478,7 @@ async function approve(callback) {
   background: $color-white;
   margin-bottom: 1rem;
   border-left: 3px solid $color-gray-3;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
 
   &.completed {
     border-left-color: $color-success;
@@ -538,7 +538,7 @@ async function approve(callback) {
   color: $color-gray--darker;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
   text-align: left;
 
   &:hover {

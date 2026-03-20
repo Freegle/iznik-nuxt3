@@ -182,7 +182,7 @@ watch(
 <style scoped lang="scss">
 .form__element {
   border: 1px solid $color-green--lighter;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .date__label {

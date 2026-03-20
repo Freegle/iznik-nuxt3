@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
   background: linear-gradient(
     180deg,
     $color-green--bg-gradient 0%,
-    #ffffff 100%
+    $color-white 100%
   );
 }
 
@@ -240,7 +240,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
 }
 
 .slogan-title {

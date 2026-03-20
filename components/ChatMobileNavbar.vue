@@ -473,8 +473,8 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.15s ease;
+  border-radius: var(--radius-md, 0.5rem);
+  transition: background-color var(--transition-fast);
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.15);
@@ -503,7 +503,7 @@ onBeforeUnmount(() => {
   width: 36px;
   height: 36px;
   background: rgba(255, 255, 255, 0.9);
-  border: 2px solid #dc3545;
+  border: 2px solid $color-red;
   border-radius: 50%;
   cursor: pointer;
   margin-right: 8px;
@@ -511,7 +511,7 @@ onBeforeUnmount(() => {
 }
 
 .navbar-mark-read-icon {
-  color: #dc3545;
+  color: $color-red;
   font-size: 1rem;
 }
 
@@ -527,7 +527,7 @@ onBeforeUnmount(() => {
 }
 
 .navbar-avatar {
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-slow);
 }
 
 .other-user-group {
@@ -536,7 +536,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   flex: 1;
   padding: 4px 8px;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   background: rgba(255, 255, 255, 0.1);
   margin: 0 8px;
   max-width: calc(100% - 120px);
@@ -561,10 +561,10 @@ onBeforeUnmount(() => {
   gap: 12px;
   padding: 12px 14px;
   margin-bottom: 12px;
-  background: #f0f4f8;
-  border: 1px solid #d0d8e0;
+  background: $color-gray--lighter;
+  border: 1px solid $color-gray-4;
   font-size: 0.9rem;
-  color: #333;
+  color: $color-gray--darker;
 }
 
 .profile-hint-btn {
@@ -572,11 +572,12 @@ onBeforeUnmount(() => {
   color: white;
   border: none;
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-green-background, 5%);
@@ -596,18 +597,18 @@ onBeforeUnmount(() => {
 
 :deep(.userOptions .dropdown-menu) {
   background: white !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border: 1px solid $color-gray--light !important;
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-md);
   padding: 0;
   min-width: 160px;
   margin-top: 0.25rem;
 
   .dropdown-item {
     background: white !important;
-    color: #333 !important;
+    color: $color-gray--darker !important;
     padding: 0.6rem 1rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid $color-gray-3;
 
     &:last-child {
       border-bottom: none;
@@ -615,7 +616,7 @@ onBeforeUnmount(() => {
 
     &:hover,
     &:focus {
-      background: #f8f8f8 !important;
+      background: $color-gray--lighter !important;
     }
   }
 }
@@ -629,15 +630,15 @@ onBeforeUnmount(() => {
 
 .menu-text {
   font-size: 0.9rem;
-  color: #333;
+  color: $color-gray--darker;
 }
 
 /* Profile popover styling */
 :deep(.profile-popover) {
   max-width: calc(100vw - 24px);
   width: 400px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-lg);
 
   .popover-body {
     padding: 12px;
@@ -765,8 +766,8 @@ onBeforeUnmount(() => {
   font-size: 0.65rem;
   font-weight: 500;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.15s ease;
+  border-radius: var(--radius-md, 0.5rem);
+  transition: background-color var(--transition-fast);
 
   &:hover {
     background-color: $color-gray--lighter;
@@ -777,17 +778,17 @@ onBeforeUnmount(() => {
   }
 
   &--danger {
-    color: #c62828;
+    color: var(--color-danger);
   }
 
   &--mark-read {
     position: relative;
-    color: #dc3545;
-    border: 1px solid #dc3545;
+    color: $color-red;
+    border: 1px solid $color-red;
     background: rgba(220, 53, 69, 0.05);
 
     .action-icon {
-      color: #dc3545;
+      color: $color-red;
     }
   }
 }

@@ -437,6 +437,6 @@ onMounted(async () => {
 }
 
 .text-danger {
-  color: #dc3545;
+  color: $color-red;
 }
 </style>

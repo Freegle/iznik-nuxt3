@@ -1398,11 +1398,12 @@ onUnmounted(() => {
   flex-shrink: 0;
   width: 50px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
   border: 2px solid $color-white-opacity-50;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color var(--transition-normal),
+    transform var(--transition-normal);
 
   &.active {
     border-color: $color-white;
@@ -1437,6 +1438,7 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 12;
   font-size: 1.2rem;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-black-opacity-70;
@@ -1465,7 +1467,8 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 100;
   font-size: 1.2rem;
-  box-shadow: 0 2px 8px $color-black-opacity-30;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-gray--dark;
@@ -1574,7 +1577,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &:hover {
     background: $color-white-opacity-50;
@@ -1649,7 +1652,7 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: $color-gray--light;
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
 
     &:hover {
       background: $color-gray--base;
@@ -1701,9 +1704,10 @@ onUnmounted(() => {
   max-width: 60%;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 8px $color-black-opacity-15;
+  box-shadow: var(--shadow-md);
   border: 1px solid $color-gray-3;
   cursor: pointer;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-white;
@@ -1840,7 +1844,7 @@ onUnmounted(() => {
   font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-gray-3;
@@ -1879,6 +1883,7 @@ onUnmounted(() => {
   font-weight: 500;
   color: $color-gray--base;
   text-decoration: none;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $color-gray--dark;
@@ -1900,6 +1905,7 @@ onUnmounted(() => {
   border: 1px solid $color-gray--light;
   border-left: 3px solid $color-info-fg;
   cursor: pointer;
+  transition: all var(--transition-fast);
 
   &:hover {
     text-decoration: none;
@@ -2169,7 +2175,7 @@ onUnmounted(() => {
     padding: 0.5rem 1rem;
     background: rgba($color-orange--dark, 0.08);
     border: 1px solid rgba($color-orange--dark, 0.25);
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 
@@ -2203,7 +2209,7 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 10001;
   font-size: 1.25rem;
-  box-shadow: 0 2px 8px $color-black-opacity-20;
+  box-shadow: var(--shadow-md);
 
   &:active {
     background: $color-white;
@@ -2233,8 +2239,8 @@ onUnmounted(() => {
   text-align: center;
   margin-left: 1rem;
   margin-right: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px $color-black-opacity-10;
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-md);
 }
 </style>
 

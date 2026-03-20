@@ -140,6 +140,7 @@ const displayedJobs = computed(() => {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
 
 .jobs-slot {
   width: 100%;
@@ -162,7 +163,7 @@ const displayedJobs = computed(() => {
 
 .jobs-slot-icon {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: $color-gray--normal;
 }
 
 .jobs-slot-more {
@@ -174,6 +175,7 @@ const displayedJobs = computed(() => {
   font-size: 0.75rem;
   font-weight: 400;
   text-decoration: none;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $gray-800;

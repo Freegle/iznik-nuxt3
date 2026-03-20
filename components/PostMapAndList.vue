@@ -616,6 +616,7 @@ function searched() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .postcode {
   position: absolute;
@@ -626,7 +627,7 @@ function searched() {
 
 .community__text {
   /* Need to override the h2 as it has higher specificity */
-  color: #212529 !important;
+  color: $color-gray--darker !important;
 }
 
 .shrink {

@@ -707,8 +707,8 @@ if (me.value) {
 
 .composer-card {
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -736,12 +736,13 @@ if (me.value) {
 }
 
 .composer-textarea {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid $color-gray-4;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 0.875rem;
   font-size: 1rem;
   resize: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
 
   &:focus {
     border-color: $color-green-background;
@@ -751,7 +752,7 @@ if (me.value) {
 }
 
 .uploaded-preview {
-  border-radius: 2px;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .composer-actions {
@@ -765,11 +766,11 @@ if (me.value) {
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 0.375rem);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   border: none;
 
   span {
@@ -821,7 +822,7 @@ if (me.value) {
   margin-top: 0;
   background: white;
   padding: 0.5rem 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -847,8 +848,8 @@ if (me.value) {
 .filter-select {
   flex: 1;
   min-width: 150px;
-  border-radius: 3px;
-  border-color: #e0e0e0;
+  border-radius: var(--radius-sm, 0.375rem);
+  border-color: $color-gray-4;
   font-size: 0.9rem;
 
   &:focus {
@@ -881,9 +882,9 @@ if (me.value) {
 
   // Modernize post cards on mobile
   :deep(.card) {
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
     border: none;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 0.75rem;
     overflow: hidden;
   }
@@ -921,12 +922,12 @@ if (me.value) {
 
   // Clean up reply input area
   :deep(.input-group) {
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
     overflow: hidden;
 
     .form-control {
-      border-radius: 4px;
-      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-sm, 0.375rem);
+      border: 1px solid $color-gray-4;
       font-size: 0.9rem;
 
       &:focus {
@@ -966,7 +967,7 @@ if (me.value) {
 
 .up-to-date-card {
   margin: 0.5rem 0;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-sm);
 }
 </style>

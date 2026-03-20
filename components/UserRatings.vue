@@ -238,6 +238,7 @@ const onModalRated = () => {
 <style scoped lang="scss">
 .btn {
   margin: 1px;
+  transition: all var(--transition-fast);
 
   &.mine,
   &:hover {

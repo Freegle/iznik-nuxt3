@@ -684,11 +684,11 @@ async function unmute() {
   padding: 0.375rem 0.625rem;
   background: $color-gray--lighter;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);

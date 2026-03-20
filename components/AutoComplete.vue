@@ -723,10 +723,10 @@ function close() {
 .showAll-transition,
 .autocomplete ul,
 .autocomplete ul li a {
-  transition: all 0.3s ease-out;
-  -moz-transition: all 0.3s ease-out;
-  -webkit-transition: all 0.3s ease-out;
-  -o-transition: all 0.3s ease-out;
+  transition: all var(--transition-slow) ease-out;
+  -moz-transition: all var(--transition-slow) ease-out;
+  -webkit-transition: all var(--transition-slow) ease-out;
+  -o-transition: all var(--transition-slow) ease-out;
 }
 
 .autocomplete ul {
@@ -752,6 +752,7 @@ function close() {
 
 .autocomplete-anchor-text {
   color: $color-gray--dark !important;
+  transition: all var(--transition-fast);
 }
 
 .autocomplete-anchor-text span {
@@ -823,12 +824,11 @@ input[invalid='true'] {
 
 .input-group.autocomplete-wrap {
   border: 1px solid $color-gray-4;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 .autocomplete-parent-focus .input-group {
   border: 1px solid $color-gray-4;
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-md, 0.5rem) 0 0 var(--radius-md, 0.5rem);
 }
 .input-group.autocomplete-wrap input,
 .input-group-append button {
@@ -840,13 +840,13 @@ input[invalid='true'] {
 }
 
 .searchbutton {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0;
 }
 
 .invalid {
   box-shadow: 0 0 0 0.2rem $color-red;
   border: none !important;
-  border-radius: 4px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 input[invalid='true'] {
   box-shadow: none;

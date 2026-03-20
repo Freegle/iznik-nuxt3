@@ -80,7 +80,7 @@ if (volunteerOpportunities.length > 0) {
 .summary-card {
   background: white;
   padding: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .summary-header {

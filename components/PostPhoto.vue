@@ -191,7 +191,7 @@ function rotateRight(e) {
   position: relative;
 
   :deep(img) {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-sm);
   }
 
   &.primary {
@@ -233,7 +233,7 @@ function rotateRight(e) {
   font-size: 10px;
   font-weight: bold;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 0.375rem);
   z-index: 10;
   pointer-events: none;
 }
@@ -241,14 +241,14 @@ function rotateRight(e) {
 /* Control button styling */
 .clickme {
   background: rgba(0, 0, 0, 0.6);
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   width: 28px;
   height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--transition-fast);
 
   &:hover {
     background: rgba(0, 0, 0, 0.8);

@@ -457,8 +457,8 @@ function goBack(index) {
 
 .help-flow {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -498,10 +498,10 @@ function goBack(index) {
   padding: 0.875rem 1rem;
   background: $color-gray--lighter;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   text-align: left;
 
   &:hover {
@@ -527,7 +527,7 @@ function goBack(index) {
   .chevron {
     color: $color-gray--dark;
     font-size: 0.8rem;
-    transition: transform 0.2s;
+    transition: transform var(--transition-normal);
   }
 
   &--back {
@@ -568,11 +568,11 @@ function goBack(index) {
   background: $color-green-background;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   font-size: 0.95rem;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-normal);
 
   &:hover {
     background: darken($color-green-background, 8%);
@@ -622,7 +622,8 @@ function goBack(index) {
   color: $color-blue--bright;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
+  transition: all var(--transition-fast);
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
@@ -640,8 +641,8 @@ function goBack(index) {
 
 .contact-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -670,7 +671,7 @@ function goBack(index) {
 
   .expand-icon {
     color: $color-gray--dark;
-    transition: transform 0.2s;
+    transition: transform var(--transition-normal);
   }
 
   &:hover .expand-icon {
@@ -692,10 +693,10 @@ function goBack(index) {
   padding: 0.75rem 1rem;
   background: $color-gray--lighter;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &:hover {
     border-color: $color-green-background;
@@ -731,7 +732,7 @@ function goBack(index) {
 .support-card {
   padding: 1rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .support-note {

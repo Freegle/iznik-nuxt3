@@ -996,7 +996,7 @@ function dragEnd(e) {
     padding: 0.5rem 1rem;
     font-size: 1rem !important;
     line-height: 1.25;
-    border-radius: 0.3rem;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 

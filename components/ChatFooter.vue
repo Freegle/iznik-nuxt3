@@ -984,7 +984,7 @@ onMounted(() => {
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 
   &:hover {
     background-color: darken($color-gray--lighter, 5%);
@@ -1064,7 +1064,7 @@ onMounted(() => {
   padding: 10px 12px;
   font-size: 0.9rem;
   resize: none;
-  background-color: #fafafa;
+  background-color: var(--color-gray-50);
 
   &:focus {
     outline: none;
@@ -1088,8 +1088,8 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     padding: 4px 6px;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
+    border-radius: var(--radius-sm, 0.375rem);
+    transition: background-color var(--transition-normal);
     cursor: pointer;
     min-width: 44px;
 

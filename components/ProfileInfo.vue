@@ -330,6 +330,7 @@ const replyTimeText = computed(() => {
   color: $color-gray--base;
   text-align: center;
   text-decoration: none;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $color-gray--dark;
@@ -442,7 +443,7 @@ const replyTimeText = computed(() => {
   justify-content: center;
   flex: 1;
   padding: 0.6rem 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .stat-offers {
@@ -551,11 +552,11 @@ const replyTimeText = computed(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #fff3cd;
+  background: $color-yellow-1;
   border-left: 3px solid $color-warning;
   margin-bottom: 1rem;
   font-size: 0.85rem;
-  color: #856404;
+  color: $color-yellow-3;
 }
 
 // Posts Section

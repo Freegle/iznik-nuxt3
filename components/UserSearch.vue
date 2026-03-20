@@ -44,7 +44,7 @@ async function deleteSearch() {
   display: inline-flex;
   align-items: center;
   background: $color-gray--lighter;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   padding: 6px 10px;
   gap: 8px;
 }
@@ -77,6 +77,7 @@ async function deleteSearch() {
   cursor: pointer;
   padding: 0;
   border-radius: 50%;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-gray--light;

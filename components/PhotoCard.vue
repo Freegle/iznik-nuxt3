@@ -177,7 +177,7 @@ const shortQualityLabel = computed(() => {
   overflow: hidden;
   background: $color-gray--lighter;
   border: 2px solid $color-gray-3;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   cursor: pointer;
 }
 
@@ -194,7 +194,7 @@ const shortQualityLabel = computed(() => {
   border-color: $color-green-background;
   border-width: 3px;
   z-index: 10;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   transform: scale(1.05);
 }
 
@@ -228,12 +228,12 @@ const shortQualityLabel = computed(() => {
   height: 36px;
   border: none;
   background: rgba(0, 0, 0, 0.6);
-  color: #fff;
+  color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
   z-index: 5;
   font-size: 1rem;
 
@@ -289,12 +289,12 @@ const shortQualityLabel = computed(() => {
 
 .circle {
   fill: none;
-  stroke: #fff;
+  stroke: $color-white;
   stroke-width: 3;
   stroke-linecap: round;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
-  transition: stroke-dasharray 0.3s ease;
+  transition: stroke-dasharray var(--transition-slow);
 }
 
 .progress-text {
@@ -302,7 +302,7 @@ const shortQualityLabel = computed(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: $color-white;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -323,7 +323,7 @@ const shortQualityLabel = computed(() => {
 }
 
 .error-message {
-  color: #fff;
+  color: $color-white;
   font-size: 0.7rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -337,7 +337,7 @@ const shortQualityLabel = computed(() => {
 .error-btn {
   padding: 0.25rem 0.5rem;
   border: none;
-  background: #fff;
+  background: $color-white;
   font-size: 0.65rem;
   color: $color-gray--darker;
   cursor: pointer;
@@ -370,11 +370,11 @@ const shortQualityLabel = computed(() => {
 
 .quality-critical {
   background: rgba(220, 53, 69, 0.9);
-  color: #fff;
+  color: $color-white;
 }
 
 .quality-warning {
   background: rgba(255, 193, 7, 0.9);
-  color: #000;
+  color: $color-black;
 }
 </style>

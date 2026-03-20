@@ -729,7 +729,7 @@ onBeforeUnmount(() => {
 .featured-photo {
   margin-bottom: 1rem;
   max-width: 280px;
-  transition: outline 0.15s ease;
+  transition: outline var(--transition-fast);
 }
 
 .drop-target-active {
@@ -745,7 +745,7 @@ onBeforeUnmount(() => {
 /* Fade transition for featured photo */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-slow);
 }
 
 .fade-enter-from,
@@ -776,11 +776,12 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   width: 50px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
   border: 2px solid $color-black-opacity-15;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color var(--transition-normal),
+    transform var(--transition-normal);
   position: relative;
 
   &:hover {
@@ -823,11 +824,11 @@ onBeforeUnmount(() => {
 .photo-card {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   overflow: hidden;
   background: $color-gray--lighter;
   border: 2px solid $color-gray-3;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
 .photo-card:active {
@@ -891,7 +892,7 @@ onBeforeUnmount(() => {
   padding: 0.25rem 0.5rem;
   border: none;
   background: $color-white;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   font-size: 0.65rem;
   color: $color-gray--darker;
   cursor: pointer;
@@ -925,7 +926,7 @@ onBeforeUnmount(() => {
   stroke-linecap: round;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
-  transition: stroke-dasharray 0.3s ease;
+  transition: stroke-dasharray var(--transition-slow);
 }
 
 .progress-text {
@@ -983,7 +984,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 }
 
 .delete-button:active {
@@ -1053,7 +1054,7 @@ onBeforeUnmount(() => {
   background: none;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
   font-size: 1rem;
   color: $color-gray--darker;
 }

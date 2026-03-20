@@ -132,7 +132,7 @@ useHead(
   gap: 1rem;
   padding: 1.25rem;
   background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 
   h2 {
     font-size: 1.125rem;
@@ -154,7 +154,11 @@ useHead(
 }
 
 .disclaimer__section--alert {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  background: linear-gradient(
+    135deg,
+    $color-red--bg-gradient 0%,
+    $color-white 100%
+  );
   border-left: 3px solid $danger;
   border-radius: var(--radius-md, 0.5rem);
 }

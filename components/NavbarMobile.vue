@@ -308,6 +308,7 @@ const me = computed(() => useAuthStore().user)
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
 #navbar-mobile {
   // Set all children to display: none except the last one.  This means that normally we'll display the navbar
@@ -327,7 +328,7 @@ const me = computed(() => useAuthStore().user)
     $color-green-background 0%,
     darken($color-green-background, 5%) 100%
   ) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
   padding: 0.5rem 0.75rem;
   min-height: $navbar-mobile-chat-height;
 
@@ -351,8 +352,8 @@ const me = computed(() => useAuthStore().user)
   align-items: stretch;
   justify-content: space-around;
   background: white;
-  border-top: 1px solid #e0e0e0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid $color-gray-4;
+  box-shadow: var(--shadow-md);
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   height: 67px;
   box-sizing: border-box;
@@ -412,18 +413,18 @@ const me = computed(() => useAuthStore().user)
 
 :deep(.userOptions .dropdown-menu) {
   background: white !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border: 1px solid $color-gray--light !important;
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-md);
   padding: 0;
   min-width: 160px;
   margin-top: 0.25rem;
 
   .dropdown-item {
     background: white !important;
-    color: #333 !important;
+    color: $color-gray--darker !important;
     padding: 0.6rem 1rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid $color-gray-3;
 
     &:last-child {
       border-bottom: none;
@@ -431,7 +432,7 @@ const me = computed(() => useAuthStore().user)
 
     &:hover,
     &:focus {
-      background: #f8f8f8 !important;
+      background: $color-gray--lighter !important;
     }
   }
 }
@@ -445,7 +446,7 @@ const me = computed(() => useAuthStore().user)
 
 .menu-text {
   font-size: 0.9rem;
-  color: #333;
+  color: $color-gray--darker;
 }
 
 .navpost {
@@ -467,8 +468,8 @@ const me = computed(() => useAuthStore().user)
   padding: 8px 12px;
   margin-left: 4px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.15s ease;
+  border-radius: var(--radius-md, 0.5rem);
+  transition: background-color var(--transition-fast);
   text-decoration: none;
 
   &:hover {
@@ -496,7 +497,7 @@ const me = computed(() => useAuthStore().user)
 
   .navpost {
     opacity: 0;
-    transition: opacity 0.15s ease-out;
+    transition: opacity var(--transition-fast) ease-out;
   }
 }
 
@@ -506,7 +507,7 @@ const me = computed(() => useAuthStore().user)
 
   .navpost {
     opacity: 1;
-    transition: opacity 0.2s ease-in 0.1s;
+    transition: opacity var(--transition-normal) ease-in 0.1s;
   }
 }
 

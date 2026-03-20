@@ -409,7 +409,7 @@ function validateAndNext() {
   margin-bottom: 1.5rem;
   padding: 0.75rem;
   background: $color-gray--lighter;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
 }
 
 .photo-thumb {
@@ -434,7 +434,7 @@ function validateAndNext() {
 .photo-more {
   width: 50px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   background: $color-gray-3;
   display: flex;
   align-items: center;
@@ -456,7 +456,7 @@ function validateAndNext() {
   justify-content: center;
   color: $color-blue--bright;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 }
 
 .edit-photos-btn:active {
@@ -480,7 +480,7 @@ function validateAndNext() {
   justify-content: center;
   color: $color-red;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 }
 
 .delete-ai-btn:active {

@@ -157,7 +157,7 @@ onMounted(() => {
   gap: 12px;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   &:hover {
@@ -210,7 +210,7 @@ onMounted(() => {
   color: white;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: var(--radius-md, 0.5rem);
   display: flex;
   align-items: center;
   justify-content: center;

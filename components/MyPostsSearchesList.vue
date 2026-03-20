@@ -50,10 +50,10 @@ const searches = computed(() => {
 
 .searches-section {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 16px;
   margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .searches-header {
@@ -90,9 +90,10 @@ const searches = computed(() => {
   padding: 10px 20px;
   background: $color-secondary;
   color: white;
-  border-radius: 25px;
+  border-radius: var(--radius-xl, 1.25rem);
   text-decoration: none;
   font-weight: 500;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: darken($color-secondary, 10%);

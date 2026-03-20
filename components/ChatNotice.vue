@@ -72,7 +72,7 @@ const iconName = computed(() => {
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   margin: 8px;
   font-size: 0.85rem;
   line-height: 1.4;
@@ -115,8 +115,8 @@ const iconName = computed(() => {
   background: transparent;
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.2s;
-  border-radius: 4px;
+  transition: opacity var(--transition-normal);
+  border-radius: var(--radius-sm, 0.375rem);
 
   &:hover {
     opacity: 1;

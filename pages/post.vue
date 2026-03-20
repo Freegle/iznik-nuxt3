@@ -91,7 +91,11 @@ function goto(path) {
 
 .post-choose-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(
+    180deg,
+    $color-gray--lighter 0%,
+    $color-gray-3 100%
+  );
   padding-bottom: 2rem;
 }
 
@@ -103,7 +107,7 @@ function goto(path) {
 .page-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
+  color: $color-gray--darker;
   margin: 0;
 }
 
@@ -118,22 +122,23 @@ function goto(path) {
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--radius-xl, 1.25rem);
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-normal),
+    box-shadow var(--transition-normal);
 
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
   }
 }
 
 .icon-wrapper {
   width: 52px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: var(--radius-xl, 1.25rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -171,19 +176,19 @@ function goto(path) {
 .option-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #333;
+  color: $color-gray--darker;
   margin: 0 0 0.25rem;
 }
 
 .option-description {
   font-size: 0.8rem;
-  color: #666;
+  color: $color-gray--dark;
   margin: 0;
   line-height: 1.3;
 }
 
 .chevron {
-  color: #ccc;
+  color: $color-gray--light;
   font-size: 1rem;
   flex-shrink: 0;
 }

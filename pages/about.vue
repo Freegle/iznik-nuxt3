@@ -399,7 +399,7 @@ const board = computed(() => teamStore.getTeam('Board')?.members)
 :deep(.card) {
   border: none;
   background: $white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 0.5rem;
 
   .card-header {
@@ -420,7 +420,7 @@ const board = computed(() => teamStore.getTeam('Board')?.members)
     background: $white;
     border: none;
     text-align: left;
-    transition: background-color 0.15s ease;
+    transition: background-color var(--transition-fast);
 
     &:hover {
       background: $gray-100;

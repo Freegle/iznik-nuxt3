@@ -178,7 +178,7 @@ onMounted(() => {
 
 .cardwidth {
   width: 100vw;
-  background-color: #f7f5ef;
+  background-color: var(--color-gray-100);
 
   @include media-breakpoint-up(md) {
     width: 50vw;
@@ -191,7 +191,7 @@ onMounted(() => {
 
 p,
 li {
-  color: #343841;
+  color: var(--color-gray-700);
 }
 
 :deep(p, li) {

@@ -1111,8 +1111,8 @@ $color-apple: #000000;
 
 .social-button--google-app {
   border: 1px solid $color-gray--light;
-  background-color: #fff;
-  color: #3c4043;
+  background-color: $color-white;
+  color: var(--color-gray-700);
 }
 
 :deep(.social-button--google > div) {

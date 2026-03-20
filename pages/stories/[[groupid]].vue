@@ -156,7 +156,7 @@ const changeGroup = function (newval) {
   background: white;
   padding: 1rem;
   margin-bottom: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .page-description {

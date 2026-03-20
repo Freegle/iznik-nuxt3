@@ -410,7 +410,7 @@ onMounted(() => {
 .mobile-body {
   background: $color-white;
   padding: 1rem;
-  box-shadow: 0 1px 4px $color-black-opacity-08;
+  box-shadow: var(--shadow-sm);
 }
 
 .mobile-section {
@@ -447,7 +447,7 @@ onMounted(() => {
   border: none;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background var(--transition-fast);
 
   &:active {
     transform: scale(0.98);

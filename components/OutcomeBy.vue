@@ -325,7 +325,7 @@ select {
 .layout {
   display: grid;
   border: 1px solid $color-gray--faded;
-  border-radius: 5px;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 10px;
 
   grid-template-rows: auto auto auto;

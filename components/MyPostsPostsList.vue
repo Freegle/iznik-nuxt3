@@ -248,7 +248,7 @@ const upcomingTrysts = computed(() => {
   min-height: 300px;
   padding: 40px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   opacity: 0;
   animation: fadeIn 0.2s ease-in forwards;
   animation-delay: 0.3s;
@@ -272,7 +272,7 @@ const upcomingTrysts = computed(() => {
   color: $color-success;
   font-weight: 500;
   font-size: 0.9rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .old-posts-toggle {
@@ -291,8 +291,8 @@ const upcomingTrysts = computed(() => {
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 
   &:hover {
     background: $color-gray--lighter;
@@ -302,10 +302,10 @@ const upcomingTrysts = computed(() => {
 
 .collections-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   border-left: 4px solid $color-blue--bright;
 }
 
@@ -362,7 +362,7 @@ const upcomingTrysts = computed(() => {
 .loading-placeholder {
   background: white;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .loading-placeholder::before {
@@ -386,7 +386,7 @@ const upcomingTrysts = computed(() => {
   justify-content: center;
   padding: 48px 24px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .empty-icon {

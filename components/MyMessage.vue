@@ -754,7 +754,7 @@ onMounted(async () => {
   background: white;
   border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .photo-section {
@@ -894,7 +894,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .promised-banner-text {
@@ -909,7 +909,7 @@ onMounted(async () => {
   padding: 2px 10px;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 
   &:hover {
     background: darken($color-orange--dark, 10%);
@@ -934,7 +934,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &:hover {
     background: rgba(255, 255, 255, 0.4);
@@ -1028,6 +1028,7 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
   font-size: 0.6rem;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: rgba(255, 255, 255, 0.8);
@@ -1063,11 +1064,11 @@ onMounted(async () => {
   gap: 4px;
   padding: 6px 12px;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &--primary {
     background: $color-green-background;
@@ -1118,6 +1119,7 @@ onMounted(async () => {
   cursor: pointer;
   background: lighten($color-green-background, 45%);
   border-left: 4px solid $color-green-background;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: lighten($color-green-background, 40%);
@@ -1156,7 +1158,7 @@ onMounted(async () => {
     height: 32px !important;
     border: 2px solid white;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     display: block !important;
   }
@@ -1167,7 +1169,7 @@ onMounted(async () => {
     display: block !important;
     border: 2px solid white;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
   }
 
@@ -1187,7 +1189,7 @@ onMounted(async () => {
     min-height: 32px !important;
     border: 2px solid white;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
 
     svg {
@@ -1211,7 +1213,7 @@ onMounted(async () => {
   color: white;
   margin-left: 4px;
   border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   z-index: 10;
   position: relative;
 }
@@ -1223,7 +1225,7 @@ onMounted(async () => {
   background: $color-green-background;
   color: white;
   padding: 8px 14px;
-  border-radius: 20px;
+  border-radius: var(--radius-xl, 1.25rem);
   font-weight: 600;
 }
 
@@ -1247,7 +1249,7 @@ onMounted(async () => {
 
 .replies-slide-enter-active,
 .replies-slide-leave-active {
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   overflow: hidden;
 }
 

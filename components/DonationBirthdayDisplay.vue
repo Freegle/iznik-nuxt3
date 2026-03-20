@@ -46,12 +46,12 @@ defineEmits(['update:modelValue'])
   text-align: center;
   padding: 1rem;
   background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
-  border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-lg, 0.75rem);
+  border: 2px solid $color-gray-3;
 }
 
 .donation-amount-display h4 {
-  color: #2d3748;
+  color: $color-gray--darker;
   font-weight: bold;
 }
 
@@ -60,9 +60,9 @@ defineEmits(['update:modelValue'])
 }
 
 .other-amount-section .input-group-prepend .input-group-text {
-  background-color: #f7fafc;
-  border-color: #e2e8f0;
-  color: #4a5568;
+  background-color: var(--color-gray-50);
+  border-color: $color-gray-3;
+  color: $color-gray--dark;
   font-weight: 500;
 }
 

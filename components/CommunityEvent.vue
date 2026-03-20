@@ -240,7 +240,7 @@ function showEventModal() {
 
 .event-card {
   background: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   height: 100%;
   display: flex;
   flex-direction: column;

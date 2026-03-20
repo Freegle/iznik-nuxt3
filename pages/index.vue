@@ -308,7 +308,8 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 24px $color-black-opacity-10;
+  border-radius: var(--radius-xl, 1.25rem);
+  box-shadow: var(--shadow-lg);
 
   @include media-breakpoint-up(md) {
     padding: 1.5rem 2rem;
@@ -356,7 +357,8 @@ onBeforeUnmount(() => {
   font-size: clamp(0.95rem, 2.5vw, 1.15rem);
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.1s, box-shadow 0.15s;
+  transition: transform 0.1s, box-shadow var(--transition-fast),
+    background var(--transition-fast);
   min-width: clamp(90px, 22vw, 150px);
   border-radius: var(--radius-md, 0.375rem);
 
@@ -419,8 +421,18 @@ onBeforeUnmount(() => {
     display: none !important;
   }
 
+  :deep(.autocomplete-wrap) {
+    border: 1px solid $color-gray--light !important;
+    border-radius: var(--radius-md, 0.5rem);
+  }
+
+  :deep(.autocomplete-wrap-focus) {
+    border-color: $color-success !important;
+    box-shadow: 0 0 0 2px rgba($color-success, 0.15);
+  }
+
   :deep(.form-control) {
-    border: 1px solid $color-gray--light;
+    border: none !important;
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
     background: rgba(255, 255, 255, 0.9);
@@ -432,9 +444,8 @@ onBeforeUnmount(() => {
     }
 
     &:focus {
-      border-color: $color-success;
       background: $color-white;
-      box-shadow: 0 0 0 2px rgba($color-success, 0.15);
+      box-shadow: none;
     }
   }
 
@@ -487,13 +498,18 @@ onBeforeUnmount(() => {
 .loading-card-ssr {
   aspect-ratio: 0.87;
   overflow: hidden;
-  background: #f5f5f5;
+  background: $color-gray--lighter;
 }
 
 .loading-shimmer-ssr {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #f5f5f5 0%, #fafafa 50%, #f5f5f5 100%);
+  background: linear-gradient(
+    90deg,
+    $color-gray--lighter 0%,
+    var(--color-gray-50) 50%,
+    $color-gray--lighter 100%
+  );
   background-size: 200% 100%;
   animation: shimmer-ssr 1.5s infinite;
 }

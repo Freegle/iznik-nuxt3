@@ -84,6 +84,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .log-container {
   max-height: 60vh;
   overflow-y: auto;
@@ -92,12 +94,12 @@ onMounted(() => {
   background: #1e1e1e;
   color: #d4d4d4;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .log-entry {
   padding: 2px 0;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid $color-gray--darker;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

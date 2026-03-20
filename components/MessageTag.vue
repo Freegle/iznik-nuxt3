@@ -98,7 +98,7 @@ const tagForGroup = computed(() => {
   background-color: $color-success-fg;
   font-size: 1.25rem;
   color: white;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   text-transform: uppercase;
   max-width: calc(100% - 20px);
   z-index: 5;

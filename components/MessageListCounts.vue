@@ -90,6 +90,7 @@ function markSeen() {
   padding: 0;
   cursor: pointer;
   text-decoration: underline;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $color-secondary;

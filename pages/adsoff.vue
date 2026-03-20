@@ -129,7 +129,7 @@ function noMethods() {
 
 .adsoff-content {
   background: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
@@ -267,7 +267,7 @@ function noMethods() {
   font-weight: 600;
 
   .heart-icon {
-    color: #e74c3c;
+    color: var(--color-danger);
     margin-right: 0.5rem;
   }
 }

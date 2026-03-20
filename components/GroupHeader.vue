@@ -673,7 +673,7 @@ async function join(callback) {
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.1s;
+  transition: transform 0.1s, background var(--transition-fast);
 
   &:active {
     transform: scale(0.98);
@@ -761,6 +761,7 @@ async function join(callback) {
     align-items: center;
     padding: 0.25rem 0.5rem;
     background: rgba($color-success, 0.08);
+    transition: all var(--transition-fast);
 
     &:hover {
       background: rgba($color-success, 0.15);
