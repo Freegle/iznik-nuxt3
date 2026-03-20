@@ -197,9 +197,10 @@ onMounted(async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .birthday-page {
-  background: white;
+  background: $color-white;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -693,10 +694,10 @@ onMounted(async () => {
 }
 
 .celebration-header {
-  background: rgba(255, 255, 255, 0.95);
+  background: $color-white-opacity-95;
   border-radius: 30px;
   padding: 3rem 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px $color-black-opacity-20;
   backdrop-filter: blur(10px);
 }
 
@@ -724,7 +725,7 @@ onMounted(async () => {
   animation: rainbowShift 3s ease-in-out infinite;
   padding: 1rem 3rem;
   border-radius: 100px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px $color-black-opacity-20;
 }
 
 #birthday-cake:before {
@@ -775,7 +776,8 @@ onMounted(async () => {
   border-radius: 50%;
   z-index: 2;
   top: -45px;
-  box-shadow: inset -5px -1px #fff, inset -70px 2px rgba(255, 255, 255, 0.1);
+  box-shadow: inset -5px -1px $color-white,
+    inset -70px 2px rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -834,8 +836,8 @@ onMounted(async () => {
 .age-number {
   font-size: 4rem;
   font-weight: bold;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  color: $color-white;
+  text-shadow: 2px 2px 4px $color-black-opacity-50;
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -854,7 +856,7 @@ onMounted(async () => {
   width: 35px;
   height: 35px;
   filter: brightness(1.8) contrast(1.3)
-    drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.7));
+    drop-shadow(2px 2px 4px $color-black-opacity-70);
   z-index: 10;
 }
 
@@ -872,7 +874,7 @@ onMounted(async () => {
   font-weight: bold;
   color: #2d3748;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 2px 2px 4px $color-black-opacity-10;
 }
 
 .birthday-subtitle {
@@ -909,7 +911,7 @@ onMounted(async () => {
 
 /* Ensure monthly checkbox has red border */
 :deep(.form-check-input) {
-  border: 1px solid red !important;
+  border: 1px solid $color-red !important;
 }
 
 /* Impact Section */
@@ -917,7 +919,7 @@ onMounted(async () => {
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0.95)
+    $color-white-opacity-95
   );
   padding: 4rem 0;
   position: relative;
@@ -960,10 +962,10 @@ onMounted(async () => {
 }
 
 .impact-card {
-  background: white;
+  background: $color-white;
   border-radius: 20px;
   padding: 3rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px $color-black-opacity-10;
   margin-bottom: 2rem;
 }
 
@@ -985,12 +987,12 @@ onMounted(async () => {
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px $color-black-opacity-10;
 }
 
 .stat-icon {
   background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  color: $color-white;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -1023,7 +1025,7 @@ onMounted(async () => {
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
-  color: white;
+  color: $color-white;
   box-shadow: 0 15px 40px rgba(45, 55, 72, 0.4);
   border: 2px solid #4a5568;
 }
@@ -1045,7 +1047,7 @@ onMounted(async () => {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
+  background: $color-white-opacity-95;
 }
 
 /* Responsive Design */

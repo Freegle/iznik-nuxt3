@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <ExternalLink class="fw-bold" :href="href" style="color: black">{{
+    <ExternalLink class="fw-bold text-dark" :href="href">{{
       text
     }}</ExternalLink>
   </client-only>

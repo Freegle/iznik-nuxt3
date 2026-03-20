@@ -261,7 +261,7 @@
             :role="member.role"
           />
           <!--div v-if="chatid" class="d-inline btn border">
-            <v-icon class="me-1" style="color: blue" icon="comments" />
+            <v-icon class="me-1 text-link" icon="comments" />
             <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
           </div-->
           <b-button variant="white" class="me-2 mb-1" @click="showChat">
@@ -574,3 +574,8 @@ async function showChat() {
   modChatModal.value?.show()
 }
 </script>
+<style scoped lang="scss">
+.text-link {
+  color: $link-color;
+}
+</style>

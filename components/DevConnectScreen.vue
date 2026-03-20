@@ -207,11 +207,13 @@ async function scanQR() {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .dev-connect {
   min-height: 100vh;
   background: linear-gradient(135deg, #5cb85c 0%, #3d8b3d 100%);
   padding: 20px;
-  color: white;
+  color: $color-white;
 }
 
 .header {
@@ -231,25 +233,25 @@ async function scanQR() {
 }
 
 .card {
-  background: white;
+  background: $color-white;
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
-  color: #333;
+  color: $color-gray--darker;
 
   h3 {
     font-size: 18px;
     margin-bottom: 12px;
-    color: #333;
+    color: $color-gray--darker;
   }
 
   .help-text {
     font-size: 14px;
-    color: #666;
+    color: $color-gray--normal;
     margin-bottom: 12px;
 
     code {
-      background: #f0f0f0;
+      background: $color-gray--lighter;
       padding: 2px 6px;
       border-radius: 4px;
     }
@@ -257,7 +259,7 @@ async function scanQR() {
 
   .saved-url {
     font-family: monospace;
-    background: #f5f5f5;
+    background: $color-gray--lighter;
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 12px;
@@ -265,13 +267,13 @@ async function scanQR() {
   }
 
   &.help {
-    background: rgba(255, 255, 255, 0.9);
+    background: $color-white-opacity-90;
 
     ul {
       margin: 0;
       padding-left: 20px;
       font-size: 14px;
-      color: #666;
+      color: $color-gray--normal;
     }
 
     li {
@@ -281,7 +283,7 @@ async function scanQR() {
     .note {
       margin-top: 12px;
       font-size: 13px;
-      color: #dc3545;
+      color: $color-red;
     }
   }
 }
@@ -313,7 +315,7 @@ async function scanQR() {
   }
 
   &.error {
-    background: rgba(220, 53, 69, 0.3);
+    background: rgba($color-red, 0.3);
   }
 }
 </style>
