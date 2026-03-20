@@ -488,6 +488,6 @@ watch(
 .admin-note {
   margin-top: 1rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

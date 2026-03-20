@@ -116,7 +116,7 @@ function donateTime() {
 
   .header-subtitle {
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -127,7 +127,7 @@ function donateTime() {
 
 .intro-text {
   text-align: center;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
 }
@@ -159,7 +159,7 @@ function donateTime() {
 
   .option-desc {
     font-size: 0.8rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 0.75rem;
     line-height: 1.3;
   }
@@ -191,7 +191,7 @@ function donateTime() {
   border-top: 1px solid $color-gray--lighter;
 
   .close-btn {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
   }
 }
 </style>

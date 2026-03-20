@@ -424,7 +424,7 @@ const sort = computed({
 // Help text - hidden on mobile
 .help-text {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 0.5rem;
   margin-bottom: 0;
 }

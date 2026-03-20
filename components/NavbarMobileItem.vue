@@ -96,7 +96,7 @@ defineEmits(['click', 'mousedown'])
 .nav-icon {
   width: 24px !important;
   height: 24px !important;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   @include media-breakpoint-up(md) {
     width: 28px !important;
@@ -107,7 +107,7 @@ defineEmits(['click', 'mousedown'])
 .nav-label {
   font-size: 10px;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   line-height: 1;
   text-align: center;
   white-space: nowrap;

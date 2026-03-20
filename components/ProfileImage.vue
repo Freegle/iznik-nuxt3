@@ -365,8 +365,8 @@ const brokenProfileImage = (e) => {
 }
 
 :deep(.ourBorder img) {
-  border: 2px solid $color-gray--dark;
-  background-color: $color-gray--dark;
+  border: 2px solid var(--color-gray-600);
+  background-color: var(--color-gray-600);
 }
 
 .circle {

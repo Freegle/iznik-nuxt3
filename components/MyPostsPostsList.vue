@@ -287,7 +287,7 @@ const upcomingTrysts = computed(() => {
   padding: 10px 16px;
   background: white;
   border: 1px solid $color-gray--light;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -350,7 +350,7 @@ const upcomingTrysts = computed(() => {
 
 .collection-details {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .posts-container {

@@ -834,7 +834,7 @@ const groupProfile = computed(() => {
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -894,7 +894,7 @@ const groupProfile = computed(() => {
 
 .thank-you-subtitle {
   font-size: 1.5rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -930,7 +930,7 @@ const groupProfile = computed(() => {
 
 .cta-text {
   font-size: 1.3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 

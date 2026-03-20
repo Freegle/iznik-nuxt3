@@ -171,7 +171,7 @@ function showModal() {
 .feature-description {
   text-align: center;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 }
 
@@ -179,7 +179,7 @@ function showModal() {
   text-align: center;
   padding: 0.5rem;
   margin: 0;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 :deep(a) {

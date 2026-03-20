@@ -419,7 +419,7 @@ onMounted(() => {
   &__label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 0.5rem;
   }
 }
@@ -476,7 +476,7 @@ onMounted(() => {
 
 .mobile-help {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-align: center;
   margin: 1rem 0 0 0;
 }

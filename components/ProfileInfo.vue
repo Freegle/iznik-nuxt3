@@ -333,13 +333,13 @@ const replyTimeText = computed(() => {
   transition: all var(--transition-fast);
 
   &:hover {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-decoration: underline;
   }
 }
 
 .member-since {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   margin-top: 0.1rem;
   display: flex;
@@ -368,7 +368,7 @@ const replyTimeText = computed(() => {
 }
 
 .location-icon {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   margin-top: 0.25rem;
   flex-shrink: 0;
@@ -486,7 +486,7 @@ const replyTimeText = computed(() => {
 
 .stat-label {
   font-size: 0.7rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -531,7 +531,7 @@ const replyTimeText = computed(() => {
 .section-label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
 }
@@ -592,7 +592,7 @@ const replyTimeText = computed(() => {
 .no-posts {
   padding: 1rem;
   text-align: center;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
 }
 </style>

@@ -182,7 +182,7 @@ function goto(path) {
 
 .option-description {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
   line-height: 1.3;
 }

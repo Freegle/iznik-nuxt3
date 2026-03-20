@@ -177,7 +177,7 @@ watch(
 
 .option-desc {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   a {
     color: $color-blue--bright;

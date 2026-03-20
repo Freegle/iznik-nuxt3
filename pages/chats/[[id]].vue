@@ -654,7 +654,7 @@ async function searchMore() {
   background: transparent;
   border: 1px solid $color-gray--light;
   border-radius: var(--radius-xl, 1.25rem);
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -689,13 +689,13 @@ async function searchMore() {
 .empty-state-text {
   font-size: 1rem;
   font-weight: 600;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 4px;
 }
 
 .empty-state-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
@@ -716,7 +716,7 @@ async function searchMore() {
   background: transparent;
   border: 1px solid $color-gray-4;
   border-radius: var(--radius-xl, 1.25rem);
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;

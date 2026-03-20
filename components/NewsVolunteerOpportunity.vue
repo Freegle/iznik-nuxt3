@@ -205,7 +205,7 @@ try {
 
 .opportunity-meta {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 
   .meta-item {
@@ -239,7 +239,7 @@ try {
 
   .detail-icon {
     flex-shrink: 0;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     width: 1em;
     margin-top: 0.3em;
   }

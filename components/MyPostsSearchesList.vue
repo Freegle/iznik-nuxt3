@@ -77,7 +77,7 @@ const searches = computed(() => {
 .searches-empty {
   text-align: center;
   padding: 16px;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   p {
     margin-bottom: 12px;

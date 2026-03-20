@@ -131,7 +131,7 @@ async function setPassword(callback) {
 
   .welcome-subtitle {
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -172,7 +172,7 @@ async function setPassword(callback) {
 .password-alt,
 .email-intro {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
   text-align: center;
 }

@@ -85,7 +85,7 @@ function confirm() {
 
 .nudge-reminder {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
@@ -98,6 +98,6 @@ function confirm() {
 }
 
 .cancel-btn {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

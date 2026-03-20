@@ -379,7 +379,7 @@ useHead(
 
 .reference-note {
   font-size: 0.85rem !important;
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
 }
 
 .reference {

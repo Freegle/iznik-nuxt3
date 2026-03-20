@@ -1100,7 +1100,7 @@ onMounted(async () => {
 
   &--light {
     background: $color-gray--lighter;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
 
     &:hover {
       background: darken($color-gray--lighter, 10%);

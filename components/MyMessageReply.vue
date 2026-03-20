@@ -419,7 +419,7 @@ function unpromise() {
 
 .chat-time {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   flex-shrink: 0;
   margin-left: auto;
   padding-left: 8px;
@@ -446,7 +446,7 @@ function unpromise() {
 
 .chat-text {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -465,7 +465,7 @@ function unpromise() {
   cursor: pointer;
   transition: all var(--transition-normal);
   white-space: nowrap;
-  background: $color-gray--dark;
+  background: var(--color-gray-600);
   color: white;
   flex-shrink: 0;
 

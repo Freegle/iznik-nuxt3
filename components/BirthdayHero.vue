@@ -943,7 +943,7 @@ const localVolunteersText = computed(() => {
 
 .volunteers-text {
   font-size: 1.3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
   font-style: italic;
   text-align: center;
@@ -951,7 +951,7 @@ const localVolunteersText = computed(() => {
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -968,7 +968,7 @@ const localVolunteersText = computed(() => {
 
 .cta-text {
   font-size: 1.3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -1000,7 +1000,7 @@ const localVolunteersText = computed(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-size: 1.1rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.5rem;

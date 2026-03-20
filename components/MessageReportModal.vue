@@ -204,7 +204,7 @@ async function report() {
 }
 
 .report-explanation {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin: 0;
 }
@@ -257,7 +257,7 @@ async function report() {
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }

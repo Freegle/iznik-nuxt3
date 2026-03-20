@@ -545,7 +545,7 @@ const markRead = async () => {
 
   .userinfo {
     flex: 0 0 auto;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-size: 0.75rem;
     line-height: 1.2;
     padding: 0;

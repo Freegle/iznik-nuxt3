@@ -62,7 +62,7 @@ defineEmits(['update:modelValue'])
 .other-amount-section .input-group-prepend .input-group-text {
   background-color: var(--color-gray-50);
   border-color: $color-gray-3;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 500;
 }
 

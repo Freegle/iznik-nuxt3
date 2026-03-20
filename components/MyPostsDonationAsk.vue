@@ -229,7 +229,7 @@ onMounted(async () => {
 
 .amount-label {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
@@ -321,7 +321,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 500;
   margin-top: 0.5rem;
 }

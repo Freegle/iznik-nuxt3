@@ -863,7 +863,7 @@ watch(
   .detail-label {
     display: block;
     font-size: 0.75rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-transform: uppercase;
     letter-spacing: 0.02em;
   }
@@ -883,7 +883,7 @@ watch(
 
   .contact-header {
     font-size: 0.85rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 0.75rem;
     font-weight: 600;
   }
@@ -896,7 +896,7 @@ watch(
     font-size: 0.9rem;
 
     .contact-icon {
-      color: $color-gray--dark;
+      color: var(--color-gray-600);
       width: 1rem;
     }
 
@@ -913,12 +913,12 @@ watch(
 
 .posted-by {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
 .inpast {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-decoration: line-through;
 }
 

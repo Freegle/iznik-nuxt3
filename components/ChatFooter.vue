@@ -929,7 +929,7 @@ onMounted(() => {
   text-align: center !important;
   font-size: 0.65rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 2px;
 }
 

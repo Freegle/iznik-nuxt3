@@ -198,7 +198,7 @@ function openVolunteerModal() {
 
 .page-description {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0 0 0.75rem 0;
 }
 

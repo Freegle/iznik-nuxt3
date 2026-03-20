@@ -259,7 +259,7 @@ onMounted(async () => {
 }
 
 .error-message {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }

@@ -69,7 +69,7 @@ async function makePrimary() {
   }
 
   &.delete {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-size: 0.9rem;
     margin-top: 2px;
 

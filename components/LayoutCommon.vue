@@ -431,7 +431,7 @@ body.modal-open {
   }
 
   .adRendering {
-    background-color: $color-gray--dark;
+    background-color: var(--color-gray-600);
   }
 
   @include media-breakpoint-up(lg) {

@@ -132,7 +132,7 @@ watch(currentValue, (newVal) => {
   border-color: var(--toggle-border-off);
   padding-left: 2rem;
   padding-right: 0.5rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 :deep(.toggle-handle) {

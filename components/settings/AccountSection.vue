@@ -205,7 +205,7 @@ watch(
 
 .private-badge {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -236,7 +236,7 @@ watch(
 .other-emails-label {
   font-weight: 500;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;

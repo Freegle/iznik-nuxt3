@@ -80,7 +80,7 @@ if (id) {
 
 .error-icon {
   font-size: 3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1rem;
 }
 
@@ -92,7 +92,7 @@ if (id) {
 }
 
 .error-message {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }

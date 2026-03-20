@@ -240,7 +240,7 @@ async function renege() {
 
 .section-description {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 }
 
@@ -261,6 +261,6 @@ async function renege() {
 }
 
 .cancel-btn {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

@@ -525,7 +525,7 @@ function goBack(index) {
   }
 
   .chevron {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-size: 0.8rem;
     transition: transform var(--transition-normal);
   }
@@ -535,11 +535,11 @@ function goBack(index) {
     border: none;
     padding: 0.5rem 0;
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-top: 0.5rem;
 
     .option-icon {
-      color: $color-gray--dark;
+      color: var(--color-gray-600);
       width: 16px;
     }
 
@@ -601,7 +601,7 @@ function goBack(index) {
 
 .app-note {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 0.5rem;
 }
 
@@ -631,7 +631,7 @@ function goBack(index) {
 }
 
 .breadcrumb-sep {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.7rem;
 }
 
@@ -670,7 +670,7 @@ function goBack(index) {
   }
 
   .expand-icon {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     transition: transform var(--transition-normal);
   }
 
@@ -739,6 +739,6 @@ function goBack(index) {
   margin-top: 0.75rem;
   margin-bottom: 0;
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

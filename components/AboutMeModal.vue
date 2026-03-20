@@ -116,7 +116,7 @@ async function save() {
 
   .header-subtitle {
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -134,7 +134,7 @@ async function save() {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   padding: 0.75rem;
   background: $color-gray--lighter;
   margin-bottom: 1rem;
@@ -153,7 +153,7 @@ async function save() {
   font-size: 0.85rem;
 
   .suggestions-label {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-weight: 500;
   }
 
@@ -174,7 +174,7 @@ async function save() {
   background: $color-gray--lighter;
 
   .cancel-btn {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-decoration: none;
     transition: all var(--transition-fast);
 

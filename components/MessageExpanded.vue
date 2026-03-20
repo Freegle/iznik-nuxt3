@@ -1471,7 +1471,7 @@ onUnmounted(() => {
   transition: all var(--transition-fast);
 
   &:hover {
-    background: $color-gray--dark;
+    background: var(--color-gray-600);
   }
 
   // Show when inside a modal
@@ -1772,7 +1772,7 @@ onUnmounted(() => {
   display: flex;
   gap: 0.5rem;
   font-size: 0.65rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .poster-overlay-stat {
@@ -1787,7 +1787,7 @@ onUnmounted(() => {
 
 .poster-overlay-chevron {
   flex-shrink: 0;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-left: auto;
 }
@@ -1840,7 +1840,7 @@ onUnmounted(() => {
   padding: 0.25rem 0.5rem;
   border: 1px solid $color-gray--light;
   background: $color-white;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
@@ -1886,7 +1886,7 @@ onUnmounted(() => {
   transition: all var(--transition-fast);
 
   &:hover {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-decoration: underline;
   }
 }
@@ -2017,7 +2017,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .poster-distance,
@@ -2043,7 +2043,7 @@ onUnmounted(() => {
 .poster-chevron {
   flex-shrink: 0;
   align-self: center;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 1.25rem;
   padding: 0.5rem;
   margin-right: -0.5rem;
@@ -2234,7 +2234,7 @@ onUnmounted(() => {
   margin-bottom: 1rem;
   padding: 0.5rem 1rem;
   background: $color-white-opacity-90;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   text-align: center;
   margin-left: 1rem;

@@ -811,7 +811,7 @@ if (me.value) {
   gap: 0.375rem;
   margin: 0.75rem 0 0 0;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   .hint-icon {
     font-size: 0.75rem;

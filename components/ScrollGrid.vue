@@ -219,12 +219,12 @@ function loadMore($state) {
 
   .scroll-grid__empty-icon {
     font-size: 3rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 1rem;
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 1rem;
   }
 }

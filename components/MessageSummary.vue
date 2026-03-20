@@ -601,7 +601,7 @@ function expand(e) {
 .content-description {
   font-size: 0.8rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   line-height: 1.35;
   flex: 1;
   display: -webkit-box;
@@ -636,7 +636,7 @@ function expand(e) {
   align-items: center;
   gap: 1rem;
   font-size: 0.7rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: auto;
 }
 

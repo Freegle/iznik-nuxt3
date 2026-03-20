@@ -276,7 +276,7 @@ function added() {
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -352,7 +352,7 @@ function added() {
 .poster-img {
   width: 100%;
   max-width: 100px;
-  border: 1px solid $color-gray--dark;
+  border: 1px solid var(--color-gray-600);
   border-radius: var(--radius-sm, 0.375rem);
   margin-bottom: 0.5rem;
 }
@@ -372,12 +372,12 @@ function added() {
 
 .businesscard-img {
   max-width: 200px;
-  border: 1px solid $color-gray--dark;
+  border: 1px solid var(--color-gray-600);
   border-radius: var(--radius-sm, 0.375rem);
 }
 
 .small-text {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

@@ -64,7 +64,7 @@ const addressBook = async () => {
 
 .private-badge {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -75,7 +75,7 @@ const addressBook = async () => {
 }
 
 .description {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
 }

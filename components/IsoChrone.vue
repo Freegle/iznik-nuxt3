@@ -372,7 +372,7 @@ watch(minutes, (newVal) => {
 .postcode-hint {
   font-weight: 400;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .header-actions {
@@ -452,7 +452,7 @@ watch(minutes, (newVal) => {
   justify-content: center;
   background: $color-gray--lighter;
   border: 1px solid $color-gray-3;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   cursor: pointer;
   transition: all var(--transition-fast);
 

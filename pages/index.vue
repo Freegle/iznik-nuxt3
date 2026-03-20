@@ -403,7 +403,7 @@ onBeforeUnmount(() => {
 .browse-label {
   font-size: 0.8rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0.75rem 0 0.4rem 0;
   display: flex;
   align-items: center;

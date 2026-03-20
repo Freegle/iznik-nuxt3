@@ -357,12 +357,12 @@ async function approve(callback) {
 
 .placeholder-icon {
   font-size: 3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   opacity: 0.5;
 }
 
 .no-photo-text {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
@@ -576,7 +576,7 @@ async function approve(callback) {
 }
 
 .help-hint {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   margin-top: 0.5rem;
   margin-bottom: 0;

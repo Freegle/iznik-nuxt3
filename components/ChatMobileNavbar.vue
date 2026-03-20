@@ -733,7 +733,7 @@ onBeforeUnmount(() => {
 
 .stat-label {
   display: none;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 400;
 
   @include media-breakpoint-up(md) {
@@ -762,7 +762,7 @@ onBeforeUnmount(() => {
   padding: 6px 12px;
   border: none;
   background: transparent;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.65rem;
   font-weight: 500;
   cursor: pointer;

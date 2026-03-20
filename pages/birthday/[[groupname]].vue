@@ -879,7 +879,7 @@ onMounted(async () => {
 
 .birthday-subtitle {
   font-size: 1.5rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -896,7 +896,7 @@ onMounted(async () => {
 
 .cta-text {
   font-size: 1.3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 2rem;
 }
 
@@ -958,7 +958,7 @@ onMounted(async () => {
 
 .section-subtitle {
   font-size: 1.3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .impact-card {
@@ -1017,7 +1017,7 @@ onMounted(async () => {
 
 .stat-label {
   font-size: 1rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 
@@ -1028,7 +1028,7 @@ onMounted(async () => {
   text-align: center;
   color: $color-white;
   box-shadow: 0 15px 40px rgba(45, 55, 72, 0.4);
-  border: 2px solid $color-gray--dark;
+  border: 2px solid var(--color-gray-600);
 }
 
 .message-content h3 {

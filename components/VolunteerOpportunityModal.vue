@@ -871,7 +871,7 @@ function rotateRight() {
   .detail-label {
     display: block;
     font-size: 0.75rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-transform: uppercase;
     letter-spacing: 0.02em;
   }
@@ -891,7 +891,7 @@ function rotateRight() {
 
   .contact-header {
     font-size: 0.85rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin-bottom: 0.75rem;
     font-weight: 600;
   }
@@ -904,7 +904,7 @@ function rotateRight() {
     font-size: 0.9rem;
 
     .contact-icon {
-      color: $color-gray--dark;
+      color: var(--color-gray-600);
       width: 1rem;
     }
 
@@ -921,7 +921,7 @@ function rotateRight() {
 
 .posted-by {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0;
 }
 
@@ -943,7 +943,7 @@ function rotateRight() {
 }
 
 .inpast {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-decoration: line-through;
 }
 

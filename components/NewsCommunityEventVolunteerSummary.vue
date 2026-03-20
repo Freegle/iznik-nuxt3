@@ -88,7 +88,7 @@ if (volunteerOpportunities.length > 0) {
   align-items: center;
   gap: 0.375rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.5rem;
   font-weight: 500;
 

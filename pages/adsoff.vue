@@ -229,7 +229,7 @@ function noMethods() {
 
 .monthly-note {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
   font-style: italic;
 }
@@ -279,7 +279,7 @@ function noMethods() {
 
 .other-ways {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 
   a {
@@ -312,7 +312,7 @@ function noMethods() {
 .thermometer-label {
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

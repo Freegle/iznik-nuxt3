@@ -36,7 +36,7 @@ const adsEnabled = p2?.length && parseInt(p2[0].value)
 }
 
 .cta-text {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   strong {
     color: $color-gray--darker;

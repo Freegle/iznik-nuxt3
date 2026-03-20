@@ -364,7 +364,7 @@ watch(
 }
 
 .rotate-btn {
-  background: $color-gray--dark;
+  background: var(--color-gray-600);
   color: white;
   border: none;
   border-radius: 50%;
@@ -455,7 +455,7 @@ watch(
 
 .empty-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1rem;
 }
 

@@ -750,16 +750,16 @@ function close() {
 }
 
 .autocomplete-anchor-text {
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
   transition: all var(--transition-fast);
 }
 
 .autocomplete-anchor-text span {
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
 }
 
 .autocomplete-anchor-text:hover {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   background: $color-gray--lighter;
 }
 

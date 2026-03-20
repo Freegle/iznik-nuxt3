@@ -457,19 +457,19 @@ function clearTryst() {
 
 .section-hint {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 400;
 }
 
 .section-description {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 }
 
 .section-note {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0.75rem 0 0;
 }
 
@@ -515,7 +515,7 @@ function clearTryst() {
 }
 
 .clear-btn {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   padding: 0.25rem 0.5rem;
 }
@@ -536,6 +536,6 @@ function clearTryst() {
 }
 
 .cancel-btn {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

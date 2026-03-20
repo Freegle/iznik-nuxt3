@@ -62,7 +62,7 @@ async function deleteSearch() {
 
 .search-ago {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .search-delete {
@@ -73,7 +73,7 @@ async function deleteSearch() {
   height: 20px;
   border: none;
   background: transparent;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   cursor: pointer;
   padding: 0;
   border-radius: 50%;

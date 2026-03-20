@@ -375,6 +375,6 @@ onMounted(async () => {
 
 .chat-empty-message {
   font-style: italic;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

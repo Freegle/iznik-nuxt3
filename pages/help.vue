@@ -182,7 +182,7 @@ useHead(
 .version-info {
   text-align: center;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 1.5rem;
 }
 </style>

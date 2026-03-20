@@ -84,7 +84,7 @@ function markSeen() {
 .mark-seen-btn {
   font-size: 0.75rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   background: none;
   border: none;
   padding: 0;
