@@ -778,13 +778,13 @@ onBeforeUnmount(() => {
   height: 50px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid rgba(0, 0, 0, 0.15);
+  border: 2px solid $color-black-opacity-15;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
   position: relative;
 
   &:hover {
-    border-color: rgba(0, 0, 0, 0.3);
+    border-color: $color-black-opacity-30;
   }
 
   &:active {
@@ -811,8 +811,8 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
+  background: $color-black-opacity-50;
+  color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -825,8 +825,8 @@ onBeforeUnmount(() => {
   aspect-ratio: 1;
   border-radius: 12px;
   overflow: hidden;
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: $color-gray--lighter;
+  border: 2px solid $color-gray-3;
   transition: all 0.2s ease;
 }
 
@@ -835,7 +835,7 @@ onBeforeUnmount(() => {
 }
 
 .photo-primary {
-  border-color: #28a745;
+  border-color: $color-success;
   border-width: 3px;
 }
 
@@ -855,7 +855,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: $color-black-opacity-50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -876,7 +876,7 @@ onBeforeUnmount(() => {
 }
 
 .error-message {
-  color: #fff;
+  color: $color-white;
   font-size: 0.7rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -890,10 +890,10 @@ onBeforeUnmount(() => {
 .error-btn {
   padding: 0.25rem 0.5rem;
   border: none;
-  background: #fff;
+  background: $color-white;
   border-radius: 4px;
   font-size: 0.65rem;
-  color: #212529;
+  color: $color-gray--darker;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -914,13 +914,13 @@ onBeforeUnmount(() => {
 
 .circle-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.3);
+  stroke: $color-white-opacity-25;
   stroke-width: 3;
 }
 
 .circle {
   fill: none;
-  stroke: #fff;
+  stroke: $color-white;
   stroke-width: 3;
   stroke-linecap: round;
   transform: rotate(-90deg);
@@ -933,7 +933,7 @@ onBeforeUnmount(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: $color-white;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -961,12 +961,12 @@ onBeforeUnmount(() => {
 
 .quality-critical {
   background: rgba(220, 53, 69, 0.9);
-  color: #fff;
+  color: $color-white;
 }
 
 .quality-warning {
   background: rgba(255, 193, 7, 0.9);
-  color: #000;
+  color: $color-black;
 }
 
 .delete-button {
@@ -976,9 +976,9 @@ onBeforeUnmount(() => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
+  background: $color-black-opacity-60;
   border: none;
-  color: #fff;
+  color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -987,7 +987,7 @@ onBeforeUnmount(() => {
 }
 
 .delete-button:active {
-  background: #dc3545;
+  background: $color-red;
 }
 
 .add-more-section {
@@ -1005,7 +1005,7 @@ onBeforeUnmount(() => {
 }
 
 .empty-icon {
-  color: #adb5bd;
+  color: $color-gray--base;
   margin-bottom: 1rem;
 }
 
@@ -1013,11 +1013,11 @@ onBeforeUnmount(() => {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .empty-subtitle {
-  color: #6c757d;
+  color: $color-gray--normal;
   margin-bottom: 1.5rem;
 }
 
@@ -1030,7 +1030,7 @@ onBeforeUnmount(() => {
   margin-bottom: 0;
 
   a {
-    color: #6c757d;
+    color: $color-gray--normal;
     text-decoration: none;
   }
 }
@@ -1055,15 +1055,15 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: background 0.2s;
   font-size: 1rem;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .source-option:not(:last-child) {
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid $color-gray-3;
 }
 
 .source-option:active {
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .ghost {

@@ -270,7 +270,11 @@ function expand(e) {
     align-items: stretch;
     max-height: 200px;
     border: 1px solid $color-gray--light;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 
   /* Mobile landscape: use list view layout */
@@ -278,7 +282,11 @@ function expand(e) {
     flex-direction: row;
     align-items: stretch;
     border: 1px solid $color-gray--light;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 }
 
@@ -416,7 +424,7 @@ function expand(e) {
     rgba(0, 0, 0, 0.03) 92%,
     rgba(0, 0, 0, 0) 100%
   );
-  color: white;
+  color: $color-white;
   z-index: 3;
   overflow: hidden;
 
@@ -504,7 +512,11 @@ function expand(e) {
     min-height: 0;
     border: 1px solid $color-gray--light;
     border-top: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 
   @include media-breakpoint-up(lg) {

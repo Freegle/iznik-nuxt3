@@ -174,3 +174,59 @@ The stories page is a long wall of alternating green header bars and white conte
 - **Component scoping** -- 54% of components use scoped styles, limiting pollution
 - **Navbar layout** is clean and functional on both mobile and desktop
 - **Give/Find flow** has a clear, focused step-by-step wizard UX
+
+---
+
+## Round 2 Audit (Post-Modernization)
+
+### Completed Fixes
+
+| Priority | Issue | Status |
+|----------|-------|--------|
+| P0 | Enable border-radius | DONE - `$enable-rounded: true` with 6px default |
+| P0 | Modern link color | DONE - `#0000FF` → `#2563eb` |
+| P1 | Introduce CSS custom properties | DONE - `_design-tokens.scss` with 25+ tokens |
+| P1 | Fix secondary button to neutral | DONE - gray outline instead of green |
+| P1 | Fix white button hover | DONE - subtle gray instead of jarring blue |
+| P2 | Remove text shadows from buttons | DONE |
+| P2 | Add shadow scale tokens | DONE - 3-level shadow system |
+| P3 | Consolidate navbar badges | DONE - 5 classes → 1 |
+| P3 | Migrate BS4 shims | DONE - 640 replacements, shims removed |
+| P3 | Fix hardcoded colors in components | DONE - 4 key components fixed |
+| -- | Variable naming standardization | DONE - `$colour-*` → `$color-*` across 58 files |
+| -- | Remove unused color variables | DONE - 28 variables removed |
+
+### Remaining Issues
+
+#### Still Needed (P2-P3)
+
+1. **~150 components still have hardcoded hex colors** - Only 4 of the worst offenders fixed. The long tail of hardcoded `#f8f9fa`, `#dee2e6`, `#6c757d` etc. remains across 150+ files. These should gradually be migrated to use SCSS variables or CSS custom properties.
+
+2. **`!important` proliferation** - Still 40+ `!important` declarations in global CSS. These exist because of Bootstrap specificity conflicts. Proper fix requires restructuring how Bootstrap overrides are applied (using higher-specificity selectors or `:where()` to lower Bootstrap specificity).
+
+3. **No dark mode foundation** - CSS custom properties are now in place, but no actual dark mode color scheme is defined. Adding `@media (prefers-color-scheme: dark)` overrides for the custom properties would be straightforward.
+
+4. **Stories page visual monotony** - While story cards now have rounded corners and shadows, the page is still a long wall of green-on-white cards with minimal visual variation.
+
+5. **Inconsistent icon sizing** - Custom `.fa-8-75x`, `.fa-0-8x`, `.fa-1-5x`, `.fa-1-75x`, `.fa-bh` classes suggest ad-hoc sizing. Should use a defined scale.
+
+6. **Form label `!important` on bold** - `label { font-weight: bold !important; }` globally prevents any lighter-weight label styling.
+
+7. **Homepage item cards** - The `MessageSummary` cards have rounded corners but don't use the design token shadow variables consistently (some have inline `rgba()` shadows).
+
+### Metrics After Modernization
+
+| Metric | Before | After | Target |
+|--------|--------|-------|--------|
+| Color variables defined | 115 lines (80+) | 87 lines (~52) | ~25 semantic tokens |
+| Unused variables | 28+ | 0 | 0 |
+| Green variants | 11 | 8 | 5 |
+| Components with hardcoded hex | 158 (26.7%) | ~150 (~25%) | <10% |
+| `!important` in global CSS | 40+ | 35+ | <10 |
+| Bootstrap 4 compat shims | 97 lines | 0 | 0 |
+| Near-duplicate utility classes | 5 badge classes | 1 | 1 |
+| CSS custom properties | 8 | 25+ | 25+ |
+| Naming consistency | Mixed colour/color | 100% $color-* | 100% |
+| Border radius enabled | No | Yes | Yes |
+| Shadow system | None | 3-level scale | 3-level scale |
+| Link color modern | #0000FF | #2563eb | Modern blue |
