@@ -90,9 +90,11 @@ Six button types:
 
 ---
 
-## 4. Border Radius
+## 4. Border Radius & Corner Shape
 
-Enabled globally via `$enable-rounded: true`. Four token levels:
+Enabled globally via `$enable-rounded: true`. Corners use **squircle** (superellipse) shape via `corner-shape: squircle` for smoother, more organic curves than standard circular `border-radius`. This is a progressive enhancement — Chrome 139+/Edge 139+ render squircles, other browsers fall back to standard rounded corners silently.
+
+Four token levels:
 
 | Token | Value | Usage |
 |-------|-------|-------|

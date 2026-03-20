@@ -51,6 +51,15 @@ body {
   background-color: var(--color-page-bg, #faf9f7);
 }
 
+// Squircle corners (superellipse) — smoother, more organic curves than
+// circular border-radius. Progressive enhancement: Chrome 139+/Edge 139+
+// get squircles, others fall back to standard border-radius silently.
+*,
+*::before,
+*::after {
+  corner-shape: squircle;
+}
+
 // Default radius for all buttons — modern design expects rounded interactive elements.
 // Input-group children are excluded (Bootstrap handles their first/last child radius).
 // Override with border-radius: 0 only when intentionally square (e.g. toolbar flush buttons).
