@@ -73,6 +73,8 @@ defineProps({
   width: 100%;
   box-shadow: none;
   background: $color-yellow--dark;
+  border-radius: var(--radius-lg, 0.5rem);
+  overflow: hidden;
 }
 
 .wizard__dot {

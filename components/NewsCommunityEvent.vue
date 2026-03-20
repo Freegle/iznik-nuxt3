@@ -223,6 +223,7 @@ initialize()
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
+  border-radius: var(--radius-sm, 0.25rem);
 }
 
 .event-title {

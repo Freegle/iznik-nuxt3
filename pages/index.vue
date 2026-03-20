@@ -358,6 +358,7 @@ onBeforeUnmount(() => {
   text-decoration: none;
   transition: transform 0.1s, box-shadow 0.15s;
   min-width: clamp(90px, 22vw, 150px);
+  border-radius: var(--radius-md, 0.375rem);
 
   &:active {
     transform: scale(0.98);
@@ -377,12 +378,12 @@ onBeforeUnmount(() => {
 }
 
 .action-btn--find {
-  background: #0081a2;
+  background: $color-secondary;
   color: white;
-  box-shadow: 0 2px 8px rgba(#0081a2, 0.3);
+  box-shadow: 0 2px 8px rgba($color-secondary, 0.3);
 
   &:hover {
-    background: darken(#0081a2, 5%);
+    background: darken($color-secondary, 5%);
     color: white;
     text-decoration: none;
   }

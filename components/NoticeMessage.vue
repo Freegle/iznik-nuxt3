@@ -17,6 +17,7 @@ defineProps({
 <style scoped lang="scss">
 .notice {
   border-left: 4px solid;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .notice--primary {

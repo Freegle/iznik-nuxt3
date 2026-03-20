@@ -46,6 +46,11 @@ html {
   }
 }
 
+// Warm off-white background for a friendly, community feel
+body {
+  background-color: var(--color-page-bg, #faf9f7);
+}
+
 .strike {
   text-decoration: line-through;
   text-decoration-style: double;

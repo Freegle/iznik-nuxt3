@@ -640,14 +640,17 @@ async function unmute() {
 
 .card__community-event {
   background-color: $color-gray-1;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card__volunteer-opportunity {
   background-color: $color-gray-2;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card__default {
   background-color: $color-white;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .image__uploaded {

@@ -141,6 +141,7 @@ async function setPassword(callback) {
   margin-bottom: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card-header {

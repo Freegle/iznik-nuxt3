@@ -45,11 +45,13 @@ const similar = computed(() => {
   background-color: $color-secondary !important;
   border-color: $color-blue--2 !important;
   color: $color-white !important;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .unselected {
   background-color: $color-white !important;
   border-color: $color-green--dark !important;
   color: $color-black !important;
+  border-radius: var(--radius-md, 0.375rem);
 }
 </style>

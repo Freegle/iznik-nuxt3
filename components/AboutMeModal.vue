@@ -161,6 +161,7 @@ async function save() {
     background: $color-gray--lighter;
     padding: 0.25rem 0.75rem;
     color: $color-gray--darker;
+    border-radius: var(--radius-sm, 0.25rem);
   }
 }
 

@@ -287,6 +287,7 @@ function $id(type) {
   background: $color-white;
   padding: 1.25rem;
   box-shadow: 0 2px 8px $color-black-opacity-08;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .detail-card-grow {

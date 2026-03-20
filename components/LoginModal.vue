@@ -1073,6 +1073,7 @@ $color-apple: #000000;
   padding: 0;
   margin-bottom: 0.5rem;
   color: $color-white;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .social-button:disabled {
