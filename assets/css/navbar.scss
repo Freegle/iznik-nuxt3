@@ -140,19 +140,49 @@ svg.fa-icon {
   color: $color-black;
 }
 
-// Consolidated navbar badge -- replaces browsebadge, mypostsbadge, newsbadge,
-// communityeventsbadge, volunteeropportunitiesbadge (which only differed in `right` offset)
-.nav-badge,
-.browsebadge,
-.mypostsbadge,
-.newsbadge,
-.communityeventsbadge,
-.volunteeropportunitiesbadge {
+// Navbar notification badges — each has a different `right` offset
+// tuned to overlap its specific icon correctly.
+.browsebadge {
   position: absolute;
   top: 2px;
-  right: 0;
+  right: -6px;
   font-size: 11px;
   background-color: $color-secondary !important;
   color: white !important;
-  transform: translateX(50%);
+}
+
+.mypostsbadge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 11px;
+  background-color: $color-secondary !important;
+  color: white !important;
+}
+
+.newsbadge {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  font-size: 11px;
+  background-color: $color-secondary !important;
+  color: white !important;
+}
+
+.communityeventsbadge {
+  position: absolute;
+  top: 2px;
+  right: -2px;
+  font-size: 11px;
+  background-color: $color-secondary !important;
+  color: white !important;
+}
+
+.volunteeropportunitiesbadge {
+  position: absolute;
+  top: 2px;
+  right: 9px;
+  font-size: 11px;
+  background-color: $color-secondary !important;
+  color: white !important;
 }
