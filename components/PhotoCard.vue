@@ -337,6 +337,7 @@ const shortQualityLabel = computed(() => {
 .error-btn {
   padding: 0.25rem 0.5rem;
   border: none;
+  border-radius: var(--radius-sm, 0.375rem);
   background: $color-white;
   font-size: 0.65rem;
   color: $color-gray--darker;

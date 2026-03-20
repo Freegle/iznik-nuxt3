@@ -408,6 +408,7 @@ watch(minutes, (newVal) => {
   justify-content: center;
   background: $color-gray--lighter;
   border: 1px solid $color-gray-3;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   cursor: pointer;
   flex-shrink: 0;

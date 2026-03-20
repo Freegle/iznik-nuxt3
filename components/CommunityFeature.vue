@@ -153,6 +153,7 @@ function showModal() {
   background: $color-success;
   color: white;
   border: none;
+  border-radius: var(--radius-sm, 0.375rem);
   font-weight: 500;
   font-size: 0.85rem;
   cursor: pointer;

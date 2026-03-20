@@ -536,6 +536,7 @@ async function approve(callback) {
   padding: 0.75rem 1rem;
   background: $color-white;
   border: 2px solid $color-gray-3;
+  border-radius: var(--radius-md, 0.5rem);
   color: $color-gray--darker;
   font-size: 0.95rem;
   cursor: pointer;

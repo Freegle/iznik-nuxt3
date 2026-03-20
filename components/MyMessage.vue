@@ -905,6 +905,7 @@ onMounted(async () => {
 .unpromise-btn {
   background: $color-orange--dark;
   border: none;
+  border-radius: var(--radius-sm, 0.375rem);
   color: white;
   padding: 2px 10px;
   font-size: 0.75rem;
