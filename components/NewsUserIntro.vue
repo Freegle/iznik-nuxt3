@@ -3,13 +3,13 @@
     <div class="d-flex clickme">
       <ProfileImage
         :image="newsfeed?.profile?.path"
-        class="ml-1 mb-1 inline"
+        class="ms-1 mb-1 inline"
         is-thumbnail
         :is-moderator="Boolean(newsfeed.showmod)"
         size="lg"
       />
-      <div class="media-body ml-2">
-        <span class="text-success font-weight-bold">
+      <div class="media-body ms-2">
+        <span class="text-success fw-bold">
           {{ newsfeed.displayname }}
         </span>
         {{ append }}

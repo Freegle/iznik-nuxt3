@@ -10,7 +10,7 @@
       v-if="newsfeed.message && emessage"
       :text="emessage"
       :max-chars="1024"
-      class="font-weight-bold preline forcebreak nopara"
+      class="fw-bold preline forcebreak nopara"
     />
     <div>
       <b-row v-if="newsfeed.image">

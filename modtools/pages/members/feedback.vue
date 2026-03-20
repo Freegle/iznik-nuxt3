@@ -6,7 +6,7 @@
       <b-tabs v-model="tabIndex" content-class="mt-3" card>
         <b-tab active>
           <template #title>
-            <h4 class="header--size4 ml-2 mr-2">
+            <h4 class="header--size4 ms-2 me-2">
               Feedback <span v-if="members.length">({{ members.length }})</span>
             </h4>
           </template>
@@ -68,7 +68,7 @@
 
         <b-tab>
           <template #title>
-            <h4 class="header--size4 ml-2 mr-2">
+            <h4 class="header--size4 ms-2 me-2">
               Thumbs Up/Down
               <span v-if="ratings.length">({{ ratings.length }})</span>
             </h4>

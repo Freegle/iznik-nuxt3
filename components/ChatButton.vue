@@ -78,7 +78,7 @@ const props = defineProps({
   titleClass: {
     type: String,
     required: false,
-    default: 'ml-1',
+    default: 'ms-1',
   },
 })
 

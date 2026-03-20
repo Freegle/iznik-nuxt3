@@ -142,7 +142,7 @@
             <b-col cols="12" md="6">
               <b-form-group label="For which community?" :state="true">
                 <GroupSelect v-model="groupid" :systemwide="true" />
-                <p v-if="showGroupError" class="text-danger font-weight-bold">
+                <p v-if="showGroupError" class="text-danger fw-bold">
                   Please select a community.
                 </p>
                 <NoticeMessage
@@ -172,10 +172,7 @@
                   :rules="validateTitle"
                   class="form-control"
                 />
-                <ErrorMessage
-                  name="title"
-                  class="text-danger font-weight-bold"
-                />
+                <ErrorMessage name="title" class="text-danger fw-bold" />
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
@@ -187,7 +184,7 @@
                   @click="rotateLeft"
                 >
                   <v-icon icon="circle" size="2x" />
-                  <v-icon icon="reply" class="ml-2" />
+                  <v-icon icon="reply" class="ms-2" />
                 </div>
                 <div
                   label="Rotate right"
@@ -243,10 +240,7 @@
                 placeholder="Let people know what the event is - why they should come, what to expect, and any admission charge or fee (we only approve free or cheap events)."
                 :rules="validateDescription"
               />
-              <ErrorMessage
-                name="description"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="description" class="text-danger fw-bold" />
             </b-form-group>
             <b-form-group
               ref="eventEdit__location"
@@ -262,10 +256,7 @@
                 placeholder="Where is it being held? Add a postcode to make sure people can find you!"
                 :rules="validateLocation"
               />
-              <ErrorMessage
-                name="location"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="location" class="text-danger fw-bold" />
             </b-form-group>
             <b-form-group label="When is it?" :state="true">
               <p>
@@ -276,7 +267,7 @@
                 v-model="event.dates"
                 time
               />
-              <p v-if="showDateError" class="text-danger font-weight-bold">
+              <p v-if="showDateError" class="text-danger fw-bold">
                 Please fill out the start and end date/time.
               </p>
             </b-form-group>
@@ -295,10 +286,7 @@
                 placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
                 :rules="validateContactName"
               />
-              <ErrorMessage
-                name="contactname"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="contactname" class="text-danger fw-bold" />
             </b-form-group>
             <EmailValidator
               v-model:email="event.contactemail"

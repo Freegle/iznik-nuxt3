@@ -31,7 +31,7 @@
       <NoticeMessage v-if="duplicate" variant="warning" class="mt-2">
         <p>
           You already have an open post
-          <span class="font-weight-bold">{{ duplicate.subject }}</span
+          <span class="fw-bold">{{ duplicate.subject }}</span
           >.
         </p>
         <p>

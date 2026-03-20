@@ -8,7 +8,7 @@
       </p>
       <div class="d-flex flex-wrap justify-content-between mb-2">
         <div>
-          <label class="font-weight-bold"> New Postcode: </label>
+          <label class="fw-bold"> New Postcode: </label>
           <PostCode
             v-if="!id"
             :value="pcname"
@@ -18,7 +18,7 @@
           />
         </div>
         <div>
-          <label class="font-weight-bold"> Nickname (e.g. Work): </label>
+          <label class="fw-bold"> Nickname (e.g. Work): </label>
           <b-form-input
             v-model="nickname"
             placeholder="Where is this?"

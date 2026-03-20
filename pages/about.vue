@@ -127,16 +127,14 @@
                           ? boardmember.profile.url
                           : boardmember?.profile?.turl
                       "
-                      class="mr-2"
+                      class="me-2"
                       size="lg"
                       :alt-text="
                         'Profile picture for ' + boardmember.displayname
                       "
                     />
                     <div>
-                      <span class="font-weight-bold">{{
-                        boardmember.displayname
-                      }}</span>
+                      <span class="fw-bold">{{ boardmember.displayname }}</span>
                       <p v-if="boardmember.description">
                         {{ boardmember.description }}
                       </p>

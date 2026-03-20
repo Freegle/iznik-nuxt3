@@ -7,7 +7,7 @@
   >
     <span class="text-muted small">
       <span v-if="newsfeed.location" class="pl-0">
-        <v-icon icon="map-marker-alt" class="ml-2" />&nbsp;{{
+        <v-icon icon="map-marker-alt" class="ms-2" />&nbsp;{{
           newsfeed.location
         }}
       </span>

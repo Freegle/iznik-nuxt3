@@ -7,7 +7,7 @@
     >
       {{ changed.name }}: {{ changed.oldname }} => {{ changed.newname }}
     </div>
-    <div v-else class="text-danger font-weight-bold">
+    <div v-else class="text-danger fw-bold">
       {{ changed.name }}: {{ changed.oldname }} => {{ changed.newname }}
     </div>
   </div>

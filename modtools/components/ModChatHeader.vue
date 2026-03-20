@@ -21,7 +21,7 @@
               chat.icon
             "
             :name="chat.name"
-            class="pr-1 clickme d-none d-md-flex"
+            class="pe-1 clickme d-none d-md-flex"
             is-thumbnail
             size="xl"
             border
@@ -32,7 +32,7 @@
           v-if="
             !collapsed && otheruser && otheruser.info && !otheruser?.deleted
           "
-          class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
+          class="d-none d-md-flex flex-column align-content-between pe-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
@@ -42,15 +42,15 @@
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
-        <div class="name font-weight-bold black d-block d-md-none">
+        <div class="name fw-bold black d-block d-md-none">
           {{ chat.name }}
         </div>
-        <div class="name font-weight-bold black text--large d-none d-md-block">
+        <div class="name fw-bold black text--large d-none d-md-block">
           {{ chat.name }}
         </div>
         <div
           v-if="otheruser && otheruser.info && !otheruser?.deleted"
-          class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
+          class="d-none d-md-flex flex-column align-content-between pe-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
@@ -62,7 +62,7 @@
         </div>
         <span
           v-if="!collapsed && otheruser && otheruser.info"
-          class="userinfo mr-2"
+          class="userinfo me-2"
         >
           <span
             class="small d-flex d-md-block justify-content-between flex-wrap"
@@ -71,13 +71,13 @@
               <span class="d-none d-md-inline">Last seen</span>
               <span class="d-inline d-md-none">Seen</span>
               <!-- eslint-disable-next-line-->
-              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ otheraccess }}</strong>
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ms-1" >{{ otheraccess }}</strong>
               <span class="d-none d-md-inline">.</span>
             </span>
             <span v-if="replytime" class="d-inline d-md-block">
               <span class="d-none d-md-inline">Typically replies in</span>
               <span class="d-inline d-md-none">Replies in</span>
-              <strong class="ml-1">{{ replytime }}</strong
+              <strong class="ms-1">{{ replytime }}</strong
               ><span class="d-none d-md-inline">.</span>
             </span>
             <span
@@ -96,7 +96,7 @@
         @click="showInfo"
       >
         <div>"</div>
-        <blockquote class="font-weight-bold aboutthem mb-0">
+        <blockquote class="fw-bold aboutthem mb-0">
           {{ aboutthem }}
         </blockquote>
         <div>"</div>
@@ -104,7 +104,7 @@
       <b-button
         v-if="unseen"
         variant="white"
-        class="ml-1 d-block d-md-none"
+        class="ms-1 d-block d-md-none"
         @click="markRead"
       >
         Mark read
@@ -120,7 +120,7 @@
           <b-button
             v-if="unseen"
             variant="white"
-            class="d-none d-md-block mr-2"
+            class="d-none d-md-block me-2"
             @click="markRead"
           >
             Mark read
@@ -130,7 +130,7 @@
           </b-button>
           <div
             v-if="otheruser && otheruser.info && !otheruser?.deleted"
-            class="mr-2"
+            class="me-2"
           >
             <b-button
               v-b-tooltip="'Show the full profile for this member'"
@@ -151,7 +151,7 @@
               <span class="d-block d-md-none"> Profile </span>
             </b-button>
           </div>
-          <div v-if="chat.chattype === 'User2User' || !unseen" class="mr-2">
+          <div v-if="chat.chattype === 'User2User' || !unseen" class="me-2">
             <template v-if="chat.status === 'Closed'">
               <b-button
                 v-b-tooltip="'Unhide this chat'"
@@ -216,7 +216,7 @@
           />
         </div>
         <div class="d-flex">
-          <div v-if="chat.chattype === 'User2User' && otheruser" class="mr-2">
+          <div v-if="chat.chattype === 'User2User' && otheruser" class="me-2">
             <template v-if="chat.status === 'Blocked'">
               <b-button
                 v-b-tooltip="'Allow this member to talk to you.'"
@@ -286,7 +286,7 @@
         @click="showInfo"
       >
         <div>"</div>
-        <blockquote class="font-weight-bold aboutthem mb-0">
+        <blockquote class="fw-bold aboutthem mb-0">
           {{ aboutthem }}
         </blockquote>
         <div>"</div>

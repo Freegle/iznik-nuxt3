@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="spacer" />
-          <div class="boxes ml-2 mr-2 d-flex flex-wrap justify-content-between">
+          <div class="boxes ms-2 me-2 d-flex flex-wrap justify-content-between">
             <NationalReuseDayBox
               title="A-Z Film"
               description="Watch and share our new film about the Freegle Free Shop."

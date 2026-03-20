@@ -33,7 +33,7 @@
           :class="{ active: chat && selectedChatId === parseInt(chat.id) }"
           @click="gotoChat(chat.id)"
         />
-        <p v-if="!visibleChats || !visibleChats.length" class="ml-2">
+        <p v-if="!visibleChats || !visibleChats.length" class="ms-2">
           <span v-if="searching" class="pulsate"> Searching... </span>
           <span v-else-if="loading" class="pulsate"> Loading... </span>
           <span v-else> No chats to show. </span>

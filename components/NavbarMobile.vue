@@ -46,14 +46,14 @@
         <div class="d-flex align-items-center">
           <button
             v-if="!loggedIn"
-            class="btn btn-white mr-2 test-signinbutton"
+            class="btn btn-white me-2 test-signinbutton"
             :disabled="signInDisabled"
             @click="requestLogin"
           >
             Log in or Join
           </button>
         </div>
-        <div v-if="isApp && loggedIn" class="text-white mr-3">
+        <div v-if="isApp && loggedIn" class="text-white me-3">
           <div class="notifwrapper">
             <v-icon icon="redo" class="fa-2x" @click="refresh" />
           </div>

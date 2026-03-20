@@ -4,7 +4,7 @@
       <ProfileImage
         :image="member.profile?.turl || member.profile?.paththumb"
         :name="member.displayname"
-        class="mr-2"
+        class="me-2"
         size="lg"
       />
     </b-col>

@@ -5,32 +5,24 @@
         <v-icon
           icon="sync"
           :class="
-            busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'
+            busy ? 'text-success fa-spin ms-4 mt-1' : 'text-faded ms-4 mt-1'
           "
           scale="2"
         />
       </div>
-      <b-form-checkbox v-if="groups || groupid" v-model="cga" class="ml-2">
+      <b-form-checkbox v-if="groups || groupid" v-model="cga" class="ms-2">
         <strong style="color: darkgreen">Show CGAs</strong>
       </b-form-checkbox>
-      <b-form-checkbox v-if="groups || groupid" v-model="dpa" class="ml-2">
+      <b-form-checkbox v-if="groups || groupid" v-model="dpa" class="ms-2">
         <strong style="color: darkblue">Show DPAs</strong>
       </b-form-checkbox>
-      <b-form-checkbox
-        v-if="groupid"
-        v-model="labels"
-        class="ml-2 font-weight-bold"
-      >
+      <b-form-checkbox v-if="groupid" v-model="labels" class="ms-2 fw-bold">
         Labels
       </b-form-checkbox>
-      <b-form-checkbox
-        v-model="shade"
-        class="ml-2 font-weight-bold"
-        @click="dobump"
-      >
+      <b-form-checkbox v-model="shade" class="ms-2 fw-bold" @click="dobump">
         Shade areas
       </b-form-checkbox>
-      <b-form-checkbox v-model="showDodgy" class="ml-2 font-weight-bold">
+      <b-form-checkbox v-model="showDodgy" class="ms-2 fw-bold">
         Areas to Review
       </b-form-checkbox>
     </div>
@@ -43,7 +35,7 @@
         If you have the "Areas to Review" checkbox ticked, you'll see the red
         circles for postcodes which might need better mapping.
       </p>
-      <p class="font-weight-bold text-danger">
+      <p class="fw-bold text-danger">
         The red circles indicate where mapping has changed recently. You can
         review these to check if it looks OK.
       </p>
@@ -68,7 +60,7 @@
         <li>You can add new areas.</li>
         <li>You can delete areas.</li>
       </ul>
-      <p class="font-weight-bold text-danger">
+      <p class="fw-bold text-danger">
         The red circles don't get updated at the moment. Soon.
       </p>
       <p>
@@ -195,7 +187,7 @@
         <b-card v-if="selectedName || selectedWKT" class="mb-2" no-body>
           <b-card-header class="bg-info"> Area Details </b-card-header>
           <b-card-body>
-            <p class="text-danger font-weight-bold">
+            <p class="text-danger fw-bold">
               Zoom/pan locked while area selected. Use Cancel to free.
             </p>
             <div v-if="groupid">

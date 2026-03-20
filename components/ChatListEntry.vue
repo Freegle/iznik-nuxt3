@@ -206,7 +206,7 @@ onMounted(() => {
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: #ef5350;
+  background: $color-red;
   color: white;
   font-size: 10px;
   font-weight: 600;
@@ -235,7 +235,7 @@ onMounted(() => {
 .chat-name {
   font-weight: 600;
   font-size: 1rem;
-  color: #333;
+  color: $color-gray--darker;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -245,7 +245,7 @@ onMounted(() => {
 
 .chat-time {
   font-size: 0.75rem;
-  color: #888;
+  color: $color-gray--dark;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .snippet {
   font-size: 0.875rem;
-  color: #666;
+  color: $color-gray--normal;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -273,7 +273,7 @@ onMounted(() => {
   }
 
   &.empty {
-    color: #999;
+    color: $color-gray--base;
     font-style: italic;
   }
 }
@@ -291,11 +291,11 @@ onMounted(() => {
 // Unread state styling
 .chat-entry.unread {
   .chat-name {
-    color: #000;
+    color: $color-black;
   }
 
   .snippet {
-    color: #333;
+    color: $color-gray--darker;
     font-weight: 500;
   }
 }

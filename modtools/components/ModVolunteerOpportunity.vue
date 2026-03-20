@@ -45,13 +45,13 @@
         />
       </b-card-body>
       <b-card-footer>
-        <b-button variant="primary" class="mr-1" @click="approve">
+        <b-button variant="primary" class="me-1" @click="approve">
           <v-icon icon="check" /> Approve
         </b-button>
-        <b-button variant="white" class="mr-1" @click="edit">
+        <b-button variant="white" class="me-1" @click="edit">
           <v-icon icon="pen" /> Edit
         </b-button>
-        <b-button variant="danger" class="mr-1" @click="confirmDelete">
+        <b-button variant="danger" class="me-1" @click="confirmDelete">
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <ChatButton
@@ -64,7 +64,7 @@
           :groupid="volunteering.groups[0]"
           title="Chat"
           variant="white"
-          class="mr-1"
+          class="me-1"
         />
       </b-card-footer>
     </b-card>

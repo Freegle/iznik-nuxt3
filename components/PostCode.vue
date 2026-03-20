@@ -29,7 +29,7 @@
               listentry: 'w-100',
               listentrylist: 'listentry',
             }"
-            class="mr-1"
+            class="me-1"
             :min="3"
             :debounce="200"
             :process="process"

@@ -4,7 +4,7 @@
       <ProfileImage
         :image="icon"
         :name="name"
-        class="ml-1 mb-1 mt-1 inline"
+        class="ms-1 mb-1 mt-1 inline"
         is-thumbnail
         size="sm"
       />

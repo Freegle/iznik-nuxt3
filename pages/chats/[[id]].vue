@@ -102,7 +102,7 @@
                       <b-badge
                         v-if="closedCount"
                         variant="danger"
-                        class="closedCount mr-1"
+                        class="closedCount me-1"
                         title="Closed chats with unread messages"
                       >
                         {{ closedCount }}
@@ -206,7 +206,7 @@
           >
             <p
               v-if="!visibleChats?.length && !closedChats?.length"
-              class="ml-2"
+              class="ms-2"
             >
               <span v-if="searching" class="pulsate"> Searching... </span>
               <span v-else> No chats to show. </span>
@@ -217,7 +217,7 @@
             />
           </VisibleWhen>
         </b-col>
-        <b-col cols="0" xl="3" class="p-0 pl-1">
+        <b-col cols="0" xl="3" class="p-0 ps-1">
           <VisibleWhen :at="['xl', 'xxl']">
             <SidebarRight
               show-job-opportunities

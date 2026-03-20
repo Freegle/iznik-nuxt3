@@ -8,7 +8,7 @@
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="p-0 pr-1">
+        <b-col cols="0" lg="3" class="p-0 pe-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarLeft
               ad-unit-path="/22794232631/freegle_myposts_desktop"
@@ -46,7 +46,7 @@
             <MyPostsSearchesList v-if="loadedMore" />
           </div>
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
+        <b-col cols="0" lg="3" class="p-0 ps-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight
               :show-job-opportunities="false"

@@ -331,7 +331,7 @@
               <ExternalLink :href="sponsor.linkurl">
                 {{ sponsor.name }}
               </ExternalLink>
-              <div v-if="sponsor.tagline" class="font-weight-bold">
+              <div v-if="sponsor.tagline" class="fw-bold">
                 {{ sponsor.tagline }}
               </div>
             </div>

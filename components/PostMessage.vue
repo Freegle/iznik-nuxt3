@@ -6,7 +6,7 @@
       </label>
       <draggable
         v-model="currentAtts"
-        class="d-flex flex-wrap pl-2 mt-2 mb-2"
+        class="d-flex flex-wrap ps-2 mt-2 mb-2"
         :item-key="(el) => `image-${el.id}`"
         :animation="150"
         ghost-class="ghost"
@@ -14,7 +14,7 @@
         @end="dragging = false"
       >
         <template #header>
-          <div class="mr-2 mb-1">
+          <div class="me-2 mb-1">
             <OurUploader
               v-if="!dragging"
               :key="bump"
@@ -36,7 +36,7 @@
               :ouruid="element.ouruid"
               :externalmods="element.externalmods"
               :primary="index === 0"
-              class="mr-1 mt-1 mt-md-0"
+              class="me-1 mt-1 mt-md-0"
               @remove="removePhoto"
             />
           </div>
@@ -56,7 +56,7 @@
     </NoticeMessage>
     <div class="subject-layout mb-1 mt-1">
       <div class="d-flex flex-column">
-        <label :for="$id('posttype')" class="d-none d-md-block pl-1">
+        <label :for="$id('posttype')" class="d-none d-md-block ps-1">
           Type</label
         >
         <b-form-input

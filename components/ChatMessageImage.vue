@@ -13,7 +13,7 @@
       :name="chatMessageProfileName"
       is-thumbnail
       size="sm"
-      class="mr-1 mb-1 mt-1 inline"
+      class="me-1 mb-1 mt-1 inline"
     />
     <OurUploadedImage
       v-if="chatmessage.image?.ouruid"
@@ -51,7 +51,7 @@
       :name="chatMessageProfileName"
       is-thumbnail
       size="sm"
-      class="ml-1 mb-1 mt-1 inline"
+      class="ms-1 mb-1 mt-1 inline"
     />
     <b-modal
       ref="photoModal"

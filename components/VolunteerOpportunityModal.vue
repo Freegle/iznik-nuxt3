@@ -159,7 +159,7 @@
             <b-col cols="12" md="6">
               <b-form-group label="For which community?" :state="true">
                 <GroupSelect v-model="groupid" :systemwide="true" />
-                <p v-if="showGroupError" class="text-danger font-weight-bold">
+                <p v-if="showGroupError" class="text-danger fw-bold">
                   Please select a community.
                 </p>
                 <NoticeMessage
@@ -189,10 +189,7 @@
                   :rules="validateTitle"
                   class="form-control"
                 />
-                <ErrorMessage
-                  name="title"
-                  class="text-danger font-weight-bold"
-                />
+                <ErrorMessage name="title" class="text-danger fw-bold" />
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
@@ -204,7 +201,7 @@
                   @click="rotateLeft"
                 >
                   <v-icon icon="circle" size="2x" />
-                  <v-icon icon="reply" class="ml-2" />
+                  <v-icon icon="reply" class="ms-2" />
                 </div>
                 <div
                   label="Rotate right"
@@ -262,10 +259,7 @@
                 placeholder="Please let people know what the opportunity is - any organisation which is involved, what you'd like them to do, and why they might like to do it."
                 :rules="validateDescription"
               />
-              <ErrorMessage
-                name="description"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="description" class="text-danger fw-bold" />
             </b-form-group>
             <b-form-group
               ref="volunteering__timecommitment"
@@ -284,10 +278,7 @@
                 placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
                 class="mt-2 form-control"
               />
-              <ErrorMessage
-                name="timecommitment"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="timecommitment" class="text-danger fw-bold" />
             </b-form-group>
             <b-form-group
               ref="volunteering__location"
@@ -303,10 +294,7 @@
                 placeholder="Where does the volunteering happen? Add a postcode to make sure people can find you!"
                 :rules="validateLocation"
               />
-              <ErrorMessage
-                name="location"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="location" class="text-danger fw-bold" />
             </b-form-group>
             <b-form-group label="When is it?" :state="true">
               <p>
@@ -333,10 +321,7 @@
                 placeholder="Is there a contact person for anyone who wants to find out more? (Optional)"
                 :rules="validateContactName"
               />
-              <ErrorMessage
-                name="contactname"
-                class="text-danger font-weight-bold"
-              />
+              <ErrorMessage name="contactname" class="text-danger fw-bold" />
             </b-form-group>
             <EmailValidator
               v-model:email="volunteering.contactemail"

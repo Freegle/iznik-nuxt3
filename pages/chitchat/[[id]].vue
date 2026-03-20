@@ -2,7 +2,7 @@
   <client-only v-if="me">
     <b-container fluid class="p-0 chitchat-page">
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="p-0 pr-1">
+        <b-col cols="0" lg="3" class="p-0 pe-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarLeft show-community-events show-volunteer-opportunities />
           </VisibleWhen>
@@ -170,7 +170,7 @@
             </div>
           </div>
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
+        <b-col cols="0" lg="3" class="p-0 ps-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight
               :show-job-opportunities="false"
@@ -942,7 +942,7 @@ if (me.value) {
   }
 
   // Better spacing for nested replies
-  :deep(.ml-2),
+  :deep(.ms-2),
   :deep(.ms-2) {
     margin-left: 0.75rem !important;
   }

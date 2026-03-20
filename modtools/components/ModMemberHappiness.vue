@@ -14,7 +14,7 @@
           </b-col>
           <b-col cols="4">
             {{ timeago(member.timestamp) }}
-            <span v-if="!member.reviewed" class="text-danger font-weight-bold">
+            <span v-if="!member.reviewed" class="text-danger fw-bold">
               New
             </span>
           </b-col>

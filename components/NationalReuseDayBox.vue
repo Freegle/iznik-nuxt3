@@ -10,7 +10,7 @@
           '); background-size: cover; background-repeat: no-repease; background-position: center center'
         "
       ></div>
-      <p class="text-center mt-2 font-weight-normal">
+      <p class="text-center mt-2 fw-normal">
         {{ description }}
       </p>
     </ExternalLink>

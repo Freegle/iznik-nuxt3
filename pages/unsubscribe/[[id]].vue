@@ -148,9 +148,9 @@
                 </p>
                 <div class="d-flex justify-content-between flex-wrap">
                   <nuxt-link to="/settings" no-prefetch>
-                    <b-button size="lg" variant="primary" class="mb-2 mr-2">
+                    <b-button size="lg" variant="primary" class="mb-2 me-2">
                       <v-icon icon="cog" />
-                      <span class="ml-1"> Get fewer emails </span>
+                      <span class="ms-1"> Get fewer emails </span>
                     </b-button>
                   </nuxt-link>
                   <b-button
@@ -160,7 +160,7 @@
                     @click="unsubscribe"
                   >
                     <v-icon icon="trash-alt" />
-                    <span class="ml-1"> Leave Freegle completely </span>
+                    <span class="ms-1"> Leave Freegle completely </span>
                   </b-button>
                 </div>
               </template>
@@ -176,10 +176,10 @@
                 class="mb-2"
               />
               <div class="d-flex justify-content-between flex-wrap mt-4">
-                <nuxt-link to="/settings" no-prefetch class="mb-2 mr-2">
+                <nuxt-link to="/settings" no-prefetch class="mb-2 me-2">
                   <b-button size="lg" variant="primary">
                     <v-icon icon="cog" />
-                    <span class="ml-1"> Get fewer emails </span>
+                    <span class="ms-1"> Get fewer emails </span>
                   </b-button>
                 </nuxt-link>
                 <SpinButton

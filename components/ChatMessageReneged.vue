@@ -9,7 +9,7 @@
               class="text-muted fa-0-8x"
             />{{ chatmessage.refmsgid }}) which has been deleted.
           </div>
-          <b-card v-else border-variant="warning" class="ml-2">
+          <b-card v-else border-variant="warning" class="ms-2">
             <b-card-title>
               <b-img
                 v-if="refmsg?.attachments?.length > 0"
@@ -25,7 +25,7 @@
               <ProfileImage
                 :image="otheruser?.profile?.paththumb"
                 :name="otheruser?.displayname"
-                class="mr-1 mb-1 mt-1 inline"
+                class="me-1 mb-1 mt-1 inline"
                 is-thumbnail
                 size="sm"
               />
@@ -45,7 +45,7 @@
                       chatmessage.secondsago < 60 ||
                       chatmessage.id > chat.lastmsgseen
                     "
-                    class="prewrap font-weight-bold"
+                    class="prewrap fw-bold"
                     >{{ emessage }}</span
                   >
                   <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -84,7 +84,7 @@
               <ProfileImage
                 :image="me.profile.path"
                 :name="me.displayname"
-                class="mr-1 mb-1 mt-1 inline"
+                class="me-1 mb-1 mt-1 inline"
                 is-thumbnail
                 size="sm"
               />
@@ -105,7 +105,7 @@
                       chatmessage.secondsago < 60 ||
                       chatmessage.id > chat.lastmsgseen
                     "
-                    class="prewrap font-weight-bold"
+                    class="prewrap fw-bold"
                     >{{ emessage }}</span
                   >
                   <span v-else class="preline forcebreak">{{ emessage }}</span>

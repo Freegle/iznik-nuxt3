@@ -210,7 +210,7 @@
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
-          class="ml-1 mr-2"
+          class="ms-1 me-2"
           @click="promise(null)"
         >
           <v-icon
@@ -224,7 +224,7 @@
         <div
           v-if="chat && chat.chattype === 'User2User' && otheruser"
           disabled
-          class="mr-2"
+          class="me-2"
           @click="addressBook"
         >
           <v-icon
@@ -237,7 +237,7 @@
         </div>
         <div
           v-if="chat && chat.chattype === 'User2Mod' && mod"
-          class="mr-2"
+          class="me-2"
           @click="spamReport"
         >
           <v-icon
@@ -255,7 +255,7 @@
             otheruser &&
             !tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudge"
         >
           <v-icon
@@ -270,7 +270,7 @@
           v-if="
             chat && chat.chattype === 'User2User' && otheruser && tooSoonToNudge
           "
-          class="mr-2"
+          class="me-2"
           @click="nudgeTooSoon"
         >
           <v-icon

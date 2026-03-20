@@ -58,9 +58,7 @@
             src="/signinbuttons/facebook-logo.png"
             class="social-button__image"
           />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Facebook</span
-          >
+          <span class="p-2 text--medium fw-bold">Continue with Facebook</span>
         </b-button>
         <b-button
           v-if="isiOS"
@@ -72,7 +70,7 @@
             src="signinbuttons/Apple_logo_white.svg"
             class="social-button__image"
           />
-          <span class="p-2 social-button__text font-weight-bold"
+          <span class="p-2 social-button__text fw-bold"
             >Sign in with Apple</span
           >
         </b-button>
@@ -85,9 +83,7 @@
             src="/signinbuttons/google-logo.svg"
             class="social-button__image"
           />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Google</span
-          >
+          <span class="p-2 text--medium fw-bold">Continue with Google</span>
         </b-button>
         <div
           v-else

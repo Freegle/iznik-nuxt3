@@ -8,9 +8,7 @@
       auto-escape
       class="prewrap"
     />
-    <span v-else class="prewrap forcebreak font-weight-bold">{{
-      safeBody
-    }}</span>
+    <span v-else class="prewrap forcebreak fw-bold">{{ safeBody }}</span>
   </div>
 </template>
 <script setup>

@@ -1,15 +1,96 @@
-// Import all variables from parent - ensures we stay in sync
-@import '../../../assets/css/_color-vars.scss';
+// ============================================================================
+// Color Variables
+// ============================================================================
+// This file is injected into every component via nuxt.config.ts additionalData.
+// For CSS custom property equivalents, see _design-tokens.scss.
 
-// ModTools-specific colour overrides and additions
-$color-modtools-blue--dark: #1d6607; /* 396aa3 208574 */
-$color-modtools-navbar-background: #396aa3;
-$color-modtools-green--light: #dff2d1;
-$color-modtools-menu: #3C73B3;
-$color-modtools-leftmenu-bg: #e8fefb;
+// ── Brand / Semantic ────────────────────────────────────────────────────────
+$colour-success: #338808;
+$colour-success-hover: #51a91e;
+$colour-success-bg: #d6e9c6;
+$colour-success-fg: #3c763d;
+$colour-success-border: #c3e6cb;
+$colour-info-fg: #000080;
+$colour-info-bg: #d9edf7;
+$colour-warning: #e38d13;
+$colour-header: #1d6607;
+$colour-secondary: #00A1CB;
 
-// TODO
-/* margin-left: 0.3em; */
-$badge-padding-x: 0.4em;
-$badge-padding-y: 0.25em;
-$badge-font-size: 75%;
+// ── Green palette ───────────────────────────────────────────────────────────
+$color-green-background: #61AE24;    // Navbar, brand background
+$color-green--light-alt: #00FF00;    // Wizard progress active step
+$color-green--lighter: #CDE4DA;      // Date picker borders
+$color-green--light: #E6ffE6;        // Card header backgrounds
+$color-green--medium: #84CF96;       // Decorative use
+$color-green--dark: #3B8070;         // Teal-green accents
+$color-green--darker: #008000;       // Outline-primary buttons
+$color-green--bg-gradient: #f0f7ed;  // Page background gradient
+
+// ── Gray palette ────────────────────────────────────────────────────────────
+$color-gray--normal: #6C757D;
+$color-gray--faded: #6C757D70;       // Including alpha
+$color-gray--lighter: #F5F5F5;
+$color-gray--light: #CDCDCD;
+$color-gray--base: #A9A9A9;
+$color-gray--dark: #808080;
+$color-gray--darker: #212529;
+$color-gray-1: rgba(221,142,98,0.05);  // News thread alt-row tint
+$color-gray-2: rgba(62,108,178,0.02);  // News thread alt-row tint
+$color-gray-3: #E9ECEF;
+$color-gray-4: #CED4DA;
+
+// ── Blue palette ────────────────────────────────────────────────────────────
+$color-blue--x-light: #D1ECF1;
+$color-blue-x-light2: #BEE5EB;
+$color-blue--light: #4895DD;
+$color-blue--base: #0000FF;          // Legacy link color (see bootstrap-custom for override)
+$color-blue--1: #0C5460;
+$color-blue--2: #204D74;
+$color-blue--bright: #007BFF;
+
+// ── Yellow / Warning ────────────────────────────────────────────────────────
+$color-yellow--light: #F9F7EC;
+$color-yellow--dark: #FBE8AA;        // Wizard progress
+$color-yellow-1: #FFF6DB;            // Notice warning background
+$color-yellow-3: #674E04;            // Notice warning text
+
+// ── Red / Danger ────────────────────────────────────────────────────────────
+$color-red--bg-gradient: #fff5f5;
+$color-red--lighter: #F8D7DA;        // Notice error background
+$color-red--light: #F5C6CB;          // Notice error border
+$color-red: #FF0000;
+$color-red--dark: #721C24;           // Notice error text
+
+// ── Orange ──────────────────────────────────────────────────────────────────
+$color-orange--dark: #FF8C00;
+
+// ── Base ────────────────────────────────────────────────────────────────────
+$color-white: #FFF;
+$color-black: #000;
+$color-purple: purple;
+$color-gold: darkgoldenrod;
+
+// ── White opacity variants (used) ───────────────────────────────────────────
+$color-white-opacity-25: rgba(255, 255, 255, 0.25);
+$color-white-opacity-50: rgba(255, 255, 255, 0.5);
+$color-white-opacity-75: rgba(255, 255, 255, 0.75);
+$color-white-opacity-80: rgba(255, 255, 255, 0.8);
+$color-white-opacity-90: rgba(255, 255, 255, 0.9);
+$color-white-opacity-95: rgba(255, 255, 255, 0.95);
+
+// ── Black opacity variants (used) ──────────────────────────────────────────
+$color-black-opacity-08: rgba(0, 0, 0, 0.08);
+$color-black-opacity-10: rgba(0, 0, 0, 0.1);
+$color-black-opacity-12: rgba(0, 0, 0, 0.12);
+$color-black-opacity-15: rgba(0, 0, 0, 0.15);
+$color-black-opacity-20: rgba(0, 0, 0, 0.2);
+$color-black-opacity-30: rgba(0, 0, 0, 0.3);
+$color-black-opacity-50: rgba(0, 0, 0, 0.5);
+$color-black-opacity-60: rgba(0, 0, 0, 0.6);
+$color-black-opacity-70: rgba(0, 0, 0, 0.7);
+
+// ── Social networks (used) ─────────────────────────────────────────────────
+$color-facebook: #3b5998;
+$color-twitter: #00aced;
+$color-whatsapp: #25d366;
+$color-gmail: #ea4335;

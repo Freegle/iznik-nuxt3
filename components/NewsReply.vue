@@ -52,7 +52,7 @@
       >
         <ProfileImage
           :image="reply.profile?.paththumb"
-          class="ml-1 mr-2 mt-1 mb-1 inline"
+          class="ms-1 me-2 mt-1 mb-1 inline"
           :is-moderator="Boolean(reply.showmod && reply.replyto === threadhead)"
           :size="reply.replyto !== threadhead ? 'sm' : 'md'"
           :lazy="false"
@@ -60,14 +60,14 @@
       </div>
       <div class="align-top reply-content">
         <span
-          class="text-success font-weight-bold clickme"
+          class="text-success fw-bold clickme"
           title="Click to see their profile"
           @click="showInfo"
           >{{ reply.displayname }}</span
         >
         <span
           :class="
-            'font-weight-bold preline forcebreak text--small nopara ml-1 ' +
+            'fw-bold preline forcebreak text--small nopara ms-1 ' +
             (reply.deleted ? 'strike' : '')
           "
         >
@@ -75,7 +75,7 @@
             :search-words="threadUsers"
             :text="emessage"
             :max-chars="500"
-            class="font-weight-bold preline forcebreak text--small d-inline"
+            class="fw-bold preline forcebreak text--small d-inline"
           />
           <br />
         </span>
@@ -103,11 +103,11 @@
           />
         </div>
         <div v-if="userid" class="text-muted align-items-center">
-          <span class="text-muted small mr-1">
+          <span class="text-muted small me-1">
             <span class="d-none d-md-inline">{{ replyaddedago }}</span>
             <span class="d-md-none">{{ replyaddedagoShort }}</span>
           </span>
-          <NewsUserInfo :id="id" class="mr-1 d-inline" />
+          <NewsUserInfo :id="id" class="me-1 d-inline" />
         </div>
         <div class="reply-actions">
           <button class="reply-action" @click="replyReply">
@@ -170,16 +170,16 @@
       :reply-to="reply.id"
       :depth="depth + 1"
     />
-    <div v-if="showReplyBox" class="mb-2 pb-1 ml-4">
+    <div v-if="showReplyBox" class="mb-2 pb-1 ms-4">
       <div v-if="enterNewLine" class="w-100">
         <OurAtTa
           ref="at"
           :members="tagusers"
-          class="pl-2 input-group"
+          class="ps-2 input-group"
           :filter-match="filterMatch"
         >
           <template #prepend>
-            <span class="input-group-text pl-1 pr-1">
+            <span class="input-group-text ps-1 pe-1">
               <ProfileImage
                 v-if="me.profile.path"
                 :image="me.profile.path"
@@ -209,12 +209,12 @@
         <OurAtTa
           ref="at"
           :members="tagusers"
-          class="pl-2 input-group"
+          class="ps-2 input-group"
           :filter-match="filterMatch"
         >
           <b-input-group>
             <slot name="prepend">
-              <span class="input-group-text pl-1 pr-1">
+              <span class="input-group-text ps-1 pe-1">
                 <ProfileImage
                   v-if="me.profile.path"
                   :image="me.profile.path"
@@ -265,7 +265,7 @@
       :modifiers="imagemods"
       alt="ChitChat Photo"
       width="100"
-      class="mt-1 ml-4 image__uploaded"
+      class="mt-1 ms-4 image__uploaded"
     />
     <OurUploader
       v-if="uploading"

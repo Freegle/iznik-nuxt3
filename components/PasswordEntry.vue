@@ -1,9 +1,5 @@
 <template>
-  <b-form-group
-    :label="placeholder"
-    label-for="password"
-    class="font-weight-bold"
-  >
+  <b-form-group :label="placeholder" label-for="password" class="fw-bold">
     <b-input-group
       id="input-password"
       :class="errorBorder ? ' border-danger' : ''"

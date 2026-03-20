@@ -12,8 +12,8 @@
       <p>
         Based on your feedback, we've added some more rule questions. Please
         respond to each question in Settings which is flagged with
-        <span class="text-danger font-weight-bold">New</span>. You can copy the
-        rules if you have multiple groups and they are the same.
+        <span class="text-danger fw-bold">New</span>. You can copy the rules if
+        you have multiple groups and they are the same.
       </p>
       <a
         v-for="inv of newRulesMissing"

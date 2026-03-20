@@ -9,13 +9,13 @@
         <ProfileImage
           :image="user.profile?.turl || user.profile?.paththumb"
           :name="user.displayname"
-          class="ml-1 mb-1 inline"
+          class="ms-1 mb-1 inline"
           is-thumbnail
           size="sm"
         />
         <span class="flex-grow-1">
           <span class="text-muted align-middle"> Posted by </span>
-          <span class="align-middle font-weight-bold text-info text--medium">
+          <span class="align-middle fw-bold text-info text--medium">
             {{ user.displayname }}
           </span>
           <span v-if="milesaway" class="align-middle">
@@ -41,7 +41,7 @@
         </span>
       </span>
     </nuxt-link>
-    <span v-if="modinfo && membership" class="ml-2 order-1 order-sm-1 small">
+    <span v-if="modinfo && membership" class="ms-2 order-1 order-sm-1 small">
       <v-icon icon="calendar-alt" />
       <span :class="joinedAge <= 31 ? 'text-danger' : ''"
         >Joined {{ dateshort(membership.added) }}</span
@@ -49,7 +49,7 @@
     </span>
     <span
       v-if="modinfo && membership"
-      class="ml-2 text-truncate small email order-3 order-md-1"
+      class="ms-2 text-truncate small email order-3 order-md-1"
     >
       <!-- eslint-disable-next-line -->
       <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user.id }}

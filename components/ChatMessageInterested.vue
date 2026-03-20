@@ -30,7 +30,7 @@
               v-if="
                 chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
               "
-              class="prewrap font-weight-bold"
+              class="prewrap fw-bold"
               v-html="linkifiedMessage"
             />
             <span v-else class="preline forcebreak" v-html="linkifiedMessage" />
@@ -41,7 +41,7 @@
               v-if="
                 chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
               "
-              class="prewrap font-weight-bold"
+              class="prewrap fw-bold"
               >{{ emessage }}</span
             >
             <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -66,7 +66,7 @@
           <div class="d-flex justify-content-between flex-wrap mb-2">
             <div
               v-if="!refmsg.promisecount"
-              class="mr-2 border-light border-end flex-grow-1 text-center"
+              class="me-2 border-light border-end flex-grow-1 text-center"
             >
               <div class="text-center small text-muted mb-2">
                 Still available?
@@ -79,11 +79,11 @@
               <div class="text-center small text-muted mb-2">
                 No longer available?
               </div>
-              <div class="d-flex justify-content-between ml-2 mr-2">
+              <div class="d-flex justify-content-between ms-2 me-2">
                 <b-button
                   variant="secondary"
                   size="sm"
-                  class="mr-1"
+                  class="me-1"
                   @click="outcome('Taken', $event)"
                 >
                   Mark as TAKEN
@@ -126,7 +126,7 @@
                   chatmessage.secondsago < 60 ||
                   chatmessage.id > chat.lastmsgseen
                 "
-                class="prewrap font-weight-bold"
+                class="prewrap fw-bold"
                 v-html="linkifiedMessage"
               />
               <span
@@ -148,7 +148,7 @@
                   chatmessage.secondsago < 60 ||
                   chatmessage.id > chat.lastmsgseen
                 "
-                class="prewrap font-weight-bold"
+                class="prewrap fw-bold"
                 v-html="linkifiedAndHighlightedMessage"
               />
               <span
@@ -173,7 +173,7 @@
                   chatmessage.secondsago < 60 ||
                   chatmessage.id > chat.lastmsgseen
                 "
-                class="prewrap font-weight-bold"
+                class="prewrap fw-bold"
                 >{{ emessage }}</span
               >
               <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -191,7 +191,7 @@
                   chatmessage.secondsago < 60 ||
                   chatmessage.id > chat.lastmsgseen
                 "
-                class="font-weight-bold"
+                class="fw-bold"
               >
                 <Highlighter
                   :text-to-highlight="emessage"

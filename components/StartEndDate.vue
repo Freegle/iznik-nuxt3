@@ -17,7 +17,7 @@
             v-if="time"
             v-model="current.starttime"
             type="time"
-            class="ml-2"
+            class="ms-2"
             placeholder="Choose a time"
             list="times"
           />
@@ -36,7 +36,7 @@
             v-if="time"
             v-model="current.endtime"
             type="time"
-            class="ml-2"
+            class="ms-2"
             placeholder="Choose a time"
             list="times"
           />

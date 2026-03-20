@@ -3,14 +3,14 @@
     <div class="d-flex">
       <ProfileImage
         image="/icon.png"
-        class="ml-1 mb-1 inline"
+        class="ms-1 mb-1 inline"
         is-thumbnail
         size="lg"
       />
       <div>
-        <span class="text-success font-weight-bold pl-2"> Freegle </span>
+        <span class="text-success fw-bold ps-2"> Freegle </span>
         <br />
-        <span class="text-muted small pl-2">
+        <span class="text-muted small ps-2">
           {{ addedago }}
         </span>
       </div>
@@ -18,7 +18,7 @@
     <!-- eslint-disable-next-line-->
     <div v-if="newsfeed.html" v-html="newsfeed.html" />
     <!-- eslint-disable-next-line-->
-    <div v-else-if="newsfeed.message" class="font-weight-bold preline forcebreak" v-html="emessage" />
+    <div v-else-if="newsfeed.message" class="fw-bold preline forcebreak" v-html="emessage" />
     <div>
       <b-img
         v-if="newsfeed.image"

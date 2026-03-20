@@ -1,5 +1,5 @@
 <template>
-  <div class="container p-0 mb-1 mr-2" :class="{ primary }">
+  <div class="container p-0 mb-1 me-2" :class="{ primary }">
     <span @touchstart="rotateLeft" @click="rotateLeft">
       <div label="Rotate left" class="topleft clickme" title="Rotate left">
         <v-icon icon="circle" size="2x" />

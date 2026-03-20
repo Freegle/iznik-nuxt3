@@ -6,7 +6,7 @@
           <!-- User Tab -->
           <b-tab>
             <template #title>
-              <h2 class="ml-2 mr-2">User</h2>
+              <h2 class="ms-2 me-2">User</h2>
             </template>
             <ModSupportFindUser :id="id" />
           </b-tab>
@@ -14,7 +14,7 @@
           <!-- Community Tab with sub-tabs -->
           <b-tab @click="onCommunityTab">
             <template #title>
-              <h2 class="ml-2 mr-2">Community</h2>
+              <h2 class="ms-2 me-2">Community</h2>
             </template>
             <div class="subtabs-wrapper">
               <b-tabs
@@ -59,7 +59,7 @@
           <!-- Message Tab -->
           <b-tab>
             <template #title>
-              <h2 class="ml-2 mr-2">Message</h2>
+              <h2 class="ms-2 me-2">Message</h2>
             </template>
             <p>
               You can search for message by id, or by subject. This will only
@@ -87,7 +87,7 @@
           <!-- Outgoing Email Tab -->
           <b-tab @click="onEmailStatsTab">
             <template #title>
-              <h2 class="ml-2 mr-2">Outgoing Email</h2>
+              <h2 class="ms-2 me-2">Outgoing Email</h2>
             </template>
             <ModSupportEmailStats
               v-if="showEmailStats"
@@ -98,7 +98,7 @@
           <!-- Incoming Email Tab -->
           <b-tab @click="onIncomingEmailTab">
             <template #title>
-              <h2 class="ml-2 mr-2">Incoming Email</h2>
+              <h2 class="ms-2 me-2">Incoming Email</h2>
             </template>
             <ModSupportIncomingEmail
               v-if="showIncomingEmail"
@@ -109,11 +109,11 @@
           <!-- Logs Tab with sub-tabs -->
           <b-tab @click="onLogsTab">
             <template #title>
-              <h2 class="ml-2 mr-2">
+              <h2 class="ms-2 me-2">
                 Logs
                 <b-badge
                   variant="danger"
-                  class="ml-1"
+                  class="ms-1"
                   style="font-size: 0.4em; vertical-align: super"
                   >WIP</b-badge
                 >
@@ -162,7 +162,7 @@
           <!-- Spam Tab with sub-tabs -->
           <b-tab @click="onSpamTab">
             <template #title>
-              <h2 class="ml-2 mr-2">Spam</h2>
+              <h2 class="ms-2 me-2">Spam</h2>
             </template>
             <div class="subtabs-wrapper">
               <b-tabs v-model="spamSubTab" content-class="mt-3" class="subtabs">

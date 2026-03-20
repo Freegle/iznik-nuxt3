@@ -138,7 +138,7 @@
             spelling and try again.
           </p>
           <b-button variant="primary" size="lg" href="/">
-            <v-icon icon="home" class="mr-2" />
+            <v-icon icon="home" class="me-2" />
             Go to Homepage
           </b-button>
         </div>

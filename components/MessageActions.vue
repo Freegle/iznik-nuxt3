@@ -5,7 +5,7 @@
         <b-button
           v-if="loggedIn && message.groups && message.groups.length"
           variant="link"
-          class="grey p-0 mr-4"
+          class="grey p-0 me-4"
           size="sm"
           @click="report"
         >
@@ -28,7 +28,7 @@
     >
       <b-button
         variant="link"
-        class="p-0 text-faded mr-2"
+        class="p-0 text-faded me-2"
         size="sm"
         :to="'/message/' + message.id"
       >

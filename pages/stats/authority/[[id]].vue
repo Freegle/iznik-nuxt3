@@ -225,7 +225,7 @@
                 </b-tr>
               </b-tbody>
             </b-table-simple>
-            <p v-if="someoverlap" class="text-muted small pl-1 mb-0">
+            <p v-if="someoverlap" class="text-muted small ps-1 mb-0">
               * The area for this Freegle community partly overlaps the area
               you're looking at, so we've added an appropriate percentage.
             </p>
@@ -237,28 +237,28 @@
           <b-col cols="0" lg="3" class="d-none d-lg-block" />
           <b-col ref="mapcont" cols="12" lg="6" class="p-0">
             <div v-if="authority">
-              <div class="title pl-2">
+              <div class="title ps-2">
                 <b-img
                   thumbnail
                   src="/icon.png"
                   class="titlelogo float-end"
                   @click="toggle"
                 />
-                <span class="text--largest mr-2">
+                <span class="text--largest me-2">
                   {{ authority.name }}
                 </span>
                 <div class="d-inline-block align-top pt-2">
                   <OurDatePicker
                     id="startDate"
                     v-model="startDate"
-                    class="ml-1"
+                    class="ms-1"
                     lang="en"
                     type="date"
                     append-to-body
                     format="YYYY-MM"
                     placeholder=""
                   />
-                  <span class="font-weight-bold ml-1 mr-1">-</span>
+                  <span class="fw-bold ms-1 me-1">-</span>
                   <OurDatePicker
                     id="endDate"
                     v-model="endDate"
@@ -269,7 +269,7 @@
                     format="YYYY-MM"
                     placeholder=""
                   />
-                  <span class="clickme ml-1" @click="reloadData">
+                  <span class="clickme ms-1" @click="reloadData">
                     <v-icon icon="sync" />
                   </span>
                 </div>
@@ -357,7 +357,7 @@
                       <span v-html="data.value" />
                     </template>
                   </b-table>
-                  <p v-if="someoverlap" class="text-muted small pl-1 mb-0">
+                  <p v-if="someoverlap" class="text-muted small ps-1 mb-0">
                     * The area for this Freegle community partly overlaps the
                     area you're looking at, so we've added an appropriate
                     percentage.
@@ -366,7 +366,7 @@
               </b-card>
               <b-row class="m-0">
                 <b-col class="p-0">
-                  <div class="title pl-2">
+                  <div class="title ps-2">
                     <b-img
                       thumbnail
                       src="/icon.png"

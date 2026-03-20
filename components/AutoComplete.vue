@@ -23,7 +23,7 @@
           <slot name="append">
             <b-button
               variant="white"
-              class="transbord p-0 pr-2"
+              class="transbord p-0 pe-2"
               tabindex="-1"
               aria-label="Busy indicator"
             >
@@ -61,7 +61,7 @@
               :size="size"
             />
             <button
-              class="btn btn-md btn-white transbord p-0 pr-2"
+              class="btn btn-md btn-white transbord p-0 pe-2"
               type="button"
               tabindex="-1"
             >

@@ -51,7 +51,7 @@
       <div v-if="showGroups" class="bg-white pt-3">
         <div v-if="showRegions">
           <div class="d-flex flex-wrap justify-content-center pb-4">
-            <div v-for="r in regions" :key="r" class="p-0 mt-2 ml-2 mr-2">
+            <div v-for="r in regions" :key="r" class="p-0 mt-2 ms-2 me-2">
               <b-button variant="secondary" :to="'/explore/region/' + r">
                 {{ r }}
               </b-button>

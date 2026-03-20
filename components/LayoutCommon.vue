@@ -78,7 +78,7 @@
           <span class="visually-hidden">Loading...</span>
         </div>
         <p>
-          <span>Loading...</span><br /><span class="font-weight-bold"
+          <span>Loading...</span><br /><span class="fw-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
             Chrome.</span
           ><br /><SupportLink text="No luck? Contact us" />

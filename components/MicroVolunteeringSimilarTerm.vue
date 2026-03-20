@@ -2,7 +2,7 @@
   <div>
     <b-button
       v-if="similar"
-      class="selected font-weight-bold"
+      class="selected fw-bold"
       variant="white"
       size="lg"
       @click="emit('not')"
@@ -11,7 +11,7 @@
     </b-button>
     <b-button
       v-else
-      class="unselected font-weight-bold"
+      class="unselected fw-bold"
       variant="white"
       size="lg"
       @click="emit('similar')"

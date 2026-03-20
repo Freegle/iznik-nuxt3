@@ -10,14 +10,14 @@
             <v-icon
               v-if="savedComment.flag"
               icon="exclamation-triangle"
-              class="mr-1"
+              class="me-1"
             />
           </div>
           <read-more
             v-if="savedComment['user' + n]"
             :text="savedComment['user' + n]"
             :max-chars="expandComments ? 1000 : 80"
-            class="font-weight-bold nopara"
+            class="fw-bold nopara"
           />
         </div>
       </div>

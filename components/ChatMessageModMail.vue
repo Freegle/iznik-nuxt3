@@ -3,14 +3,14 @@
     <b-row>
       <b-col>
         <div class="media">
-          <b-card border-variant="success" :class="{ 'ml-auto': !amUser }">
+          <b-card border-variant="success" :class="{ 'ms-auto': !amUser }">
             <b-card-title>
               <div v-if="group">
                 <h4>
                   <ProfileImage
                     v-if="group"
                     :image="group.profile"
-                    class="mr-1 mb-1 mt-1 inline"
+                    class="me-1 mb-1 mt-1 inline"
                     is-thumbnail
                     size="sm"
                   />
@@ -37,7 +37,7 @@
                       chatmessage.secondsago < 60 ||
                       chatmessage.id > chat.lastmsgseen
                     "
-                    class="prewrap font-weight-bold"
+                    class="prewrap fw-bold"
                     >{{ emessage }}</span
                   >
                   <span v-else class="preline forcebreak">{{ emessage }}</span>

@@ -6,12 +6,12 @@
         <b-tabs v-model="tabIndex" content-class="mt-3" card lazy>
           <b-tab id="Spammers" :active="!hasPermissionSpamAdmin">
             <template #title>
-              <h2 class="ml-2 mr-2">Confirmed Spammers</h2>
+              <h2 class="ms-2 me-2">Confirmed Spammers</h2>
             </template>
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="PendingAdd">
             <template #title>
-              <h2 class="ml-2 mr-2">
+              <h2 class="ms-2 me-2">
                 Pending Add
                 <b-badge v-if="pendingaddcount" variant="danger">
                   {{ pendingaddcount }}
@@ -21,12 +21,12 @@
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="Safelisted">
             <template #title>
-              <h2 class="ml-2 mr-2">Safelisted</h2>
+              <h2 class="ms-2 me-2">Safelisted</h2>
             </template>
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="PendingRemove">
             <template #title>
-              <h2 class="ml-2 mr-2">
+              <h2 class="ms-2 me-2">
                 Pending Remove
                 <b-badge v-if="pendingremovecount" variant="danger">
                   {{ pendingremovecount }}

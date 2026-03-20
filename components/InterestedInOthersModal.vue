@@ -5,7 +5,7 @@
         <ProfileImage
           v-if="otherUser.profile.path"
           :image="otherUser.profile.path"
-          class="mr-2"
+          class="me-2"
           is-thumbnail
           size="lg"
         />

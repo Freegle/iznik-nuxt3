@@ -10,7 +10,7 @@
         :key="'term-' + term.id"
         :term="term"
         :similar-terms="similarTerms"
-        class="mr-1 mb-2"
+        class="me-1 mb-2"
         @similar="similar(term)"
         @not="notSimilar(term)"
       />

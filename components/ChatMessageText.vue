@@ -22,7 +22,7 @@
           <span v-if="!highlightEmails">
             <span
               v-if="messageIsNew"
-              class="prewrap font-weight-bold"
+              class="prewrap fw-bold"
               v-html="linkifiedMessage"
             />
             <span v-else class="preline forcebreak" v-html="linkifiedMessage" />
@@ -37,7 +37,7 @@
           <span v-else>
             <span
               v-if="messageIsNew"
-              class="prewrap font-weight-bold"
+              class="prewrap fw-bold"
               v-html="linkifiedAndHighlightedMessage"
             />
             <span
@@ -57,7 +57,7 @@
         <!-- Freegle: no clickable links for safety -->
         <template v-else>
           <span v-if="!highlightEmails">
-            <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
+            <span v-if="messageIsNew" class="prewrap fw-bold">{{
               emessage
             }}</span>
             <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -70,7 +70,7 @@
             />
           </span>
           <span v-else>
-            <span v-if="messageIsNew" class="font-weight-bold">
+            <span v-if="messageIsNew" class="fw-bold">
               <Highlighter
                 :text-to-highlight="emessage"
                 :search-words="[regexEmail]"

@@ -175,8 +175,8 @@ const shortQualityLabel = computed(() => {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: $color-gray--lighter;
+  border: 2px solid $color-gray-3;
   transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -339,7 +339,7 @@ const shortQualityLabel = computed(() => {
   border: none;
   background: #fff;
   font-size: 0.65rem;
-  color: #212529;
+  color: $color-gray--darker;
   cursor: pointer;
   display: flex;
   align-items: center;

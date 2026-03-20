@@ -28,7 +28,7 @@
         <donation-button value="25" class="mb-1" @clicked="score(25)" />
       </div>
       <div class="mt-2 mb-4 d-flex border border-secondary rounded p-2">
-        <SupporterInfo size="lg" class="mr-2 align-self-center" />
+        <SupporterInfo size="lg" class="me-2 align-self-center" />
         <div>
           You'll get a cute little badge so that other people can see you're a
           committed freegler.
