@@ -50,17 +50,17 @@ const searches = computed(() => {
 
 .searches-section {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 16px;
   margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .searches-header {
   display: flex;
   align-items: center;
   margin-bottom: 12px;
-  color: $colour-secondary;
+  color: $color-secondary;
 }
 
 .searches-title {
@@ -77,7 +77,7 @@ const searches = computed(() => {
 .searches-empty {
   text-align: center;
   padding: 16px;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   p {
     margin-bottom: 12px;
@@ -88,14 +88,15 @@ const searches = computed(() => {
   display: inline-flex;
   align-items: center;
   padding: 10px 20px;
-  background: $colour-secondary;
+  background: $color-secondary;
   color: white;
-  border-radius: 25px;
+  border-radius: var(--radius-xl, 1.25rem);
   text-decoration: none;
   font-weight: 500;
+  transition: all var(--transition-fast);
 
   &:hover {
-    background: darken($colour-secondary, 10%);
+    background: darken($color-secondary, 10%);
     color: white;
   }
 }

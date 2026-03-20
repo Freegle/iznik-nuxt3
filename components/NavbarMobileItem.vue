@@ -96,7 +96,7 @@ defineEmits(['click', 'mousedown'])
 .nav-icon {
   width: 24px !important;
   height: 24px !important;
-  color: #757575;
+  color: var(--color-gray-600);
 
   @include media-breakpoint-up(md) {
     width: 28px !important;
@@ -107,7 +107,7 @@ defineEmits(['click', 'mousedown'])
 .nav-label {
   font-size: 10px;
   font-weight: 500;
-  color: #757575;
+  color: var(--color-gray-600);
   line-height: 1;
   text-align: center;
   white-space: nowrap;
@@ -127,7 +127,7 @@ defineEmits(['click', 'mousedown'])
   color: white;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,11 +141,13 @@ defineEmits(['click', 'mousedown'])
   }
 
   &.badge-info {
-    background: #17a2b8;
+    background: $color-secondary;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 
   &.badge-danger {
-    background: #ef5350;
+    background: var(--color-danger);
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 

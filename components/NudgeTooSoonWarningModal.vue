@@ -73,7 +73,7 @@ const { modal, hide } = useOurModal()
 
 .nudge-reminder {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin: 0;
 }
 

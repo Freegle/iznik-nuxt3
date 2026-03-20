@@ -85,10 +85,6 @@ const update = (newVal, oldVal) => {
 }
 
 :deep(input) {
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  border-top-left-radius: 0 !important;
-  border-top-right-radius: 0 !important;
   font-size: 1.6rem !important;
   line-height: 2rem !important;
   padding-top: 0.45rem !important;

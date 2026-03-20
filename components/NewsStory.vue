@@ -10,7 +10,7 @@
       <b-col>
         <b-card no-body>
           <b-card-header
-            class="font-weight-bold"
+            class="fw-bold"
             bg-variant="primary"
             text-variant="white"
           >
@@ -51,7 +51,7 @@
               v-if="body"
               :text="body"
               :max-chars="500"
-              class="font-weight-bold preline forcebreak nopara"
+              class="fw-bold preline forcebreak nopara"
             />
           </b-card-text>
         </b-card>
@@ -66,20 +66,20 @@
         <b-button
           variant="link"
           size="sm"
-          class="d-inline-block mr-1"
+          class="d-inline-block me-1"
           @click="share"
         >
           <v-icon icon="share-alt" /><span class="d-none d-inline-block-md">
             Share</span
           >
         </b-button>
-        <b-button variant="secondary" to="/stories" size="sm" class="mr-1">
-          <v-icon icon="book-open" class="mr-1" />
+        <b-button variant="secondary" to="/stories" size="sm" class="me-1">
+          <v-icon icon="book-open" class="me-1" />
           <span class="d-none d-inline-block-md">More stories</span>
           <span class="d-inline-block d-none-md">More</span>
         </b-button>
         <b-button variant="primary" size="sm" @click="showAddModal">
-          <v-icon icon="book-open" class="mr-1" />
+          <v-icon icon="book-open" class="me-1" />
           <span class="d-none d-inline-block-md">Tell your story!</span>
           <span class="d-inline-block d-none-md">Tell yours</span>
         </b-button>

@@ -96,7 +96,7 @@ defineProps({
   justify-content: center;
   font-size: 12px;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .unread-badge {
@@ -106,11 +106,11 @@ defineProps({
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: #ef5350;
+  background: var(--color-danger);
   color: white;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: var(--radius-md, 0.5rem);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -6,7 +6,7 @@
         :userid="member.userid"
         :groupid="member.groupid"
         :banned="Boolean(member.bandate)"
-        class="mr-1"
+        class="me-1"
         :spam="spam"
       />
       <ModMemberButton
@@ -90,7 +90,7 @@
         :userid="member.userid"
         :groupid="member.groupid"
         :banned="Boolean(member.bandate)"
-        class="mr-1"
+        class="me-1"
       />
       <ModMemberButton
         v-if="spamignore && member.suspectreason"
@@ -101,7 +101,7 @@
         label="Ignore"
       />
       <ModMemberButton
-        class="ml-1 mr-1"
+        class="ms-1 me-1"
         :member="member"
         variant="white"
         icon="envelope"
@@ -118,7 +118,7 @@
         :label="stdmsg.title"
         :stdmsgid="stdmsg.id"
         :member="member"
-        class="mr-1"
+        class="me-1"
         :autosend="Boolean(stdmsg.autosend && allowAutoSend)"
       />
       <b-button
@@ -138,7 +138,7 @@
           :width="150"
           :font-size="14"
           :sync="true"
-          class="mr-1"
+          class="me-1"
           :labels="{ checked: 'Allow autosend', unchecked: 'Edit first' }"
           variant="modgreen"
         />

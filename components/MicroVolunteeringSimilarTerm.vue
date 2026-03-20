@@ -2,7 +2,7 @@
   <div>
     <b-button
       v-if="similar"
-      class="selected font-weight-bold"
+      class="selected fw-bold"
       variant="white"
       size="lg"
       @click="emit('not')"
@@ -11,7 +11,7 @@
     </b-button>
     <b-button
       v-else
-      class="unselected font-weight-bold"
+      class="unselected fw-bold"
       variant="white"
       size="lg"
       @click="emit('similar')"
@@ -42,14 +42,16 @@ const similar = computed(() => {
 </script>
 <style scoped lang="scss">
 .selected {
-  background-color: $colour-secondary !important;
-  border-color: $color-blue--2 !important;
+  background-color: $color-secondary !important;
+  border-color: #204D74 !important;
   color: $color-white !important;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .unselected {
   background-color: $color-white !important;
   border-color: $color-green--dark !important;
   color: $color-black !important;
+  border-radius: var(--radius-md, 0.375rem);
 }
 </style>

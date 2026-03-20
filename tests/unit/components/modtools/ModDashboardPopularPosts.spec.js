@@ -366,9 +366,9 @@ describe('ModDashboardPopularPosts', () => {
     it('applies text-success class to subjects', () => {
       mockPopularPosts.value = mockPosts
       const wrapper = mountComponent()
-      // The subject is in a col with text-success font-weight-bold class
+      // The subject is in a col with text-success fw-bold class
       expect(wrapper.html()).toContain('text-success')
-      expect(wrapper.html()).toContain('font-weight-bold')
+      expect(wrapper.html()).toContain('fw-bold')
     })
   })
 })

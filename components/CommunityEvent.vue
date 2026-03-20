@@ -240,7 +240,7 @@ function showEventModal() {
 
 .event-card {
   background: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -260,7 +260,7 @@ function showEventModal() {
 .event-card__title {
   flex: 1;
   min-width: 0;
-  color: $color-blue--base;
+  color: var(--color-link);
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -135,7 +135,7 @@
               <b-form-select
                 v-model="modconfig"
                 :options="modConfigOptions"
-                class="mb-2 font-weight-bold"
+                class="mb-2 fw-bold"
               />
             </b-form-group>
           </b-card-body>
@@ -262,25 +262,25 @@
                   :groupid="groupid"
                   name="settings.keywords.offer"
                   label="OFFER keyword"
-                  class="mr-2"
+                  class="me-2"
                 />
                 <ModGroupSetting
                   :groupid="groupid"
                   name="settings.keywords.taken"
                   label="TAKEN keyword"
-                  class="mr-2"
+                  class="me-2"
                 />
                 <ModGroupSetting
                   :groupid="groupid"
                   name="settings.keywords.wanted"
                   label="WANTED keyword"
-                  class="mr-2"
+                  class="me-2"
                 />
                 <ModGroupSetting
                   :groupid="groupid"
                   name="settings.keywords.received"
                   label="RECEIVED keyword"
-                  class="mr-2"
+                  class="me-2"
                 />
               </div>
             </b-form-group>
@@ -320,8 +320,8 @@
               Only owners can change these rules.
             </p>
             <div class="d-flex flex-wrap">
-              <strong class="mr-1 mt-2">Copy rules from:</strong>
-              <ModGroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
+              <strong class="me-1 mt-2">Copy rules from:</strong>
+              <ModGroupSelect v-model="copyfrom" modonly class="mb-2 me-2" />
               <div>
                 <SpinButton
                   variant="white"
@@ -477,35 +477,35 @@
               name="settings.maxagetoshow"
               label="Expire posts"
               description="Posts will be considered as expired (i.e. no longer available) after the greater of this number of days and the maximum duration of autoreposts (i.e. max * repost time).  Set to 0 to use the default of 30 days. Max 90 days."
-              class="mr-2"
+              class="me-2"
             />
             <ModGroupSetting
               :groupid="groupid"
               name="settings.reposts.chaseups"
               label="Chaseup"
               description="Ask what's happening with the item this number of days after the last reply (0 to disable)"
-              class="mr-2"
+              class="me-2"
             />
             <ModGroupSetting
               :groupid="groupid"
               name="settings.reposts.max"
               label="Max auto-reposts"
               description="Auto-reposting is proven to help more posts get replies. We mail the member before auto-reposting so that they can choose what happens.  0 to disable."
-              class="mr-2"
+              class="me-2"
             />
             <ModGroupSetting
               :groupid="groupid"
               name="settings.reposts.offer"
               label="OFFER repost time"
               description="Controls when the member can manually repost, and when auto-repost kicks in.  0 = always show manual Repost button."
-              class="mr-2"
+              class="me-2"
             />
             <ModGroupSetting
               :groupid="groupid"
               name="settings.reposts.wanted"
               label="WANTED repost time"
               description="Controls when the member can manually repost, and when auto-repost kicks in.  0 = always show manual Repost button."
-              class="mr-2"
+              class="me-2"
             />
             <NoticeMessage variant="warning">
               The following setting will soon be retired in favour of the "post
@@ -739,25 +739,25 @@
                 :groupid="groupid"
                 name="settings.duplicates.offer"
                 label="OFFER duplicate period"
-                class="mr-2"
+                class="me-2"
               />
               <ModGroupSetting
                 :groupid="groupid"
                 name="settings.duplicates.taken"
                 label="TAKEN duplicate period"
-                class="mr-2"
+                class="me-2"
               />
               <ModGroupSetting
                 :groupid="groupid"
                 name="settings.duplicates.wanted"
                 label="WANTED duplicate period"
-                class="mr-2"
+                class="me-2"
               />
               <ModGroupSetting
                 :groupid="groupid"
                 name="settings.duplicates.received"
                 label="RECEIVED duplicate period"
-                class="mr-2"
+                class="me-2"
               />
             </div>
             <b-form-text class="mb-2"> All periods are in days. </b-form-text>
@@ -796,7 +796,7 @@
               <b-form-select
                 v-model="region"
                 :options="regionOptions"
-                class="font-weight-bold"
+                class="fw-bold"
                 :disabled="!supportOrAdmin"
               />
             </b-form-group>
@@ -862,7 +862,7 @@
               name="settings.map.zoom"
               label="Default zoom for maps"
               description="Where we show maps on the site for this community, which Google zoom level should we use?"
-              class="mr-2"
+              class="me-2"
             />
           </b-card-body>
         </b-collapse>
@@ -1545,6 +1545,6 @@ select {
 
 .card {
   border-width: medium;
-  border-color: $colour-success-border;
+  border-color: $color-success-border;
 }
 </style>

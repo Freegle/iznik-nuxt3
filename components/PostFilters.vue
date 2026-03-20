@@ -335,23 +335,17 @@ const sort = computed({
   border-color: $color-white !important;
 }
 
-// Remove curved corners from form controls
+// Let Bootstrap handle input-group radius (first/last child logic).
+// Only override standalone controls outside input-groups.
 :deep(.form-select),
-:deep(.form-control),
+:deep(.form-control:not(.input-group .form-control)),
 :deep(select),
-:deep(input) {
-  border-radius: 0 !important;
+:deep(input:not(.input-group input)) {
+  border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
-:deep(.input-group) {
-  .form-control,
-  .btn {
-    border-radius: 0 !important;
-  }
-}
-
-:deep(.btn) {
-  border-radius: 0 !important;
+:deep(.btn:not(.input-group .btn)) {
+  border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
 // Compact labels for mobile
@@ -424,7 +418,7 @@ const sort = computed({
 // Help text - hidden on mobile
 .help-text {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: 0.5rem;
   margin-bottom: 0;
 }

@@ -2,7 +2,7 @@
   <client-only v-if="me">
     <b-container fluid class="p-0 chitchat-page">
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="p-0 pr-1">
+        <b-col cols="0" lg="3" class="p-0 pe-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarLeft show-community-events show-volunteer-opportunities />
           </VisibleWhen>
@@ -170,7 +170,7 @@
             </div>
           </div>
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
+        <b-col cols="0" lg="3" class="p-0 ps-1">
           <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight
               :show-job-opportunities="false"
@@ -707,8 +707,8 @@ if (me.value) {
 
 .composer-card {
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
@@ -720,14 +720,14 @@ if (me.value) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
   .header-icon {
-    color: $colour-success;
+    color: $color-success;
     font-size: 1.1rem;
   }
 
   .header-title {
     font-weight: 600;
     font-size: 1rem;
-    color: $colour-success;
+    color: $color-success;
   }
 }
 
@@ -736,12 +736,13 @@ if (me.value) {
 }
 
 .composer-textarea {
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid $color-gray-4;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 0.875rem;
   font-size: 1rem;
   resize: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
 
   &:focus {
     border-color: $color-green-background;
@@ -751,7 +752,7 @@ if (me.value) {
 }
 
 .uploaded-preview {
-  border-radius: 2px;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .composer-actions {
@@ -765,11 +766,11 @@ if (me.value) {
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 0.375rem);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   border: none;
 
   span {
@@ -780,11 +781,12 @@ if (me.value) {
 }
 
 .photo-btn {
-  background: $color-gray--lighter;
-  color: $color-gray--darker;
+  background: var(--color-gray-200);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-900);
 
   &:hover {
-    background: darken($color-gray--lighter, 5%);
+    background: var(--color-gray-300);
   }
 }
 
@@ -809,7 +811,7 @@ if (me.value) {
   gap: 0.375rem;
   margin: 0.75rem 0 0 0;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   .hint-icon {
     font-size: 0.75rem;
@@ -821,7 +823,7 @@ if (me.value) {
   margin-top: 0;
   background: white;
   padding: 0.5rem 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -847,8 +849,8 @@ if (me.value) {
 .filter-select {
   flex: 1;
   min-width: 150px;
-  border-radius: 3px;
-  border-color: #e0e0e0;
+  border-radius: var(--radius-sm, 0.375rem);
+  border-color: $color-gray-4;
   font-size: 0.9rem;
 
   &:focus {
@@ -881,9 +883,9 @@ if (me.value) {
 
   // Modernize post cards on mobile
   :deep(.card) {
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
     border: none;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 0.75rem;
     overflow: hidden;
   }
@@ -921,12 +923,12 @@ if (me.value) {
 
   // Clean up reply input area
   :deep(.input-group) {
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
     overflow: hidden;
 
     .form-control {
-      border-radius: 4px;
-      border: 1px solid #e0e0e0;
+      border-radius: var(--radius-sm, 0.375rem);
+      border: 1px solid $color-gray-4;
       font-size: 0.9rem;
 
       &:focus {
@@ -942,7 +944,7 @@ if (me.value) {
   }
 
   // Better spacing for nested replies
-  :deep(.ml-2),
+  :deep(.ms-2),
   :deep(.ms-2) {
     margin-left: 0.75rem !important;
   }
@@ -966,7 +968,7 @@ if (me.value) {
 
 .up-to-date-card {
   margin: 0.5rem 0;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-sm, 0.375rem);
+  box-shadow: var(--shadow-sm);
 }
 </style>

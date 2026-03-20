@@ -16,7 +16,7 @@
           :width="130"
           :sync="true"
           :labels="{ checked: 'New line', unchecked: 'Send' }"
-          color="#61AE24"
+          :color="toggleColor"
           @change="changeNewLine"
         />
       </div>
@@ -34,7 +34,7 @@
           :width="100"
           :sync="true"
           :labels="{ checked: 'On', unchecked: 'Off' }"
-          color="#61AE24"
+          :color="toggleColor"
           @change="changeAutorepost"
         />
       </div>
@@ -49,7 +49,7 @@
           :width="100"
           :sync="true"
           :labels="{ checked: 'On', unchecked: 'Off' }"
-          color="#61AE24"
+          :color="toggleColor"
           @change="changeMarketingConsent"
         />
       </div>
@@ -70,6 +70,9 @@ const authStore = useAuthStore()
 const miscStore = useMiscStore()
 
 const { me } = useMe()
+
+// Brand color for toggle switches
+const toggleColor = '#61AE24'
 
 // State
 const autorepostsLocal = ref(true)
@@ -115,8 +118,8 @@ watch(
 
 .settings-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -174,7 +177,7 @@ watch(
 
 .option-desc {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 
   a {
     color: $color-blue--bright;

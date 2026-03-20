@@ -8,7 +8,7 @@
             <NoticeMessage
               v-if="editing && !message.lat && !message.lng"
               variant="danger"
-              class="mb-2 mr-2"
+              class="mb-2 me-2"
             >
               This message needs editing so that we know where it is. Please put
               in a postcode (it doesn't have to be exactly right - do your best
@@ -26,7 +26,7 @@
               <ModGroupSelect
                 v-model="editgroup"
                 modonly
-                class="mr-1"
+                class="me-1"
                 size="lg"
                 :disabled-except-for="memberGroupIds"
                 :disabled="editmessage.fromuser?.tnuserid"
@@ -38,13 +38,13 @@
                 <b-form-select
                   v-model="editmessage.type"
                   :options="typeOptions"
-                  class="type mr-1"
+                  class="type me-1"
                   size="lg"
                 />
                 <b-form-input
                   v-model="editmessage.item.name"
                   size="lg"
-                  class="mr-1"
+                  class="me-1"
                 />
               </div>
               <div v-if="editmessage.item && editmessage.location">
@@ -60,13 +60,13 @@
                 v-else
                 class="flex-grow-1 pl-0 pl-md-2 pr-0 pr-md-2 fullsubject"
               >
-                <label class="mr-2">Subject:</label>
+                <label class="me-2">Subject:</label>
                 <b-form-input v-model="editmessage.subject" size="lg" />
-                <label class="mr-2">Post type:</label>
+                <label class="me-2">Post type:</label>
                 <b-form-select
                   v-model="editmessage.type"
                   :options="typeOptions"
-                  class="type mr-1"
+                  class="type me-1"
                   size="lg"
                 />
               </div>
@@ -75,9 +75,9 @@
               v-else-if="editreview && oldSubject && newSubject"
               :old="oldSubject"
               :new="newSubject"
-              class="font-weight-bold"
+              class="fw-bold"
             />
-            <div v-else :class="subjectClass + ' font-weight-bold'">
+            <div v-else :class="subjectClass + ' fw-bold'">
               <Highlighter
                 v-if="message.matchedon"
                 :search-words="[String(message.matchedon.word)]"
@@ -155,7 +155,7 @@
           <div class="d-flex">
             <div
               v-if="summary && message && message.fromuser"
-              class="text-info font-weight-bold mr-2"
+              class="text-info fw-bold me-2"
             >
               {{ message.fromuser.displayname }}
             </div>
@@ -186,7 +186,7 @@
                   @handle="backToPending"
                 />
               </div>
-              <div class="ml-2">
+              <div class="ms-2">
                 <b-button
                   v-if="summary"
                   variant="white"
@@ -314,26 +314,26 @@
               <div v-else-if="editreview">
                 <h4>Differences:</h4>
                 <ModDiff
-                  class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold"
+                  class="mb-3 rounded border border-warning p-2 preline forcebreak fw-bold"
                   :old="oldBody"
                   :new="newBody"
                 />
                 <h4>New version:</h4>
                 <div
-                  class="mb-3 rounded border border-success p-2 preline forcebreak font-weight-bold"
+                  class="mb-3 rounded border border-success p-2 preline forcebreak fw-bold"
                 >
                   {{ newBody }}
                 </div>
               </div>
               <div
                 v-else-if="!eBody"
-                class="mb-3 rounded border p-2 preline forcebreak font-weight-bold"
+                class="mb-3 rounded border p-2 preline forcebreak fw-bold"
               >
                 <em>This message is blank.</em>
               </div>
               <div
                 v-else
-                class="mb-3 rounded border p-2 preline forcebreak font-weight-bold"
+                class="mb-3 rounded border p-2 preline forcebreak fw-bold"
               >
                 <Highlighter
                   v-if="message.matchedon"
@@ -352,17 +352,15 @@
                   :key="'attachment-' + attachment.id"
                   :class="{
                     'd-inline': true,
-                    'pr-1': true,
+                    'pe-1': true,
                     addedImage: imageAdded(attachment.id),
                     removeImage: imageRemoved(attachment.id),
                   }"
                 >
-                  <div class="addedMessage pl-2 font-weight-bold text-success">
+                  <div class="addedMessage ps-2 fw-bold text-success">
                     Added
                   </div>
-                  <div
-                    class="removedMessage pl-2 font-weight-bold text-warning"
-                  >
+                  <div class="removedMessage ps-2 fw-bold text-warning">
                     Removed
                   </div>
                   <ModPhoto :message="message" :attachment="attachment" />
@@ -575,7 +573,7 @@
         <b-button
           v-if="editing"
           variant="secondary"
-          class="mr-auto"
+          class="me-auto"
           @click="photoAdd"
         >
           <v-icon icon="camera" />&nbsp;Add photo

@@ -4,7 +4,7 @@
       <div class="d-flex flex-column justify-content-around">
         <b-button
           variant="white "
-          class="mr-1"
+          class="me-1"
           size="xs"
           @click="zoom = Math.max(1, zoom - 0.1)"
         >
@@ -12,14 +12,14 @@
         </b-button>
       </div>
       <div
-        class="d-flex flex-column justify-content-around ml-1 mr-1 ml-md-4 mr-md-4"
+        class="d-flex flex-column justify-content-around ms-1 me-1 ml-md-4 mr-md-4"
       >
         <div class="small">Drag image around</div>
       </div>
       <div class="d-flex flex-column justify-content-around">
         <b-button
           variant="white"
-          class="mr-1"
+          class="me-1"
           size="xs"
           @click="zoom = Math.min(10, zoom + 0.1)"
         >

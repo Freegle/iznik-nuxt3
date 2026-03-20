@@ -304,9 +304,9 @@ describe('ModMessageWorry', () => {
       expect(wrapper.find('.notice-message.mb-1').exists()).toBe(true)
     })
 
-    it('keyword has text-danger and font-weight-bold classes', () => {
+    it('keyword has text-danger and fw-bold classes', () => {
       const wrapper = mountComponent()
-      const keywordSpan = wrapper.find('span.text-danger.font-weight-bold')
+      const keywordSpan = wrapper.find('span.text-danger.fw-bold')
       expect(keywordSpan.exists()).toBe(true)
     })
 

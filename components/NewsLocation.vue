@@ -13,7 +13,7 @@
             v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
-            class="ml-1"
+            class="ms-1"
             >{{ areaname }}</span
           >
         </div>
@@ -25,7 +25,7 @@
             v-b-tooltip="
               'This is where other people will see that you are.  Change your location from Settings.'
             "
-            class="ml-1"
+            class="ms-1"
             >{{ areaname }}</span
           >
         </div>

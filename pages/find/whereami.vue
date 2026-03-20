@@ -108,13 +108,13 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 
 .location-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .stepper-container {
   background: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 
   @include media-breakpoint-up(lg) {
     padding: 1.5rem 2rem;
@@ -134,7 +134,7 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 .location-card {
   background: white;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .location-title {
@@ -146,7 +146,7 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 }
 
 .location-subtitle {
-  color: #6b7280;
+  color: $color-gray--normal;
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -162,8 +162,8 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 }
 
 .community-card {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-gray-50);
+  border: 1px solid $color-gray-3;
   padding: 1.25rem;
   text-align: center;
 }
@@ -183,7 +183,7 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 
 .community-label {
   font-weight: 600;
-  color: #374151;
+  color: var(--color-gray-700);
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -206,7 +206,7 @@ const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
 
 .community-hint {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: $color-gray--base;
   margin-bottom: 0;
 }
 

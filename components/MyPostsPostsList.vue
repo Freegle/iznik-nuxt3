@@ -248,7 +248,7 @@ const upcomingTrysts = computed(() => {
   min-height: 300px;
   padding: 40px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   opacity: 0;
   animation: fadeIn 0.2s ease-in forwards;
   animation-delay: 0.3s;
@@ -269,10 +269,10 @@ const upcomingTrysts = computed(() => {
   margin-bottom: 12px;
   background: white;
   border: 1px solid $color-gray--light;
-  color: $colour-success;
+  color: $color-success;
   font-weight: 500;
   font-size: 0.9rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .old-posts-toggle {
@@ -287,12 +287,12 @@ const upcomingTrysts = computed(() => {
   padding: 10px 16px;
   background: white;
   border: 1px solid $color-gray--light;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 
   &:hover {
     background: $color-gray--lighter;
@@ -302,10 +302,10 @@ const upcomingTrysts = computed(() => {
 
 .collections-card {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 16px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   border-left: 4px solid $color-blue--bright;
 }
 
@@ -350,7 +350,7 @@ const upcomingTrysts = computed(() => {
 
 .collection-details {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .posts-container {
@@ -362,7 +362,7 @@ const upcomingTrysts = computed(() => {
 .loading-placeholder {
   background: white;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .loading-placeholder::before {
@@ -384,21 +384,24 @@ const upcomingTrysts = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 3rem 1.5rem;
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg, 0.75rem);
+  border: 1px dashed var(--color-gray-300);
+  max-width: 480px;
+  margin: 1rem auto;
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: $color-gray--base;
-  margin-bottom: 16px;
+  color: var(--color-gray-400);
+  margin-bottom: 1rem;
 }
 
 .empty-text {
   font-size: 1.1rem;
-  color: $color-gray--dark;
-  margin-bottom: 20px;
+  color: var(--color-gray-600);
+  margin-bottom: 1.25rem;
 }
 
 .empty-actions {
@@ -423,21 +426,21 @@ const upcomingTrysts = computed(() => {
   }
 
   &--give {
-    background: $colour-success;
+    background: $color-success;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-success, 5%);
+      background: darken($color-success, 5%);
       color: $color-white;
     }
   }
 
   &--find {
-    background: $colour-secondary;
+    background: $color-secondary;
     color: $color-white;
 
     &:hover {
-      background: darken($colour-secondary, 5%);
+      background: darken($color-secondary, 5%);
       color: $color-white;
     }
   }

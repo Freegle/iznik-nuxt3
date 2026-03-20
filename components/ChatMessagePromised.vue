@@ -13,7 +13,7 @@
           <ProfileImage
             :image="otheruser?.profile?.paththumb"
             :name="otheruser?.displayname"
-            class="mr-2 inline"
+            class="me-2 inline"
             is-thumbnail
             size="sm"
           />
@@ -42,7 +42,7 @@
             v-if="
               chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
             "
-            class="prewrap font-weight-bold"
+            class="prewrap fw-bold"
             >{{ emessage }}</span
           >
           <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -63,7 +63,7 @@
           <ProfileImage
             :image="me?.profile?.path"
             :name="me?.displayname"
-            class="mr-2 inline"
+            class="me-2 inline"
             is-thumbnail
             size="sm"
           />
@@ -84,13 +84,13 @@
             <AddToCalendar
               v-if="tryst?.calendarLink"
               :calendar-link="tryst.calendarLink"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
             />
             <b-button
               v-if="refmsg.promisecount && refmsg.availablenow"
               variant="secondary"
               size="sm"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @click="changeTime"
             >
               <v-icon icon="pen" />
@@ -101,7 +101,7 @@
             <b-button
               variant="secondary"
               size="sm"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @click="changeTime"
             >
               <v-icon icon="pen" />
@@ -112,7 +112,7 @@
             v-if="refmsg.promisecount && refmsg.availablenow"
             variant="warning"
             size="sm"
-            class="mr-2 mb-1"
+            class="me-2 mb-1"
             @click="unpromise"
           >
             Unpromise
@@ -145,7 +145,7 @@
             v-if="
               chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
             "
-            class="prewrap font-weight-bold"
+            class="prewrap fw-bold"
             >{{ emessage }}</span
           >
           <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -322,11 +322,11 @@ async function outcome(type) {
 }
 
 .promised-wrapper {
-  background-color: #ffffff;
+  background-color: $color-white;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .promised-header {
@@ -337,7 +337,7 @@ async function outcome(type) {
 
 .promised-label {
   font-size: 0.85rem;
-  color: #333;
+  color: $color-gray--darker;
 }
 
 .promised-actions {
@@ -350,6 +350,6 @@ async function outcome(type) {
   font-size: 0.9rem;
   padding: 8px;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 </style>

@@ -131,10 +131,10 @@ const block = (e) => {
 @import 'assets/css/message-images.scss';
 
 .item {
-  color: $colour-info-fg !important;
+  color: $color-info-fg !important;
 
   a {
-    color: $colour-info-fg !important;
+    color: $color-info-fg !important;
   }
 
   font-weight: bold !important;

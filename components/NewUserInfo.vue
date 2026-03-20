@@ -118,7 +118,7 @@ async function setPassword(callback) {
 
   .welcome-icon {
     font-size: 2.5rem;
-    color: $colour-success;
+    color: $color-success;
     margin-bottom: 0.75rem;
   }
 
@@ -131,7 +131,7 @@ async function setPassword(callback) {
 
   .welcome-subtitle {
     font-size: 0.9rem;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
@@ -139,8 +139,9 @@ async function setPassword(callback) {
 .info-card {
   background: white;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card-header {
@@ -152,7 +153,7 @@ async function setPassword(callback) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   .header-icon {
-    color: $colour-success;
+    color: $color-success;
   }
 
   .header-title {
@@ -171,7 +172,7 @@ async function setPassword(callback) {
 .password-alt,
 .email-intro {
   font-size: 0.9rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
   text-align: center;
 }
@@ -185,7 +186,7 @@ async function setPassword(callback) {
   .password-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: $colour-success;
+    color: $color-success;
     letter-spacing: 0.1em;
   }
 }

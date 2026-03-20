@@ -85,7 +85,7 @@
         @handle="send"
       />
       <div v-if="alerts && alerts.length">
-        <b-row class="font-weight-bold">
+        <b-row class="fw-bold">
           <b-col cols="6" lg="2"> Created </b-col>
           <b-col cols="6" lg="2"> Complete </b-col>
           <b-col cols="6" lg="2"> To </b-col>

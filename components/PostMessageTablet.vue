@@ -241,7 +241,7 @@ function $id(type) {
 @import 'assets/css/_color-vars.scss';
 
 .post-tablet {
-  background: #f8f9fa;
+  background: $color-gray--lighter;
   min-height: 100%;
 }
 
@@ -269,9 +269,9 @@ function $id(type) {
 
 /* Photo section */
 .photo-section {
-  background: white;
+  background: $color-white;
   padding: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
 }
@@ -284,9 +284,10 @@ function $id(type) {
 }
 
 .detail-card {
-  background: white;
+  background: $color-white;
   padding: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .detail-card-grow {
@@ -304,7 +305,7 @@ function $id(type) {
   display: block;
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
+  color: $color-gray--darker;
   margin-bottom: 0.75rem;
 }
 
@@ -312,8 +313,8 @@ function $id(type) {
   :deep(input) {
     font-size: 1.1rem;
     padding: 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
-    transition: border-color 0.2s;
+    border: 2px solid $color-gray-4;
+    transition: border-color var(--transition-normal);
 
     &:focus {
       border-color: $color-green-background;
@@ -329,10 +330,10 @@ function $id(type) {
 .detail-textarea {
   font-size: 1rem;
   padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid $color-gray-4;
   resize: vertical;
   min-height: 120px;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
 
   &:focus {
     border-color: $color-green-background;

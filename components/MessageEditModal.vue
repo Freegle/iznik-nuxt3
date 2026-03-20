@@ -316,7 +316,7 @@ function onModalHidden() {
 
 /* Modal body background and height constraint for sticky ads */
 :deep(.edit-modal-body) {
-  background: #f8f9fa;
+  background: $color-gray--lighter;
   padding: 0.5rem;
   max-height: calc(100vh - 200px) !important;
 
@@ -337,7 +337,7 @@ function onModalHidden() {
 .form-card {
   background: white;
   padding: 0.875rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Row layout for combined fields - space between */
@@ -369,7 +369,7 @@ function onModalHidden() {
   display: block;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-gray-700);
   margin-bottom: 0.375rem;
 }
 
@@ -378,8 +378,8 @@ function onModalHidden() {
   :deep(input) {
     font-size: 1rem;
     padding: 0.5rem 0.75rem;
-    border: 2px solid #e5e7eb;
-    transition: border-color 0.2s;
+    border: 2px solid $color-gray-3;
+    transition: border-color var(--transition-normal);
 
     &:focus {
       border-color: $color-green-background;
@@ -395,10 +395,10 @@ function onModalHidden() {
 .form-textarea {
   font-size: 0.95rem;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid $color-gray-3;
   resize: vertical;
   min-height: 80px;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
 
   &:focus {
     border-color: $color-green-background;
@@ -409,9 +409,9 @@ function onModalHidden() {
 .form-select {
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid $color-gray-3;
   text-transform: uppercase;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
   min-height: 42px;
   width: 100%;
 
@@ -424,8 +424,8 @@ function onModalHidden() {
 .form-date {
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e5e7eb;
-  transition: border-color 0.2s;
+  border: 2px solid $color-gray-3;
+  transition: border-color var(--transition-normal);
   min-height: 42px;
   width: 100%;
 
@@ -455,7 +455,7 @@ function onModalHidden() {
 
 /* PostCode styling */
 :deep(.autocomplete-wrap) {
-  border: 2px solid #e5e7eb !important;
+  border: 2px solid $color-gray-3 !important;
   min-height: 42px;
 
   input {
@@ -535,9 +535,9 @@ function onModalHidden() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #e5e7eb;
-  border-radius: 8px;
-  background: #f9fafb;
+  border: 2px dashed $color-gray-3;
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--color-gray-50);
 
   :deep(.wrapper) {
     width: 100% !important;

@@ -99,6 +99,7 @@ function filterNonsense(val) {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
 
 .mosaic-tile {
   flex-shrink: 0;
@@ -116,7 +117,7 @@ function filterNonsense(val) {
     text-decoration: none;
 
     .mosaic-title {
-      color: #61ae24;
+      color: $color-green-background;
     }
   }
 }
@@ -154,7 +155,7 @@ function filterNonsense(val) {
   line-height: 1.2;
   min-height: calc(2 * 1.2 * 0.75rem);
   text-align: center;
-  transition: color 0.15s ease;
+  transition: color var(--transition-fast);
 }
 
 .mosaic-location {

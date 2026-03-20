@@ -43,7 +43,7 @@
           <nav
             id="navbar_large"
             data-v-454188a5=""
-            class="navbar fixed-top navbar-expand ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+            class="navbar fixed-top navbar-expand ourBack d-none d-xl-flex ps-1 pe-2 navbar-dark navbar-expand-xl"
           >
             <div class="container-fluid">
               <a
@@ -51,7 +51,7 @@
                 aria-current="page"
                 href="/"
                 class="router-link-active router-link-exact-active navbar-brand p-0"
-                ><picture data-v-454188a5="" class="logo mr-2"
+                ><picture data-v-454188a5="" class="logo me-2"
                   ><source
                     type="image/webp"
                     sizes="58px"
@@ -70,11 +70,11 @@
                       https://delivery.ilovefreegle.org/?filename=icon.png&we&w=116&output=png&fit=inside&url=https://www.ilovefreegle.org/icon.png 116w
                     " /></picture></a
               ><!----><!---->
-              <div data-v-454188a5="" class="navbar-nav ml-auto">
+              <div data-v-454188a5="" class="navbar-nav ms-auto">
                 <div data-v-454188a5="" class="nav-item" no-prefetch="">
                   <button
                     data-v-454188a5=""
-                    class="btn btn-md btn-white mr-2 test-signinbutton"
+                    class="btn btn-md btn-white me-2 test-signinbutton"
                     disabled
                     type="button"
                   >
@@ -93,7 +93,7 @@
               <div />
               <div class="d-flex align-items-center">
                 <ul class="nav">
-                  <a><div class="btn btn-white mr-2">Log in or Join</div></a>
+                  <a><div class="btn btn-white me-2">Log in or Join</div></a>
                 </ul>
               </div>
             </div>

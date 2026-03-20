@@ -19,9 +19,9 @@
             </div>
           </div>
           <div v-else>
-            <div class="d-flex pl-1 bg-white">
+            <div class="d-flex ps-1 bg-white">
               <b-img thumbnail src="/icon.png" class="titlelogo" />
-              <div class="ml-2">
+              <div class="ms-2">
                 <h2>Freegle</h2>
                 <h5>
                   Give and get stuff for free in your local community. Don't

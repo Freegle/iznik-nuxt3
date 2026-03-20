@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button variant="white" class="mr-2 mb-1" @click="view">
+    <b-button variant="white" class="me-2 mb-1" @click="view">
       <v-icon icon="comments" /> View Chat
     </b-button>
     <NoticeMessage v-if="showModal && !id" variant="warning" class="mt-2">

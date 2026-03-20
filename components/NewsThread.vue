@@ -124,7 +124,7 @@
           :scroll-to="scrollDownTo"
           :reply-to="replyingTo"
           :depth="1"
-          :class="newsfeed.deleted ? 'strike mr-1' : 'mr-1'"
+          :class="newsfeed.deleted ? 'strike me-1' : 'me-1'"
           @rendered="rendered"
         />
         <span v-if="!newsfeed?.closed">
@@ -138,7 +138,7 @@
             >
               <b-input-group>
                 <slot name="prepend">
-                  <span class="input-group-text pl-1 pr-1">
+                  <span class="input-group-text ps-1 pe-1">
                     <ProfileImage
                       v-if="me.profile.path"
                       :image="me.profile.path"
@@ -158,7 +158,7 @@
                   maxlength="2048"
                   spellcheck="true"
                   placeholder="Write a comment on this thread..."
-                  class="p-0 pl-1 pt-1 enternewline"
+                  class="p-0 ps-1 pt-1 enternewline"
                   @focus="focusedComment"
                 />
               </b-input-group>
@@ -178,7 +178,7 @@
             >
               <b-input-group>
                 <slot name="prepend">
-                  <span class="input-group-text pl-2 pr-1">
+                  <span class="input-group-text ps-2 pe-1">
                     <ProfileImage
                       v-if="me.profile.path"
                       :image="me.profile.path"
@@ -197,7 +197,7 @@
                   maxlength="2048"
                   spellcheck="true"
                   :placeholder="commentPlaceholder"
-                  class="p-0 pl-2 pt-2 entersend"
+                  class="p-0 ps-2 pt-2 entersend"
                   autocapitalize="none"
                   @keydown.enter.shift.exact.prevent="newlineComment"
                   @keydown.alt.shift.enter.exact.prevent="newlineComment"
@@ -227,7 +227,7 @@
             :modifiers="imagemods"
             alt="ChitChat Photo"
             width="100"
-            class="mt-1 ml-4 image__uploaded"
+            class="mt-1 ms-4 image__uploaded"
           />
           <NuxtPicture
             v-else-if="imageuid"
@@ -237,7 +237,7 @@
             :modifiers="imagemods"
             alt="ChitChat Photo"
             width="100"
-            class="mt-1 ml-4 image__uploaded"
+            class="mt-1 ms-4 image__uploaded"
           />
           <OurUploader
             v-if="uploading"
@@ -640,14 +640,17 @@ async function unmute() {
 
 .card__community-event {
   background-color: $color-gray-1;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card__volunteer-opportunity {
   background-color: $color-gray-2;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .card__default {
   background-color: $color-white;
+  border-radius: var(--radius-md, 0.375rem);
 }
 
 .image__uploaded {
@@ -681,11 +684,11 @@ async function unmute() {
   padding: 0.375rem 0.625rem;
   background: $color-gray--lighter;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   color: $color-gray--darker;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);
@@ -698,11 +701,11 @@ async function unmute() {
 }
 
 .send-btn {
-  background: $colour-success;
+  background: $color-success;
   color: white;
 
   &:hover:not(:disabled) {
-    background: darken($colour-success, 8%);
+    background: darken($color-success, 8%);
   }
 }
 

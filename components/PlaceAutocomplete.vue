@@ -1,6 +1,6 @@
 <template>
   <div class="test-place-autocomplete">
-    <label :for="inputId" class="smaller font-weight-bold mb-1">
+    <label :for="inputId" class="smaller fw-bold mb-1">
       <span v-if="labeltextSr" class="visually-hidden">
         {{ labeltextSr }}
       </span>

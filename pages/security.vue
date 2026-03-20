@@ -142,7 +142,7 @@ useHead(
   margin: 0 auto;
   background: white;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 
   h1 {
     font-size: 1.5rem;

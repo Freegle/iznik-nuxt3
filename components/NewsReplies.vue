@@ -304,7 +304,7 @@ function expandCombined(combinedIds) {
 .replies-container {
   margin-left: 0.5rem;
   padding-left: 0.75rem;
-  border-left: 2px solid rgba($colour-success, 0.4);
+  border-left: 2px solid rgba($color-success, 0.4);
 
   @include media-breakpoint-up(md) {
     margin-left: 1rem;
@@ -313,7 +313,7 @@ function expandCombined(combinedIds) {
 
   /* Nested replies get lighter borders */
   &.depth-2 {
-    border-left-color: rgba($colour-success, 0.25);
+    border-left-color: rgba($color-success, 0.25);
   }
 
   /* After depth 2, stop indenting further to prevent narrow columns.

@@ -157,7 +157,7 @@ onMounted(() => {
   gap: 12px;
   padding: 10px 12px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   &:hover {
@@ -206,11 +206,11 @@ onMounted(() => {
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: #ef5350;
+  background: $color-red;
   color: white;
   font-size: 10px;
   font-weight: 600;
-  border-radius: 9px;
+  border-radius: var(--radius-md, 0.5rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,7 +235,7 @@ onMounted(() => {
 .chat-name {
   font-weight: 600;
   font-size: 1rem;
-  color: #333;
+  color: $color-gray--darker;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -245,7 +245,7 @@ onMounted(() => {
 
 .chat-time {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-gray-500);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .snippet {
   font-size: 0.875rem;
-  color: #666;
+  color: var(--color-gray-600);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -273,7 +273,7 @@ onMounted(() => {
   }
 
   &.empty {
-    color: #999;
+    color: $color-gray--base;
     font-style: italic;
   }
 }
@@ -291,11 +291,11 @@ onMounted(() => {
 // Unread state styling
 .chat-entry.unread {
   .chat-name {
-    color: #000;
+    color: $color-black;
   }
 
   .snippet {
-    color: #333;
+    color: $color-gray--darker;
     font-weight: 500;
   }
 }

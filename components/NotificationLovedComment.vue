@@ -3,17 +3,17 @@
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
         :image="fromuser?.profile?.path"
-        class="mr-1 mb-1 ml-1 inline"
+        class="me-1 mb-1 ms-1 inline"
         is-thumbnail
         size="lg"
       />
     </div>
     <div class="d-flex flex-column">
       <div>
-        <span class="font-weight-bold">{{ fromuser?.displayname }}</span>
+        <span class="fw-bold">{{ fromuser?.displayname }}</span>
         loves your comment:
       </div>
-      <div v-if="newsfeed?.message" class="line-clamp-2 font-weight-bold">
+      <div v-if="newsfeed?.message" class="line-clamp-2 fw-bold">
         "{{ newsfeed.message }}"
       </div>
       <abbr class="small text-muted">{{ notificationago }}</abbr>

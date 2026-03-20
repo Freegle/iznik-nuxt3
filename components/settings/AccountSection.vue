@@ -177,8 +177,8 @@ watch(
 
 .settings-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -205,7 +205,7 @@ watch(
 
 .private-badge {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -230,13 +230,13 @@ watch(
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .other-emails-label {
   font-weight: 500;
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;

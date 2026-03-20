@@ -58,7 +58,7 @@ if (id) {
 
 .error-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,15 +72,15 @@ if (id) {
 
 .error-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   padding: 2rem;
   text-align: center;
 }
 
 .error-icon {
   font-size: 3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1rem;
 }
 
@@ -92,7 +92,7 @@ if (id) {
 }
 
 .error-message {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }

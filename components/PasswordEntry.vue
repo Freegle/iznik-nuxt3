@@ -1,9 +1,5 @@
 <template>
-  <b-form-group
-    :label="placeholder"
-    label-for="password"
-    class="font-weight-bold"
-  >
+  <b-form-group :label="placeholder" label-for="password" class="fw-bold">
     <b-input-group
       id="input-password"
       :class="errorBorder ? ' border-danger' : ''"
@@ -116,7 +112,7 @@ onMounted(() => {
   height: 100%;
   width: 100%;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .showpassword__button {

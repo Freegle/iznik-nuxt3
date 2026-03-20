@@ -89,7 +89,7 @@ const DonationButtonSimplified = defineComponent({
         @click="clicked"
       >
         <div class="d-flex align-items-center">
-          <div :id="uniqueId" ref="paypalbutton" class="mr-2" />
+          <div :id="uniqueId" ref="paypalbutton" class="me-2" />
           <div v-if="text">{{ text }}</div>
           <div v-else-if="!show">Donate</div>
           <div v-else>{{ show }}</div>

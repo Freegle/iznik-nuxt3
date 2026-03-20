@@ -14,7 +14,7 @@
           <b-badge
             v-if="message.availablenow > 1"
             variant="info"
-            class="lg ml-2"
+            class="lg ms-2"
           >
             {{ message.availablenow }} left
           </b-badge>
@@ -189,7 +189,7 @@
             variant="primary"
             icon-name="save"
             :label="buttonLabel"
-            class="ml-2"
+            class="ms-2"
             :disabled="type === 'Taken' && !tookUsers.length"
             @handle="submit"
           />

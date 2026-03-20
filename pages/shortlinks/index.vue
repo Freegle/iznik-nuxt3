@@ -28,7 +28,7 @@
                   class="select"
                 />
                 <div class="d-flex">
-                  <span class="mt-2 font-weight-bold">freegle.in/</span>
+                  <span class="mt-2 fw-bold">freegle.in/</span>
                   <b-form-input
                     v-model="name"
                     placeholder="Enter your shortlink name"
@@ -48,7 +48,7 @@
             </b-card-body>
           </b-card>
         </div>
-        <b-row class="mt-2 bg-white m-0 font-weight-bold">
+        <b-row class="mt-2 bg-white m-0 fw-bold">
           <b-col cols="3"> Community </b-col>
           <b-col cols="7"> Shortlink </b-col>
           <b-col cols="2" />

@@ -127,16 +127,14 @@
                           ? boardmember.profile.url
                           : boardmember?.profile?.turl
                       "
-                      class="mr-2"
+                      class="me-2"
                       size="lg"
                       :alt-text="
                         'Profile picture for ' + boardmember.displayname
                       "
                     />
                     <div>
-                      <span class="font-weight-bold">{{
-                        boardmember.displayname
-                      }}</span>
+                      <span class="fw-bold">{{ boardmember.displayname }}</span>
                       <p v-if="boardmember.description">
                         {{ boardmember.description }}
                       </p>
@@ -401,7 +399,7 @@ const board = computed(() => teamStore.getTeam('Board')?.members)
 :deep(.card) {
   border: none;
   background: $white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 0.5rem;
 
   .card-header {
@@ -422,7 +420,7 @@ const board = computed(() => teamStore.getTeam('Board')?.members)
     background: $white;
     border: none;
     text-align: left;
-    transition: background-color 0.15s ease;
+    transition: background-color var(--transition-fast);
 
     &:hover {
       background: $gray-100;

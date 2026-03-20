@@ -122,17 +122,17 @@ if (refmsgid.value) {
 }
 
 .completed-wrapper {
-  background-color: #ffffff;
+  background-color: $color-white;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .completed-text {
   font-size: 0.9rem;
   padding: 8px;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 </style>

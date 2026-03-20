@@ -311,7 +311,7 @@ async function approve(callback) {
 /* Modern message card styling */
 .message-card {
   overflow: hidden;
-  box-shadow: 0 2px 8px $color-black-opacity-12;
+  box-shadow: var(--shadow-md);
   background: $color-white;
   margin-bottom: 1rem;
 }
@@ -357,12 +357,12 @@ async function approve(callback) {
 
 .placeholder-icon {
   font-size: 3rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   opacity: 0.5;
 }
 
 .no-photo-text {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
@@ -375,6 +375,7 @@ async function approve(callback) {
   color: $color-white;
   padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
+  border-radius: var(--radius-sm, 0.375rem);
   z-index: 5;
 }
 
@@ -478,10 +479,10 @@ async function approve(callback) {
   background: $color-white;
   margin-bottom: 1rem;
   border-left: 3px solid $color-gray-3;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-normal);
 
   &.completed {
-    border-left-color: $colour-success;
+    border-left-color: $color-success;
   }
 
   &.disabled {
@@ -500,7 +501,7 @@ async function approve(callback) {
 .step-number {
   width: 24px;
   height: 24px;
-  background: $colour-success;
+  background: $color-success;
   color: $color-white;
   display: flex;
   align-items: center;
@@ -516,7 +517,7 @@ async function approve(callback) {
 }
 
 .step-check {
-  color: $colour-success;
+  color: $color-success;
 }
 
 .step-content {
@@ -535,21 +536,22 @@ async function approve(callback) {
   padding: 0.75rem 1rem;
   background: $color-white;
   border: 2px solid $color-gray-3;
+  border-radius: var(--radius-md, 0.5rem);
   color: $color-gray--darker;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
   text-align: left;
 
   &:hover {
-    border-color: $colour-success;
-    background: lighten($colour-success, 45%);
+    border-color: $color-success;
+    background: lighten($color-success, 45%);
   }
 
   &.active {
-    border-color: $colour-success;
-    background: lighten($colour-success, 40%);
-    color: darken($colour-success, 15%);
+    border-color: $color-success;
+    background: lighten($color-success, 40%);
+    color: darken($color-success, 15%);
     font-weight: 600;
   }
 }
@@ -558,7 +560,7 @@ async function approve(callback) {
   border: 2px solid $color-gray-3;
 
   &:focus {
-    border-color: $colour-success;
+    border-color: $color-success;
     box-shadow: none;
   }
 
@@ -574,7 +576,7 @@ async function approve(callback) {
 }
 
 .help-hint {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   margin-top: 0.5rem;
   margin-bottom: 0;

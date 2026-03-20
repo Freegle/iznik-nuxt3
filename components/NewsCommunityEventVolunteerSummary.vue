@@ -80,7 +80,7 @@ if (volunteerOpportunities.length > 0) {
 .summary-card {
   background: white;
   padding: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .summary-header {
@@ -88,12 +88,12 @@ if (volunteerOpportunities.length > 0) {
   align-items: center;
   gap: 0.375rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.5rem;
   font-weight: 500;
 
   .header-icon {
-    color: $color-blue--base;
+    color: var(--color-link);
   }
 }
 
@@ -111,7 +111,7 @@ if (volunteerOpportunities.length > 0) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: $color-blue--base;
+  color: var(--color-link);
   font-size: 0.9rem;
   text-decoration: none;
 
@@ -122,7 +122,7 @@ if (volunteerOpportunities.length > 0) {
 
 .summary-count {
   flex-shrink: 0;
-  color: $colour-success;
+  color: $color-success;
   font-size: 0.85rem;
   text-decoration: none;
 

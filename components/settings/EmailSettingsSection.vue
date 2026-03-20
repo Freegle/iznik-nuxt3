@@ -87,7 +87,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotification($event, 'email')"
             />
           </div>
@@ -99,7 +99,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotification($event, 'emailmine')"
             />
           </div>
@@ -111,7 +111,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNotifChitchat"
             />
           </div>
@@ -123,7 +123,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeRelevant"
             />
           </div>
@@ -135,7 +135,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeNewsletter"
             />
           </div>
@@ -147,7 +147,7 @@
               :width="120"
               :sync="true"
               :labels="{ checked: 'On', unchecked: 'Off' }"
-              color="#61AE24"
+              :color="toggleColor"
               @change="changeEngagement"
             />
           </div>
@@ -178,6 +178,9 @@ const { me, myGroups } = useMe()
 const emit = defineEmits(['update'])
 
 const authStore = useAuthStore()
+
+// Brand color for toggle switches
+const toggleColor = '#61AE24'
 
 // State
 const showAdvanced = ref(false)
@@ -366,8 +369,8 @@ watch(
 
 .settings-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -427,7 +430,7 @@ watch(
   padding: 1rem;
   margin-bottom: 0.75rem;
   background: $color-gray--lighter;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 
 .group-header {
@@ -485,6 +488,6 @@ watch(
 .admin-note {
   margin-top: 1rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

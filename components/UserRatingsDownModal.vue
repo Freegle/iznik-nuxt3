@@ -50,9 +50,7 @@
       </b-form-group>
     </div>
     <div class="mt-2">
-      <label class="font-weight-bold" for="text">
-        Please give a bit of detail.
-      </label>
+      <label class="fw-bold" for="text"> Please give a bit of detail. </label>
       <b-form-textarea
         id="text"
         v-model="text"

@@ -11,7 +11,7 @@
     <!-- eslint-disable-next-line-->
     <b-card-body v-html="item.iframe" />
     <b-card-footer :key="'sharelist-' + actioned.length">
-      <b-button variant="white" class="mb-1 mr-1" @click="shareAll">
+      <b-button variant="white" class="mb-1 me-1" @click="shareAll">
         <v-icon icon="share-alt" />
         Share all
       </b-button>
@@ -19,7 +19,7 @@
         v-for="group in groups"
         :key="'socialaction-' + group.id"
         :variant="isActioned(group.id) ? 'white' : 'primary'"
-        class="mb-1 mr-1"
+        class="mb-1 me-1"
         :disabled="isActioned(group.id)"
         @click="share(group)"
       >
@@ -28,7 +28,7 @@
         <v-icon v-else icon="share-alt" />
         {{ group.namedisplay }}
       </b-button>
-      <b-button variant="danger" class="mb-1 mr-1" @click="hideAll">
+      <b-button variant="danger" class="mb-1 me-1" @click="hideAll">
         <v-icon icon="trash-alt" />
         Hide all
       </b-button>

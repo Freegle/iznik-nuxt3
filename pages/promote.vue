@@ -276,15 +276,15 @@ function added() {
   }
 
   p {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     margin: 0;
   }
 }
 
 .section-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -340,9 +340,9 @@ function added() {
   align-items: center;
   text-decoration: none;
   padding: 0.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   background: $color-gray--lighter;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 
   &:hover {
     background: darken($color-gray--lighter, 5%);
@@ -352,8 +352,8 @@ function added() {
 .poster-img {
   width: 100%;
   max-width: 100px;
-  border: 1px solid $color-gray--dark;
-  border-radius: 4px;
+  border: 1px solid var(--color-gray-600);
+  border-radius: var(--radius-sm, 0.375rem);
   margin-bottom: 0.5rem;
 }
 
@@ -372,12 +372,12 @@ function added() {
 
 .businesscard-img {
   max-width: 200px;
-  border: 1px solid $color-gray--dark;
-  border-radius: 4px;
+  border: 1px solid var(--color-gray-600);
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .small-text {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 </style>

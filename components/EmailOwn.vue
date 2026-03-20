@@ -58,6 +58,7 @@ async function makePrimary() {
   font-size: 0.8rem;
   cursor: pointer;
   padding: 0;
+  transition: all var(--transition-fast);
 
   &.primary {
     color: $color-blue--bright;
@@ -68,7 +69,7 @@ async function makePrimary() {
   }
 
   &.delete {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     font-size: 0.9rem;
     margin-top: 2px;
 

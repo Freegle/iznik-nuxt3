@@ -22,7 +22,7 @@
       <div v-else class="mt-2">
         <h2>Top Micro-volunteers</h2>
         <b-table-simple class="bg-white">
-          <b-thead class="font-weight-bold">
+          <b-thead class="fw-bold">
             <b-tr>
               <b-th>ID</b-th>
               <b-th>Name</b-th>

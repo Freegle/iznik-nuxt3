@@ -29,7 +29,7 @@
                 }}
               </ExternalLink>
             </b-col>
-            <b-col cols="8" sm="6" class="text-success font-weight-bold">
+            <b-col cols="8" sm="6" class="text-success fw-bold">
               {{ msg.subject }}
             </b-col>
             <b-col cols="6" sm="2">

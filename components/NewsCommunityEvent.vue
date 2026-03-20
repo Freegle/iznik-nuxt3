@@ -218,11 +218,12 @@ initialize()
 .type-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba($color-blue--base, 0.1);
-  color: $color-blue--base;
+  background: color-mix(in srgb, var(--color-link) 10%, transparent);
+  color: var(--color-link);
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
+  border-radius: var(--radius-sm, 0.25rem);
 }
 
 .event-title {
@@ -234,7 +235,7 @@ initialize()
 
 .event-meta {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 
   .meta-item {
@@ -268,7 +269,7 @@ initialize()
 
   .detail-icon {
     flex-shrink: 0;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     width: 1em;
     margin-top: 0.3em;
   }

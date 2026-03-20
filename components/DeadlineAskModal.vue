@@ -11,9 +11,7 @@
       </p>
       <p>That way you won't get replies you don't want.</p>
       <div v-if="showInput">
-        <label class="font-weight-bold mb-1" for="deadline">
-          Set a deadline:
-        </label>
+        <label class="fw-bold mb-1" for="deadline"> Set a deadline: </label>
         <b-input
           id="deadline"
           ref="deadlineInput"
@@ -29,7 +27,7 @@
           The deadline must be today or in the future.
         </div>
       </div>
-      <p v-else class="font-weight-bold">Set a deadline?</p>
+      <p v-else class="fw-bold">Set a deadline?</p>
       <NoticeMessage v-if="deadline === today" variant="warning" class="mt-2">
         Are you sure you want your post to stop showing after today?
       </NoticeMessage>

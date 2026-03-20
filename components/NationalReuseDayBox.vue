@@ -10,7 +10,7 @@
           '); background-size: cover; background-repeat: no-repease; background-position: center center'
         "
       ></div>
-      <p class="text-center mt-2 font-weight-normal">
+      <p class="text-center mt-2 fw-normal">
         {{ description }}
       </p>
     </ExternalLink>
@@ -53,7 +53,7 @@ const boxClass = computed(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .box {
-  border-radius: 10px;
+  border-radius: var(--radius-lg, 0.75rem);
   border: 3px solid white;
   padding: 10px;
   width: 120px;
@@ -98,7 +98,7 @@ p {
 
 h2 {
   color: black !important;
-  background-color: #f7f5ef !important;
+  background-color: var(--color-gray-100) !important;
   font-size: 1rem;
 
   @include media-breakpoint-up(md) {

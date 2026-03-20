@@ -20,7 +20,7 @@
                 user.id
               }}
             </b-col>
-            <b-col cols="8" md="6" class="text-success font-weight-bold">
+            <b-col cols="8" md="6" class="text-success fw-bold">
               <ProfileImage
                 :image="user.profile?.turl || user.profile?.paththumb"
                 :name="user.displayname"

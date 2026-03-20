@@ -13,10 +13,7 @@
               <span v-if="item.result === 'Approve'">
                 no need to rotate photo
               </span>
-              <span
-                v-if="item.result === 'Reject'"
-                class="text-danger font-weight-bold"
-              >
+              <span v-if="item.result === 'Reject'" class="text-danger fw-bold">
                 rotated photo
                 <br /><span class="text-muted">(current photo shown)</span>
               </span>
@@ -28,13 +25,13 @@
               <span v-if="item.result === 'Reject'">
                 <span
                   v-if="item.msgcategory === 'CouldBeBetter'"
-                  class="text-warning font-weight-bold"
+                  class="text-warning fw-bold"
                 >
                   thinks this message could be better
                 </span>
                 <span
                   v-else-if="item.msgcategory === 'ShouldntBeHere'"
-                  class="text-danger font-weight-bold"
+                  class="text-danger fw-bold"
                 >
                   thinks this message shouldn't be on Freegle
                 </span>

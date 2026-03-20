@@ -188,11 +188,12 @@ try {
 .type-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba($colour-success, 0.1);
-  color: $colour-success;
+  background: rgba($color-success, 0.1);
+  color: $color-success;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
+  border-radius: var(--radius-sm, 0.25rem);
 }
 
 .opportunity-title {
@@ -204,7 +205,7 @@ try {
 
 .opportunity-meta {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 
   .meta-item {
@@ -238,7 +239,7 @@ try {
 
   .detail-icon {
     flex-shrink: 0;
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     width: 1em;
     margin-top: 0.3em;
   }

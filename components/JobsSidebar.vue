@@ -105,6 +105,7 @@ function loadMore($state) {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
 
 .jobs-sidebar {
   height: 100%;
@@ -115,7 +116,7 @@ function loadMore($state) {
 }
 
 .jobs-sidebar-header {
-  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  background: linear-gradient(135deg, $color-green-background 0%, #4a8f1c 100%);
   padding: 0.75rem 1rem;
 }
 
@@ -197,16 +198,16 @@ function loadMore($state) {
   gap: 0.35rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #61ae24;
+  color: $color-green-background;
   text-decoration: none;
   padding: 0.5rem 1rem;
   background: rgba(97, 174, 36, 0.1);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
 
   &:hover {
     background: rgba(97, 174, 36, 0.2);
     text-decoration: none;
-    color: #61ae24;
+    color: $color-green-background;
   }
 }
 </style>

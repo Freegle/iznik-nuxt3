@@ -47,5 +47,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .jgbutton {
   background-color: #7a04dd;
+  border-radius: var(--radius-md, 0.375rem);
 }
 </style>

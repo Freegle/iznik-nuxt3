@@ -108,7 +108,7 @@ describe('ChatMessageReminder', () => {
       }
       mockData.chat = { user: { id: 1 }, lastmsgseen: 100 }
       const wrapper = createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows bold text for unseen messages (id > lastmsgseen)', () => {
@@ -119,7 +119,7 @@ describe('ChatMessageReminder', () => {
       }
       mockData.chat = { user: { id: 1 }, lastmsgseen: 100 }
       const wrapper = createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows regular text for old seen messages', () => {

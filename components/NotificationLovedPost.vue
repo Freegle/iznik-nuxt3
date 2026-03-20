@@ -3,21 +3,21 @@
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
         :image="fromuser?.profile?.path"
-        class="mr-1 mb-1 ml-1 inline"
+        class="me-1 mb-1 ms-1 inline"
         is-thumbnail
         size="lg"
       />
     </div>
     <div class="d-flex flex-column">
       <div>
-        <span class="font-weight-bold">{{ fromuser?.displayname }}</span>
+        <span class="fw-bold">{{ fromuser?.displayname }}</span>
         <span v-if="newsfeed?.type == 'Noticeboard'"> loves your poster </span>
         <span v-else> loves your post</span>
       </div>
-      <div v-if="noticeboardname" class="font-weight-bold">
+      <div v-if="noticeboardname" class="fw-bold">
         &quot;{{ noticeboardname }}&quot;
       </div>
-      <div v-else-if="newsfeed?.message" class="font-weight-bold line-clamp-2">
+      <div v-else-if="newsfeed?.message" class="fw-bold line-clamp-2">
         "{{ newsfeed.message }}"
       </div>
       <abbr class="small text-muted">{{ notificationago }}</abbr>

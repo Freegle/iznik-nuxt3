@@ -140,13 +140,13 @@ onMounted(() => {
 
 .find-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .stepper-container {
   background: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 
   @include media-breakpoint-up(lg) {
     padding: 1.5rem 2rem;
@@ -173,12 +173,13 @@ onMounted(() => {
 }
 
 .clear-link {
-  color: #9ca3af;
+  color: $color-gray--base;
   font-size: 0.85rem;
   text-decoration: none;
+  transition: all var(--transition-fast);
 
   &:hover {
-    color: #6b7280;
+    color: $color-gray--normal;
     text-decoration: underline;
   }
 }
@@ -206,11 +207,11 @@ onMounted(() => {
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
-  color: #6b7280;
+  color: $color-gray--normal;
   font-size: 0.95rem;
 
   .hint-icon {
-    color: #9ca3af;
+    color: $color-gray--base;
   }
 }
 </style>

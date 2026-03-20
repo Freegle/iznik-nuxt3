@@ -9,15 +9,13 @@
         <ProfileImage
           v-if="fromuser?.profile"
           :image="fromuser.profile.paththumb"
-          class="mr-1 inline"
+          class="me-1 inline"
           is-thumbnail
           size="md"
           @click="showProfileModal"
         />
         <div class="d-flex flex-column order-0" @click="showProfileModal">
-          <span class="text-success font-weight-bold">{{
-            fromuser?.displayname
-          }}</span>
+          <span class="text-success fw-bold">{{ fromuser?.displayname }}</span>
           <span
             v-if="fromuser?.info?.openoffers + fromuser?.info?.openwanteds > 0"
             class="text--small"
@@ -38,7 +36,7 @@
           v-if="message.interacted"
           no-prefetch
           :to="'/chats/' + message.interacted"
-          class="font-weight-bold"
+          class="fw-bold"
           title="You've chatted to this freegler before.  Click here to view Chat."
         >
           <v-icon icon="link" /> Connected before
@@ -60,7 +58,7 @@
             '/explore/' + groups[group.groupid].exploreLink + '?noguard=true'
           "
           :title="'Click to view ' + groups[group.groupid].namedisplay"
-          class="small font-weight-bold text-success nodecor mr-1"
+          class="small fw-bold text-success nodecor me-1"
         >
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>

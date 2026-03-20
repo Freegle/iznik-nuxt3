@@ -77,13 +77,13 @@
                     <v-icon
                       v-for="i in done"
                       :key="'hearta-' + i"
-                      class="mr-1 text-danger"
+                      class="me-1 text-danger"
                       icon="heart"
                     />
                     <v-icon
                       v-for="i in todo"
                       :key="'heartb-' + i"
-                      class="mr-1 text-faded"
+                      class="me-1 text-faded"
                       icon="heart"
                     />
                   </span>
@@ -96,7 +96,7 @@
                   Photo Rotate
                 </span>
               </h1>
-              <div class="font-weight-bold">
+              <div class="fw-bold">
                 These little things help Freegle run smoothly. Thank you!
               </div>
             </div>
@@ -417,7 +417,7 @@ onMounted(async () => {
 }
 
 :deep(.modal-header) {
-  background: $colour-success;
+  background: $color-success;
   color: $color-white;
 
   h1 {
@@ -437,6 +437,6 @@ onMounted(async () => {
 }
 
 .text-danger {
-  color: #dc3545;
+  color: $color-red;
 }
 </style>

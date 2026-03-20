@@ -255,7 +255,8 @@ function expand(e) {
 .message-summary-mobile {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 8px $color-black-opacity-12;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+  border-radius: var(--radius-md, 0.375rem);
   cursor: pointer;
   background: $color-white;
   display: flex;
@@ -269,7 +270,11 @@ function expand(e) {
     align-items: stretch;
     max-height: 200px;
     border: 1px solid $color-gray--light;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 
   /* Mobile landscape: use list view layout */
@@ -277,7 +282,11 @@ function expand(e) {
     flex-direction: row;
     align-items: stretch;
     border: 1px solid $color-gray--light;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 }
 
@@ -360,6 +369,7 @@ function expand(e) {
   color: $color-white;
   padding: 0.2rem 0.5rem;
   font-size: 0.7rem;
+  border-radius: var(--radius-sm, 0.375rem);
   z-index: 5;
   height: auto;
 }
@@ -415,7 +425,7 @@ function expand(e) {
     rgba(0, 0, 0, 0.03) 92%,
     rgba(0, 0, 0, 0) 100%
   );
-  color: white;
+  color: $color-white;
   z-index: 3;
   overflow: hidden;
 
@@ -503,7 +513,11 @@ function expand(e) {
     min-height: 0;
     border: 1px solid $color-gray--light;
     border-top: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(
+      --shadow-md,
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1)
+    );
   }
 
   @include media-breakpoint-up(lg) {
@@ -587,7 +601,7 @@ function expand(e) {
 .content-description {
   font-size: 0.8rem;
   font-weight: 500;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   line-height: 1.35;
   flex: 1;
   display: -webkit-box;
@@ -622,7 +636,7 @@ function expand(e) {
   align-items: center;
   gap: 1rem;
   font-size: 0.7rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-top: auto;
 }
 
