@@ -730,20 +730,19 @@ function close() {
 }
 
 .autocomplete ul {
-  font-family: sans-serif;
+  font-family: inherit;
   position: absolute;
   list-style: none;
   background: $color-white;
-  padding: 0;
-  margin: 0;
+  padding: 0.25rem 0;
+  margin: 0.25rem 0 0;
   display: inline-block;
   min-width: 15%;
-  margin-top: 0px;
   z-index: 1000;
   right: 48%;
   border: 1px solid $color-gray--light;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-md);
 }
 
 :deep(.postcodelist.autocomplete ul) {
@@ -767,30 +766,28 @@ function close() {
 .autocomplete ul li a {
   text-decoration: none;
   display: block;
-  padding: 5px;
-  padding-left: 10px;
-  color: $color-gray--dark;
-  font-size: 13px;
+  padding: 0.5rem 0.75rem;
+  color: var(--color-gray-900);
+  font-size: 0.875rem;
+  transition: background var(--transition-fast);
 }
 
 .autocomplete ul li a:hover,
 .autocomplete ul li.focus-list a {
-  color: $color-gray--dark;
-  background: $color-gray--lighter;
+  color: var(--color-gray-900);
+  background: var(--color-gray-50);
 }
 
 .autocomplete ul li a .autocomplete-anchor-label {
   display: block;
-  margin-top: 3px;
-  color: $color-gray--dark;
-  font-size: 13px;
+  margin-top: 0.2rem;
+  color: var(--color-gray-500);
+  font-size: 0.8rem;
 }
 
 .autocomplete ul li a:hover .autocomplete-anchor-label,
-.autocomplete ul li.focus-list a span,
-.autocomplete ul li a:hover .autocomplete-anchor-label,
 .autocomplete ul li.focus-list a span {
-  color: $color-white;
+  color: var(--color-gray-600);
 }
 
 .close {
