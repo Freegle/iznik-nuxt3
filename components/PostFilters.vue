@@ -335,22 +335,16 @@ const sort = computed({
   border-color: $color-white !important;
 }
 
-// Remove curved corners from form controls
+// Let Bootstrap handle input-group radius (first/last child logic).
+// Only override standalone controls outside input-groups.
 :deep(.form-select),
-:deep(.form-control),
+:deep(.form-control:not(.input-group .form-control)),
 :deep(select),
-:deep(input) {
+:deep(input:not(.input-group input)) {
   border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
-:deep(.input-group) {
-  .form-control,
-  .btn {
-    border-radius: var(--radius-sm, 0.375rem) !important;
-  }
-}
-
-:deep(.btn) {
+:deep(.btn:not(.input-group .btn)) {
   border-radius: var(--radius-sm, 0.375rem) !important;
 }
 
