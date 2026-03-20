@@ -611,7 +611,7 @@ function typing() {
 
 .empty-state-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-500);
   margin: 0;
 }
 

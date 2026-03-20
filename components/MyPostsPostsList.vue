@@ -384,21 +384,24 @@ const upcomingTrysts = computed(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
-  background: white;
-  box-shadow: var(--shadow-md);
+  padding: 3rem 1.5rem;
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg, 0.75rem);
+  border: 1px dashed var(--color-gray-300);
+  max-width: 480px;
+  margin: 1rem auto;
 }
 
 .empty-icon {
   font-size: 3rem;
-  color: $color-gray--base;
-  margin-bottom: 16px;
+  color: var(--color-gray-400);
+  margin-bottom: 1rem;
 }
 
 .empty-text {
   font-size: 1.1rem;
-  color: $color-gray--dark;
-  margin-bottom: 20px;
+  color: var(--color-gray-600);
+  margin-bottom: 1.25rem;
 }
 
 .empty-actions {
