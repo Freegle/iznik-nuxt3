@@ -12,23 +12,23 @@
     >
       <span
         v-if="user.userid > 0"
-        class="text--large font-weight-bold mt-1 text-start select"
+        class="text--large fw-bold mt-1 text-start select"
       >
         {{ user.displayname }}
       </span>
-      <span v-else class="text--large font-weight-bold mt-1 text-start select">
+      <span v-else class="text--large fw-bold mt-1 text-start select">
         <span v-if="availablenow === 1">Someone else</span>
         <span v-else>Other people</span>
       </span>
       <div class="ratings">
-        <div class="d-none d-md-block ml-1">
+        <div class="d-none d-md-block ms-1">
           <UserRatings v-if="user.userid > 0" :id="user.userid" size="lg" />
         </div>
-        <div class="d-block d-md-none ml-1">
+        <div class="d-block d-md-none ms-1">
           <UserRatings v-if="user.userid > 0" :id="user.userid" size="md" />
         </div>
       </div>
-      <div :class="'ml-1 took ' + (availablenow <= 1 ? 'd-none' : '')">
+      <div :class="'ms-1 took ' + (availablenow <= 1 ? 'd-none' : '')">
         <NumberIncrementDecrement
           v-model="user.count"
           label="Number taken"
@@ -50,7 +50,7 @@
         v-model="selectUser"
         :options="userOptions(false)"
         size="lg"
-        :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
+        :class="'fw-bold ' + (chooseError ? 'text-danger' : '')"
         :state="invalid ? false : null"
       />
       <p v-if="invalid" class="invalid-feedback">
@@ -63,7 +63,7 @@
         v-model="selectUser"
         :options="userOptions(true)"
         size="lg"
-        :class="'font-weight-bold ' + (chooseError ? 'text-danger' : '')"
+        :class="'fw-bold ' + (chooseError ? 'text-danger' : '')"
         :state="invalid ? false : null"
       />
       <p v-if="invalid" class="invalid-feedback">
@@ -315,7 +315,7 @@ option {
 }
 
 .btn[aria-pressed='true'] {
-  box-shadow: 0px 0px 5px 2px $color-blue--base !important;
+  box-shadow: 0px 0px 5px 2px var(--color-link) !important;
 }
 
 select {
@@ -325,7 +325,7 @@ select {
 .layout {
   display: grid;
   border: 1px solid $color-gray--faded;
-  border-radius: 5px;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 10px;
 
   grid-template-rows: auto auto auto;

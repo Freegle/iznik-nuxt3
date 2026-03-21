@@ -302,7 +302,7 @@ onBeforeUnmount(() => {
 </script>
 <style scoped lang="scss">
 .ourpopup {
-  color: $colour-success;
+  color: $color-success;
   font-weight: bold;
 }
 </style>

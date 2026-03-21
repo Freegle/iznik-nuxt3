@@ -8,10 +8,10 @@
       </div>
       <div class="media-body">
         <div class="notification-title">You have {{ count }}</div>
-        <div class="font-weight-bold introduction">
+        <div class="fw-bold introduction">
           What happened? Use <em>My Posts</em> to let us know.
         </div>
-        <ul class="small pl-3">
+        <ul class="small ps-3">
           <li>Mark <em>OFFERs</em> as <em>TAKEN</em>.</li>
           <li>Click <em>Withdraw</em> if no longer active.</li>
           <li>Click <em>Repost</em> to keep trying.</li>

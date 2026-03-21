@@ -38,7 +38,7 @@
         title="Recent replies to OFFERs"
         class="clickme d-inline-flex me-2"
       >
-        <div class="d-flex mr-1">
+        <div class="d-flex me-1">
           <v-icon icon="gift" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
         </div>
@@ -50,7 +50,7 @@
         title="Recent replies to WANTEDs"
         class="clickme d-inline-flex me-2"
       >
-        <div class="d-flex mr-1">
+        <div class="d-flex me-1">
           <v-icon icon="search" class="fa-fw" />
           <v-icon icon="reply" class="fa-fw" />
         </div>

@@ -7,7 +7,7 @@
       class="mb-1"
     >
       <p>
-        Flagged for review: "<span class="text-danger font-weight-bold">{{
+        Flagged for review: "<span class="text-danger fw-bold">{{
           word.worryword.keyword
         }}</span
         >".

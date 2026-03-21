@@ -3,7 +3,7 @@
     <ChatNotVisible v-if="notVisible" id="notvisible" />
     <p
       v-else-if="!id"
-      class="text-center text-info font-weight-bold mt-2 chatHolder"
+      class="text-center text-info fw-bold mt-2 chatHolder"
       :class="{
         stickyAdRendered,
       }"

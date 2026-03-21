@@ -9,13 +9,13 @@
           :class="
             'small ' +
             (daysago(membership.added) < 31
-              ? 'text-danger font-weight-bold'
+              ? 'text-danger fw-bold'
               : 'text-muted')
           "
         >
           joined {{ timeago(membership.added) }}</span
         >
-        <span v-if="membership.reviewreason" class="text-danger ml-1 mr-1">
+        <span v-if="membership.reviewreason" class="text-danger ms-1 me-1">
           <span v-if="membership.reviewrequestedat" class="text-dark small"
             >flagged {{ timeago(membership.reviewrequestedat) }}</span
           >
@@ -45,7 +45,7 @@
           spinclass="success"
           variant="primary"
           label="Ignore"
-          class="mr-2 mb-1"
+          class="me-2 mb-1"
           @handle="ignore"
         />
         <SpinButton
@@ -54,7 +54,7 @@
           spinclass="success"
           variant="warning"
           label="Remove"
-          class="mr-2 mb-1"
+          class="me-2 mb-1"
           @handle="remove"
         />
         <ModMemberButton
@@ -67,7 +67,7 @@
           reviewhold
           :reviewgroupid="membership.id"
           label="Hold"
-          class="mr-2"
+          class="me-2"
         />
         <ModMemberButton
           v-else
@@ -79,7 +79,7 @@
           reviewrelease
           :reviewgroupid="membership.id"
           label="Release"
-          class="mr-2"
+          class="me-2"
         />
         <b-button
           :to="'/members/approved/' + membership.id + '/' + userid"

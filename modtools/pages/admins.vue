@@ -6,7 +6,7 @@
         <b-tabs v-model="tabIndex" content-class="mt-3" card>
           <b-tab active>
             <template #title>
-              <h2 class="ml-2 mr-2" @click="fetchPending">
+              <h2 class="ms-2 me-2" @click="fetchPending">
                 Pending
                 <b-badge v-if="pendingcount" variant="danger">
                   {{ pendingcount }}
@@ -32,9 +32,9 @@
           </b-tab>
           <b-tab>
             <template #title>
-              <h2 class="ml-2 mr-2">Create</h2>
+              <h2 class="ms-2 me-2">Create</h2>
             </template>
-            <label for="groupidcreate" class="font-weight-bold">Group:</label>
+            <label for="groupidcreate" class="fw-bold">Group:</label>
             <ModGroupSelect
               id="groupidcreate"
               v-model="groupidcreate"
@@ -123,10 +123,7 @@
                     :rules="validateSubject"
                     class="form-control"
                   />
-                  <ErrorMessage
-                    name="subject"
-                    class="text-danger font-weight-bold"
-                  />
+                  <ErrorMessage name="subject" class="text-danger fw-bold" />
                 </b-form-group>
                 <b-form-group
                   label="Body of ADMIN:"
@@ -146,10 +143,7 @@
                     :rules="validateBody"
                     class="form-control"
                   />
-                  <ErrorMessage
-                    name="body"
-                    class="text-danger font-weight-bold"
-                  />
+                  <ErrorMessage name="body" class="text-danger fw-bold" />
                 </b-form-group>
                 <p>
                   You can optionally add a big button into the ADMIN, and
@@ -201,7 +195,7 @@
           </b-tab>
           <b-tab>
             <template #title>
-              <h2 class="ml-2 mr-2" @click="fetchPrevious">Previous</h2>
+              <h2 class="ms-2 me-2" @click="fetchPrevious">Previous</h2>
             </template>
             <ModGroupSelect v-model="groupidprevious" modonly class="mb-2" />
             <p>

@@ -1333,7 +1333,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  background: $color-white-opacity-25;
+  background: rgba(255, 255, 255, 0.25);
   color: $color-white;
   padding: 0.15rem 0.4rem;
   border-radius: 1rem;
@@ -1398,11 +1398,12 @@ onUnmounted(() => {
   flex-shrink: 0;
   width: 50px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
   border: 2px solid $color-white-opacity-50;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color var(--transition-normal),
+    transform var(--transition-normal);
 
   &.active {
     border-color: $color-white;
@@ -1410,7 +1411,7 @@ onUnmounted(() => {
   }
 
   &:not(.active):hover {
-    border-color: $color-white-opacity-80;
+    border-color: rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -1437,6 +1438,7 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 12;
   font-size: 1.2rem;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-black-opacity-70;
@@ -1465,10 +1467,11 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 100;
   font-size: 1.2rem;
-  box-shadow: 0 2px 8px $color-black-opacity-30;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
 
   &:hover {
-    background: $color-gray--dark;
+    background: var(--color-gray-600);
   }
 
   // Show when inside a modal
@@ -1568,13 +1571,13 @@ onUnmounted(() => {
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: $color-white-opacity-25;
+  background: rgba(255, 255, 255, 0.25);
   color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &:hover {
     background: $color-white-opacity-50;
@@ -1649,7 +1652,7 @@ onUnmounted(() => {
 
   &::-webkit-scrollbar-thumb {
     background: $color-gray--light;
-    border-radius: 4px;
+    border-radius: var(--radius-sm, 0.375rem);
 
     &:hover {
       background: $color-gray--base;
@@ -1692,7 +1695,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 7rem; /* Above title-overlay which has ~6rem height */
   right: 1rem;
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   color: $color-gray--darker;
   padding: 0.4rem 0.6rem;
@@ -1701,9 +1704,10 @@ onUnmounted(() => {
   max-width: 60%;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 8px $color-black-opacity-15;
+  box-shadow: var(--shadow-md);
   border: 1px solid $color-gray-3;
   cursor: pointer;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-white;
@@ -1768,7 +1772,7 @@ onUnmounted(() => {
   display: flex;
   gap: 0.5rem;
   font-size: 0.65rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .poster-overlay-stat {
@@ -1783,7 +1787,7 @@ onUnmounted(() => {
 
 .poster-overlay-chevron {
   flex-shrink: 0;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-left: auto;
 }
@@ -1836,11 +1840,11 @@ onUnmounted(() => {
   padding: 0.25rem 0.5rem;
   border: 1px solid $color-gray--light;
   background: $color-white;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 
   &:hover {
     background: $color-gray-3;
@@ -1879,9 +1883,10 @@ onUnmounted(() => {
   font-weight: 500;
   color: $color-gray--base;
   text-decoration: none;
+  transition: all var(--transition-fast);
 
   &:hover {
-    color: $color-gray--dark;
+    color: var(--color-gray-600);
     text-decoration: underline;
   }
 }
@@ -1898,8 +1903,9 @@ onUnmounted(() => {
   color: inherit;
   background: $color-white;
   border: 1px solid $color-gray--light;
-  border-left: 3px solid $colour-info-fg;
+  border-left: 3px solid $color-info-fg;
   cursor: pointer;
+  transition: all var(--transition-fast);
 
   &:hover {
     text-decoration: none;
@@ -2011,7 +2017,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
 }
 
 .poster-distance,
@@ -2037,7 +2043,7 @@ onUnmounted(() => {
 .poster-chevron {
   flex-shrink: 0;
   align-self: center;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 1.25rem;
   padding: 0.5rem;
   margin-right: -0.5rem;
@@ -2169,7 +2175,7 @@ onUnmounted(() => {
     padding: 0.5rem 1rem;
     background: rgba($color-orange--dark, 0.08);
     border: 1px solid rgba($color-orange--dark, 0.25);
-    border-radius: 6px;
+    border-radius: var(--radius-sm, 0.375rem);
   }
 }
 
@@ -2194,7 +2200,7 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: $color-white-opacity-95;
+  background: rgba(255, 255, 255, 0.95);
   border: none;
   color: $color-gray--darker;
   display: flex;
@@ -2203,7 +2209,7 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 10001;
   font-size: 1.25rem;
-  box-shadow: 0 2px 8px $color-black-opacity-20;
+  box-shadow: var(--shadow-md);
 
   &:active {
     background: $color-white;
@@ -2228,13 +2234,13 @@ onUnmounted(() => {
   margin-bottom: 1rem;
   padding: 0.5rem 1rem;
   background: $color-white-opacity-90;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.85rem;
   text-align: center;
   margin-left: 1rem;
   margin-right: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px $color-black-opacity-10;
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-md);
 }
 </style>
 

@@ -2,7 +2,7 @@
   <div v-if="user" class="d-flex w-100">
     <ProfileImage
       :image="user.profile.path"
-      class="mb-1 mt-1 inline mr-2"
+      class="mb-1 mt-1 inline me-2"
       is-thumbnail
       size="xl"
     />
@@ -22,7 +22,7 @@
         </div>
       </div>
       <div>
-        <div class="text--small text-faded mb-1 text-start text-lg-end mr-2">
+        <div class="text--small text-faded mb-1 text-start text-lg-end me-2">
           #{{ id }}
         </div>
         <div class="d-flex flex-row flex-lg-column align-items-baseline">
@@ -47,7 +47,7 @@
           <UserRatings
             :id="id"
             size="sm"
-            class="pt-1 mr-2 mr-lg-0 d-block"
+            class="pt-1 me-2 mr-lg-0 d-block"
             :disabled="!myid"
           />
         </div>

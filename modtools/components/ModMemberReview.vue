@@ -13,7 +13,7 @@
             v-if="user"
             :image="user.profile?.turl || user.profile?.paththumb"
             :name="user.displayname"
-            class="ml-1 mb-1 inline"
+            class="ms-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
@@ -128,7 +128,7 @@
           :key="'membership-' + m.membershipid"
           :membershipid="m.membershipid"
           :userid="member.userid"
-          class="p-1 mr-1"
+          class="p-1 me-1"
           @forcerefresh="forcerefresh"
         />
         <b-badge

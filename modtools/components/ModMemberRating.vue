@@ -15,14 +15,10 @@
             />{{ rating.rater }})</nuxt-link
           >
           &hairsp;
-          <span
-            v-if="rating.rating === 'Down'"
-            class="text-danger font-weight-bold"
+          <span v-if="rating.rating === 'Down'" class="text-danger fw-bold"
             >gave a thumbs down to</span
           >
-          <span
-            v-else-if="rating.rating === 'Up'"
-            class="text-success font-weight-bold"
+          <span v-else-if="rating.rating === 'Up'" class="text-success fw-bold"
             >gave a thumbs up to</span
           >
           <!-- eslint-disable-next-line-->
@@ -36,10 +32,7 @@
         <div>
           {{ timeago(rating.timestamp) }},
           <span v-if="groupName"> both members of {{ groupName }} </span>
-          <span
-            v-if="rating.reviewrequired"
-            class="text-danger font-weight-bold"
-          >
+          <span v-if="rating.reviewrequired" class="text-danger fw-bold">
             New
           </span>
         </div>

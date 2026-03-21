@@ -37,7 +37,7 @@
         />
       </div>
     </b-form-group>
-    <div v-if="newRule" class="text-danger font-weight-bold">&nbsp;New</div>
+    <div v-if="newRule" class="text-danger fw-bold">&nbsp;New</div>
   </div>
 </template>
 <script setup>

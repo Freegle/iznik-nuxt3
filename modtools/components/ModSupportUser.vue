@@ -9,7 +9,7 @@
           :title="preferredemail"
         >
           <div v-if="preferredemail">
-            <ModClipboard class="mr-1" :value="preferredemail" />
+            <ModClipboard class="me-1" :value="preferredemail" />
             {{ preferredemail }}
           </div>
           <div v-if="user.tnuserid" class="text-muted small">
@@ -53,15 +53,15 @@
       <ModComments :userid="user.id" />
 
       <div class="d-flex flex-wrap">
-        <b-button variant="white" class="mr-2 mb-1" @click="spamReport">
+        <b-button variant="white" class="me-2 mb-1" @click="spamReport">
           <v-icon icon="ban" /> Spammer
         </b-button>
-        <b-button variant="white" class="mr-2 mb-1" @click="purge">
+        <b-button variant="white" class="me-2 mb-1" @click="purge">
           <v-icon icon="trash-alt" /> Purge
         </b-button>
         <b-button
           variant="white"
-          class="mr-2 mb-1"
+          class="me-2 mb-1"
           :href="user.loginlink"
           target="_blank"
           rel="noopener noreferrer"
@@ -72,7 +72,7 @@
         <b-button
           v-if="admin"
           variant="white"
-          class="mr-2 mb-1"
+          class="me-2 mb-1"
           :href="
             user.loginlink
               ? user.loginlink.replace(/http.*\?u/, 'http://localhost:3002/?u')
@@ -83,14 +83,14 @@
         >
           <v-icon icon="user" /> Impersonate (localhost:3002)
         </b-button>
-        <ModMergeButton class="mr-2 mb-1" />
-        <b-button variant="white" class="mr-2 mb-1" @click="showLogsModal">
+        <ModMergeButton class="me-2 mb-1" />
+        <b-button variant="white" class="me-2 mb-1" @click="showLogsModal">
           <v-icon icon="book-open" /> Logs
         </b-button>
-        <b-button variant="white" class="mr-2 mb-1" @click="profile">
+        <b-button variant="white" class="me-2 mb-1" @click="profile">
           <v-icon icon="user" /> Profile
         </b-button>
-        <b-button variant="white" class="mr-2 mb-1" @click="addAComment">
+        <b-button variant="white" class="me-2 mb-1" @click="addAComment">
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
@@ -367,7 +367,7 @@
         <b-row
           v-for="message in messageHistoriesShown"
           :key="'messagehistory-' + message.arrival + '-' + message.id"
-          :class="{ 'pl-3': true, strike: message.deleted }"
+          :class="{ 'ps-3': true, strike: message.deleted }"
         >
           <b-col cols="4" md="2" class="order-1 p-1 small">
             {{ datetimeshort(message.arrival) }}
@@ -418,7 +418,7 @@
         </p>
         <b-form-select
           v-model="chatmodstatus"
-          class="mb-2 flex-shrink-1 font-weight-bold"
+          class="mb-2 flex-shrink-1 fw-bold"
         >
           <b-form-select-option value="Moderated">
             Moderated (default - spam checked)
@@ -444,7 +444,7 @@
         <p>Moderation status:</p>
         <b-form-select
           v-model="newsfeedmodstatus"
-          class="mb-2 flex-shrink-1 font-weight-bold"
+          class="mb-2 flex-shrink-1 fw-bold"
         >
           <b-form-select-option value="Unmoderated">
             Unmoderated
@@ -455,17 +455,17 @@
         </b-form-select>
         <div v-for="newsfeed in newsfeedShown" :key="'newsfeed-' + newsfeed.id">
           <div class="d-flex">
-            <div class="mr-2">
+            <div class="me-2">
               <ExternalLink
                 :href="'https://www.ilovefreegle.org/chitchat/' + newsfeed.id"
               >
                 {{ newsfeed.id }}
               </ExternalLink>
             </div>
-            <div class="mr-2">
+            <div class="me-2">
               {{ datetimeshort(newsfeed.timestamp) }}
             </div>
-            <div class="mr-2">
+            <div class="me-2">
               <div
                 class="line-clamp-2"
                 :style="{ strike: newsfeed.hidden || newsfeed.deleted }"
@@ -501,7 +501,7 @@
         <b-row
           v-for="email in emailHistoriesShown"
           :key="'emailhistory-' + email.id"
-          class="pl-3"
+          class="ps-3"
         >
           <b-col
             cols="6"

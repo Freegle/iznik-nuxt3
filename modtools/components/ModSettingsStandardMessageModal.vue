@@ -60,7 +60,7 @@
             </b-button>
           </div>
           <div>
-            <b-button variant="white" class="mr-2" @click="hide">
+            <b-button variant="white" class="me-2" @click="hide">
               Cancel
             </b-button>
             <b-button

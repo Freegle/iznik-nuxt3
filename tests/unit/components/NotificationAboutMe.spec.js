@@ -84,9 +84,7 @@ describe('NotificationAboutMe', () => {
 
     it('displays tell us about yourself header', async () => {
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').text()).toBe(
-        'Tell us about yourself!'
-      )
+      expect(wrapper.find('.fw-bold').text()).toBe('Tell us about yourself!')
     })
 
     it('displays notification ago time', async () => {

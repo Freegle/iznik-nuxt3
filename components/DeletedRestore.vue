@@ -15,7 +15,7 @@
         class="mb-3 text-center"
       >
         <div v-if="me.forgotten">
-          <p class="text--large font-weight-bold">
+          <p class="text--large fw-bold">
             <v-icon icon="exclamation-triangle" />
             You deleted your account {{ medeleted }}. Your data has now been
             removed.
@@ -26,12 +26,12 @@
           >
         </div>
         <div v-else>
-          <p class="text--large font-weight-bold">
+          <p class="text--large fw-bold">
             <v-icon icon="exclamation-triangle" />
             You deleted your account {{ medeleted }}. It will be completely
             removed soon.
           </p>
-          <p class="font-weight-bold">
+          <p class="fw-bold">
             Meanwhile, other freeglers can't see your details, posts or chats.
           </p>
           <p>

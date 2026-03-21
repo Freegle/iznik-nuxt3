@@ -147,9 +147,9 @@ function goToMessage() {
 
 .chat-message-card {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
   background: $color-white;
 
@@ -277,7 +277,7 @@ function goToMessage() {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(4px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .placeholder-icon {

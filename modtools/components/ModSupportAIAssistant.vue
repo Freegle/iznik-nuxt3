@@ -315,10 +315,10 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <strong>AI Support Helper</strong>
-          <span v-if="!sanitizerAvailable" class="text-danger ml-2">
+          <span v-if="!sanitizerAvailable" class="text-danger ms-2">
             (Service unavailable)
           </span>
-          <span v-if="totalCost > 0" class="session-cost ml-2">
+          <span v-if="totalCost > 0" class="session-cost ms-2">
             Session: ${{ totalCost.toFixed(4) }}
           </span>
         </div>
@@ -327,7 +327,7 @@
             v-model="privacyReviewMode"
             switch
             size="sm"
-            class="mr-3"
+            class="me-3"
           >
             <small>Privacy Review</small>
           </b-form-checkbox>
@@ -335,13 +335,13 @@
             v-model="showAnonymisedData"
             switch
             size="sm"
-            class="mr-3"
+            class="me-3"
           >
             <small>{{
               showAnonymisedData ? 'Show PII' : 'Show Anonymised'
             }}</small>
           </b-form-checkbox>
-          <b-form-checkbox v-model="debugMode" switch size="sm" class="mr-3">
+          <b-form-checkbox v-model="debugMode" switch size="sm" class="me-3">
             <small>Debug</small>
           </b-form-checkbox>
           <b-button
@@ -402,7 +402,7 @@
           <div class="d-flex align-items-center">
             <div class="flex-grow-1">
               <strong>{{ user.displayname || 'No name' }}</strong>
-              <span class="text-muted ml-2">{{ user.email }}</span>
+              <span class="text-muted ms-2">{{ user.email }}</span>
               <br />
               <small class="text-muted">
                 ID: {{ user.id }}
@@ -427,15 +427,15 @@
       <div class="selected-user-banner p-2 bg-light d-flex align-items-center">
         <div v-if="selectedUser" class="flex-grow-1">
           <strong>{{ selectedUser.displayname || 'User' }}</strong>
-          <span class="text-muted ml-2">{{ selectedUser.email }}</span>
-          <small class="text-muted ml-2">(ID: {{ selectedUser.id }})</small>
-          <span v-if="selectedUser.lastaccess" class="text-muted ml-2">
+          <span class="text-muted ms-2">{{ selectedUser.email }}</span>
+          <small class="text-muted ms-2">(ID: {{ selectedUser.id }})</small>
+          <span v-if="selectedUser.lastaccess" class="text-muted ms-2">
             | Last active: {{ formatDate(selectedUser.lastaccess) }}
           </span>
         </div>
         <div v-else class="flex-grow-1">
           <strong class="text-secondary">General Query</strong>
-          <span class="text-muted ml-2">(no specific user selected)</span>
+          <span class="text-muted ms-2">(no specific user selected)</span>
         </div>
         <b-button variant="outline-primary" size="sm" @click="newChat">
           New Chat
@@ -538,7 +538,7 @@
             <div class="message-header small text-muted mb-1">AI Assistant</div>
             <div class="message-content">
               <div class="d-flex align-items-center">
-                <b-spinner small class="mr-2" />
+                <b-spinner small class="me-2" />
                 <span>{{ processingStatus }}</span>
               </div>
               <b-button

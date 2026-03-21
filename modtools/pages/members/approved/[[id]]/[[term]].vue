@@ -13,7 +13,7 @@
           <b-button
             v-if="groupid"
             variant="white"
-            class="ml-2"
+            class="ms-2"
             @click="addMember"
           >
             <v-icon icon="plus" /> Add
@@ -21,7 +21,7 @@
           <b-button
             v-if="groupid"
             variant="white"
-            class="ml-2"
+            class="ms-2"
             @click="banMember"
           >
             <v-icon icon="trash-alt" /> Ban
@@ -38,8 +38,8 @@
             :groupid="groupid"
             @hidden="showBanMember = false"
           />
-          <ModMergeButton class="ml-2" />
-          <ModMemberExportButton class="ml-2" :groupid="groupid" />
+          <ModMergeButton class="ms-2" />
+          <ModMemberExportButton class="ms-2" :groupid="groupid" />
         </div>
         <ModMemberSearchbox :search="search" @search="startsearch" />
       </div>

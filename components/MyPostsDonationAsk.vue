@@ -130,18 +130,19 @@ onMounted(async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 // Variation #10: Minimal Friction Design
 // Based on NextAfter 2024 research: reduce friction, increase conversions
 
 .donation-ask-container {
   position: relative;
-  background: linear-gradient(135deg, #ffffff, #f8f9ff);
-  border-radius: 15px;
+  background: linear-gradient(135deg, $color-white, #f8f9ff);
+  border-radius: var(--radius-xl, 1.25rem);
   padding: 2rem;
   margin: 1rem auto 1.5rem; // Center with auto horizontal margins
   max-width: calc(100% - 2rem); // Leave 1rem space on each side
-  border: 1px solid #e2e8f0;
+  border: 1px solid $color-gray-3;
 
   // Animated rainbow border using pseudo-element
   &::before {
@@ -151,7 +152,7 @@ onMounted(async () => {
     left: -5px;
     right: -5px;
     bottom: -5px;
-    border-radius: 17px;
+    border-radius: var(--radius-xl, 1.25rem);
     background: linear-gradient(
       45deg,
       rgba(255, 0, 0, 0.7),
@@ -171,7 +172,7 @@ onMounted(async () => {
   }
 
   // Main shadow for depth
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-xl);
 }
 
 @keyframes rainbow-glow {
@@ -205,12 +206,12 @@ onMounted(async () => {
 
 .donation-message {
   font-size: 1.25rem;
-  color: #2d3748;
+  color: $color-gray--darker;
   margin-bottom: 1.5rem;
   line-height: 1.6;
 
   strong {
-    color: #1a202c;
+    color: var(--color-gray-900);
     font-weight: 600;
   }
 }
@@ -228,7 +229,7 @@ onMounted(async () => {
 
 .amount-label {
   font-size: 0.9rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
@@ -236,14 +237,14 @@ onMounted(async () => {
 .amount-value {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #007bff;
+  color: $color-blue--bright;
   line-height: 1;
 }
 
 .amount-slider {
   width: 100%;
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 0.375rem);
   background: transparent; // Make transparent so we can control the track color
   outline: none;
   -webkit-appearance: none;
@@ -257,10 +258,10 @@ onMounted(async () => {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #007bff;
+    background: $color-blue--bright;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.5);
-    transition: all 0.2s ease;
+    transition: all var(--transition-normal);
     margin-top: -10px; // Vertically center thumb (half of thumb height minus half of track height)
 
     &:hover {
@@ -277,11 +278,11 @@ onMounted(async () => {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #007bff;
+    background: $color-blue--bright;
     cursor: pointer;
     border: none;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.5);
-    transition: all 0.2s ease;
+    transition: all var(--transition-normal);
 
     &:hover {
       transform: scale(1.2);
@@ -296,15 +297,23 @@ onMounted(async () => {
   &::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
-    border-radius: 4px;
-    background: linear-gradient(to right, #e2e8f0 0%, #007bff 100%);
+    border-radius: var(--radius-sm, 0.375rem);
+    background: linear-gradient(
+      to right,
+      $color-gray-3 0%,
+      $color-blue--bright 100%
+    );
   }
 
   &::-moz-range-track {
     width: 100%;
     height: 8px;
-    border-radius: 4px;
-    background: linear-gradient(to right, #e2e8f0 0%, #007bff 100%);
+    border-radius: var(--radius-sm, 0.375rem);
+    background: linear-gradient(
+      to right,
+      $color-gray-3 0%,
+      $color-blue--bright 100%
+    );
   }
 }
 
@@ -312,7 +321,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: #4a5568;
+  color: var(--color-gray-600);
   font-weight: 500;
   margin-top: 0.5rem;
 }

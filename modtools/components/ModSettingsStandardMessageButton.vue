@@ -3,7 +3,7 @@
     <b-button
       v-if="stdmsg"
       :variant="variant(stdmsg)"
-      class="mb-1 mr-2"
+      class="mb-1 me-2"
       @click="click"
     >
       <v-icon :icon="icon(stdmsg)" /> {{ stdmsg.title }}

@@ -335,13 +335,14 @@ function validateAndNext() {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
 @import 'assets/css/sticky-banner.scss';
 
 .app-find-details {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: $color-white;
   padding-bottom: 80px;
 
   &.has-sticky-ad {
@@ -369,17 +370,17 @@ function validateAndNext() {
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 12px;
+  background: $color-gray--lighter;
+  border-radius: var(--radius-lg, 0.75rem);
 }
 
 .photo-thumb {
   position: relative;
   width: 50px;
   height: 50px;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
-  border: 2px solid #e9ecef;
+  border: 2px solid $color-gray-3;
 
   img {
     width: 100%;
@@ -389,26 +390,26 @@ function validateAndNext() {
 }
 
 .photo-thumb-primary {
-  border-color: #28a745;
+  border-color: $color-success;
   border-width: 3px;
 }
 
 .photo-thumb-ai {
-  border-color: #6c757d;
+  border-color: $color-gray--normal;
   border-style: dashed;
 }
 
 .photo-more {
   width: 50px;
   height: 50px;
-  border-radius: 8px;
-  background: #e9ecef;
+  border-radius: var(--radius-md, 0.5rem);
+  background: $color-gray-3;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #6c757d;
+  color: $color-gray--normal;
 }
 
 .edit-photos-btn {
@@ -416,18 +417,18 @@ function validateAndNext() {
   width: 36px;
   height: 36px;
   border: none;
-  background: #fff;
+  background: $color-white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #007bff;
+  color: $color-blue--bright;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 }
 
 .edit-photos-btn:active {
-  background: #e9ecef;
+  background: $color-gray-3;
 }
 
 .delete-ai-btn {
@@ -435,18 +436,18 @@ function validateAndNext() {
   width: 36px;
   height: 36px;
   border: none;
-  background: #fff;
+  background: $color-white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #dc3545;
+  color: $color-red;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-normal);
 }
 
 .delete-ai-btn:active {
-  background: #f8d7da;
+  background: $color-red--lighter;
 }
 
 .form-section {
@@ -457,7 +458,7 @@ function validateAndNext() {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .app-footer {
@@ -466,8 +467,8 @@ function validateAndNext() {
   left: 0;
   right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #fff;
+  border-top: 1px solid $color-gray-3;
+  background: $color-white;
   z-index: 100;
 
   &.has-sticky-ad {

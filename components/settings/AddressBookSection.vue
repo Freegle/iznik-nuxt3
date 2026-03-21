@@ -36,8 +36,8 @@ const addressBook = async () => {
 
 .settings-section {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   margin-bottom: 1rem;
   overflow: hidden;
 }
@@ -64,7 +64,7 @@ const addressBook = async () => {
 
 .private-badge {
   font-size: 0.75rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -75,7 +75,7 @@ const addressBook = async () => {
 }
 
 .description {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
 }

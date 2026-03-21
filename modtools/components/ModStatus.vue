@@ -166,7 +166,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  background-color: $color-green--medium;
+  background-color: $color-green-background;
   display: block;
 }
 </style>

@@ -4,7 +4,7 @@
     <b-tabs v-model="activeTab" content-class="mt-3" card>
       <b-tab @click="clear('messages', true)">
         <template #title>
-          <h2 class="ml-2 mr-2">Messages</h2>
+          <h2 class="ms-2 me-2">Messages</h2>
         </template>
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />
@@ -24,7 +24,7 @@
       </b-tab>
       <b-tab to="/logs/members" @click="clear('memberships', true)">
         <template #title>
-          <h2 class="ml-2 mr-2">Members</h2>
+          <h2 class="ms-2 me-2">Members</h2>
         </template>
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />

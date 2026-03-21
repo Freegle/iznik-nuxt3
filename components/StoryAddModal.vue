@@ -72,7 +72,7 @@
                   @click="rotateLeft"
                 >
                   <v-icon icon="circle" size="2x" />
-                  <v-icon icon="reply" class="ml-2" />
+                  <v-icon icon="reply" class="ms-2" />
                 </div>
                 <div
                   label="Rotate right"
@@ -127,7 +127,7 @@
         <b-button
           variant="white"
           :disabled="uploadingPhoto"
-          class="mr-2"
+          class="me-2"
           @click="hide"
         >
           Cancel

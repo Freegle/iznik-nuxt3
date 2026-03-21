@@ -83,7 +83,7 @@ const list = computed(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  background: linear-gradient(135deg, $color-green-background 0%, #4a8f1c 100%);
   color: $white;
 }
 
@@ -107,6 +107,7 @@ const list = computed(() => {
   font-size: 0.85rem;
   text-decoration: none;
   opacity: 0.9;
+  transition: all var(--transition-fast);
 
   &:hover {
     opacity: 1;

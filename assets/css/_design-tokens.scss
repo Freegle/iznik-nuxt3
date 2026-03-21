@@ -1,0 +1,63 @@
+// Design Tokens
+// =============
+// CSS custom properties for the Freegle design system.
+// These provide a single source of truth for colors, shadows, and radii
+// that can be used in both SCSS and runtime CSS.
+//
+// Migration note: Existing SCSS variables in _color-vars.scss still work.
+// These CSS custom properties are the future-facing system and should be
+// preferred for new code.
+
+:root {
+  // ── Brand / Primary ───────────────────────────────────────────────
+  --color-primary: #{$color-success};           // #338808
+  --color-primary-hover: #{$color-success-hover}; // #51a91e
+  --color-primary-light: #{$color-green--light};  // #E6ffE6
+  --color-primary-dark: #{$color-header};        // #1d6607
+  --color-primary-surface: #{$color-green--bg-gradient}; // #f0f7ed
+  --color-primary-bg: #{$color-green-background}; // #61AE24 (navbar, brand bg)
+
+  // ── Accent / Info ─────────────────────────────────────────────────
+  --color-accent: #{$color-secondary};           // #00A1CB
+  --color-accent-light: #{$color-info-bg};       // #d9edf7
+
+  // ── Semantic ──────────────────────────────────────────────────────
+  --color-warning: #{$color-warning};            // #e38d13
+  --color-danger: #dc3545;
+  --color-success-bg: #{$color-success-bg};      // #d6e9c6
+  --color-success-fg: #{$color-success-fg};      // #3c763d
+  --color-link: #2563eb;
+  --color-link-hover: #1d4ed8;
+
+  // ── Neutrals ──────────────────────────────────────────────────────
+  --color-gray-50: #faf9f7;
+  --color-gray-100: #f5f3f0;
+  --color-gray-200: #{$color-gray-3};             // #E9ECEF
+  --color-gray-300: #{$color-gray-4};             // #CED4DA
+  --color-gray-400: #adb5bd;
+  --color-gray-500: #{$color-gray--normal};       // #6C757D
+  --color-gray-600: #495057;
+  --color-gray-700: #343a40;
+  --color-gray-900: #{$color-gray--darker};       // #212529
+
+  --color-page-bg: #faf9f7;
+
+  // ── Shadows ───────────────────────────────────────────────────────
+  // 4-level scale based on actual codebase usage patterns
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);            // cards at rest, list items
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);              // elevated cards, hover states
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);            // dropdowns, popovers, sticky
+  --shadow-xl: 0 10px 30px rgba(0, 0, 0, 0.15);           // modals, overlays
+
+  // ── Border Radius ─────────────────────────────────────────────────
+  --radius-sm: 0.375rem;    // 6px  – tags, badges, small controls
+  --radius-md: 0.5rem;      // 8px  – buttons, inputs, cards
+  --radius-lg: 0.75rem;     // 12px – section cards, modals
+  --radius-xl: 1.25rem;     // 20px – chat bubbles, hero cards, pills
+
+
+  // ── Transitions ───────────────────────────────────────────────────
+  --transition-fast: 150ms ease-in-out;   // hover highlights, opacity
+  --transition-normal: 200ms ease-in-out; // color, background, border
+  --transition-slow: 300ms ease-in-out;   // transforms, layout shifts
+}

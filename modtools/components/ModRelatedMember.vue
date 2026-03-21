@@ -10,25 +10,25 @@
         </b-col>
       </b-row>
       <div class="d-flex flex-wrap justify-content-start pills mt-2">
-        <b-button v-if="whichposted === 'Both'" variant="warning" class="mr-1">
+        <b-button v-if="whichposted === 'Both'" variant="warning" class="me-1">
           Posted: {{ whichposted }}
         </b-button>
-        <b-button v-else variant="white" class="mr-1">
+        <b-button v-else variant="white" class="me-1">
           Posted: {{ whichposted }}
         </b-button>
-        <b-button variant="white" class="mr-1">
+        <b-button variant="white" class="me-1">
           Joined a group: {{ whichjoined }}
         </b-button>
-        <b-button v-if="activeSameDay" variant="secondary" class="mr-1">
+        <b-button v-if="activeSameDay" variant="secondary" class="me-1">
           Active same day
         </b-button>
-        <b-button v-if="similarNameOrEmail" variant="secondary" class="mr-1">
+        <b-button v-if="similarNameOrEmail" variant="secondary" class="me-1">
           Similar name/email
         </b-button>
-        <b-button v-if="groupsInCommon" variant="secondary" class="mr-1">
+        <b-button v-if="groupsInCommon" variant="secondary" class="me-1">
           Groups in common
         </b-button>
-        <b-button v-if="probablySame" variant="primary" class="mr-1">
+        <b-button v-if="probablySame" variant="primary" class="me-1">
           Probably the same
         </b-button>
       </div>

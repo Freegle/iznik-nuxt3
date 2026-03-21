@@ -1,5 +1,5 @@
 <template>
-  <div class="pl-2">
+  <div class="ps-2">
     <vue-thermometer
       :key="raised"
       :value="raised"

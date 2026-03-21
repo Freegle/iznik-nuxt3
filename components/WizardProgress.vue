@@ -72,7 +72,9 @@ defineProps({
 .wizard__progress-bar {
   width: 100%;
   box-shadow: none;
-  background: $color-yellow--dark;
+  background: #fbe8aa;
+  border-radius: var(--radius-lg, 0.5rem);
+  overflow: hidden;
 }
 
 .wizard__dot {
@@ -100,11 +102,11 @@ defineProps({
 }
 
 .active .wizard__dot {
-  background: $color-green--medium;
+  background: $color-success;
 }
 
 .active .wizard__dot::after {
-  background: $color-green--light-alt;
+  background: $color-green-background;
 }
 
 .wizard__info {

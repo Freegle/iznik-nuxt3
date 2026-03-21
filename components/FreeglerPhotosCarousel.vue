@@ -165,7 +165,11 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   padding-bottom: 0.5rem;
-  background: linear-gradient(180deg, #f0f7ed 0%, #ffffff 100%);
+  background: linear-gradient(
+    180deg,
+    $color-green--bg-gradient 0%,
+    $color-white 100%
+  );
 }
 
 .gallery-wall {
@@ -236,7 +240,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
 }
 
 .slogan-title {
@@ -248,11 +252,11 @@ onBeforeUnmount(() => {
 
 .slogan-line1 {
   display: block;
-  color: $colour-header;
+  color: $color-header;
 }
 
 .slogan-line2 {
   display: block;
-  color: $colour-success;
+  color: $color-success;
 }
 </style>

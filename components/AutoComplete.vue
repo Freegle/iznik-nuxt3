@@ -23,7 +23,7 @@
           <slot name="append">
             <b-button
               variant="white"
-              class="transbord p-0 pr-2"
+              class="transbord p-0 pe-2"
               tabindex="-1"
               aria-label="Busy indicator"
             >
@@ -61,7 +61,7 @@
               :size="size"
             />
             <button
-              class="btn btn-md btn-white transbord p-0 pr-2"
+              class="btn btn-md btn-white transbord p-0 pe-2"
               type="button"
               tabindex="-1"
             >
@@ -723,27 +723,26 @@ function close() {
 .showAll-transition,
 .autocomplete ul,
 .autocomplete ul li a {
-  transition: all 0.3s ease-out;
-  -moz-transition: all 0.3s ease-out;
-  -webkit-transition: all 0.3s ease-out;
-  -o-transition: all 0.3s ease-out;
+  transition: all var(--transition-slow) ease-out;
+  -moz-transition: all var(--transition-slow) ease-out;
+  -webkit-transition: all var(--transition-slow) ease-out;
+  -o-transition: all var(--transition-slow) ease-out;
 }
 
 .autocomplete ul {
-  font-family: sans-serif;
+  font-family: inherit;
   position: absolute;
   list-style: none;
   background: $color-white;
-  padding: 0;
-  margin: 0;
+  padding: 0.25rem 0;
+  margin: 0.25rem 0 0;
   display: inline-block;
   min-width: 15%;
-  margin-top: 0px;
   z-index: 1000;
   right: 48%;
   border: 1px solid $color-gray--light;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  border-radius: var(--radius-md, 0.5rem);
+  box-shadow: var(--shadow-md);
 }
 
 :deep(.postcodelist.autocomplete ul) {
@@ -751,45 +750,44 @@ function close() {
 }
 
 .autocomplete-anchor-text {
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
+  transition: all var(--transition-fast);
 }
 
 .autocomplete-anchor-text span {
-  color: $color-gray--dark !important;
+  color: var(--color-gray-600) !important;
 }
 
 .autocomplete-anchor-text:hover {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   background: $color-gray--lighter;
 }
 
 .autocomplete ul li a {
   text-decoration: none;
   display: block;
-  padding: 5px;
-  padding-left: 10px;
-  color: $color-gray--dark;
-  font-size: 13px;
+  padding: 0.5rem 0.75rem;
+  color: var(--color-gray-900);
+  font-size: 0.875rem;
+  transition: background var(--transition-fast);
 }
 
 .autocomplete ul li a:hover,
 .autocomplete ul li.focus-list a {
-  color: $color-gray--dark;
-  background: $color-gray--lighter;
+  color: var(--color-gray-900);
+  background: var(--color-gray-50);
 }
 
 .autocomplete ul li a .autocomplete-anchor-label {
   display: block;
-  margin-top: 3px;
-  color: $color-gray--dark;
-  font-size: 13px;
+  margin-top: 0.2rem;
+  color: var(--color-gray-500);
+  font-size: 0.8rem;
 }
 
 .autocomplete ul li a:hover .autocomplete-anchor-label,
-.autocomplete ul li.focus-list a span,
-.autocomplete ul li a:hover .autocomplete-anchor-label,
 .autocomplete ul li.focus-list a span {
-  color: $color-white;
+  color: var(--color-gray-600);
 }
 
 .close {
@@ -823,12 +821,11 @@ input[invalid='true'] {
 
 .input-group.autocomplete-wrap {
   border: 1px solid $color-gray-4;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 .autocomplete-parent-focus .input-group {
   border: 1px solid $color-gray-4;
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-md, 0.5rem) 0 0 var(--radius-md, 0.5rem);
 }
 .input-group.autocomplete-wrap input,
 .input-group-append button {
@@ -840,13 +837,13 @@ input[invalid='true'] {
 }
 
 .searchbutton {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0;
 }
 
 .invalid {
   box-shadow: 0 0 0 0.2rem $color-red;
   border: none !important;
-  border-radius: 4px;
+  border-radius: var(--radius-md, 0.5rem);
 }
 input[invalid='true'] {
   box-shadow: none;

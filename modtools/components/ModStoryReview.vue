@@ -7,7 +7,7 @@
             <ProfileImage
               :image="storyUser.profile?.turl || storyUser.profile?.paththumb"
               :name="storyUser.displayname || primaryEmail"
-              class="mr-1 ml-1 mb-1 mt-1 inline breakgrid"
+              class="me-1 ms-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail
               size="sm"
             />
@@ -32,7 +32,7 @@
       <b-card-body>
         <!-- eslint-disable-next-line -->
         <h3>{{ twem(story.headline) }}</h3>
-        <div class="d-flex font-weight-bold">
+        <div class="d-flex fw-bold">
           {{ twem(story.story) }}
           <b-img v-if="story.photo" thumbnail :src="story.photo.paththumb" />
         </div>
@@ -45,7 +45,7 @@
         <div class="d-flex flex-wrap justify-content-start">
           <b-button
             variant="warning"
-            class="mr-2 mb-1"
+            class="me-2 mb-1"
             @click="dontUseForPublicity"
           >
             <v-icon icon="times" /> Hide
@@ -54,7 +54,7 @@
             <b-button
               v-if="newsletter"
               variant="primary"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @click="useForNewsletter"
             >
               <v-icon icon="check" /> Good for newsletter
@@ -62,7 +62,7 @@
             <b-button
               v-else
               variant="primary"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @click="useForPublicity"
             >
               <v-icon icon="check" /> Good for publicity
@@ -74,7 +74,7 @@
             :groupid="firstGroupId"
             title="Chat"
             variant="white"
-            class="mr-2 mb-1"
+            class="me-2 mb-1"
           />
         </div>
       </b-card-footer>

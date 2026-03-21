@@ -1,7 +1,7 @@
 <template>
   <div v-if="mobileStore.appupdaterequired">
     <NoticeMessage variant="danger" class="mb-2">
-      <p class="font-weight-bold mb-1">Update Required</p>
+      <p class="fw-bold mb-1">Update Required</p>
       <p class="mb-2">
         A new version of the app is required. Please update to continue using
         Freegle.

@@ -2,14 +2,14 @@
   <client-only>
     <b-container fluid class="p-0 p-xl-2">
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pr-1" />
+        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pe-1" />
         <b-col cols="12" lg="6" class="p-0">
           <div>
             <div class="bg-white pb-2">
-              <div class="subtitle pl-2">
+              <div class="subtitle ps-2">
                 <ExternalLink
                   href="https://loveessex.org/"
-                  class="p-2 mr-2 mt-1 mb-1 float-end"
+                  class="p-2 me-2 mt-1 mb-1 float-end"
                 >
                   <div class="imglayout">
                     <b-img
@@ -24,7 +24,7 @@
                     />
                   </div>
                 </ExternalLink>
-                <p class="font-weight-bold">
+                <p class="fw-bold">
                   <span class="d-none d-md-inline">
                     All across Essex people are already saving pre-loved items
                     from going to landfill. Why not join them?
@@ -40,13 +40,11 @@
                   for what you need, or scroll down for things other people are
                   freegling.
                 </p>
-                <p class="font-weight-bold">
-                  Everything on Freegle is completely free.
-                </p>
+                <p class="fw-bold">Everything on Freegle is completely free.</p>
               </div>
               <hr class="text-muted m-0 mb-1" />
               <GiveAsk />
-              <client-only class="pl-2">
+              <client-only class="ps-2">
                 <PlaceAutocomplete
                   class="mb-2"
                   labeltext="Or enter your location and we'll help you join your local
@@ -72,7 +70,7 @@
             </client-only>
           </div>
         </b-col>
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pl-1" />
+        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 ps-1" />
       </b-row>
     </b-container>
   </client-only>

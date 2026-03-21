@@ -1322,10 +1322,57 @@ async function loginViaModTools(page, email, password = 'freegle') {
   return true
 }
 
+/**
+ * Log in to ModTools via API and inject auth tokens into localStorage.
+ * Bypasses the UI login modal for speed and reliability.
+ * Uses testmod@test.com / freegle credentials by default.
+ */
+async function loginModToolsViaAPI(page) {
+  const { environment } = require('../config')
+  const modtoolsBaseUrl = environment.modtoolsBaseUrl
+
+  // Navigate to ModTools login page to set the correct origin for localStorage
+  await page.goto(`${modtoolsBaseUrl}/login`, {
+    timeout: timeouts.navigation.initial,
+    waitUntil: 'domcontentloaded',
+  })
+
+  // Call login API from page context (same origin for cookies)
+  const authData = await page.evaluate(
+    async ({ email, password }) => {
+      const res = await fetch('http://apiv1.localhost/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, modtools: true }),
+      })
+      const data = await res.json()
+      if (data.ret !== 0) {
+        throw new Error(`Login failed: ${data.status}`)
+      }
+      return { jwt: data.jwt, persistent: data.persistent }
+    },
+    { email: 'testmod@test.com', password: 'freegle' }
+  )
+
+  // Inject auth tokens into localStorage (matching the Pinia auth store format)
+  await page.evaluate((tokens) => {
+    localStorage.setItem(
+      'auth',
+      JSON.stringify({
+        auth: {
+          jwt: tokens.jwt,
+          persistent: tokens.persistent,
+        },
+      })
+    )
+  }, authData)
+}
+
 module.exports = {
   signUpViaHomepage,
   loginViaHomepage,
   loginViaModTools,
+  loginModToolsViaAPI,
   unsubscribeManually,
   logoutIfLoggedIn,
   getMyGroups,

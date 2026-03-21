@@ -85,14 +85,14 @@
 
 .sponsors-section {
   background: $color-gray--lighter;
-  border-radius: 12px;
+  border-radius: var(--radius-lg, 0.75rem);
   padding: 1rem 1.5rem;
   margin-bottom: 1rem;
 }
 
 .sponsors-label {
   font-size: 0.8rem;
-  color: #595959;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -108,7 +108,7 @@
 .sponsor-link {
   display: block;
   opacity: 0.8;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-normal);
 
   &:hover {
     opacity: 1;
@@ -126,7 +126,7 @@
 
 .charity-text {
   font-size: 0.8rem;
-  color: #595959;
+  color: var(--color-gray-600);
   margin-bottom: 0.75rem;
 }
 
@@ -143,9 +143,10 @@
   text-decoration: none;
   font-size: 0.85rem;
   padding: 0.25rem 0.5rem;
+  transition: all var(--transition-fast);
 
   &:hover {
-    color: $colour-success;
+    color: $color-success;
   }
 }
 

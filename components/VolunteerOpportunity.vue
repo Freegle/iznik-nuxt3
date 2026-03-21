@@ -242,6 +242,7 @@ const volunteering = computed(() => {
   return null
 })
 
+// eslint-disable-next-line no-unused-vars
 const groups = computed(() => {
   const ret = []
   volunteering.value?.groups?.forEach((id) => {
@@ -308,7 +309,7 @@ function expire() {
 
 .volop-card {
   background: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -328,7 +329,7 @@ function expire() {
 .volop-card__title {
   flex: 1;
   min-width: 0;
-  color: $color-blue--base;
+  color: var(--color-link);
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;

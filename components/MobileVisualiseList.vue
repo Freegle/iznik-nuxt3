@@ -164,9 +164,9 @@ function goToMessage(id) {
 
 .scroll-item {
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: var(--radius-sm, 0.375rem);
   overflow: hidden;
-  transition: transform 0.2s;
+  transition: transform var(--transition-normal);
 
   &:active {
     transform: scale(0.98);
@@ -189,7 +189,7 @@ function goToMessage(id) {
 
 .loading-card {
   aspect-ratio: 1 / 1.15;
-  border-radius: 8px;
+  border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
   background: $color-gray--lighter;
 }

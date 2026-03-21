@@ -65,7 +65,7 @@ const steps = computed(() => {
   align-items: flex-start;
   justify-content: center;
   padding: 0.75rem 0;
-  background: linear-gradient(to bottom, #f8faf8, white);
+  background: linear-gradient(to bottom, var(--color-primary-surface), white);
 }
 
 .step {
@@ -81,7 +81,7 @@ const steps = computed(() => {
   position: absolute;
   top: 18px;
   height: 3px;
-  background: #e5e7eb;
+  background: $color-gray-3;
   z-index: 0;
 
   &:first-of-type {
@@ -127,18 +127,18 @@ const steps = computed(() => {
   height: 36px;
   border-radius: 50%;
   background: white;
-  border: 3px solid #e5e7eb;
+  border: 3px solid $color-gray-3;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
 .step-icon {
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: $color-gray--base;
 }
 
 .check-icon {
@@ -148,10 +148,10 @@ const steps = computed(() => {
 
 .step-label {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: $color-gray--base;
   margin-top: 0.4rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
 }
 
 /* Active state */
@@ -177,6 +177,6 @@ const steps = computed(() => {
 }
 
 .step.completed .step-label {
-  color: #6b7280;
+  color: $color-gray--normal;
 }
 </style>

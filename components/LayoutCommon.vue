@@ -71,14 +71,14 @@
     >
       <div class="text-center bg-white p-2">
         <div
-          class="spinner-border"
-          style="width: 50px; height: 50px; color: #61ae24"
+          class="spinner-border text-success"
+          style="width: 50px; height: 50px"
           role="status"
         >
           <span class="visually-hidden">Loading...</span>
         </div>
         <p>
-          <span>Loading...</span><br /><span class="font-weight-bold"
+          <span>Loading...</span><br /><span class="fw-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
             Chrome.</span
           ><br /><SupportLink text="No luck? Contact us" />
@@ -461,7 +461,7 @@ body.modal-open {
   }
 
   .adRendering {
-    background-color: $color-gray--dark;
+    background-color: var(--color-gray-600);
   }
 
   @include media-breakpoint-up(lg) {

@@ -171,12 +171,13 @@ function goNext() {
 
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
 .app-give-options {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: $color-white;
   padding-bottom: 80px;
 
   &.has-sticky-ad {
@@ -206,7 +207,7 @@ function goNext() {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .toggle-options {
@@ -217,23 +218,23 @@ function goNext() {
 .toggle-btn {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid #dee2e6;
-  background: #fff;
-  border-radius: 12px;
+  border: 2px solid var(--color-gray-300);
+  background: $color-white;
+  border-radius: var(--radius-lg, 0.75rem);
   font-size: 1rem;
-  color: #495057;
+  color: var(--color-gray-600);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &.active {
-    border-color: #28a745;
-    background: #d4edda;
-    color: #155724;
+    border-color: $color-success;
+    background: $color-success-border;
+    color: $color-success-fg;
     font-weight: 500;
   }
 
   &:not(.active):active {
-    background: #f8f9fa;
+    background: $color-gray--lighter;
   }
 }
 
@@ -247,8 +248,8 @@ function goNext() {
   left: 0;
   right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #fff;
+  border-top: 1px solid $color-gray-3;
+  background: $color-white;
   z-index: 100;
 
   &.has-sticky-ad {

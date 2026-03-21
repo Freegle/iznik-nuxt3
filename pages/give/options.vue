@@ -200,13 +200,13 @@ function goNext() {
 
 .options-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .stepper-container {
   background: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 
   @include media-breakpoint-up(lg) {
     padding: 1.5rem 2rem;
@@ -226,7 +226,7 @@ function goNext() {
 .options-card {
   background: white;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .options-title {
@@ -249,7 +249,7 @@ function goNext() {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #212529;
+  color: $color-gray--darker;
 }
 
 .toggle-options {
@@ -260,12 +260,12 @@ function goNext() {
 .toggle-btn {
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid #dee2e6;
-  background: #fff;
+  border: 2px solid var(--color-gray-300);
+  background: $color-white;
   font-size: 1rem;
-  color: #495057;
+  color: var(--color-gray-600);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 
   &.active {
     border-color: $color-green-background;
@@ -275,7 +275,7 @@ function goNext() {
   }
 
   &:not(.active):hover {
-    background: #f8f9fa;
+    background: $color-gray--lighter;
   }
 }
 

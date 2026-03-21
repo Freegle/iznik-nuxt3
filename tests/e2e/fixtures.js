@@ -586,7 +586,7 @@ const test = base.test.extend({
           // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
           // Can't use Playwright's toBeVisible assertion since that doesn't check opacity.
           const loadingIndicator = page.locator('.loading-indicator')
-          if (loadingIndicator.count() > 0) {
+          if ((await loadingIndicator.count()) > 0) {
             await base.expect(loadingIndicator).toHaveCSS('opacity', '0')
           }
 

@@ -14,7 +14,7 @@
           class="ml-0"
         >
           <v-icon icon="handshake" />
-          <span class="ml-2">Promised</span>
+          <span class="ms-2">Promised</span>
         </b-badge>
         to
         <strong>{{ promise.name }}</strong>

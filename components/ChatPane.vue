@@ -592,8 +592,8 @@ function typing() {
   text-align: center;
   background: white;
   padding: 32px 40px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
 }
 
 .empty-state-icon {
@@ -611,7 +611,7 @@ function typing() {
 
 .empty-state-hint {
   font-size: 0.85rem;
-  color: $color-gray--dark;
+  color: var(--color-gray-500);
   margin: 0;
 }
 
@@ -620,7 +620,7 @@ function typing() {
   order: 2;
   background: white;
   padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   position: relative;
   z-index: 1;
 }
@@ -651,7 +651,7 @@ function typing() {
   gap: 8px;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: $color-gray--darker;
   margin-bottom: 4px;
 }
 
@@ -671,6 +671,7 @@ function typing() {
   font-size: 0.75rem;
   color: $color-gray--darker;
   font-weight: 500;
+  border-radius: var(--radius-sm, 0.375rem);
 }
 
 .stat-icon {
@@ -702,7 +703,7 @@ function typing() {
 }
 
 .action-btn--mark-read {
-  border: 1px solid #dc3545 !important;
-  color: #dc3545 !important;
+  border: 1px solid $color-red !important;
+  color: $color-red !important;
 }
 </style>

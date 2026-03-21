@@ -143,7 +143,7 @@
           :width="150"
           :font-size="14"
           :sync="true"
-          class="mr-1"
+          class="me-1"
           :labels="{ checked: 'Allow autosend', unchecked: 'Edit first' }"
           variant="modgreen"
         />

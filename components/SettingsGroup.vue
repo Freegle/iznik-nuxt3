@@ -197,7 +197,7 @@ function leaveGroup(callback) {
   }
 
   &.frequency-off {
-    border: 1px solid $color-gray--dark;
+    border: 1px solid var(--color-gray-600);
   }
 }
 
@@ -208,9 +208,10 @@ function leaveGroup(callback) {
 }
 
 .leave-btn {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   padding: 0;
   font-size: 0.85rem;
+  transition: all var(--transition-fast);
 
   &:hover {
     color: $color-red;

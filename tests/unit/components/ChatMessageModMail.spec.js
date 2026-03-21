@@ -291,7 +291,7 @@ describe('ChatMessageModMail', () => {
     it('shows bold message when recent', async () => {
       mockChatmessage.value.secondsago = 30
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows bold message when id > lastmsgseen', async () => {
@@ -299,7 +299,7 @@ describe('ChatMessageModMail', () => {
       mockChatmessage.value.id = 100
       mockChat.value.lastmsgseen = 50
       const wrapper = await createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows normal text when old message', async () => {
@@ -520,18 +520,18 @@ describe('ChatMessageModMail', () => {
   })
 
   describe('card alignment', () => {
-    it('applies ml-auto class when amUser is false', async () => {
+    it('applies ms-auto class when amUser is false', async () => {
       mockChat.value.user = { id: 2 }
       mockMyid.value = 1
       const wrapper = await createWrapper()
-      expect(wrapper.find('.b-card').classes()).toContain('ml-auto')
+      expect(wrapper.find('.b-card').classes()).toContain('ms-auto')
     })
 
-    it('does not apply ml-auto class when amUser is true', async () => {
+    it('does not apply ms-auto class when amUser is true', async () => {
       mockChat.value.user = { id: 1 }
       mockMyid.value = 1
       const wrapper = await createWrapper()
-      expect(wrapper.find('.b-card').classes()).not.toContain('ml-auto')
+      expect(wrapper.find('.b-card').classes()).not.toContain('ms-auto')
     })
   })
 })

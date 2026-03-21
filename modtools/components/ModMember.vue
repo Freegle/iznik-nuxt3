@@ -6,7 +6,7 @@
           <div v-if="isLJ">LoveJunk user #{{ user.ljuserid }}</div>
           <div v-else-if="email">
             <!-- eslint-disable-next-line -->
-            <ModClipboard class="mr-1" :value="email" />
+            <ModClipboard class="me-1" :value="email" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
           </div>
         </div>
@@ -14,7 +14,7 @@
           <ProfileImage
             :image="user.profile?.turl || user.profile?.paththumb"
             :name="user.displayname || member.fullname"
-            class="ml-1 mb-1 inline"
+            class="ms-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
@@ -86,12 +86,12 @@
           </b-button>
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <div class="border border-info p-1 flex-grow-1 mr-1">
+          <div class="border border-info p-1 flex-grow-1 me-1">
             <SettingsGroup
               v-if="groupid"
               :emailfrequency="member.emailfrequency"
               :membership-m-t="member"
-              xclass="border border-info p-1 flex-grow-1 mr-1"
+              xclass="border border-info p-1 flex-grow-1 me-1"
               @update:emailfrequency="
                 settingsChange('emailfrequency', groupid, $event)
               "
@@ -264,10 +264,10 @@
             :role="member.role"
           />
           <!--div v-if="chatid" class="d-inline btn border">
-            <v-icon class="me-1" style="color: blue" icon="comments" />
+            <v-icon class="me-1 text-link" icon="comments" />
             <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
           </div-->
-          <b-button variant="white" class="mr-2 mb-1" @click="showChat">
+          <b-button variant="white" class="me-2 mb-1" @click="showChat">
             <v-icon icon="comments" /> View Chat
           </b-button>
           <ChatButton
@@ -275,7 +275,7 @@
             :groupid="member.groupid"
             title="Chat"
             variant="white"
-            class="ml-1"
+            class="ms-1"
           />
         </div>
       </b-card-footer>
@@ -598,3 +598,8 @@ async function showChat() {
   modChatModal.value?.show()
 }
 </script>
+<style scoped lang="scss">
+.text-link {
+  color: var(--color-link);
+}
+</style>

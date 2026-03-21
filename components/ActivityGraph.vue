@@ -13,7 +13,7 @@
             "
             v-model="units"
             :options="unitOptions"
-            class="graphSelect mr-1"
+            class="graphSelect me-1"
           />
           <b-form-select
             v-model="graphType"

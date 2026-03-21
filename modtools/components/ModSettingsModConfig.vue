@@ -17,7 +17,7 @@
       <b-form-select
         v-model="configid"
         :options="configOptions"
-        class="mb-2 font-weight-bold"
+        class="mb-2 fw-bold"
       />
       <div>
         <b-input-group>

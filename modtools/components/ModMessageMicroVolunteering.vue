@@ -27,7 +27,7 @@
         shouldn't be here
       </strong>
       <br />
-      <span v-if="microvolunteering.comments" class="font-weight-bold"
+      <span v-if="microvolunteering.comments" class="fw-bold"
         >"{{ microvolunteering.comments }}"</span
       >
       <em v-else>No comment supplied.</em>

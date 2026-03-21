@@ -91,12 +91,13 @@ function goNext() {
 
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
 .app-find-photos {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: $color-white;
   padding-bottom: 80px;
 
   &.has-sticky-ad {
@@ -123,8 +124,8 @@ function goNext() {
   left: 0;
   right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #fff;
+  border-top: 1px solid $color-gray-3;
+  background: $color-white;
   z-index: 100;
 
   &.has-sticky-ad {

@@ -1,17 +1,17 @@
 <template>
   <b-badge
     :variant="spamKeywordVariant"
-    class="mr-2 mb-2 p-2"
+    class="me-2 mb-2 p-2"
     style="font-size: 0.9rem"
   >
-    <small v-if="spamKeyword?.type === 'Regex'" class="mr-1 text-muted"
+    <small v-if="spamKeyword?.type === 'Regex'" class="me-1 text-muted"
       >REGEX:</small
     >
     {{ displayText }}
     <b-button
       size="sm"
       variant="outline-danger"
-      class="ml-2 p-1"
+      class="ms-2 p-1"
       :disabled="isLoading"
       @click="confirmDelete"
     >

@@ -461,7 +461,7 @@
               <p>These are any stories you've told us.</p>
               <ShowMore :items="status.data.stories">
                 <template #item="s">
-                  <span class="font-weight-bold">{{ s.item.headline }}</span>
+                  <span class="fw-bold">{{ s.item.headline }}</span>
                   <br />
                   {{ s.item.story }}
                 </template>
@@ -730,7 +730,7 @@
               </ShowMore>
               <h2>Exports</h2>
               <p>These are any other times you've viewed this data.</p>
-              <b-row class="font-weight-bold">
+              <b-row class="fw-bold">
                 <b-col cols="4"> Requested</b-col>
                 <b-col cols="4"> Started</b-col>
                 <b-col cols="4"> Completed</b-col>

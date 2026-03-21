@@ -6,7 +6,7 @@
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
               :userid="message.fromuser.id"
-              class="mr-2"
+              class="me-2"
               tag="From: "
               :groupid="message.group ? message.group.id : 0"
               @reload="reload"
@@ -19,14 +19,14 @@
             <ModChatReviewUser
               v-if="message.touser"
               :userid="message.touser.id"
-              class="ml-2"
+              class="ms-2"
               tag="To: "
               :groupid="message.group ? message.group.id : 0"
               @reload="reload"
             />
           </div>
           <div v-if="message.bymailid || message.msgid">
-            <b-button variant="white" class="ml-2" @click="showOriginal = true">
+            <b-button variant="white" class="ms-2" @click="showOriginal = true">
               <v-icon icon="info-circle" /> View original email
             </b-button>
           </div>
@@ -52,9 +52,7 @@
             think it should be released.
           </span>
         </NoticeMessage>
-        <div
-          class="rounded bg-white p-2 font-weight-bold border border-warning mb-2"
-        >
+        <div class="rounded bg-white p-2 fw-bold border border-warning mb-2">
           <ChatMessage
             :id="message.id"
             :chatid="message.chatid"
@@ -145,7 +143,7 @@
             <b-button
               v-if="message.held && me.id === message.held.id"
               variant="warning"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @click="release"
             >
               <v-icon icon="play" /> Release
@@ -155,7 +153,7 @@
               icon-name="exclamation-triangle"
               label="Add Mod Message"
               variant="warning"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @handle="showModnote"
             />
             <SpinButton
@@ -163,7 +161,7 @@
               icon-name="eraser"
               label="Remove highlighted emails"
               variant="warning"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @handle="redactEmails"
             />
           </template>
@@ -173,7 +171,7 @@
             label="Approve - Not Spam"
             spinclass="text-white"
             variant="primary"
-            class="mr-2 mb-1"
+            class="me-2 mb-1"
             @handle="approve"
           />
           <template v-if="!message.widerchatreview && isActiveMod">
@@ -183,7 +181,7 @@
               label="Approve and whitelist"
               spinclass="text-white"
               variant="primary"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               confirm
               @handle="whitelist"
             />
@@ -192,7 +190,7 @@
               icon-name="pause"
               label="Hold"
               variant="warning"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               @handle="hold"
             />
             <SpinButton
@@ -200,7 +198,7 @@
               icon-name="trash-alt"
               label="Delete"
               variant="danger"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               confirm
               @handle="reject"
             />
@@ -209,7 +207,7 @@
               icon-name="ban"
               label="Spam"
               variant="danger"
-              class="mr-2 mb-1"
+              class="me-2 mb-1"
               confirm
               @handle="reject"
             />
@@ -451,7 +449,7 @@ async function redactEmails(callback) {
 //@import 'color-vars';
 
 .highlight {
-  color: $color-blue--base;
+  color: var(--color-link);
   background-color: initial;
 }
 </style>

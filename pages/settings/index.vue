@@ -123,9 +123,11 @@ const ProfileModal = defineAsyncComponent(() =>
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .settings-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .settings-content {

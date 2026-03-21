@@ -4,7 +4,7 @@
       v-for="l in displayLogins"
       :key="'login-' + l.id"
       variant="info"
-      class="border border-info rounded p-1 mr-1"
+      class="border border-info rounded p-1 me-1"
     >
       {{ loginType(l.type) }} login {{ timeago(l.lastaccess) }}
     </b-badge>

@@ -18,7 +18,7 @@
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
-        class="ml-1"
+        class="ms-1"
       >
         RSVP - reply expected
       </b-badge>
@@ -53,7 +53,7 @@
       >
         <v-icon icon="check" class="text-muted" />
       </span>
-      <span v-if="chat.chattype === 'User2Mod'" class="ml-1">
+      <span v-if="chat.chattype === 'User2Mod'" class="ms-1">
         <span v-if="chatmessage?.userid === me.id"> You </span>
         <span v-else-if="othermodname">
           {{ othermodname }}
@@ -68,13 +68,13 @@
       <span v-if="chatmessage?.reviewrequired" class="text-danger small">
         Pending review
       </span>
-      <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
+      <span :title="datetimeshort(chatmessage?.date)" class="ms-1">{{
         timeadaptChat(chatmessage?.date)
       }}</span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
-        class="ml-1"
+        class="ms-1"
       >
         RSVP - reply requested
       </b-badge>

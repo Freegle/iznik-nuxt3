@@ -14,7 +14,7 @@
           </div>
           <div v-if="eventData.name">
             <add-to-calendar-button
-              style-light="background-color: #61AE24; color: white; border-radius: 4px; padding: 10px 20px; border: none; font-weight: 500;"
+              style-light="background-color: var(--color-primary-bg); color: white; border-radius: 4px; padding: 10px 20px; border: none; font-weight: 500;"
               button-style="default"
               light-mode="bodyScheme"
             >

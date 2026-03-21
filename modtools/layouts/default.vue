@@ -7,7 +7,7 @@
       class="navback p-0 p-sm-1 justify-content-between"
       fixed="top"
     >
-      <b-navbar-brand class="p-0 pr-2 d-flex">
+      <b-navbar-brand class="p-0 pe-2 d-flex">
         <b-img
           class="logo clickme"
           fluid
@@ -23,7 +23,7 @@
         <b-nav-item
           v-if="loggedIn"
           id="menu-option-modtools-discourse2"
-          class="text-center p-0 mr-4"
+          class="text-center p-0 me-4"
         >
           <ExternalLink
             id="discourseIcon"
@@ -45,7 +45,7 @@
           v-if="loggedIn"
           id="menu-option-modtools-chat2"
           :is-list-item="true"
-          class="mr-4"
+          class="me-4"
         />
         <b-nav-item v-if="loggedIn">
           <div class="position-relative">
@@ -80,7 +80,7 @@
           @mobilehidemenu="mobilehidemenu"
         />
         <hr />
-        <div class="pl-1">Messages</div>
+        <div class="ps-1">Messages</div>
         <ModMenuItemLeft
           link="/messages/pending"
           name="Pending"
@@ -103,7 +103,7 @@
           @mobilehidemenu="mobilehidemenu"
         />
         <hr />
-        <div class="pl-1">Members</div>
+        <div class="ps-1">Members</div>
         <ModMenuItemLeft
           link="/members/approved"
           name="Approved"
@@ -229,13 +229,13 @@
         <div>
           <ExternalLink
             href="https://wiki.ilovefreegle.org/ModTools"
-            class="pl-1"
+            class="ps-1"
           >
             Help
           </ExternalLink>
         </div>
         <div>
-          <a href="#" class="pl-1" @click="logOut"> Logout </a>
+          <a href="#" class="ps-1" @click="logOut"> Logout </a>
         </div>
         <div v-if="inMTapp" id="mtinfo" :title="inMTapp">
           MT app {{ inMTapp }}

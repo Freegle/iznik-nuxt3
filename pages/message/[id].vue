@@ -239,15 +239,15 @@ onMounted(async () => {
 
 .error-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: var(--shadow-md);
   padding: 2rem;
   text-align: center;
 }
 
 .error-icon {
   font-size: 3rem;
-  color: $colour-success;
+  color: $color-success;
   margin-bottom: 1rem;
 }
 
@@ -259,7 +259,7 @@ onMounted(async () => {
 }
 
 .error-message {
-  color: $color-gray--dark;
+  color: var(--color-gray-600);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white pl-2">
+  <div class="bg-white ps-2">
     <client-only>
       <h1>Teams</h1>
       <p>
@@ -20,10 +20,10 @@
       </div>
       <div v-if="selected && team && team.members" class="mt-2">
         <h2>{{ team.name }}</h2>
-        <p v-if="team.supporttools" class="font-weight-bold">
+        <p v-if="team.supporttools" class="fw-bold">
           Members of this team have Support Tools access.
         </p>
-        <p v-else class="font-weight-normal">
+        <p v-else class="fw-normal">
           Members of this team don't need Support Tools access.
         </p>
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">

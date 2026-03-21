@@ -15,7 +15,7 @@
       {{ alert.subject }}
     </b-col>
     <b-col cols="6" lg="2">
-      <b-button variant="white" class="mr-1" @click="stats">
+      <b-button variant="white" class="me-1" @click="stats">
         Show Stats
       </b-button>
       <b-button variant="white" @click="details"> Show Details </b-button>

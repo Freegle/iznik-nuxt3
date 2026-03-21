@@ -27,8 +27,8 @@
   background: linear-gradient(
     to right,
     transparent,
-    rgba($colour-success, 0.4),
-    rgba($colour-success, 0.4),
+    rgba($color-success, 0.4),
+    rgba($color-success, 0.4),
     transparent
   );
 }
@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: $colour-success;
+  color: $color-success;
   white-space: nowrap;
 }
 

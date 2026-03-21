@@ -251,7 +251,7 @@ describe('ChatMessageInterested', () => {
     it('shows bold message when secondsago < 60', () => {
       mockChatmessage.value.secondsago = 30
       const wrapper = createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows bold message when message id > lastmsgseen', () => {
@@ -259,7 +259,7 @@ describe('ChatMessageInterested', () => {
       mockChatmessage.value.id = 100
       mockChat.value.lastmsgseen = 50
       const wrapper = createWrapper()
-      expect(wrapper.find('.font-weight-bold').exists()).toBe(true)
+      expect(wrapper.find('.fw-bold').exists()).toBe(true)
     })
 
     it('shows normal text when old message', () => {

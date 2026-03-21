@@ -52,7 +52,7 @@
       <b-form-select
         v-model="modnotifs"
         :options="modNotifOptions"
-        class="mb-2 font-weight-bold"
+        class="mb-2 fw-bold"
       />
     </b-form-group>
     <b-form-group label="Moderation Notifications (Backup)">
@@ -64,7 +64,7 @@
       <b-form-select
         v-model="backupmodnotifs"
         :options="modNotifOptions"
-        class="mb-2 font-weight-bold"
+        class="mb-2 fw-bold"
       />
     </b-form-group>
     <b-form-group label="Show me as a volunteer?">

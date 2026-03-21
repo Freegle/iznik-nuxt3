@@ -98,7 +98,7 @@ module.exports = defineConfig({
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://freegle-dev-local.localhost',
+    baseURL: process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     // viewport set at test level for better control
     trace: 'retain-on-failure',

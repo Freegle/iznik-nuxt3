@@ -3,7 +3,7 @@
     <div class="d-flex">
       <ProfileImage
         :image="avatar"
-        class="ml-1 mb-1 inline"
+        class="ms-1 mb-1 inline"
         is-thumbnail
         size="lg"
       />

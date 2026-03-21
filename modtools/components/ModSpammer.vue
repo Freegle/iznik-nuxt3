@@ -31,7 +31,7 @@
             }}</ExternalLink
             >)
           </span>
-          <ModClipboard class="ml-1" :value="user.spammer.byuser.email" />
+          <ModClipboard class="ms-1" :value="user.spammer.byuser.email" />
         </span>
         #{{ user.spammer.byuserid }} {{ timeago(user.spammer.added) }}
       </div>

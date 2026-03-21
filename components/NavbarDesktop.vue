@@ -1,14 +1,14 @@
 <template>
   <b-navbar
     id="navbar_large"
-    class="ourBack d-none d-xl-flex pl-1 pr-2 navbar-dark navbar-expand-xl"
+    class="ourBack d-none d-xl-flex ps-1 pe-2 navbar-dark navbar-expand-xl"
     fixed="top"
   >
     <nuxt-link :to="homePage" class="navbar-brand p-0" no-prefetch>
       <OfflineIndicator v-if="!online" />
       <b-img
         v-else-if="logoFormat === 'gif'"
-        class="logo mr-2"
+        class="logo me-2"
         :src="logo"
         :format="logoFormat"
         alt="Home"
@@ -16,7 +16,7 @@
       <ProxyImage
         v-else
         preload
-        class="logo mr-2"
+        class="logo me-2"
         :src="logo"
         :format="logoFormat"
         alt="Home"
@@ -43,7 +43,7 @@
           <nuxt-link
             id="menu-option-mygroups"
             no-prefetch
-            class="nav-link text-center small p-0 ml-2"
+            class="nav-link text-center small p-0 ms-2"
             to="/browse"
             @mousedown="maybeReload('/browse')"
           >
@@ -253,11 +253,11 @@
         </li>
       </ul>
     </div>
-    <div v-if="!loggedIn" class="navbar-nav ml-auto">
+    <div v-if="!loggedIn" class="navbar-nav ms-auto">
       <div class="nav-item" no-prefetch>
         <b-button
           variant="white"
-          class="mr-2 test-signinbutton"
+          class="me-2 test-signinbutton"
           :disabled="signInDisabled"
           @click="requestLogin"
         >

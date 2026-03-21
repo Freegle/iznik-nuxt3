@@ -34,7 +34,7 @@
             "
           >
             <div class="d-flex flex-wrap">
-              <div v-if="message.deliverypossible" class="mb-2 mr-2">
+              <div v-if="message.deliverypossible" class="mb-2 me-2">
                 <b-badge
                   v-b-tooltip="
                     'They have said they may be able to deliver.  No guarantees - it needs to be convenient for them - but you can ask.'
@@ -75,7 +75,7 @@
               @input="stateMachine.startTyping"
             />
           </b-form-group>
-          <ErrorMessage name="reply" class="text-danger font-weight-bold" />
+          <ErrorMessage name="reply" class="text-danger fw-bold" />
           <b-form-group
             v-if="message.type == 'Offer'"
             class="mt-1"
@@ -96,7 +96,7 @@
               max-rows="2"
             />
           </b-form-group>
-          <ErrorMessage name="collect" class="text-danger font-weight-bold" />
+          <ErrorMessage name="collect" class="text-danger fw-bold" />
         </VeeForm>
         <p v-if="me && !alreadyAMember" class="text--small text-muted">
           You're not yet a member of this community; we'll join you. Change
@@ -116,7 +116,7 @@
         <b-button
           variant="link"
           size="sm"
-          class="p-0 ml-2"
+          class="p-0 ms-2"
           @click="stateMachine.retry"
         >
           Try again
@@ -125,14 +125,14 @@
     </div>
     <hr />
     <div class="d-flex justify-content-between">
-      <div class="pr-2 w-50">
+      <div class="pe-2 w-50">
         <b-button variant="secondary" size="lg" block @click="close">
           Cancel
         </b-button>
       </div>
       <div
         v-if="!fromme && !me?.deleted"
-        class="pl-2 w-50 justify-content-end d-flex"
+        class="ps-2 w-50 justify-content-end d-flex"
       >
         <SpinButton
           variant="primary"

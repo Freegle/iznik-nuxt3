@@ -143,6 +143,8 @@ onBeforeUnmount(() => {
 })
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .posit {
   position: fixed;
   bottom: 0;
@@ -151,15 +153,15 @@ onBeforeUnmount(() => {
 }
 
 .error-stack {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 0.25rem;
+  background-color: $color-gray--lighter;
+  border: 1px solid $color-gray-3;
+  border-radius: var(--radius-sm, 0.375rem);
   padding: 0.75rem;
   font-size: 0.875rem;
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 200px;
   overflow-y: auto;
-  color: #dc3545;
+  color: $color-red;
 }
 </style>

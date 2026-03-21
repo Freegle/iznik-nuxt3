@@ -204,13 +204,13 @@ async function next() {
 
 .whoami-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: $color-gray--lighter;
 }
 
 .stepper-container {
   background: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 
   @include media-breakpoint-up(lg) {
     padding: 1.5rem 2rem;
@@ -230,7 +230,7 @@ async function next() {
 .whoami-card {
   background: white;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .whoami-title {
@@ -242,7 +242,7 @@ async function next() {
 }
 
 .whoami-subtitle {
-  color: #6b7280;
+  color: $color-gray--normal;
   text-align: center;
   margin-bottom: 1.5rem;
 }
@@ -260,7 +260,7 @@ async function next() {
 
 .terms-text {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: $color-gray--normal;
   margin-top: 1.5rem;
   line-height: 1.4;
   text-align: center;

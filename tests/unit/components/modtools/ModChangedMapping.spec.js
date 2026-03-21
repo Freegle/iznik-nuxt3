@@ -59,11 +59,11 @@ describe('ModChangedMapping', () => {
       expect(div.exists()).toBe(true)
     })
 
-    it('shows text-danger font-weight-bold when highlighted id matches', () => {
+    it('shows text-danger fw-bold when highlighted id matches', () => {
       const wrapper = mountModChangedMapping({
         highlighted: { id: 1 }, // Same id as defaultChanged
       })
-      const dangerDiv = wrapper.find('.text-danger.font-weight-bold')
+      const dangerDiv = wrapper.find('.text-danger.fw-bold')
       expect(dangerDiv.exists()).toBe(true)
       // Should not have clickme class when highlighted
       expect(wrapper.find('.clickme').exists()).toBe(false)

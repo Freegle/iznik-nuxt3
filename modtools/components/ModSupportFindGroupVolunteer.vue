@@ -7,12 +7,12 @@
     </b-col>
     <b-col cols="12" md="3" class="order-4 order-md-2">
       {{ volunteer.displayname }}
-      <span v-if="active" class="font-weight-bold"> (Active) </span>
+      <span v-if="active" class="fw-bold"> (Active) </span>
       <span v-else class="text-muted"> (Backup) </span>
     </b-col>
     <b-col cols="12" md="3" class="order-5 order-md-3">
       <template v-if="email">
-        <ModClipboard class="mr-3" :value="email" />
+        <ModClipboard class="me-3" :value="email" />
         <!-- eslint-disable-next-line -->
         <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
       </template>

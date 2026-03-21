@@ -75,7 +75,7 @@
                     <div>
                       <b-button
                         variant="white"
-                        class="ml-2"
+                        class="ms-2"
                         @click="editAddress"
                         >Address Book</b-button
                       >

@@ -3,7 +3,7 @@
     <b-container fluid class="p-0 p-xl-2 bg-white">
       <h1 class="visually-hidden">Ad Test page</h1>
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="p-0 pr-1">
+        <b-col cols="0" lg="3" class="p-0 pe-1">
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -46,7 +46,7 @@
             show-logged-out
           />
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
+        <b-col cols="0" lg="3" class="p-0 ps-1">
           <div class="d-flex justify-content-end">
             <VisibleWhen
               :not="['xs', 'sm', 'md', 'lg']"
