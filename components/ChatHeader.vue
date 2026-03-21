@@ -476,7 +476,7 @@ const showInfo = () => {
   if (miscStore.modtools) {
     // MT
     navigateTo(
-      '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+      '/members/approved/' + chat.value.group.id + '/' + chat.value.user1
     )
   } else showProfileModal.value = true
 }

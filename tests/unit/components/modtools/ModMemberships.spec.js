@@ -13,6 +13,23 @@ vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
 }))
 
+// Mock the API module — fetchApplied and fetchMembershipHistory
+const mockFetchApplied = vi.fn().mockResolvedValue([])
+const mockFetchMembershipHistory = vi.fn().mockResolvedValue([])
+
+vi.mock('~/api', () => ({
+  default: () => ({
+    user: {
+      fetchApplied: mockFetchApplied,
+      fetchMembershipHistory: mockFetchMembershipHistory,
+    },
+  }),
+}))
+
+vi.mock('#app', () => ({
+  useRuntimeConfig: () => ({}),
+}))
+
 describe('ModMemberships', () => {
   const createUser = (overrides = {}) => ({
     id: 456,
@@ -31,7 +48,6 @@ describe('ModMemberships', () => {
         added: '2024-02-01T10:00:00Z',
       },
     ],
-    applied: [],
     ...overrides,
   })
 
@@ -47,11 +63,15 @@ describe('ModMemberships', () => {
   // Helper to create applied groups
   const createApplied = (count) =>
     Array.from({ length: count }, (_, i) => ({
-      id: i + 1,
-      userid: 456,
+      groupid: 100 + i + 1,
       namedisplay: `Applied ${i + 1}`,
       added: `2024-01-${String(i + 1).padStart(2, '0')}`,
     }))
+
+  beforeEach(() => {
+    mockFetchApplied.mockReset().mockResolvedValue([])
+    mockFetchMembershipHistory.mockReset().mockResolvedValue([])
+  })
 
   function mountComponent(props = {}, userOverrides = {}) {
     mockUserData = createUser(userOverrides)
@@ -226,53 +246,53 @@ describe('ModMemberships', () => {
   })
 
   describe('applied groups', () => {
-    it('shows applied groups and filters out existing memberships', () => {
+    it('shows applied groups and filters out existing memberships', async () => {
+      mockFetchApplied.mockResolvedValue([
+        {
+          groupid: 1,
+          namedisplay: 'Group 1',
+          added: '2024-06-01',
+        }, // Same groupid as memberships
+        {
+          groupid: 99,
+          namedisplay: 'Applied Group',
+          added: '2024-06-01',
+        },
+      ])
       const wrapper = mountComponent(
         {},
         {
           memberships: [
             {
               id: 1,
+              groupid: 1,
               membershipid: 101,
               namedisplay: 'Group 1',
               added: '2024-01-01',
             },
           ],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Group 1',
-              added: '2024-06-01',
-            }, // Same id as memberships
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied Group',
-              added: '2024-06-01',
-            },
-          ],
         }
       )
+      await wrapper.vm.$nextTick()
+      await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Applied Group')
       expect(wrapper.text()).toContain('joined')
       expect(wrapper.vm.filteredApplied.length).toBe(1)
       expect(wrapper.vm.filteredApplied[0].namedisplay).toBe('Applied Group')
     })
 
-    it('returns empty array when user has no applied', () => {
-      const wrapper = mountComponent({}, { applied: null })
+    it('returns empty array when user has no applied', async () => {
+      mockFetchApplied.mockResolvedValue([])
+      const wrapper = mountComponent({})
+      await wrapper.vm.$nextTick()
       expect(wrapper.vm.filteredApplied).toEqual([])
     })
 
     it('shows first 3 applied by default, all when allapplied is true', async () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          memberships: [],
-          applied: createApplied(5),
-        }
-      )
+      mockFetchApplied.mockResolvedValue(createApplied(5))
+      const wrapper = mountComponent({}, { memberships: [] })
+      await wrapper.vm.$nextTick()
+      await wrapper.vm.$nextTick()
 
       // Default: shows first 3
       expect(wrapper.vm.visibleApplied.length).toBe(3)
@@ -291,13 +311,10 @@ describe('ModMemberships', () => {
     ])(
       'returns correct count when %s',
       async (_, appliedCount, allapplied, expected) => {
-        const wrapper = mountComponent(
-          {},
-          {
-            memberships: [],
-            applied: createApplied(appliedCount),
-          }
-        )
+        mockFetchApplied.mockResolvedValue(createApplied(appliedCount))
+        const wrapper = mountComponent({}, { memberships: [] })
+        await wrapper.vm.$nextTick()
+        await wrapper.vm.$nextTick()
         if (allapplied) {
           wrapper.vm.allapplied = true
           await wrapper.vm.$nextTick()
@@ -306,14 +323,11 @@ describe('ModMemberships', () => {
       }
     )
 
-    it('shows applied badge when hidden applied exist', () => {
-      const wrapper = mountComponent(
-        {},
-        {
-          memberships: [],
-          applied: createApplied(4),
-        }
-      )
+    it('shows applied badge when hidden applied exist', async () => {
+      mockFetchApplied.mockResolvedValue(createApplied(4))
+      const wrapper = mountComponent({}, { memberships: [] })
+      await wrapper.vm.$nextTick()
+      await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('+1 applied')
     })
   })

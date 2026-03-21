@@ -27,8 +27,7 @@ function useChatSharedMT(chatId) {
     let user = null
 
     if (!otheruid) {
-      // MT: try user1id or user1.id
-      otheruid = chat.value?.user1id || chat.value?.user1?.id
+      otheruid = chat.value?.user1
     }
 
     if (otheruid) {
@@ -165,14 +164,14 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
   const messageIsFromCurrentUser = computed(() => {
     if (chat.value?.chattype === 'User2User') {
       // For User2User chats viewed by support, use pov to determine perspective
-      if (pov === chat.value?.user1id) {
-        return chat.value?.user1id === chatmessage.value?.userid
+      if (pov === chat.value?.user1) {
+        return chat.value?.user1 === chatmessage.value?.userid
       } else {
-        return chat.value?.user1id !== chatmessage.value?.userid
+        return chat.value?.user1 !== chatmessage.value?.userid
       }
     }
     // For User2Mod chats, messages from user1 (the member) appear on the left
-    return chat.value?.user1id !== chatmessage.value?.userid
+    return chat.value?.user1 !== chatmessage.value?.userid
   })
 
   // MT: refmsg may already be populated directly on the message
@@ -194,7 +193,7 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
   const me = computed(() => {
     if (!pov) {
       return realMe.value
-    } else if (chat.value?.user1 && chat.value.user1.id === pov) {
+    } else if (chat.value?.user1 && chat.value?.user1 === pov) {
       return chat.value.user1
     } else if (chat.value?.user2 && chat.value.user2.id === pov) {
       return chat.value.user2
@@ -209,14 +208,14 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
 
   // MT: Profile image based on user1 (the member)
   const chatMessageProfileImage = computed(() => {
-    return chat.value?.user1id !== chatmessage.value?.userid
+    return chat.value?.user1 !== chatmessage.value?.userid
       ? me.value?.profile?.turl
       : otheruser.value?.profile?.turl || chat.value?.icon
   })
 
   // MT: Profile name based on user1 (the member)
   const chatMessageProfileName = computed(() => {
-    return chat.value?.user1id !== chatmessage.value?.userid
+    return chat.value?.user1 !== chatmessage.value?.userid
       ? me.value?.displayname
       : otheruser.value?.displayname
   })

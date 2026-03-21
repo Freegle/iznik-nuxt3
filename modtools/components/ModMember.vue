@@ -396,7 +396,16 @@ const user = computed(() => {
   // Full user data from store, populated by fetchMT on mount.
   // Falls back to props.member for fields not yet loaded.
   const storeUser = userStore.list[member.value?.userid]
-  return storeUser || member.value
+  if (!storeUser) return member.value
+
+  // The member store may have richer data (e.g. spammer object from
+  // spammer.js addAll) than the user store (which has spammer as a boolean).
+  // Merge member data over user store data so enriched fields aren't lost.
+  if (member.value && typeof member.value.spammer === 'object') {
+    return { ...storeUser, spammer: member.value.spammer }
+  }
+
+  return storeUser
 })
 
 const email = usePreferredEmail(user)

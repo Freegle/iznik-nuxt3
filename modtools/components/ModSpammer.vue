@@ -56,6 +56,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
@@ -71,7 +72,20 @@ const props = defineProps({
 })
 
 const userStore = useUserStore()
-const user = computed(() => userStore.byId(props.userid))
+const memberStore = useMemberStore()
+
+const user = computed(() => {
+  // The member store may have richer spammer data (object with reason/byuser)
+  // than the user store (which has spammer as a boolean).
+  const memberData = memberStore.list[props.userid]
+  const storeUser = userStore.byId(props.userid)
+
+  if (memberData && typeof memberData.spammer === 'object' && storeUser) {
+    return { ...storeUser, spammer: memberData.spammer }
+  }
+
+  return memberData || storeUser
+})
 
 watch(
   () => props.userid,

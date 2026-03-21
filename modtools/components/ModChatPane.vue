@@ -37,10 +37,7 @@
               v-if="index < messagesToShow"
               :id="chatmessage.id"
               :chatid="chatmessage.chatid"
-              :pov="
-                chat?.user1id ||
-                (typeof chat?.user1 === 'number' ? chat.user1 : null)
-              "
+              :pov="chat?.user1"
               :last="
                 chatmessage.id === chatmessages[chatmessages.length - 1].id
               "
@@ -130,7 +127,7 @@ if (props.id) {
     // Fetch the messages.  No need to wait, as we might already have the messages in store.
     chatStore.fetchMessages(props.id)
 
-    const otheruid = chat.value.otheruid || chat.value.user1id
+    const otheruid = chat.value.otheruid || chat.value.user1
     if (otheruid) {
       await userStore.fetch(otheruid)
       chat.value.otheruid = otheruid
@@ -187,8 +184,8 @@ watch(me, async (newVal, oldVal) => {
 
       chatStore.fetchMessages(props.id)
 
-      if (chat?.value?.user1id) {
-        const otheruid = chat.value.user1id
+      if (chat?.value?.user1) {
+        const otheruid = chat.value.user1
         await userStore.fetch(otheruid)
         chat.value.otheruid = otheruid
       }

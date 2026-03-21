@@ -318,6 +318,11 @@ export const useChatStore = defineStore({
 
       await api(this.config).chat.send(data)
 
+      // Update the snippet in the chat list entry so it shows immediately.
+      if (message && this.listByChatId[chatid]) {
+        this.listByChatId[chatid].snippet = message
+      }
+
       // Get the latest messages back.
       this.fetchMessages(chatid)
 
@@ -476,13 +481,7 @@ export const useChatStore = defineStore({
   },
   getters: {
     byChatId: (state) => {
-      return (id) => {
-        const chatroom = state.listByChatId[id]
-        if (chatroom && !chatroom.user1id && chatroom.user1) {
-          chatroom.user1id = chatroom.user1.id
-        }
-        return chatroom
-      }
+      return (id) => state.listByChatId[id]
     },
     messagesById: (state) => {
       return (id) => (state.messages[id] ? state.messages[id] : [])

@@ -64,7 +64,7 @@ const chat = computed(() => {
 // which uses v1 tuimg_ URLs that only return default gravatars.
 const resolvedIcon = computed(() => {
   if (miscStore.modtools && chat.value) {
-    const uid = chat.value.user1id || chat.value.user1?.id
+    const uid = chat.value.user1 || chat.value.user1?.id
     if (uid) {
       const user = userStore.byId(uid)
       const turl = user?.profile?.turl || user?.profile?.paththumb
@@ -79,7 +79,7 @@ const resolvedIcon = computed(() => {
 // On ModTools, fetch the other user's profile so we have their profile image.
 if (miscStore.modtools) {
   watch(
-    () => chat.value?.user1id || chat.value?.user1?.id,
+    () => chat.value?.user1 || chat.value?.user1?.id,
     async (uid) => {
       if (uid && !userStore.byId(uid)) {
         try {

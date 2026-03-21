@@ -401,13 +401,13 @@
       @hidden="showConfirmModal = false"
     />
     <ModSpammerReport
-      v-if="showSpamModal && chat.user1id"
-      :userid="chat.user1id"
+      v-if="showSpamModal && chat.user1"
+      :userid="chat.user1"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
-      v-if="showAddCommentModal && chat.user1id"
-      :userid="chat.user1id"
+      v-if="showAddCommentModal && chat.user1"
+      :userid="chat.user1"
       :groupid="chat.group.id"
       @hidden="showAddCommentModal = false"
     />
@@ -533,8 +533,8 @@ const showSpamModal = ref(false)
 const showConfirmModal = ref(false)
 const showAddCommentModal = ref(false)
 
-if (chat.value?.user1id) {
-  await userStore.fetch(chat.value.user1id)
+if (chat.value?.user1) {
+  await userStore.fetch(chat.value.user1)
 }
 
 // Computed properties

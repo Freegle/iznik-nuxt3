@@ -79,7 +79,7 @@ const {
     id: 123,
     chattype: 'User2Mod',
     otheruid: 456,
-    user1id: 456,
+    user1: 456,
     group: { id: 789 },
   })
 
@@ -114,7 +114,7 @@ const createChat = (overrides = {}) => ({
   id: 123,
   chattype: 'User2Mod',
   otheruid: 456,
-  user1id: 456,
+  user1: 456,
   group: { id: 789 },
   ...overrides,
 })
@@ -374,7 +374,7 @@ describe('ModChatFooter', () => {
         id: 123,
         chattype: 'User2Mod',
         otheruid: 456,
-        user1id: 456,
+        user1: 456,
         group: { id: 789 },
       })
       expect(mockOtheruser.value.id).toBe(456)
@@ -528,8 +528,8 @@ describe('ModChatFooter', () => {
   })
 
   describe('component behavior when mounted', () => {
-    it('fetches user data when chat has user1id', async () => {
-      mockChat.value = createChat({ user1id: 789 })
+    it('fetches user data when chat has user1', async () => {
+      mockChat.value = createChat({ user1: 789 })
       await mountComponent()
       expect(mockUserStore.fetch).toHaveBeenCalled()
     })

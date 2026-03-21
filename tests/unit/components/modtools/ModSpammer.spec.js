@@ -14,6 +14,12 @@ vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
 }))
 
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => ({
+    list: {},
+  }),
+}))
+
 vi.mock('~/composables/useModMe', () => ({
   useModMe: () => ({
     hasPermissionSpamAdmin: ref(false),

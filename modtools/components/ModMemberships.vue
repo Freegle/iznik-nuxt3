@@ -30,9 +30,9 @@
         class="p-1 me-1"
       >
         <strong class="me-1">{{
-          (m.nameshort || '').length > 32
-            ? m.nameshort.substring(0, 32) + '...'
-            : m.nameshort || ''
+          (m.namedisplay || '').length > 32
+            ? m.namedisplay.substring(0, 32) + '...'
+            : m.namedisplay || ''
         }}</strong>
         <span
           :class="
@@ -55,13 +55,13 @@
     <div v-if="visibleApplied && visibleApplied.length">
       <div
         v-for="m in visibleApplied"
-        :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added"
+        :key="'memberapplied-' + m.groupid + '-' + m.added"
         class="p-1 me-1"
       >
         <strong class="me-1">{{
-          m.namedisplay.length > 32
+          (m.namedisplay || '').length > 32
             ? m.namedisplay.substring(0, 32) + '...'
-            : m.namedisplay
+            : m.namedisplay || ''
         }}</strong>
         <span
           :class="

@@ -87,7 +87,7 @@ describe('ModChatHeader', () => {
     status: 'Online',
     icon: '/chat-icon.png',
     group: { id: 789 },
-    user1id: 456,
+    user1: 456,
     ...overrides,
   })
 
@@ -399,7 +399,7 @@ describe('ModChatHeader', () => {
     it('showInfo navigates to member page', async () => {
       mockChat.value = createChat({
         group: { id: 789 },
-        user1id: 456,
+        user1: 456,
       })
       const wrapper = await mountComponent()
       const inner = getInner(wrapper)
@@ -611,7 +611,7 @@ describe('ModChatHeader', () => {
     it('View profile button calls showInfo', async () => {
       mockChat.value = createChat({
         group: { id: 789 },
-        user1id: 456,
+        user1: 456,
       })
       mockOtheruser.value = createOtheruser({
         info: { replytime: 60 },

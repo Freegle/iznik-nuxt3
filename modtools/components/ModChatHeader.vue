@@ -472,7 +472,7 @@ const showblock = () => {
 const showInfo = () => {
   // MT: Navigate to member page instead of showing profile modal
   navigateTo(
-    '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+    '/members/approved/' + chat.value.group.id + '/' + chat.value.user1
   )
 }
 
