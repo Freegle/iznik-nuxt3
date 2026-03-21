@@ -186,10 +186,7 @@ const confirmButton = computed(() => {
 })
 
 async function approveIt() {
-  await messageStore.approve({
-    id: message.value.id,
-    groupid: groupid.value,
-  })
+  await messageStore.approve(message.value.id, groupid.value)
   checkWorkDeferGetMessages()
 }
 

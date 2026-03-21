@@ -699,13 +699,13 @@ async function process(callback) {
 
     switch (stdmsg.value.action) {
       case 'Approve':
-        await messageStore.approve({
-          id: message.value.id,
-          groupid: groupid.value,
-          subject: subj,
-          body: bodyText,
-          stdmsgid: stdmsg.value.id,
-        })
+        await messageStore.approve(
+          message.value.id,
+          groupid.value,
+          subj,
+          stdmsg.value.id,
+          bodyText
+        )
         break
       case 'Leave':
       case 'Leave Approved Message':
@@ -764,13 +764,13 @@ async function process(callback) {
         })
         break
       case 'Reject':
-        await messageStore.reject({
-          id: message.value.id,
-          groupid: groupid.value,
-          subject: subj,
-          body: bodyText,
-          stdmsgid: stdmsg.value.id,
-        })
+        await messageStore.reject(
+          message.value.id,
+          groupid.value,
+          subj,
+          stdmsg.value.id,
+          bodyText
+        )
         break
       case 'Delete':
       case 'Delete Approved Message':

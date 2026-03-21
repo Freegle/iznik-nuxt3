@@ -214,10 +214,7 @@ describe('ModMessageButton', () => {
         { id: 111, groups: [{ groupid: 222 }] }
       )
       await wrapper.vm.click()
-      expect(mockMessageStore.approve).toHaveBeenCalledWith({
-        id: 111,
-        groupid: 222,
-      })
+      expect(mockMessageStore.approve).toHaveBeenCalledWith(111, 222)
     })
 
     it('calls checkWorkDeferGetMessages after approve', async () => {

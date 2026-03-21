@@ -7,6 +7,7 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/APIErrors'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useMiscStore } from '~/stores/misc'
 
@@ -558,27 +559,46 @@ export const useMessageStore = defineStore({
       })
       this.remove({ id })
     },
-    async approve(params) {
+    async approve(id, groupid, subject, stdmsgid, body) {
+      const msg = this.byId(id)
+      const fromuser = msg?.fromuser
+
       await api(this.config).message.approve(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
+        id,
+        groupid,
+        subject,
+        stdmsgid,
+        body
       )
+      this.remove({ id })
 
-      this.remove({ id: params.id })
+      // Re-fetch the sender so posting status changes from stdmsg take effect.
+      if (fromuser) {
+        const uid = typeof fromuser === 'number' ? fromuser : fromuser.id
+        if (uid) {
+          useUserStore().fetch(uid, true)
+        }
+      }
     },
-    async reject(params) {
-      await api(this.config).message.reject(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
+    async reject(id, groupid, subject, stdmsgid, body) {
+      const msg = this.byId(id)
+      const fromuser = msg?.fromuser
 
-      this.remove({ id: params.id })
+      await api(this.config).message.reject(
+        id,
+        groupid,
+        subject,
+        stdmsgid,
+        body
+      )
+      this.remove({ id })
+
+      if (fromuser) {
+        const uid = typeof fromuser === 'number' ? fromuser : fromuser.id
+        if (uid) {
+          useUserStore().fetch(uid, true)
+        }
+      }
     },
     async reply(params) {
       await api(this.config).message.reply(
