@@ -76,7 +76,7 @@ export const useLogsStore = defineStore({
       const fetches = []
 
       if (userIds.size > 0) {
-        fetches.push(userStore.fetchMultiple([...userIds]))
+        fetches.push(userStore.fetchMultiple([...userIds], true))
       }
 
       if (msgIds.size > 0) {

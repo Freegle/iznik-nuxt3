@@ -164,7 +164,7 @@ export const useUserStore = defineStore({
         resolve(this.list[id])
       }
     },
-    async fetchMultiple(ids) {
+    async fetchMultiple(ids, modtools = false) {
       // Filter out IDs that are currently being fetched (to avoid duplicate requests)
       // Note: We don't filter by this.list[id] because processBatch() already decided
       // these IDs need fetching (including force-refresh cases)
@@ -183,7 +183,10 @@ export const useUserStore = defineStore({
         // Process each chunk
         for (const chunk of chunks) {
           // Create a shared promise for the batch request
-          const batchPromise = api(this.config).user.fetchMultiple(chunk)
+          const batchPromise = api(this.config).user.fetchMultiple(
+            chunk,
+            modtools
+          )
 
           // Set the same promise for each ID so concurrent fetches wait for the same request
           chunk.forEach((id) => {

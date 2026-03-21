@@ -64,7 +64,7 @@ export const useSpammerStore = defineStore({
       })
 
       if (ids.size > 0) {
-        await userStore.fetchMultiple([...ids])
+        await userStore.fetchMultiple([...ids], true)
       }
     },
 

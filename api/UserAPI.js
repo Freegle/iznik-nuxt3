@@ -10,12 +10,13 @@ export default class UserAPI extends BaseAPI {
   }
 
   // Fetch multiple users in a single request
-  async fetchMultiple(ids) {
+  async fetchMultiple(ids, modtools = false) {
     if (!ids || !ids.length) {
       return []
     }
 
-    return await this.$getv2('/user/' + ids.join(','))
+    const params = modtools ? { modtools: true } : {}
+    return await this.$getv2('/user/' + ids.join(','), params)
   }
 
   async fetchMT(params) {
