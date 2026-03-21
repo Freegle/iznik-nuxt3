@@ -1,11 +1,7 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class ChatAPI extends BaseAPI {
-  fetchMessages(chatid) {
-    return this.$getv2(`/chat/${chatid}/message`)
-  }
-
-  fetchMessagesMT(chatid, params) {
+  fetchMessages(chatid, params = {}) {
     return this.$getv2(`/chat/${chatid}/message`, params)
   }
 
@@ -68,6 +64,8 @@ export default class ChatAPI extends BaseAPI {
     return await this.$postv2('/chat/' + data.roomid + '/message', data)
   }
 
+  // Moderation actions on chat messages (approve, reject, hold, release, redact).
+  // Different from send() which creates new messages.
   async sendMT(data) {
     return await this.$postv2('/chatmessages', data)
   }

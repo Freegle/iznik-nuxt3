@@ -14,6 +14,13 @@ export const useChatStore = () => {
       byChatId: () => null,
       fetchMessages: async () => {},
       fetchMT: async () => {},
+      approveChat: async () => {},
+      approveAllFutureChat: async () => {},
+      rejectChat: async () => {},
+      holdChat: async () => {},
+      releaseChat: async () => {},
+      redactChat: async () => {},
+      send: async () => {},
     }
   )
 }

@@ -245,15 +245,8 @@ export const useChatStore = defineStore({
     async fetchMessages(id, force) {
       let messages = []
       const miscStore = useMiscStore() // MT
-      if (miscStore.modtools) {
-        const params = {
-          // limit: 10, // NO: so new messages are picked up
-          modtools: true,
-        }
-        messages = await api(this.config).chat.fetchMessagesMT(id, params)
-      } else {
-        messages = await api(this.config).chat.fetchMessages(id)
-      }
+      const params = miscStore.modtools ? { modtools: true } : {}
+      messages = await api(this.config).chat.fetchMessages(id, params)
 
       const update = () => {
         this.messages[id] = messages
@@ -323,12 +316,7 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      const miscStore = useMiscStore() // MT
-      if (miscStore.modtools) {
-        await api(this.config).chat.sendMT(data)
-      } else {
-        await api(this.config).chat.send(data)
-      }
+      await api(this.config).chat.send(data)
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
@@ -346,6 +334,25 @@ export const useChatStore = defineStore({
         refchatid,
       })
       this.fetchMessages(chatid)
+    },
+    // Chat review moderation actions (approve/reject/hold/release/redact).
+    async approveChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'Approve' })
+    },
+    async approveAllFutureChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'ApproveAllFuture' })
+    },
+    async rejectChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'Reject' })
+    },
+    async holdChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'Hold' })
+    },
+    async releaseChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'Release' })
+    },
+    async redactChat(id) {
+      await api(this.config).chat.sendMT({ id, action: 'Redact' })
     },
     async openChat(params) {
       let id = null

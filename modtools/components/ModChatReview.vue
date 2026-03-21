@@ -263,7 +263,6 @@ const isActiveMod = computed(() => {
 
 const emit = defineEmits(['reload'])
 
-const { $api } = useNuxtApp()
 const { me } = useMe()
 const { checkWork } = useModMe()
 
@@ -403,37 +402,34 @@ function reload() {
 }
 
 async function release() {
-  await $api.chat.sendMT({ id: props.messageid, action: 'Release' })
+  await chatStore.releaseChat(props.messageid)
   emit('reload')
   checkWork(true)
 }
 
 async function hold(callback) {
-  await $api.chat.sendMT({ id: props.messageid, action: 'Hold' })
+  await chatStore.holdChat(props.messageid)
   emit('reload')
   checkWork(true)
   callback()
 }
 
 async function approve(callback) {
-  await $api.chat.sendMT({ id: props.messageid, action: 'Approve' })
+  await chatStore.approveChat(props.messageid)
   emit('reload')
   checkWork(true)
   callback()
 }
 
 async function reject(callback) {
-  await $api.chat.sendMT({ id: props.messageid, action: 'Reject' })
+  await chatStore.rejectChat(props.messageid)
   emit('reload')
   checkWork(true)
   callback()
 }
 
 async function whitelist(callback) {
-  await $api.chat.sendMT({
-    id: props.messageid,
-    action: 'ApproveAllFuture',
-  })
+  await chatStore.approveAllFutureChat(props.messageid)
   emit('reload')
   checkWork(true)
   callback()
@@ -446,7 +442,7 @@ function showModnote(callback) {
 }
 
 async function redactEmails(callback) {
-  await $api.chat.sendMT({ id: props.messageid, action: 'Redact' })
+  await chatStore.redactChat(props.messageid)
   emit('reload')
   callback()
 }

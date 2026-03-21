@@ -27,14 +27,7 @@ export default class EmailTrackingAPI extends BaseAPI {
         email: userIdOrEmail,
       })
     }
-    return await this.$getv2(`/email/user/${userIdOrEmail}`, params)
-  }
-
-  /**
-   * Fetch email types for filtering.
-   */
-  async fetchEmailTypes() {
-    return await this.$getv2('/modtools/email/types')
+    return await this.$getv2(`/modtools/email/user/${userIdOrEmail}`, params)
   }
 
   /**

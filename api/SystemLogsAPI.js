@@ -19,7 +19,7 @@ export default class SystemLogsAPI extends BaseAPI {
   }
 
   fetchCounts(params) {
-    return this.$getv2('/systemlogs/counts', params)
+    return this.$getv2('/modtools/systemlogs/counts', params)
   }
 
   // Fallback: Fetch API headers by timestamp and endpoint (for older logs without request_id).

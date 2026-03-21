@@ -4,14 +4,13 @@ import { createPinia, setActivePinia } from 'pinia'
 import dayjs from 'dayjs'
 import ModChatReview from '~/modtools/components/ModChatReview.vue'
 
-const mockSendMT = vi.fn().mockResolvedValue({})
-
-const mockApi = {
-  chat: {
-    sendMT: mockSendMT,
-  },
-}
-globalThis.useNuxtApp = () => ({ $api: mockApi })
+// Chat moderation methods are on the store, not $api
+const mockApproveChat = vi.fn().mockResolvedValue({})
+const mockApproveAllFutureChat = vi.fn().mockResolvedValue({})
+const mockRejectChat = vi.fn().mockResolvedValue({})
+const mockHoldChat = vi.fn().mockResolvedValue({})
+const mockReleaseChat = vi.fn().mockResolvedValue({})
+const mockRedactChat = vi.fn().mockResolvedValue({})
 
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
@@ -133,10 +132,21 @@ describe('ModChatReview', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
-    mockSendMT.mockResolvedValue({})
     mockMessageData = null
+    mockApproveChat.mockClear()
+    mockApproveAllFutureChat.mockClear()
+    mockRejectChat.mockClear()
+    mockHoldChat.mockClear()
+    mockReleaseChat.mockClear()
+    mockRedactChat.mockClear()
     globalThis.__mockChatStore = {
       messageById: vi.fn(() => mockMessageData),
+      approveChat: mockApproveChat,
+      approveAllFutureChat: mockApproveAllFutureChat,
+      rejectChat: mockRejectChat,
+      holdChat: mockHoldChat,
+      releaseChat: mockReleaseChat,
+      redactChat: mockRedactChat,
     }
     globalThis.__mockAuthStore = {
       groups: [{ groupid: 789, role: 'Moderator', active: 1 }],
@@ -390,19 +400,19 @@ describe('ModChatReview', () => {
     })
 
     it.each([
-      ['release', 'Release'],
-      ['hold', 'Hold'],
-      ['approve', 'Approve'],
-      ['reject', 'Reject'],
-      ['whitelist', 'ApproveAllFuture'],
-      ['redactEmails', 'Redact'],
+      ['release', mockReleaseChat],
+      ['hold', mockHoldChat],
+      ['approve', mockApproveChat],
+      ['reject', mockRejectChat],
+      ['whitelist', mockApproveAllFutureChat],
+      ['redactEmails', mockRedactChat],
     ])(
-      '%s calls API with %s action, emits reload, calls callback',
-      async (method, action) => {
+      '%s calls store method with message id, emits reload, calls callback',
+      async (method, mockFn) => {
         const wrapper = mountComponent()
         const callback = vi.fn()
         await wrapper.vm[method](callback)
-        expect(mockSendMT).toHaveBeenCalledWith({ id: 123, action })
+        expect(mockFn).toHaveBeenCalledWith(123)
         expect(wrapper.emitted('reload')).toBeTruthy()
         if (method !== 'release') {
           expect(callback).toHaveBeenCalled()
