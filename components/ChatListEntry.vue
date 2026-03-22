@@ -119,18 +119,18 @@ const fetch = async () => {
 onMounted(() => {
   if (props.active) {
     const cb = () => {
-      const element = document.querySelector('.chat-entry')
+      const element = document.querySelector('.chat-entry.active')
       if (element) {
         if (element.scrollIntoViewIfNeeded) {
           element.scrollIntoViewIfNeeded({
             behavior: 'instant',
-            block: 'start',
+            block: 'nearest',
             inline: 'nearest',
           })
         } else {
           element.scrollIntoView({
             behavior: 'instant',
-            block: 'start',
+            block: 'nearest',
             inline: 'nearest',
           })
         }
