@@ -28,7 +28,7 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
-          <ChatTypingIndicator :chatid="id" :icon="chat?.icon || ''" />
+          <ChatTypingIndicator :chatid="id" :icon="chat?.icon" />
           <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
