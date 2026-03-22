@@ -183,7 +183,16 @@ const { modal, hide } = useOurModal()
 // Message was fetched by parent.
 const message = toRaw(messageStore.byId(props.id))
 const textbody = message.textbody
-const itemName = message.item?.name
+// Use item name from API, or extract from subject if not available.
+// Subject format: "OFFER: Item Name (Location)" or "Offer: Item Name"
+const itemName =
+  message.item?.name ||
+  (() => {
+    const match = message.subject?.match(
+      /^(?:offer|wanted):\s*(.+?)(?:\s*\(.*\))?\s*$/i
+    )
+    return match ? match[1].trim() : ''
+  })()
 const attachments = ref(message.attachments || [])
 const dragging = ref(false)
 const triedToSave = ref(false)

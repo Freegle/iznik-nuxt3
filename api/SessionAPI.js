@@ -84,11 +84,4 @@ export default class SessionAPI extends BaseAPI {
       userlist,
     })
   }
-
-  yahooCodeLogin(yahoocodelogin) {
-    // ModTools - no V2 handler yet
-    return this.$post('/session', {
-      yahoocodelogin,
-    })
-  }
 }
