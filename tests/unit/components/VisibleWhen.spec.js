@@ -13,8 +13,8 @@ vi.mock('~/stores/misc', () => ({
   }),
 }))
 
-// Mock process.server
-vi.stubGlobal('process', { server: false })
+// Mock process.server while preserving process.env
+vi.stubGlobal('process', { ...process, server: false })
 
 describe('VisibleWhen', () => {
   beforeEach(() => {
