@@ -371,6 +371,7 @@ const brokenProfileImage = (e) => {
 
 .circle {
   border-radius: 50%;
+  corner-shape: round;
 }
 
 .generated-avatar {

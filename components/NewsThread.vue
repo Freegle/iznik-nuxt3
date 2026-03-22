@@ -583,7 +583,7 @@ function referToTaken() {
 }
 
 function referToReceived() {
-  referTo('Recived')
+  referTo('Received')
 }
 
 async function createStory() {

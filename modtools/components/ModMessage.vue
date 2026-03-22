@@ -152,6 +152,9 @@
               class="text-info fw-bold me-2"
             >
               {{ fromUser.displayname }}
+              <span v-if="fromUser.deleted" class="badge bg-danger ms-1">
+                Account deleted
+              </span>
             </div>
             <div v-if="expanded" class="d-flex">
               <div class="d-flex flex-column align-content-end">
@@ -240,6 +243,14 @@
               </div>
             </div>
             <div v-if="fromUser">
+              <NoticeMessage
+                v-if="fromUser.deleted"
+                variant="warning"
+                class="mb-2"
+              >
+                This user has deleted their account. You may wish to handle this
+                message accordingly as they will not be able to respond.
+              </NoticeMessage>
               <ModComments
                 :userid="fromUserId"
                 @update-comments="updateComments"

@@ -209,8 +209,10 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
   // MT: Profile image based on user1 (the member)
   const chatMessageProfileImage = computed(() => {
     return chat.value?.user1 !== chatmessage.value?.userid
-      ? me.value?.profile?.turl
-      : otheruser.value?.profile?.turl || chat.value?.icon
+      ? me.value?.profile?.turl || me.value?.profile?.paththumb
+      : otheruser.value?.profile?.turl ||
+          otheruser.value?.profile?.paththumb ||
+          chat.value?.icon
   })
 
   // MT: Profile name based on user1 (the member)

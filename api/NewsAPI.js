@@ -62,7 +62,7 @@ export default class NewsAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$delv2('/newsfeed', { id })
+    return this.$requestv2('DELETE', `/newsfeed/${id}`, {})
   }
 
   async count(distance, log) {

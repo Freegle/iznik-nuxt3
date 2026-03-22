@@ -52,7 +52,7 @@ watch(
 
 const postingStatus = computed({
   get() {
-    return props.membership.ourpostingstatus || 'MODERATED'
+    return props.membership.ourpostingstatus ?? 'MODERATED'
   },
   async set(val) {
     const groupid = props.membership.groupid ?? props.membership.id

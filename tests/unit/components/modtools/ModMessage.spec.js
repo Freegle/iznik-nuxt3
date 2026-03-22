@@ -914,6 +914,45 @@ describe('ModMessage', () => {
     })
   })
 
+  describe('Deleted user indicator', () => {
+    it('shows "Account deleted" badge in summary view when user is deleted', () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Deleted User',
+        deleted: '2024-01-15',
+        memberships: [{ id: 789, groupid: 789 }],
+      })
+      const wrapper = mountComponent({ summary: true })
+      expect(wrapper.text()).toContain('Account deleted')
+    })
+
+    it('shows recovery notice in expanded view when user is deleted', async () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Deleted User',
+        deleted: '2024-01-15',
+        memberships: [{ id: 789, groupid: 789 }],
+      })
+      const wrapper = mountComponent({ summary: false })
+      await wrapper.vm.$nextTick()
+      expect(wrapper.text()).toContain('This user has deleted their account')
+    })
+
+    it('does not show deleted indicator for active user', async () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Active User',
+        memberships: [{ id: 789, groupid: 789 }],
+      })
+      const wrapper = mountComponent({ summary: true })
+      await wrapper.vm.$nextTick()
+      expect(wrapper.text()).not.toContain('Account deleted')
+      expect(wrapper.text()).not.toContain(
+        'This user has deleted their account'
+      )
+    })
+  })
+
   describe('Microvolunteering and related messages', () => {
     it('shows both sections when data present', async () => {
       const wrapper = mountComponent(

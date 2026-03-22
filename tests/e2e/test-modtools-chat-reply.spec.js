@@ -43,10 +43,16 @@ test.describe('ModTools Chat Reply', () => {
     console.log('\n--- Step 1: Login as mod ---')
     await loginViaModTools(page, modEmail)
 
-    // Step 2: Navigate to the specific User2Mod chat
+    // Step 2: Navigate to the specific User2Mod chat.
+    // After loginViaModTools, the auth is in localStorage. SSR may redirect
+    // to /login first, then client-side auth bounces back. Use
+    // domcontentloaded so goto doesn't hang on the redirect chain, then
+    // wait for the textarea (which only appears once we're on the chat page
+    // and fully authenticated).
     console.log('\n--- Step 2: Navigate to chat ---')
     await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
       timeout: timeouts.navigation.initial,
+      waitUntil: 'domcontentloaded',
     })
 
     await dismissAllModals(page)

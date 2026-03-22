@@ -259,6 +259,9 @@ export const useUserStore = defineStore({
     },
     async edit(params) {
       await api(this.config).user.save(params)
+      if (params.id) {
+        await this.fetch(params.id, true)
+      }
     },
     async addEmail(params) {
       await api(this.config).user.addEmail(
