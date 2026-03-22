@@ -50,10 +50,15 @@ const attachment = computed(() => {
 })
 
 const externalmods = computed(() => {
-  if (attachment.value?.mods) {
-    const jsonmods = JSON.parse(attachment.value.mods)
-    if (!jsonmods) return {}
-    return jsonmods
+  const raw = attachment.value?.externalmods || attachment.value?.mods
+  if (raw) {
+    try {
+      const jsonmods = typeof raw === 'string' ? JSON.parse(raw) : raw
+      if (!jsonmods) return {}
+      return jsonmods
+    } catch (e) {
+      return {}
+    }
   }
   return {}
 })
