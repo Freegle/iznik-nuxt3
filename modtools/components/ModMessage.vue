@@ -242,6 +242,9 @@
                 </NoticeMessage>
               </div>
             </div>
+            <div v-if="!fromUser && fromUserId" class="mb-2">
+              <Spinner :size="20" />
+            </div>
             <div v-if="fromUser">
               <NoticeMessage
                 v-if="fromUser.deleted"
@@ -404,6 +407,9 @@
                 modinfo
                 :groupid="message.groups[0].groupid"
               />
+              <div v-else-if="fromUserId && !fromUser">
+                <Spinner :size="20" />
+              </div>
               <div v-else>
                 <NoticeMessage
                   v-if="

@@ -704,6 +704,10 @@ const applySuggestedAddress = async () => {
 const _updateAfterSend = async () => {
   sending.value = false
 
+  // Mark read immediately — the mod has clearly seen this chat.
+  // This optimistically clears the unread badge without waiting for API.
+  await chatStore.markRead(props.id)
+
   // Force-fetch messages to pick up the newly sent one. The force flag
   // bypasses the length check in the store — without it, a race between
   // the fire-and-forget fetch in send() and this fetch can result in
