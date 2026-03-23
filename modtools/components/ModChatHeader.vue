@@ -513,6 +513,11 @@ const markRead = async () => {
   .name {
     grid-column: 3;
     grid-row: 1 / 2;
+    font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .ratings {

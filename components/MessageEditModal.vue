@@ -8,7 +8,7 @@
     @hidden="onModalHidden"
   >
     <template #default>
-      <div v-if="message.location" class="edit-form">
+      <div v-if="message.location || message.item" class="edit-form">
         <!-- Type and Location row - at top, space-between -->
         <div class="form-card form-card-row-spaced">
           <div class="form-field">
