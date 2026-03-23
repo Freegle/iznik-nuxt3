@@ -55,7 +55,7 @@ const postingStatus = computed({
     return props.membership.ourpostingstatus ?? 'DEFAULT'
   },
   async set(val) {
-    const groupid = props.membership.groupid ?? props.membership.id
+    const groupid = props.membership.groupid
     await memberStore.updateMembership({
       userid: props.userid,
       groupid,

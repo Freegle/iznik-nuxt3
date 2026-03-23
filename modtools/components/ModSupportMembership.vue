@@ -37,7 +37,7 @@
             <div class="d-flex flex-column justify-content-between">
               <ModRole
                 :userid="userid"
-                :groupid="membership.id"
+                :groupid="membership.groupid"
                 :role="membership.role"
               />
               <div>
