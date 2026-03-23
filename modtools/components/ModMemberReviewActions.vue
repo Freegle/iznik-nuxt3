@@ -22,7 +22,7 @@
           {{ membership.reviewreason }}
         </span>
       </div>
-      <div v-if="amAModOn(membership.id) && needsReview && heldById">
+      <div v-if="amAModOn(membership.groupid) && needsReview && heldById">
         <NoticeMessage variant="warning" class="mt-2 mb-2">
           <p v-if="myid === heldById">
             You held this member. Other people will see a warning to check with
@@ -36,7 +36,7 @@
         </NoticeMessage>
       </div>
       <div
-        v-if="amAModOn(membership.id) && needsReview"
+        v-if="amAModOn(membership.groupid) && needsReview"
         class="d-flex mt-2 flex-wrap"
       >
         <SpinButton
@@ -61,11 +61,11 @@
           v-if="!membership.heldby"
           :userid="userid"
           :membershipid="membership.membershipid || membership.id"
-          :groupid="membership.id"
+          :groupid="membership.groupid"
           variant="warning"
           icon="pause"
           reviewhold
-          :reviewgroupid="membership.id"
+          :reviewgroupid="membership.groupid"
           label="Hold"
           class="me-2"
         />
@@ -73,16 +73,16 @@
           v-else
           :userid="userid"
           :membershipid="membership.membershipid || membership.id"
-          :groupid="membership.id"
+          :groupid="membership.groupid"
           variant="warning"
           icon="play"
           reviewrelease
-          :reviewgroupid="membership.id"
+          :reviewgroupid="membership.groupid"
           label="Release"
           class="me-2"
         />
         <b-button
-          :to="'/members/approved/' + membership.id + '/' + userid"
+          :to="'/members/approved/' + membership.groupid + '/' + userid"
           variant="secondary"
           class="mb-1"
         >
@@ -171,8 +171,8 @@ const user = computed(() => userStore.byId(props.userid))
 
 const groupName = computed(() => {
   if (!membership.value) return ''
-  const group = groupStore.get(membership.value.id)
-  return group ? group.namedisplay : '#' + membership.value.id
+  const group = groupStore.get(membership.value.groupid)
+  return group ? group.namedisplay : '#' + membership.value.groupid
 })
 
 watch(
@@ -236,7 +236,7 @@ function remove(callback) {
 }
 
 async function removeConfirmed() {
-  await memberStore.remove(props.userid, membership.value.id)
+  await memberStore.remove(props.userid, membership.value.groupid)
 
   setTimeout(() => {
     reviewed.value = true
@@ -247,7 +247,7 @@ async function removeConfirmed() {
 async function ignore(callback) {
   await memberStore.spamignore({
     userid: props.userid,
-    groupid: membership.value.id,
+    groupid: membership.value.groupid,
   })
 
   setTimeout(() => {

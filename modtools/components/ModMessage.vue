@@ -109,6 +109,24 @@
                 </b-badge>
               </span>
             </div>
+            <span v-if="pending" class="badge bg-warning text-dark ms-1">
+              Pending
+            </span>
+            <span
+              v-if="
+                message.groups &&
+                message.groups[0] &&
+                message.groups[0].approvedby
+              "
+              class="small text-muted ms-1"
+            >
+              Approved by
+              {{
+                message.groups[0].approvedby === myid
+                  ? 'you'
+                  : '#' + message.groups[0].approvedby
+              }}
+            </span>
             <div v-if="message.deadline" class="text-danger small">
               Deadline: end {{ dateonly(message.deadline) }}
             </div>
