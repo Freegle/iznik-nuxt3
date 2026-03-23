@@ -89,9 +89,14 @@ test.describe('ModTools Chat Reply', () => {
     console.log(`Send response: ${sendStatus} ${sendBody}`)
     expect(sendStatus).toBe(200)
 
-    // Step 4: Verify the message appears in the chat
+    // Step 4: Verify the message appears in the chat pane (right side).
+    // The reply text also appears in the chat list snippet (left side),
+    // so we must scope to the chat pane to avoid matching the snippet.
     console.log('\n--- Step 4: Verify reply appears ---')
-    await expect(page.locator(`text=${replyText}`)).toBeVisible({
+    const chatPane = page
+      .locator('.chatback, .col-md-8, [class*="chatpane"]')
+      .first()
+    await expect(chatPane.getByText(replyText)).toBeVisible({
       timeout: timeouts.ui.appearance,
     })
     console.log('Reply visible in chat')

@@ -95,11 +95,13 @@ test.describe('ModTools Edits Flow', () => {
 
     // Step 3: Log in as mod and verify edit appears on the edits page.
     console.log('\n--- Step 3: Check edits page as mod ---')
+    console.log(`Message ID: ${posted.id}, Edit text: ${editText}`)
     await page.context().clearCookies()
     await loginViaModTools(page, modEmail)
 
     await page.goto(`${MODTOOLS_URL}/messages/edits`, {
       timeout: timeouts.navigation.initial,
+      waitUntil: 'domcontentloaded',
     })
 
     const groupSelect = page.locator('#communitieslist')
@@ -109,11 +111,30 @@ test.describe('ModTools Edits Flow', () => {
     await dismissAllModals(page)
 
     // Check for edits — try selecting groups with work counts if needed
+    let pollAttempts = 0
     await expect
       .poll(
         async () => {
+          pollAttempts++
           const bodyText = await page.textContent('body')
-          if (!bodyText.includes('There are no messages at the moment')) {
+          const hasNoMessages = bodyText.includes(
+            'There are no messages at the moment'
+          )
+
+          if (pollAttempts <= 3 || pollAttempts % 10 === 0) {
+            console.log(
+              `Poll #${pollAttempts}: noMessages=${hasNoMessages}, URL=${page.url()}`
+            )
+            // List available groups
+            const options = await groupSelect.locator('option').all()
+            const groupTexts = []
+            for (const opt of options.slice(0, 5)) {
+              groupTexts.push(await opt.textContent())
+            }
+            console.log(`Groups: ${groupTexts.join(' | ')}`)
+          }
+
+          if (!hasNoMessages) {
             return true
           }
 
@@ -146,10 +167,14 @@ test.describe('ModTools Edits Flow', () => {
 
     // Step 4: Approve the edit via the UI "Accept Edit" button.
     console.log('\n--- Step 4: Approve edit via UI ---')
+
+    // The Accept Edit button may take a moment to render after the message
+    // card expands. Use getByRole for more reliable matching.
     const acceptButton = page
-      .locator('button:has-text("Accept Edit"), .btn:has-text("Accept Edit")')
+      .getByRole('button', { name: /Accept Edit/i })
       .first()
     await expect(acceptButton).toBeVisible({ timeout: timeouts.ui.appearance })
+    console.log('Accept Edit button found')
 
     // Wait for the POST to succeed (ApproveEdits action)
     const approvePromise = page.waitForResponse(
@@ -164,19 +189,11 @@ test.describe('ModTools Edits Flow', () => {
     console.log(`Approve response: ${approveResponse.status()}`)
     expect(approveResponse.status()).toBe(200)
 
-    // Verify the edit disappears from the page
-    await expect
-      .poll(
-        async () => {
-          const bodyText = await page.textContent('body')
-          return bodyText.includes('There are no messages at the moment')
-        },
-        {
-          message: 'Waiting for edit to disappear after approval',
-          timeout: timeouts.api.slowApi,
-        }
-      )
-      .toBe(true)
+    // Verify the edit disappears from the page — the message card should
+    // no longer be visible after approval removes it from the store.
+    await expect(page.getByText(editText)).not.toBeVisible({
+      timeout: timeouts.api.slowApi,
+    })
 
     console.log('Edit approved and cleared from edits page')
     console.log('\n=== TEST COMPLETE ===')

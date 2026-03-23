@@ -704,8 +704,11 @@ const applySuggestedAddress = async () => {
 const _updateAfterSend = async () => {
   sending.value = false
 
-  // Fetch the messages again to pick up the new one.
-  await fetchMessages()
+  // Force-fetch messages to pick up the newly sent one. The force flag
+  // bypasses the length check in the store — without it, a race between
+  // the fire-and-forget fetch in send() and this fetch can result in
+  // both returning stale data, with the length check preventing update.
+  await chatStore.fetchMessages(props.id, true)
   emit('scrollbottom')
 
   // We also want to trigger an update in the chat list.

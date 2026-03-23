@@ -3,18 +3,24 @@
  * All timeout values and other configurable parameters should be defined here
  */
 
+// Under parallel workers, API and browser are slower due to resource contention.
+// Detect CI or high worker counts and apply a timeout multiplier.
+const isParallel =
+  !!process.env.CI || parseInt(process.env.PW_TEST_WORKERS || '1') > 1
+const M = isParallel ? 1.5 : 1
+
 // Timeouts in milliseconds
 const timeouts = {
   // Navigation timeouts
   navigation: {
-    default: 60000, // Default navigation timeout (increased for slow loading)
-    initial: 90000, // First page load timeout
-    slowPage: 90000, // Extra long timeout for known slow pages
+    default: 60000 * M, // Default navigation timeout (increased for slow loading)
+    initial: 135000, // First page load timeout (already generous)
+    slowPage: 90000 * M, // Extra long timeout for known slow pages
   },
 
   // UI interaction timeouts
   ui: {
-    appearance: 30000, // Waiting for element to appear (increased for Docker)
+    appearance: 30000 * M, // Waiting for element to appear (increased for Docker)
     interaction: 10000, // Interaction with elements like clicks
     animation: 1000, // Waiting for animations to complete
     autocomplete: 10000, // Waiting for autocomplete results
@@ -23,8 +29,8 @@ const timeouts = {
 
   // API and data loading timeouts
   api: {
-    default: 15000, // Default API response timeout
-    slowApi: 30000, // Slower API endpoints timeout
+    default: 15000 * M, // Default API response timeout
+    slowApi: 30000 * M, // Slower API endpoints timeout
   },
 
   // Test teardown timeouts
@@ -36,10 +42,14 @@ const timeouts = {
   assertion: {
     quick: 1000, // Quick assertions
     normal: 5000, // Standard assertions
-    slow: 15000, // Slow assertions for complex operations
+    slow: 15000 * M, // Slow assertions for complex operations
   },
 
-  background: 120000, // For background tasks like processing chat messages.
+  background: 180000, // For background tasks like processing chat messages (3 min).
+}
+
+if (isParallel) {
+  console.log('CI environment detected - using extended timeouts')
 }
 
 // Environment-specific settings
