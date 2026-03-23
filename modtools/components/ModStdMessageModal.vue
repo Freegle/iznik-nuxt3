@@ -124,7 +124,7 @@
         </div>
         <div>
           <SpinButton
-            ref="process"
+            ref="processButton"
             :label="processLabel"
             icon-name="envelope"
             spinclass="success"
