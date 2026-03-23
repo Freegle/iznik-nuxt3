@@ -1153,7 +1153,8 @@ function postcodeSelect(pc) {
 }
 
 function startEdit() {
-  editmessage.value = message.value
+  // Clone so that store refetches don't overwrite the edit state.
+  editmessage.value = JSON.parse(JSON.stringify(message.value))
   editing.value = true
   miscStore.modtoolsediting = true
   editmessage.value.groups.forEach((grp) => {
