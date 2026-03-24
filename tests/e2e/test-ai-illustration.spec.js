@@ -182,14 +182,10 @@ test.describe('AI Illustration Tests - Give Flow', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Clear any existing content first (prevents issues with leftover content
-    // from previous tests or store state), then click to ensure focus
-    await itemInput.first().fill('')
-    await itemInput.first().click()
-
-    // Type an item name with prefix (this should be stripped by the backend)
+    // Set the item name with prefix atomically (type() with delay can lose
+    // characters when Vue watchers or autocomplete fire between keystrokes).
     const testItemName = 'OFFER: Blue Chair'
-    await itemInput.first().type(testItemName, { delay: 100 })
+    await itemInput.first().fill(testItemName)
 
     // Blur to trigger the illustration fetch
     await itemInput.first().blur()

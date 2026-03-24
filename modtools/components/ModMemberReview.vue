@@ -231,13 +231,13 @@ const sortedMemberOf = computed(() => {
 
   return members.sort((a, b) => {
     const areview =
-      amAModOn(a.id) &&
+      amAModOn(a.groupid) &&
       a.reviewrequestedat &&
       (!a.reviewedat ||
         new Date(a.reviewrequestedat).getTime() >
           new Date(a.reviewedat).getTime())
     const breview =
-      amAModOn(b.id) &&
+      amAModOn(b.groupid) &&
       b.reviewrequestedat &&
       (!b.reviewedat ||
         new Date(b.reviewrequestedat).getTime() >

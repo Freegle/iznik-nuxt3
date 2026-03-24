@@ -905,6 +905,7 @@ const testWithFixtures = test.extend({
         description = `Created by automated test at ${new Date().toISOString()}`,
         postcode = testEnv?.postcode || environment.postcode,
         email,
+        deadline,
       } = options
 
       if (!email) {
@@ -1062,16 +1063,35 @@ const testWithFixtures = test.extend({
         await maybeDeliveryButton.click()
         console.log('Clicked "Maybe" for delivery option')
 
-        // "No deadline" should be selected by default, but click it to be sure
-        const noDeadlineButton = page.locator(
-          '.toggle-btn:has-text("No deadline")'
-        )
-        await noDeadlineButton.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-        await noDeadlineButton.click()
-        console.log('Clicked "No deadline" for deadline option')
+        if (deadline) {
+          // Click "Set a deadline" and fill the date
+          const setDeadlineButton = page.locator(
+            '.toggle-btn:has-text("Set deadline")'
+          )
+          await setDeadlineButton.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await setDeadlineButton.click()
+          const deadlineInput = page.locator('input[type="date"]').first()
+          await deadlineInput.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await deadlineInput.fill(deadline)
+          console.log(`Set deadline to: ${deadline}`)
+        } else {
+          // "No deadline" should be selected by default, but click it to be sure
+          const noDeadlineButton = page.locator(
+            '.toggle-btn:has-text("No deadline")'
+          )
+          await noDeadlineButton.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await noDeadlineButton.click()
+          console.log('Clicked "No deadline" for deadline option')
+        }
 
         // Click Next to go to email/whoami page (Playwright auto-scrolls)
         await page.locator('.next-btn:has-text("Next")').click()

@@ -14,6 +14,51 @@ const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
 
 test.describe('Freegle Edit Deadline', () => {
+  test('deadline set during initial post is visible on MyPosts edit', async ({
+    page,
+    testEmail,
+    postMessage,
+  }) => {
+    // Post with a deadline set during the Give flow
+    const deadlineDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .substring(0, 10)
+
+    const posted = await postMessage({
+      type: 'OFFER',
+      item: `DeadlineInitialPost ${Date.now()}`,
+      description: 'Testing deadline saved during initial posting',
+      email: testEmail,
+      deadline: deadlineDate,
+    })
+    expect(posted.id).toBeTruthy()
+    console.log(
+      `Posted with deadline: id=${posted.id}, deadline=${deadlineDate}`
+    )
+
+    // Should be on /myposts after posting
+    await expect(page).toHaveURL(/\/myposts/, {
+      timeout: timeouts.navigation.default,
+    })
+
+    // Find and click Edit on our message
+    const messageCard = page
+      .locator(`.message-card:has-text("${posted.item}")`)
+      .first()
+    await expect(messageCard).toBeVisible({ timeout: timeouts.ui.appearance })
+    await messageCard.locator('button:has-text("Edit")').first().click()
+
+    const editModal = page.locator('.modal.show')
+    await expect(editModal).toBeVisible({ timeout: timeouts.ui.appearance })
+
+    // Verify the deadline from initial posting is shown
+    const deadlineInput = editModal.locator('input[type="date"]').first()
+    await expect(deadlineInput).toBeVisible({ timeout: timeouts.ui.appearance })
+    const savedDeadline = await deadlineInput.inputValue()
+    expect(savedDeadline).toBe(deadlineDate)
+    console.log(`Deadline from initial post visible on edit: ${savedDeadline}`)
+  })
+
   test('editing a deadline saves and persists after reload', async ({
     page,
     testEnv,
