@@ -52,7 +52,8 @@ watch(
 
 const postingStatus = computed({
   get() {
-    return props.membership.ourpostingstatus ?? 'DEFAULT'
+    // V1 parity: NULL in DB means MODERATED (line 967 of Group.php).
+    return props.membership.ourpostingstatus ?? 'MODERATED'
   },
   async set(val) {
     const groupid = props.membership.groupid

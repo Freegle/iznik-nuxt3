@@ -374,11 +374,10 @@ export const useMessageStore = defineStore({
     async patch(params) {
       const data = await api(this.config).message.save(params)
 
-      // Clear from store to ensure no attachments.
-      this.remove({
-        id: params.id,
-      })
-
+      // Re-fetch the message to get the updated server state (e.g. after
+      // deleting a photo).  Don't remove-then-readd — that destroys and
+      // recreates any mounted component, losing local state such as
+      // expanded/collapsed in summary view (#299).
       const miscStore = useMiscStore()
       if (miscStore.modtools) {
         const message = await this.fetchMT({

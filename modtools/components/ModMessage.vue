@@ -109,7 +109,10 @@
                 </b-badge>
               </span>
             </div>
-            <span v-if="pending" class="badge bg-warning text-dark ms-1">
+            <span
+              v-if="pending && (editreview || review)"
+              class="badge bg-warning text-dark ms-1"
+            >
               Pending
             </span>
             <span
