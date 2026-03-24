@@ -58,7 +58,7 @@
               </div>
               <div
                 v-else
-                class="flex-grow-1 pl-0 pl-md-2 pr-0 pr-md-2 fullsubject"
+                class="flex-grow-1 ps-0 ps-md-2 pe-0 pe-md-2 fullsubject"
               >
                 <label class="me-2">Subject:</label>
                 <b-form-input v-model="editmessage.subject" size="lg" />
@@ -266,7 +266,7 @@
             <div v-if="fromUser">
               <NoticeMessage
                 v-if="fromUser.deleted"
-                variant="warning"
+                variant="danger"
                 class="mb-2"
               >
                 This user has deleted their account. You may wish to handle this

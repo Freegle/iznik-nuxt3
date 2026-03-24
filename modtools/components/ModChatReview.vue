@@ -74,7 +74,7 @@
             {{ timeago(message.date) }}
           </span>
           <span v-if="message.widerchatreview" class="text-danger">
-            <v-icon icon="info-circle" class="mr-1" />
+            <v-icon icon="info-circle" class="me-1" />
             <em>Quicker Chat Review</em>
           </span>
           <span v-if="message.group">

@@ -4,7 +4,7 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-md-1 pb-md-1 pl-md-1">
+      <div class="nameinfo pt-md-1 pb-md-1 ps-md-1">
         <div
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >

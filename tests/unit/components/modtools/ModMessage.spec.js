@@ -953,6 +953,17 @@ describe('ModMessage', () => {
     })
   })
 
+  describe('Pending badge and approved-by display', () => {
+    it('shows Pending badge for pending messages', async () => {
+      const message = createTestMessage({
+        groups: [{ groupid: 789, namedisplay: 'Test', collection: 'Pending' }],
+      })
+      const wrapper = mountComponent({ message, summary: false })
+      await wrapper.vm.$nextTick()
+      expect(wrapper.text()).toContain('Pending')
+    })
+  })
+
   describe('Microvolunteering and related messages', () => {
     it('shows both sections when data present', async () => {
       const wrapper = mountComponent(
