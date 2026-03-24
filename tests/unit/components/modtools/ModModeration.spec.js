@@ -152,7 +152,7 @@ describe('ModModeration', () => {
       })
     })
 
-    it('uses membership.id as fallback groupid when membership.groupid is null', async () => {
+    it('passes null groupid when membership.groupid is null', async () => {
       const wrapper = mountComponent({
         membership: { id: 555, groupid: null, ourpostingstatus: 'MODERATED' },
         userid: 111,
@@ -165,7 +165,7 @@ describe('ModModeration', () => {
 
       expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
         userid: 111,
-        groupid: 555,
+        groupid: null,
         ourPostingStatus: 'DEFAULT',
       })
     })
@@ -344,7 +344,7 @@ describe('ModModeration', () => {
       )
     })
 
-    it('falls back to membership.id when groupid is undefined', async () => {
+    it('passes undefined groupid when membership has no groupid property', async () => {
       const wrapper = mountComponent({
         membership: { id: 300, ourpostingstatus: 'MODERATED' },
         userid: 111,
@@ -356,7 +356,7 @@ describe('ModModeration', () => {
       await flushPromises()
 
       expect(mockMemberStore.updateMembership).toHaveBeenCalledWith(
-        expect.objectContaining({ groupid: 300 })
+        expect.objectContaining({ groupid: undefined })
       )
     })
   })

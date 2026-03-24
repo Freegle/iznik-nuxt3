@@ -54,6 +54,7 @@ vi.mock('~/composables/useModMe', () => ({
 describe('ModMemberReviewActions', () => {
   const defaultMembership = () => ({
     id: 789,
+    groupid: 789,
     membershipid: 100,
     namedisplay: 'Test Group',
     added: dayjs().subtract(10, 'day').toISOString(),
@@ -85,7 +86,7 @@ describe('ModMemberReviewActions', () => {
       memberships: [ms, { id: 111, membershipid: 200, namedisplay: 'Other' }],
     }
 
-    mockGroups[ms.id] = { namedisplay: ms.namedisplay }
+    mockGroups[ms.groupid] = { namedisplay: ms.namedisplay }
     mockUsers[456] = { id: 456, displayname: 'Test User' }
   }
 
@@ -269,7 +270,7 @@ describe('ModMemberReviewActions', () => {
     })
 
     it('hides action buttons when not a mod on group', () => {
-      const wrapper = mountComponent({ id: 999 })
+      const wrapper = mountComponent({ groupid: 999 })
       expect(wrapper.find('.spin-button').exists()).toBe(false)
     })
 
@@ -413,10 +414,45 @@ describe('ModMemberReviewActions', () => {
   })
 
   describe('link destinations', () => {
-    it('Go to membership links to correct URL', () => {
-      const wrapper = mountComponent({ reviewedat: null })
+    it('Go to membership links to correct URL using groupid', () => {
+      const wrapper = mountComponent({ reviewedat: null, groupid: 789 })
       const button = wrapper.find('button[to]')
       expect(button.attributes('to')).toBe('/members/approved/789/456')
+    })
+
+    it('uses groupid not membership.id for route URL', () => {
+      /* groupid and id differ -- the route must use groupid */
+      const wrapper = mountComponent({
+        reviewedat: null,
+        groupid: 789,
+        id: 999,
+      })
+      const button = wrapper.find('button[to]')
+      expect(button.attributes('to')).toBe('/members/approved/789/456')
+    })
+  })
+
+  describe('groupid usage', () => {
+    it('uses membership.groupid for amAModOn checks', () => {
+      /* amAModOn mock returns true only for groupid 789 */
+      const wrapper = mountComponent({ groupid: 789, reviewedat: null })
+      expect(wrapper.find('.spin-button').exists()).toBe(true)
+    })
+
+    it('passes groupid to memberStore.remove', async () => {
+      const wrapper = mountComponent({ groupid: 789 })
+      await wrapper.vm.removeConfirmed()
+      expect(mockMemberStore.remove).toHaveBeenCalledWith(456, 789)
+    })
+
+    it('passes groupid to memberStore.spamignore', async () => {
+      const wrapper = mountComponent({ groupid: 789 })
+      const callback = vi.fn()
+      await wrapper.vm.ignore(callback)
+      expect(mockMemberStore.spamignore).toHaveBeenCalledWith({
+        userid: 456,
+        groupid: 789,
+      })
     })
   })
 })

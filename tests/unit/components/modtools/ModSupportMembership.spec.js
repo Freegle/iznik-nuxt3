@@ -170,7 +170,7 @@ describe('ModSupportMembership', () => {
     it('passes correct props to ModRole', () => {
       const wrapper = mountComponent(
         { userid: 123, membershipid: 200 },
-        { id: 789, membershipid: 200, role: 'Moderator' }
+        { id: 789, groupid: 789, membershipid: 200, role: 'Moderator' }
       )
       const modRole = wrapper.find('.mod-role')
       expect(modRole.attributes('data-userid')).toBe('123')

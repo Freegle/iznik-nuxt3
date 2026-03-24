@@ -86,6 +86,7 @@ describe('ModChatHeader', () => {
     otheruid: 456,
     status: 'Online',
     icon: '/chat-icon.png',
+    groupid: 789,
     group: { id: 789 },
     user1: 456,
     ...overrides,
@@ -396,15 +397,42 @@ describe('ModChatHeader', () => {
       expect(inner.vm[stateProp]).toBe(true)
     })
 
-    it('showInfo navigates to member page', async () => {
+    it('showInfo navigates to member page using groupid when available', async () => {
       mockChat.value = createChat({
+        groupid: 111,
         group: { id: 789 },
+        otheruid: 456,
+        user1: 456,
+      })
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      inner.vm.showInfo()
+      expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/111/456')
+    })
+
+    it('showInfo falls back to group.id when groupid is absent', async () => {
+      mockChat.value = createChat({
+        groupid: undefined,
+        group: { id: 789 },
+        otheruid: 456,
         user1: 456,
       })
       const wrapper = await mountComponent()
       const inner = getInner(wrapper)
       inner.vm.showInfo()
       expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/789/456')
+    })
+
+    it('showInfo uses otheruid over user1', async () => {
+      mockChat.value = createChat({
+        groupid: 111,
+        otheruid: 500,
+        user1: 456,
+      })
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      inner.vm.showInfo()
+      expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/111/500')
     })
 
     it('markRead calls chatStore.markRead and fetchChat', async () => {

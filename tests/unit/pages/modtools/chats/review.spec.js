@@ -224,6 +224,8 @@ describe('chats/review.vue page', () => {
     it('shows notice when no messages', async () => {
       mockChatStore.messagesById.mockReturnValue([])
       const wrapper = mountComponent()
+      // Wait for onMounted clearAndLoad to complete (sets loading=false)
+      await flushPromises()
       wrapper.vm.show = 10
       await wrapper.vm.$nextTick()
 

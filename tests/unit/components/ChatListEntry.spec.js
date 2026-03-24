@@ -288,4 +288,126 @@ describe('ChatListEntry', () => {
       expect(wrapper.props('active')).toBe(true)
     })
   })
+
+  describe('scrollIntoView on active', () => {
+    it('scrolls the .chat-entry.active element into view when active', () => {
+      const scrollIntoViewMock = vi.fn()
+
+      /* Mock document.querySelector to return an element with scrollIntoView */
+      const mockElement = { scrollIntoView: scrollIntoViewMock }
+      const originalQuerySelector = document.querySelector.bind(document)
+      vi.spyOn(document, 'querySelector').mockImplementation((selector) => {
+        if (selector === '.chat-entry.active') {
+          return mockElement
+        }
+        return originalQuerySelector(selector)
+      })
+
+      /* Mock requestIdleCallback to run the callback synchronously */
+      const originalRIC = window.requestIdleCallback
+      window.requestIdleCallback = (cb) => cb()
+
+      createWrapper({ active: true })
+
+      expect(document.querySelector).toHaveBeenCalledWith('.chat-entry.active')
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: 'instant',
+        block: 'nearest',
+        inline: 'nearest',
+      })
+
+      /* Restore */
+      window.requestIdleCallback = originalRIC
+      vi.restoreAllMocks()
+    })
+
+    it('uses scrollIntoViewIfNeeded when available', () => {
+      const scrollIntoViewIfNeededMock = vi.fn()
+
+      const mockElement = {
+        scrollIntoViewIfNeeded: scrollIntoViewIfNeededMock,
+        scrollIntoView: vi.fn(),
+      }
+      const originalQuerySelector = document.querySelector.bind(document)
+      vi.spyOn(document, 'querySelector').mockImplementation((selector) => {
+        if (selector === '.chat-entry.active') {
+          return mockElement
+        }
+        return originalQuerySelector(selector)
+      })
+
+      const originalRIC = window.requestIdleCallback
+      window.requestIdleCallback = (cb) => cb()
+
+      createWrapper({ active: true })
+
+      expect(scrollIntoViewIfNeededMock).toHaveBeenCalledWith({
+        behavior: 'instant',
+        block: 'nearest',
+        inline: 'nearest',
+      })
+      expect(mockElement.scrollIntoView).not.toHaveBeenCalled()
+
+      window.requestIdleCallback = originalRIC
+      vi.restoreAllMocks()
+    })
+
+    it('does not scroll when active is false', () => {
+      const originalQuerySelector = document.querySelector.bind(document)
+      const querySelectorSpy = vi
+        .spyOn(document, 'querySelector')
+        .mockImplementation((selector) => {
+          if (selector === '.chat-entry.active') {
+            return null
+          }
+          return originalQuerySelector(selector)
+        })
+
+      createWrapper({ active: false })
+
+      /* querySelector should not have been called with .chat-entry.active */
+      const activeQueries = querySelectorSpy.mock.calls.filter(
+        (call) => call[0] === '.chat-entry.active'
+      )
+      expect(activeQueries).toHaveLength(0)
+
+      vi.restoreAllMocks()
+    })
+
+    it('falls back to setTimeout when requestIdleCallback is not available', () => {
+      vi.useFakeTimers()
+
+      const scrollIntoViewMock = vi.fn()
+      const mockElement = { scrollIntoView: scrollIntoViewMock }
+      const originalQuerySelector = document.querySelector.bind(document)
+      vi.spyOn(document, 'querySelector').mockImplementation((selector) => {
+        if (selector === '.chat-entry.active') {
+          return mockElement
+        }
+        return originalQuerySelector(selector)
+      })
+
+      /* Remove requestIdleCallback to test the fallback */
+      const originalRIC = window.requestIdleCallback
+      delete window.requestIdleCallback
+
+      createWrapper({ active: true })
+
+      /* scrollIntoView should not have been called yet */
+      expect(scrollIntoViewMock).not.toHaveBeenCalled()
+
+      /* Advance timers by 100ms (the setTimeout delay) */
+      vi.advanceTimersByTime(100)
+
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: 'instant',
+        block: 'nearest',
+        inline: 'nearest',
+      })
+
+      window.requestIdleCallback = originalRIC
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+  })
 })
