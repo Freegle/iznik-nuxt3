@@ -954,11 +954,15 @@ describe('ModMessage', () => {
   })
 
   describe('Pending badge and approved-by display', () => {
-    it('shows Pending badge for pending messages', async () => {
+    it('shows Pending badge for pending messages on editreview page', async () => {
       const message = createTestMessage({
         groups: [{ groupid: 789, namedisplay: 'Test', collection: 'Pending' }],
       })
-      const wrapper = mountComponent({ message, summary: false })
+      const wrapper = mountComponent({
+        message,
+        summary: false,
+        editreview: true,
+      })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Pending')
     })

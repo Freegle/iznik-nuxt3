@@ -252,6 +252,7 @@ async function deleteConfirmed() {
 
 async function reviewHoldIt() {
   await memberStore.reviewHold({
+    userid: props.userid,
     membershipid: props.membershipid,
     groupid: props.reviewgroupid ?? props.groupid,
   })
@@ -259,6 +260,7 @@ async function reviewHoldIt() {
 
 async function reviewReleaseIt() {
   await memberStore.reviewRelease({
+    userid: props.userid,
     membershipid: props.membershipid,
     groupid: props.reviewgroupid ?? props.groupid,
   })

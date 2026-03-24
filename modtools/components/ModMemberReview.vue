@@ -208,13 +208,14 @@ const allmemberof = computed(() => {
   // Merge in ALL memberships from the user store (fetched via fetchMT).
   // This shows groups the user is on that aren't flagged for review.
   if (user.value && user.value.memberships) {
-    const existingGroupIds = new Set(ms.map((m) => parseInt(m.id)))
+    const existingGroupIds = new Set(ms.map((m) => parseInt(m.groupid)))
 
     user.value.memberships.forEach((um) => {
       if (!existingGroupIds.has(parseInt(um.groupid))) {
         ms.push({
-          id: um.groupid,
+          id: um.id,
           membershipid: um.id,
+          groupid: um.groupid,
           added: um.added,
           role: um.role,
         })

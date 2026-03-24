@@ -156,8 +156,9 @@ const membership = computed(() => {
     )
     if (um) {
       return {
-        id: um.groupid,
+        id: um.id,
         membershipid: um.id,
+        groupid: um.groupid,
         added: um.added,
         role: um.role,
       }
@@ -172,13 +173,25 @@ const user = computed(() => userStore.byId(props.userid))
 const groupName = computed(() => {
   if (!membership.value) return ''
   const group = groupStore.get(membership.value.groupid)
-  return group ? group.namedisplay : '#' + membership.value.groupid
+  return group
+    ? group.namedisplay || group.namefull || '#' + group.id
+    : '#' + membership.value.groupid
 })
 
 watch(
   () => props.userid,
   (uid) => {
     if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => membership.value?.groupid,
+  (gid) => {
+    if (gid && !groupStore.get(gid)) {
+      groupStore.fetch(gid)
+    }
   },
   { immediate: true }
 )

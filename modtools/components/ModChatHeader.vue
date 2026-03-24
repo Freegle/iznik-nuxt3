@@ -498,7 +498,9 @@ const markRead = async () => {
 .outer {
   background-color: $color-blue--x-light;
   border: 1px solid $color-gray--light;
-  box-shadow: 0px 4px 2px -2px $color-black-opacity-60 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15) !important;
+  position: relative;
+  z-index: 2;
 }
 
 .nameinfo {

@@ -258,11 +258,12 @@ describe('ModMemberButton', () => {
   })
 
   describe('review actions', () => {
-    it('calls memberStore.reviewHold for reviewhold action', async () => {
+    it('calls memberStore.reviewHold with userid for reviewhold action', async () => {
       const wrapper = mountComponent({ reviewhold: true })
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(mockMemberStore.reviewHold).toHaveBeenCalledWith({
+        userid: 456,
         membershipid: 111,
         groupid: 789,
       })
@@ -273,16 +274,18 @@ describe('ModMemberButton', () => {
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(mockMemberStore.reviewHold).toHaveBeenCalledWith({
+        userid: 456,
         membershipid: 111,
         groupid: 333,
       })
     })
 
-    it('calls memberStore.reviewRelease for reviewrelease action', async () => {
+    it('calls memberStore.reviewRelease with userid for reviewrelease action', async () => {
       const wrapper = mountComponent({ reviewrelease: true })
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(mockMemberStore.reviewRelease).toHaveBeenCalledWith({
+        userid: 456,
         membershipid: 111,
         groupid: 789,
       })
@@ -296,6 +299,7 @@ describe('ModMemberButton', () => {
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(mockMemberStore.reviewRelease).toHaveBeenCalledWith({
+        userid: 456,
         membershipid: 111,
         groupid: 444,
       })

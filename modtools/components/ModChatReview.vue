@@ -108,9 +108,7 @@
           :userid="message.fromuser.id"
         />
         <div class="d-flex justify-content-around">
-          <div
-            v-if="!message.widerchatreview && isActiveMod && message.fromuser"
-          >
+          <div v-if="isActiveMod && message.fromuser">
             <span>
               <!-- eslint-disable-next-line -->
               <v-icon icon="info-circle" /> {{ message.fromuser?.displayname }} is

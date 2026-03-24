@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="chat"
+    ref="entryEl"
     class="chat-entry"
     :class="{ unread: chat.unseen }"
     @mouseenter="fetch"
@@ -60,11 +61,11 @@ const chat = computed(() => {
   return chatStore.byChatId(props.id)
 })
 
-// On ModTools, resolve the user profile image instead of relying on chat.icon
-// which uses v1 tuimg_ URLs that only return default gravatars.
+// On ModTools, resolve the other user's profile image instead of relying on
+// chat.icon which may use v1 tuimg_ URLs.
 const resolvedIcon = computed(() => {
   if (miscStore.modtools && chat.value) {
-    const uid = chat.value.user1 || chat.value.user1?.id
+    const uid = chat.value.otheruid
     if (uid) {
       const user = userStore.byId(uid)
       const turl = user?.profile?.turl || user?.profile?.paththumb
@@ -79,7 +80,7 @@ const resolvedIcon = computed(() => {
 // On ModTools, fetch the other user's profile so we have their profile image.
 if (miscStore.modtools) {
   watch(
-    () => chat.value?.user1 || chat.value?.user1?.id,
+    () => chat.value?.otheruid,
     async (uid) => {
       if (uid && !userStore.byId(uid)) {
         try {
@@ -116,24 +117,24 @@ const fetch = async () => {
   await chatStore.fetchMessages(props.id)
 }
 
+const entryEl = ref(null)
+
 onMounted(() => {
-  if (props.active) {
+  if (props.active && entryEl.value) {
     const cb = () => {
-      const element = document.querySelector('.chat-entry.active')
-      if (element) {
-        if (element.scrollIntoViewIfNeeded) {
-          element.scrollIntoViewIfNeeded({
-            behavior: 'instant',
-            block: 'nearest',
-            inline: 'nearest',
-          })
-        } else {
-          element.scrollIntoView({
-            behavior: 'instant',
-            block: 'nearest',
-            inline: 'nearest',
-          })
-        }
+      if (!entryEl.value) return
+      if (entryEl.value.scrollIntoViewIfNeeded) {
+        entryEl.value.scrollIntoViewIfNeeded({
+          behavior: 'instant',
+          block: 'nearest',
+          inline: 'nearest',
+        })
+      } else {
+        entryEl.value.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest',
+          inline: 'nearest',
+        })
       }
     }
 

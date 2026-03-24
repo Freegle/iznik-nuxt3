@@ -122,8 +122,9 @@ export const useMemberStore = defineStore({
               }
             }
             byUser[uid].memberships.push({
-              id: member.groupid,
+              id: member.id,
               membershipid: member.id,
+              groupid: member.groupid,
               added: member.added,
               collection: member.collection,
               role: member.role,
@@ -222,7 +223,7 @@ export const useMemberStore = defineStore({
     },
     async reviewHold(params) {
       await api(this.config).memberships.reviewHold(
-        params.membershipid,
+        params.userid,
         params.groupid
       )
       const authStore = useAuthStore()
@@ -237,7 +238,7 @@ export const useMemberStore = defineStore({
 
     async reviewRelease(params) {
       await api(this.config).memberships.reviewRelease(
-        params.membershipid,
+        params.userid,
         params.groupid
       )
       this.reviewHeld({
