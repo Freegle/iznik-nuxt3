@@ -32,7 +32,7 @@
                 :disabled="fromUser?.tnuserid"
               />
               <div
-                v-if="editmessage.item?.name && editmessage.location"
+                v-if="editmessage.item && editmessage.location"
                 class="d-flex justify-content-start"
               >
                 <b-form-select
@@ -47,7 +47,7 @@
                   class="me-1"
                 />
               </div>
-              <div v-if="editmessage.item?.name && editmessage.location">
+              <div v-if="editmessage.item && editmessage.location">
                 <b-input-group>
                   <PostCode
                     :value="editmessage.location.name"
