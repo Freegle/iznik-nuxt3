@@ -114,7 +114,9 @@
               <v-icon icon="info-circle" /> {{ message.fromuser?.displayname }} is
               <span>
                 <span v-if="message.groupfrom"
-                  >on {{ message.groupfrom.namedisplay }}, which you mod. </span
+                  >on {{ message.groupfrom.namedisplay
+                  }}<span v-if="!message.widerchatreview">, which you mod</span
+                  >. </span
                 ><span v-else>not on any groups which you actively mod. </span>
                 <b-button
                   v-if="message.groupfrom"
