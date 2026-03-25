@@ -101,8 +101,8 @@
         <table class="table table-sm table-bordered">
           <thead>
             <tr>
-              <th>Pseudonymized (sent to AI)</th>
               <th>Real Value (kept private)</th>
+              <th>Pseudonymized (sent to AI)</th>
             </tr>
           </thead>
           <tbody>
@@ -110,10 +110,10 @@
               v-for="(value, token) in pendingPrivacyReview.mapping"
               :key="token"
             >
+              <td>{{ value }}</td>
               <td>
                 <code class="text-danger">{{ token }}</code>
               </td>
-              <td>{{ value }}</td>
             </tr>
           </tbody>
         </table>
@@ -988,9 +988,24 @@ async function proceedWithQuery(queryText, pseudonymizedQuery) {
 
 async function queryLogsForUser(userQuery) {
   try {
+    // If a user is selected, ensure their USER token is in the query so Claude
+    // knows who to investigate — even if the mod just wrote "What have they done?"
+    let enrichedQuery = userQuery
+    if (selectedUser.value?.id && localMapping.value) {
+      // Find the USER token for the selected user's ID
+      const userToken = Object.entries(localMapping.value).find(
+        ([token, val]) =>
+          token.startsWith('USER_') && val === selectedUser.value.id.toString()
+      )
+      if (userToken && !userQuery.includes(userToken[0])) {
+        enrichedQuery = `[Investigating user ${userToken[0]}] ${userQuery}`
+      }
+    }
+
     const requestBody = {
-      query: userQuery,
+      query: enrichedQuery,
       userId: selectedUser.value?.id || 0,
+      sanitizerSessionId: currentSessionId.value,
     }
 
     // Include Claude session ID for conversation continuity
@@ -1000,48 +1015,95 @@ async function queryLogsForUser(userQuery) {
 
     addDebugEntry('request', 'Claude Code Request', requestBody)
 
+    // Use SSE for streaming progress updates
     const response = await fetch(`${AI_SUPPORT_URL}/api/log-analysis`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      },
       body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
       if (response.status === 404) {
-        return `**Log Analysis Service**\n\nThe AI-powered log analysis service is being set up.`
+        return {
+          analysis:
+            '**Log Analysis Service**\n\nThe AI-powered log analysis service is not yet available.',
+          costUsd: 0,
+        }
       }
       const errorData = await response.json().catch(() => ({}))
-      // Handle expired session gracefully - clear it and inform user
       if (response.status === 410 || errorData.error === 'SESSION_EXPIRED') {
         claudeSessionId.value = null
         return {
           analysis:
-            '**Session Expired**\n\nYour previous conversation has expired. Please ask your question again to start a new session.',
+            '**Session Expired**\n\nPlease ask your question again to start a new session.',
           costUsd: null,
         }
       }
       throw new Error(errorData.message || 'Failed to query logs')
     }
 
-    const data = await response.json()
+    // Read SSE stream for progress updates
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let resultData = null
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const event = JSON.parse(line.slice(6))
+            if (event.type === 'result') {
+              resultData = event
+            } else if (event.type === 'error') {
+              throw new Error(event.message)
+            } else if (event.type === 'tool') {
+              processingStatus.value = event.message
+            } else if (event.type === 'status') {
+              processingStatus.value = event.message
+            }
+          } catch (e) {
+            if (e.message !== 'Unexpected end of JSON input') {
+              throw e
+            }
+          }
+        }
+      }
+    }
+
+    if (!resultData) {
+      return {
+        analysis: 'No response received from analysis service.',
+        costUsd: 0,
+      }
+    }
 
     // Save Claude session ID for conversation continuity
-    if (data.claudeSessionId) {
-      claudeSessionId.value = data.claudeSessionId
+    if (resultData.claudeSessionId) {
+      claudeSessionId.value = resultData.claudeSessionId
       addDebugEntry('response', 'Claude Code Response', {
-        claudeSessionId: data.claudeSessionId,
-        isNewSession: data.isNewSession,
-        analysisLength: data.analysis?.length || 0,
-        costUsd: data.costUsd,
-        usage: data.usage,
+        claudeSessionId: resultData.claudeSessionId,
+        isNewSession: resultData.isNewSession,
+        analysisLength: resultData.analysis?.length || 0,
+        costUsd: resultData.costUsd,
+        usage: resultData.usage,
       })
     }
 
-    // Return analysis and cost info
     return {
-      analysis: data.analysis || 'No analysis available.',
-      costUsd: data.costUsd,
-      usage: data.usage,
+      analysis: resultData.analysis || 'No analysis available.',
+      costUsd: resultData.costUsd,
+      usage: resultData.usage,
     }
   } catch (error) {
     if (error.message.includes('fetch')) {
@@ -1070,35 +1132,18 @@ function deTokenize(text) {
   return result
 }
 
-function highlightPii(text, mapping, showTokens) {
-  if (!text || !mapping) return text
-
-  let result = text
-  for (const [token, realValue] of Object.entries(mapping)) {
-    // Always highlight PII in red - show either token or real value based on toggle
-    const displayValue = showTokens ? token : realValue
-    const highlightHtml = `<span class="pii-highlight" title="Anonymised: ${token} = ${realValue}">${displayValue}</span>`
-
-    // Replace both token and real value with highlighted version
-    result = result.split(token).join(highlightHtml)
-    if (!showTokens) {
-      // When showing real values, also replace any remaining tokens
-      result = result.split(realValue).join(highlightHtml)
-    }
-  }
-  return result
-}
-
 function formatMessageContent(msg) {
   if (!msg.content) return ''
 
-  // Start with the de-tokenized content, then re-highlight based on toggle
-  let html = marked(msg.content)
+  // Simple approach: render markdown, then show raw content.
+  // The privacy guarantee comes from the pseudonymizer (Claude never sees real PII),
+  // not from frontend rendering tricks. The "Show Anonymised" toggle controls whether
+  // we display the de-tokenized content or the raw pseudonymized content.
+  const content = showAnonymisedData.value
+    ? msg.rawContent || msg.content
+    : msg.content
 
-  // Always highlight PII - toggle controls whether we show token or real value
-  if (msg.mapping && Object.keys(msg.mapping).length > 0) {
-    html = highlightPii(html, msg.mapping, showAnonymisedData.value)
-  }
+  const html = marked(content)
 
   return html
 }
