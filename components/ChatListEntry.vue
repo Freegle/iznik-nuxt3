@@ -32,11 +32,9 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, watch } from '#imports'
+import { ref, computed, onMounted } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useChatStore } from '~/stores/chat'
-import { useUserStore } from '~/stores/user'
-import { useMiscStore } from '~/stores/misc'
 import { timeago } from '~/composables/useTimeFormat'
 import ChatAvatar from '~/components/ChatAvatar'
 
@@ -53,46 +51,17 @@ const props = defineProps({
 })
 
 const chatStore = useChatStore()
-const userStore = useUserStore()
-const miscStore = useMiscStore()
 const fetched = ref(false)
 
 const chat = computed(() => {
   return chatStore.byChatId(props.id)
 })
 
-// On ModTools, resolve the other user's profile image instead of relying on
-// chat.icon which may use v1 tuimg_ URLs.
-const resolvedIcon = computed(() => {
-  if (miscStore.modtools && chat.value) {
-    const uid = chat.value.otheruid
-    if (uid) {
-      const user = userStore.byId(uid)
-      const turl = user?.profile?.turl || user?.profile?.paththumb
-      if (turl) {
-        return turl
-      }
-    }
-  }
-  return chat.value?.icon
-})
-
-// On ModTools, fetch the other user's profile so we have their profile image.
-if (miscStore.modtools) {
-  watch(
-    () => chat.value?.otheruid,
-    async (uid) => {
-      if (uid && !userStore.byId(uid)) {
-        try {
-          await userStore.fetch(uid)
-        } catch (e) {
-          // Silently ignore - will fall back to chat.icon
-        }
-      }
-    },
-    { immediate: true }
-  )
-}
+// Use chat.icon from the Go listing API. The listing query uses the same
+// ProfileSetPath logic as the user profile, picking the latest users_images
+// row (ORDER BY id DESC LIMIT 1). No need to fetch the user separately —
+// that caused avatar flicker when the user store returned a different URL (#327).
+const resolvedIcon = computed(() => chat.value?.icon)
 
 const esnippet = computed(() => {
   if (chat.value?.snippet === 'null') {

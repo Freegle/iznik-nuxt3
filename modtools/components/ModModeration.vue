@@ -52,10 +52,9 @@ watch(
 
 const postingStatus = computed({
   get() {
-    // V1 frontend parity: NULL or falsy → 'DEFAULT' (shows "Group Settings").
-    // The V1 PHP returns 'MODERATED' for NULL but the V1 frontend uses
-    // || 'DEFAULT' which overrides. Users see "Group Settings" on V1.
-    return props.membership.ourpostingstatus || 'DEFAULT'
+    // Go API resolves NULL → 'MODERATED' (V1 parity). Always returns
+    // a non-null string: MODERATED, DEFAULT, or PROHIBITED.
+    return props.membership.ourpostingstatus
   },
   async set(val) {
     const groupid = props.membership.groupid
