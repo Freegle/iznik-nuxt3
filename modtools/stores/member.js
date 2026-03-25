@@ -171,13 +171,20 @@ export const useMemberStore = defineStore({
         params.groupid
       )
 
-      // Remove the member from the store so they disappear from the review
-      // list immediately (#308 Ignore not sticking).
+      // Remove just the acted-on membership from the member's memberships
+      // array, not the whole entry. If the member is in review on multiple
+      // groups, the mod needs to act on each one (#324).
       const key = Object.keys(this.list).find(
         (k) => parseInt(this.list[k].userid) === parseInt(params.userid)
       )
-      if (key) {
-        delete this.list[key]
+      if (key && this.list[key].memberships) {
+        this.list[key].memberships = this.list[key].memberships.filter(
+          (m) => parseInt(m.groupid) !== parseInt(params.groupid)
+        )
+        // Remove the whole entry only when no memberships remain.
+        if (this.list[key].memberships.length === 0) {
+          delete this.list[key]
+        }
       }
     },
 

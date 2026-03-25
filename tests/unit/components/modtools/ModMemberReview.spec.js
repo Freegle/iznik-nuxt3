@@ -559,4 +559,34 @@ describe('ModMemberReview', () => {
       expect(sorted[0].id).toBe(50000)
     })
   })
+
+  describe('firstgrouppolygon', () => {
+    it('uses groupid not id for polygon lookup', () => {
+      mockModGroupStore.get.mockImplementation((gid) => {
+        if (gid === 789)
+          return { id: 789, poly: 'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))' }
+        return null
+      })
+
+      const wrapper = mountComponent({
+        member: createMember({
+          memberships: [
+            {
+              id: 50000,
+              membershipid: 50000,
+              groupid: 789,
+              added: '2024-01-01T10:00:00Z',
+              reviewrequestedat: '2024-01-01T10:00:00Z',
+              reviewedat: null,
+            },
+          ],
+        }),
+      })
+      // Should look up group 789 (groupid), not 50000 (id)
+      expect(mockModGroupStore.get).toHaveBeenCalledWith(789)
+      expect(wrapper.vm.firstgrouppolygon).toBe(
+        'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'
+      )
+    })
+  })
 })
