@@ -109,11 +109,13 @@ describe('ModModeration', () => {
       expect(wrapper.vm.postingStatus).toBe('DEFAULT')
     })
 
-    it('defaults to DEFAULT (Group Settings) when ourpostingstatus is null (V1 frontend parity)', () => {
+    it('returns null when ourpostingstatus is null (Go API resolves NULL server-side)', () => {
+      // The Go API resolves NULL → MODERATED before returning, so null
+      // should never reach the frontend. But if it does, no fallback.
       const wrapper = mountComponent({
         membership: createMembership({ ourpostingstatus: null }),
       })
-      expect(wrapper.vm.postingStatus).toBe('DEFAULT')
+      expect(wrapper.vm.postingStatus).toBeNull()
     })
 
     it('calls userStore.edit when setting postingStatus', async () => {
