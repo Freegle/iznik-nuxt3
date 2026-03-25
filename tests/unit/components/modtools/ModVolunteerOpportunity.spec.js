@@ -215,9 +215,9 @@ describe('ModVolunteerOpportunity', () => {
       expect(mockDelete).toHaveBeenCalledWith(123)
     })
 
-    it('approve calls save and remove', () => {
+    it('approve calls save and remove', async () => {
       const wrapper = mountComponent()
-      wrapper.vm.approve()
+      await wrapper.vm.approve()
       expect(mockSave).toHaveBeenCalledWith({
         id: 123,
         pending: false,

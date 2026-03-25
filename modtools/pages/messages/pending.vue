@@ -241,9 +241,10 @@ async function loadMore($state) {
     console.log('Ignore load more on MT page with no session.')
     $state.complete()
   } else if (show.value < messages.value.length) {
-    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-    show.value++
+    // Show all fetched messages at once.  Previously we incremented by 1, but that caused the
+    // InfiniteLoading loader div to scroll below the viewport after ~9 messages, making
+    // visible=false and stopping further progressive reveal.
+    show.value = messages.value.length
     $state.loaded()
   } else {
     const currentCount = Object.keys(messageStore.list).length

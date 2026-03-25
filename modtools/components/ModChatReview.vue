@@ -18,7 +18,7 @@
             />
             <ModChatReviewUser
               v-if="message.touser"
-              :userid="message.touser.id"
+              :userid="message.touser?.id"
               class="ms-2"
               tag="To: "
               :groupid="message.group ? message.group.id : 0"
@@ -67,7 +67,7 @@
         </div>
         <ModSpammer
           v-if="message.touser?.spammer"
-          :userid="message.touser.id"
+          :userid="message.touser?.id"
         />
         <div class="d-flex justify-content-between flex-wrap">
           <span>
@@ -105,7 +105,7 @@
         </div>
         <ModSpammer
           v-if="message.fromuser?.spammer"
-          :userid="message.fromuser.id"
+          :userid="message.fromuser?.id"
         />
         <div class="d-flex justify-content-around">
           <div v-if="isActiveMod && message.fromuser">
@@ -124,7 +124,7 @@
                     '/members/approved/' +
                     message.groupfrom.id +
                     '/' +
-                    message.fromuser.id
+                    message.fromuser?.id
                   "
                   variant="link"
                   class="p-0 border-0 align-top"

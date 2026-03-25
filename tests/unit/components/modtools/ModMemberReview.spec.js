@@ -17,6 +17,7 @@ const mockMemberStore = {
 
 const mockModGroupStore = {
   get: vi.fn(),
+  fetchIfNeedBeMT: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/user', () => ({

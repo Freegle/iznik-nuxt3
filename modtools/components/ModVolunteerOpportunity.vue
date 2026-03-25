@@ -145,8 +145,8 @@ function deleteme() {
   showDeleteConfirm.value = false
 }
 
-function approve() {
-  volunteeringStore.save({
+async function approve() {
+  await volunteeringStore.save({
     id: volunteering.value.id,
     pending: false,
   })

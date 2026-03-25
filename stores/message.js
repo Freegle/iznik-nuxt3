@@ -521,8 +521,8 @@ export const useMessageStore = defineStore({
 
       return messageIDs
     },
-    async fetchMT(params) {
-      const message = await api(this.config).message.fetchMT(params)
+    async fetchMT(params, logError = true) {
+      const message = await api(this.config).message.fetchMT(params, logError)
       if (message && !message.subject) message.subject = ''
       return message
     },

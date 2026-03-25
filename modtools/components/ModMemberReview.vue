@@ -157,7 +157,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
@@ -311,6 +311,18 @@ onMounted(() => {
     userStore.fetch(member.value.userid)
   }
 })
+
+// Ensure the first group's polygon is fetched for the map boundary.
+watch(
+  () => sortedMemberOf.value?.[0],
+  (first) => {
+    if (first) {
+      const gid = first.groupid || first.id
+      if (gid) modGroupStore.fetchIfNeedBeMT(gid)
+    }
+  },
+  { immediate: true }
+)
 
 function showHistory(typeArg = null) {
   type.value = typeArg

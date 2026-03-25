@@ -304,9 +304,12 @@ async function searchById(msgId) {
   error.value = false
 
   try {
-    const message = await messageStore.fetchMT({
-      id: msgId,
-    })
+    const message = await messageStore.fetchMT(
+      {
+        id: msgId,
+      },
+      false
+    )
     if (message) messageStore.list[msgId] = message
   } catch (e) {
     console.log("Couldn't fetch", e)

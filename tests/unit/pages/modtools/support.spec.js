@@ -199,18 +199,20 @@ describe('support/[[id]].vue page', () => {
       const wrapper = mountComponent()
       wrapper.vm.messageTerm = '12345'
       await wrapper.vm.searchedMessage()
-      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
-        id: '12345',
-      })
+      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith(
+        { id: '12345' },
+        false
+      )
     })
 
     it('searchedMessage calls searchById for #id term', async () => {
       const wrapper = mountComponent()
       wrapper.vm.messageTerm = '#12345'
       await wrapper.vm.searchedMessage()
-      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
-        id: '12345',
-      })
+      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith(
+        { id: '12345' },
+        false
+      )
     })
 
     it('searchedMessage calls searchBySubject for text term', async () => {

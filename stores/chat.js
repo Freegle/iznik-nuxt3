@@ -68,13 +68,23 @@ export const useChatStore = defineStore({
         })
 
         if (selectedChatId) {
-          const { chatroom } = await api(this.config).chat.fetchChatMT(
-            selectedChatId
-          )
-          if (chatroom) {
-            this.listByChatId[chatroom.id] = chatroom
-          } else {
-            console.error('listChatsMT selectedChatId NOTHING', selectedChatId)
+          try {
+            const chatroom = await api(this.config).chat.fetchChat(
+              selectedChatId,
+              false
+            )
+            if (chatroom) {
+              this.listByChatId[chatroom.id] = {
+                ...this.listByChatId[chatroom.id],
+                ...chatroom,
+              }
+            }
+          } catch (e) {
+            console.error(
+              'listChatsMT selectedChatId fetch failed',
+              selectedChatId,
+              e
+            )
           }
         }
       } catch (e) {
@@ -134,7 +144,12 @@ export const useChatStore = defineStore({
           m.refmsgid = m.refmsg.id
           messageStore.fetch(m.refmsg.id, true)
         }
-        this.listByChatId[m.chatid] = m.chatroom
+        // Merge rather than overwrite — preserves icon and other fields
+        // from the listing that the message response doesn't include (#327).
+        this.listByChatId[m.chatid] = {
+          ...this.listByChatId[m.chatid],
+          ...m.chatroom,
+        }
         this.listByChatMessageId[m.id] = m
       })
 
@@ -218,32 +233,22 @@ export const useChatStore = defineStore({
     },
     async fetchChat(id) {
       if (id > 0) {
-        const miscStore = useMiscStore() // MT
-        if (miscStore.modtools) {
-          const { chatroom } = await api(this.config).chat.fetchChatMT(id)
-          if (chatroom) {
-            // Merge rather than overwrite — the listing response includes
-            // lastmsg which fetchChatMT doesn't return. Overwriting would
-            // lose it, breaking markRead (#311).
+        try {
+          const chat = await api(this.config).chat.fetchChat(id, false)
+          if (chat) {
+            // Merge to preserve any existing data (e.g. from listing).
             this.listByChatId[id] = {
               ...this.listByChatId[id],
-              ...chatroom,
+              ...chat,
             }
-          } else {
-            console.error('useChatStore fetchChat NOTHING', id)
           }
-        } else {
-          try {
-            const chat = await api(this.config).chat.fetchChat(id, false)
-            this.listByChatId[id] = chat
-          } catch (e) {
-            if (e?.response?.status === 404) {
-              // Chat was deleted — remove stale reference.
-              console.log('Chat 404, removing stale reference', id)
-              delete this.listByChatId[id]
-            } else {
-              throw e
-            }
+        } catch (e) {
+          if (e?.response?.status === 404) {
+            // Chat was deleted — remove stale reference.
+            console.log('Chat 404, removing stale reference', id)
+            delete this.listByChatId[id]
+          } else {
+            throw e
           }
         }
       }
@@ -282,8 +287,7 @@ export const useChatStore = defineStore({
         // Cheat and set the value in the store, which makes it look like it worked very rapidly.
         this.listByChatId[id].unseen = 0
 
-        // Use lastmsg from the chat listing. If missing (fetchChatMT overwrites
-        // the listing entry without lastmsg), fall back to the highest message
+        // Use lastmsg from the chat data. Fall back to the highest message
         // ID we have loaded in memory for this chat.
         let lastmsg = chat.lastmsg
         if (!lastmsg && this.messages[id]?.length) {

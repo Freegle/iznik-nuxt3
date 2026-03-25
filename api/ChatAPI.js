@@ -33,13 +33,6 @@ export default class ChatAPI extends BaseAPI {
     )
   }
 
-  fetchChatMT(chatid) {
-    return this.$getv2('/chatrooms', {
-      id: chatid,
-      chattypes: ['User2Mod', 'Mod2Mod'],
-    })
-  }
-
   fetchChat(chatid, logError) {
     return this.$getv2('/chat/' + chatid, {}, logError)
   }
