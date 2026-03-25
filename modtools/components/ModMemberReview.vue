@@ -230,26 +230,29 @@ const sortedMemberOf = computed(() => {
   const members = allmemberof.value
 
   return members.sort((a, b) => {
+    const amod = amAModOn(a.groupid)
+    const bmod = amAModOn(b.groupid)
     const areview =
-      amAModOn(a.groupid) &&
+      amod &&
       a.reviewrequestedat &&
       (!a.reviewedat ||
         new Date(a.reviewrequestedat).getTime() >
           new Date(a.reviewedat).getTime())
     const breview =
-      amAModOn(b.groupid) &&
+      bmod &&
       b.reviewrequestedat &&
       (!b.reviewedat ||
         new Date(b.reviewrequestedat).getTime() >
           new Date(b.reviewedat).getTime())
 
-    if (areview && !breview) {
-      return -1
-    } else if (breview && !areview) {
-      return 1
-    } else {
-      return b.added.localeCompare(a.added)
-    }
+    // Tier 1: mod's groups with active review first
+    if (areview && !breview) return -1
+    if (breview && !areview) return 1
+    // Tier 2: mod's groups (without review) before non-mod groups
+    if (amod && !bmod) return -1
+    if (bmod && !amod) return 1
+    // Tier 3: by date
+    return (b.added || '').localeCompare(a.added || '')
   })
 })
 

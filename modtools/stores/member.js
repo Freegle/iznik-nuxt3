@@ -170,6 +170,15 @@ export const useMemberStore = defineStore({
         params.userid,
         params.groupid
       )
+
+      // Remove the member from the store so they disappear from the review
+      // list immediately (#308 Ignore not sticking).
+      const key = Object.keys(this.list).find(
+        (k) => parseInt(this.list[k].userid) === parseInt(params.userid)
+      )
+      if (key) {
+        delete this.list[key]
+      }
     },
 
     async updateMembership(params) {

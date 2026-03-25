@@ -222,7 +222,13 @@ export const useChatStore = defineStore({
         if (miscStore.modtools) {
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
           if (chatroom) {
-            this.listByChatId[id] = chatroom
+            // Merge rather than overwrite — the listing response includes
+            // lastmsg which fetchChatMT doesn't return. Overwriting would
+            // lose it, breaking markRead (#311).
+            this.listByChatId[id] = {
+              ...this.listByChatId[id],
+              ...chatroom,
+            }
           } else {
             console.error('useChatStore fetchChat NOTHING', id)
           }
@@ -273,10 +279,21 @@ export const useChatStore = defineStore({
       const chat = this.listByChatId[id]
 
       if (chat?.unseen > 0) {
-        // Cheat and set the value in the store, which makes it look like it worked very rapidly.  This speeds
-        // things up a lot, and when we use this we expect to then call fetchChats after we've finished.
+        // Cheat and set the value in the store, which makes it look like it worked very rapidly.
         this.listByChatId[id].unseen = 0
-        await api(this.config).chat.markRead(id, chat.lastmsg, false)
+
+        // Use lastmsg from the chat listing. If missing (fetchChatMT overwrites
+        // the listing entry without lastmsg), fall back to the highest message
+        // ID we have loaded in memory for this chat.
+        let lastmsg = chat.lastmsg
+        if (!lastmsg && this.messages[id]?.length) {
+          const msgs = this.messages[id]
+          lastmsg = msgs[msgs.length - 1].id
+        }
+
+        if (lastmsg) {
+          await api(this.config).chat.markRead(id, lastmsg, false)
+        }
       }
     },
     async markUnread(chatid, prevmsgid) {
