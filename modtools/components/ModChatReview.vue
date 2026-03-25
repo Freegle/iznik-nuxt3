@@ -5,10 +5,10 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
-              :userid="message.fromuser.id"
+              :userid="message.fromuser?.id"
               class="me-2"
               tag="From: "
-              :groupid="message.group ? message.group.id : 0"
+              :groupid="message.group?.id || 0"
               @reload="reload"
             />
             <v-icon

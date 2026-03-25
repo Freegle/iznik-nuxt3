@@ -52,8 +52,10 @@ watch(
 
 const postingStatus = computed({
   get() {
-    // V1 parity: NULL in DB means MODERATED (line 967 of Group.php).
-    return props.membership.ourpostingstatus ?? 'MODERATED'
+    // V1 frontend parity: NULL or falsy → 'DEFAULT' (shows "Group Settings").
+    // The V1 PHP returns 'MODERATED' for NULL but the V1 frontend uses
+    // || 'DEFAULT' which overrides. Users see "Group Settings" on V1.
+    return props.membership.ourpostingstatus || 'DEFAULT'
   },
   async set(val) {
     const groupid = props.membership.groupid

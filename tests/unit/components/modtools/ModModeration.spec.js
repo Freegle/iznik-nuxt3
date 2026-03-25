@@ -109,11 +109,11 @@ describe('ModModeration', () => {
       expect(wrapper.vm.postingStatus).toBe('DEFAULT')
     })
 
-    it('defaults to MODERATED when ourpostingstatus is null (V1 parity)', () => {
+    it('defaults to DEFAULT (Group Settings) when ourpostingstatus is null (V1 frontend parity)', () => {
       const wrapper = mountComponent({
         membership: createMembership({ ourpostingstatus: null }),
       })
-      expect(wrapper.vm.postingStatus).toBe('MODERATED')
+      expect(wrapper.vm.postingStatus).toBe('DEFAULT')
     })
 
     it('calls userStore.edit when setting postingStatus', async () => {
