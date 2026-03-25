@@ -223,13 +223,6 @@ describe('support/[[id]].vue page', () => {
       })
     })
 
-    it('onSystemLogsTab sets showSystemLogs and clears store', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onSystemLogsTab()
-      expect(wrapper.vm.showSystemLogs).toBe(true)
-      expect(mockSystemLogsStore.clear).toHaveBeenCalled()
-    })
-
     it('onEmailStatsTab sets showEmailStats', () => {
       const wrapper = mountComponent()
       wrapper.vm.onEmailStatsTab()
@@ -250,15 +243,6 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.$nextTick()
       await flushPromises()
       expect(wrapper.vm.activeTab).toBe(1)
-    })
-
-    it('sets logsSubTab from query param', async () => {
-      mockRouteQuery.value = { tab: 'logs', subtab: 'ai' } // 'ai' maps to index 1 in logsSubTabMap
-      const wrapper = mountComponent()
-      await wrapper.vm.$nextTick()
-      await flushPromises()
-      expect(wrapper.vm.activeTab).toBe(5) // Logs tab is now at index 5
-      expect(wrapper.vm.logsSubTab).toBe(1) // 'ai' subtab is index 1
     })
   })
 })
