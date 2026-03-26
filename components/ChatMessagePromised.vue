@@ -249,6 +249,7 @@ const {
   chat,
   chatmessage,
   emessage,
+  isEmptyMessage,
   refmsgid,
   refmsg,
   me,
