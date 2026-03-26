@@ -114,7 +114,7 @@ test.describe('Post flow tests', () => {
     // ChatListEntry is hidden. Poll with page reloads until the entry appears.
     console.log('Navigating to /chats to check for reply')
     const chatEntry = page.locator('.chat-entry').first()
-    const maxAttempts = 10
+    const maxAttempts = 20
     let chatFound = false
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {

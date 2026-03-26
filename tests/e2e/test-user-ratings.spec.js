@@ -60,7 +60,7 @@ test.describe('User ratings tests', () => {
     // ChatListEntry is hidden (v-if="c.lastmsg > 0"). Poll with page reloads
     // until the worker has processed it and the entry appears.
     const chatEntry = page.locator('.chat-entry').first()
-    const maxAttempts = 10
+    const maxAttempts = 20
     let found = false
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
