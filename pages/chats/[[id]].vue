@@ -346,6 +346,7 @@ const searching = ref(false)
 const searchlast = ref(null)
 const complete = ref(false)
 const bump = ref(1)
+let searchGeneration = 0
 const distance = ref(1000)
 const selectedChatId = ref(null)
 
@@ -424,10 +425,16 @@ watch(search, (newVal, oldVal) => {
 
   if (!newVal) {
     // Force a refresh to remove any old chats.
+    searchGeneration++
     chatStore.fetchChats()
   } else if (newVal.length > 2) {
     // Force a server search to pick up old chats or more subtle matches.
     searchMore()
+  } else {
+    // Short search term — refetch without server search to restore the
+    // normal list (prevents stale search results from staying in the store).
+    searchGeneration++
+    chatStore.fetchChats()
   }
 })
 
@@ -567,20 +574,29 @@ async function searchMore() {
     searchlast.value = search.value
   } else {
     searching.value = search.value
+    const gen = ++searchGeneration
 
     await chatStore.fetchChats(search.value)
 
-    showChats.value = minShowChats.value
-    bump.value++
+    // Only apply results if this is still the latest search.
+    // Prevents stale responses from overwriting newer results.
+    if (gen === searchGeneration) {
+      showChats.value = minShowChats.value
+      bump.value++
+    }
 
     while (searchlast.value) {
       // We have another search queued.
       const val2 = searchlast.value
       searching.value = searchlast.value
       searchlast.value = null
+      const gen2 = ++searchGeneration
       await chatStore.fetchChats(val2)
-      showChats.value = minShowChats.value
-      bump.value++
+
+      if (gen2 === searchGeneration) {
+        showChats.value = minShowChats.value
+        bump.value++
+      }
     }
 
     searching.value = null
