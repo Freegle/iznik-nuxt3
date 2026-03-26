@@ -23,7 +23,7 @@
                 @error="brokenImage"
               />
               <ProfileImage
-                :image="otheruser?.profile?.paththumb"
+                :image="chat?.icon"
                 :name="otheruser?.displayname"
                 class="me-1 mb-1 mt-1 inline"
                 is-thumbnail

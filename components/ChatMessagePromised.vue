@@ -11,7 +11,7 @@
       <div v-else class="promised-wrapper">
         <div class="promised-header">
           <ProfileImage
-            :image="otheruser?.profile?.paththumb"
+            :image="chat?.icon"
             :name="otheruser?.displayname"
             class="me-2 inline"
             is-thumbnail
@@ -37,7 +37,7 @@
           </span>
           <span v-else> They are no longer looking for this. </span>
         </notice-message>
-        <div v-if="emessage" class="promised-text mt-2">
+        <div v-if="emessage && !isEmptyMessage" class="promised-text mt-2">
           <span
             v-if="
               chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
@@ -140,7 +140,7 @@
         <p v-else-if="!refmsg?.availablenow" class="text-muted small mt-2">
           This has now been taken.
         </p>
-        <div v-if="emessage" class="promised-text mt-2">
+        <div v-if="emessage && !isEmptyMessage" class="promised-text mt-2">
           <span
             v-if="
               chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
