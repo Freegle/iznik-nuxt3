@@ -137,8 +137,9 @@ watch(search, (newVal, oldVal) => {
   if (!newVal) {
     // Force a refresh to remove any old chats.
     listChats()
-  } else {
+  } else if (newVal.length > 2) {
     // Force a server search to pick up old chats or more subtle matches.
+    // Only search when the term is long enough to be meaningful.
     searchMore()
   }
 })
@@ -166,13 +167,17 @@ function scanChats(closed, chatList) {
   if (result.length && search.value && searching.value) {
     const l = search.value.toLowerCase()
     result = result.filter((chat) => {
+      // The API flags chats found via message content search with search=true.
+      if (chat.search) {
+        return true
+      }
+
       if (
         chat.name.toLowerCase().includes(l) ||
         (chat.snippet &&
           typeof chat.snippet === 'string' &&
           chat.snippet.toLowerCase().includes(l))
       ) {
-        // Found in the name of the chat (which may include a user
         return true
       }
 
@@ -195,13 +200,8 @@ function scanChats(closed, chatList) {
     })
   }
 
-  // Sort to show unseen first then more recent first
+  // Sort by most recent first.
   result.sort((a, b) => {
-    if (a.unseen === 0 && b.unseen > 0) {
-      return 1
-    } else if (a.unseen > 0 && b.unseen === 0) {
-      return -1
-    }
     if (a.lastdate && b.lastdate) {
       return dayjs(b.lastdate).diff(dayjs(a.lastdate))
     } else if (a.lastdate) {
