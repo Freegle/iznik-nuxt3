@@ -306,8 +306,9 @@ if (route.query.search) {
   search.value = route.query.search
 }
 
-if (myid) {
-  // Fetch the list of chats.
+if (myid && process.client) {
+  // Fetch the list of chats. Only on client — SSR has no auth token
+  // and the template uses <client-only> anyway.
   await chatStore.fetchChats(search.value, true, id)
 
   // Is this chat in the list?
