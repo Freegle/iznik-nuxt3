@@ -54,12 +54,33 @@ test.describe('User ratings tests', () => {
     }
     console.log('Logged in as User A')
 
-    // Navigate to /chats
-    await page.gotoAndVerify('/chats')
-
-    // Wait for chat entry to appear and click it
+    // Navigate to /chats and wait for a chat entry to appear.
+    // The reply message is created with processingsuccessful=0 and a background
+    // worker sets it to 1. Until processed, the chat has lastmsg=0 and the
+    // ChatListEntry is hidden (v-if="c.lastmsg > 0"). Poll with page reloads
+    // until the worker has processed it and the entry appears.
     const chatEntry = page.locator('.chat-entry').first()
-    await chatEntry.waitFor({ state: 'visible', timeout: timeouts.background })
+    const maxAttempts = 10
+    let found = false
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await page.gotoAndVerify('/chats')
+
+      try {
+        await chatEntry.waitFor({ state: 'visible', timeout: 15000 })
+        console.log(`Chat entry appeared on attempt ${attempt}`)
+        found = true
+        break
+      } catch (e) {
+        console.log(`Chat entry not visible on attempt ${attempt}, retrying...`)
+      }
+    }
+
+    if (!found) {
+      throw new Error(
+        `Chat entry did not appear after ${maxAttempts} attempts — background worker may not have processed the message`
+      )
+    }
     await chatEntry.click()
     await page.waitForTimeout(timeouts.ui.settleTime)
 

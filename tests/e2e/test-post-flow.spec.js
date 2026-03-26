@@ -108,16 +108,30 @@ test.describe('Post flow tests', () => {
     }
     console.log('Successfully logged in as original user')
 
-    // Go to /chats and verify the reply is visible
+    // Go to /chats and verify the reply is visible.
+    // The reply message is created with processingsuccessful=0 and a background
+    // worker sets it to 1. Until processed, the chat has lastmsg=0 and the
+    // ChatListEntry is hidden. Poll with page reloads until the entry appears.
     console.log('Navigating to /chats to check for reply')
-    await page.gotoAndVerify('/chats')
+    const chatEntry = page.locator('.chat-entry').first()
+    const maxAttempts = 10
+    let chatFound = false
 
-    // Wait for the chat list to load and look for a chat entry
-    await page.waitForSelector('.chat-entry', {
-      timeout: timeouts.background,
-    })
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await page.gotoAndVerify('/chats')
 
-    // Check that there's one chat entry (the reply)
+      try {
+        await chatEntry.waitFor({ state: 'visible', timeout: 15000 })
+        console.log(`Chat entry appeared on attempt ${attempt}`)
+        chatFound = true
+        break
+      } catch (e) {
+        console.log(`Chat entry not visible on attempt ${attempt}, retrying...`)
+      }
+    }
+
+    expect(chatFound).toBeTruthy()
+
     const chatEntries = page.locator('.chat-entry').filter({ visible: true })
     const chatCount = await chatEntries.count()
     expect(chatCount).toEqual(1)
