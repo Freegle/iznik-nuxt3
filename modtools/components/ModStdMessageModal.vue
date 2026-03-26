@@ -546,7 +546,11 @@ async function substitutionStrings(text) {
     text = text.replace(/\$volunteersemail/g, group.modsemail)
     text = text.replace(/\$volunteeremail/g, group.modsemail)
     text = text.replace(/\$groupemail/g, group.groupemail)
-    text = text.replace(/\$groupurl/g, group.url)
+    text = text.replace(
+      /\$groupurl/g,
+      group.url ||
+        'https://www.ilovefreegle.org/explore/' + (group.nameshort || '')
+    )
     text = text.replace(/\$myname/g, me.value.displayname)
     text = text.replace(/\$nummembers/g, group.membercount)
     text = text.replace(/\$nummods/g, group.modcount)
