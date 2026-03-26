@@ -56,6 +56,6 @@ export default class CommunityEventAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$delv2('/communityevent', { id })
+    return this.$delv2('/communityevent/' + id)
   }
 }
