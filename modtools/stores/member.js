@@ -233,7 +233,7 @@ export const useMemberStore = defineStore({
       await api(this.config).memberships.happinessReviewed({
         userid: params.userid,
         groupid: params.groupid,
-        happinessid: params.happinessid,
+        happiness: String(params.happinessid),
         action: 'HappinessReviewed',
       })
     },
