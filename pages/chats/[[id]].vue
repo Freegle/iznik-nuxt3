@@ -282,13 +282,12 @@ definePageMeta({
   layout: 'login',
 })
 
-let title = 'Chats'
-let description = "See the conversations you're having with other freeglers."
+const title = 'Chats'
+const description = "See the conversations you're having with other freeglers."
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 
-const myid = authStore.user?.id
 const showChats = ref(20)
 
 // When there's a flag in the chat store to show the modal.  Don't reset the value in the store here otherwise
@@ -306,35 +305,8 @@ if (route.query.search) {
   search.value = route.query.search
 }
 
-if (myid && process.client) {
-  // Fetch the list of chats. Only on client — SSR has no auth token
-  // and the template uses <client-only> anyway.
-  await chatStore.fetchChats(search.value, true, id)
-
-  // Is this chat in the list?
-  chat = chatStore.byChatId(id)
-
-  if (!chat) {
-    // Might be old.  Try fetching it specifically.
-    try {
-      chat = await chatStore.fetchChat(id)
-    } catch (e) {
-      console.log("Couldn't fetch chat", id, e)
-    }
-  } else {
-    // We have the chat, but maybe it's not quite up to date (e.g. a new message).  So fetch, but don't wait.
-    title = chat.name
-    description = 'Chat with ' + chat.name
-
-    chatStore.fetchChat(id)
-  }
-
-  if (id) {
-    // Find id in the list of chats.
-    const index = chatStore.list.findIndex((c) => c.id === id)
-    showChats.value = Math.max(showChats.value, index + 1)
-  }
-}
+// Chat data is fetched in onMounted to ensure auth is fully hydrated.
+// SSR has no auth token and the template uses <client-only> anyway.
 
 useHead(buildHead(route, runtimeConfig, title, description))
 
@@ -429,12 +401,32 @@ watch(search, (newVal, oldVal) => {
   }
 })
 
-onMounted(() => {
+onMounted(async () => {
   selectedChatId.value = null
 
   if (authStore.user) {
     const route = useRoute()
     selectedChatId.value = route.params.id ? parseInt(route.params.id) : 0
+
+    // Fetch chat list now that auth is fully hydrated.
+    await chatStore.fetchChats(search.value, true, id)
+
+    chat = chatStore.byChatId(id)
+
+    if (!chat && id) {
+      try {
+        chat = await chatStore.fetchChat(id)
+      } catch (e) {
+        console.log("Couldn't fetch chat", id, e)
+      }
+    } else if (chat) {
+      chatStore.fetchChat(id)
+    }
+
+    if (id) {
+      const index = chatStore.list.findIndex((c) => c.id === id)
+      showChats.value = Math.max(showChats.value, index + 1)
+    }
   }
 })
 
