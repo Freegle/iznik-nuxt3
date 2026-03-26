@@ -282,7 +282,7 @@ async function save() {
     id: admin.value.id,
     subject: admin.value.subject,
     text: admin.value.text,
-    pending: 1,
+    pending: true,
   })
 
   saving.value = false

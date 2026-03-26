@@ -229,7 +229,7 @@ describe('ModAdmin', () => {
         id: 1,
         subject: 'Test Admin',
         text: 'Test body',
-        pending: 1,
+        pending: true,
       })
     })
 
