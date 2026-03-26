@@ -467,11 +467,17 @@ function scanChats(closed, chats) {
   if (chats && search.value) {
     const l = search.value.toLowerCase()
     chats = chats.filter((chat) => {
+      // The API flags chats found via message content search with search=true.
+      // Include those even if the snippet (latest message) doesn't contain
+      // the search term — the match is in an older message.
+      if (chat.search) {
+        return true
+      }
+
       if (
         chat.name.toLowerCase().includes(l) ||
         (chat.snippet && chat.snippet.toLowerCase().includes(l))
       ) {
-        // Found in the name of the chat (which may include a user
         return true
       }
 
