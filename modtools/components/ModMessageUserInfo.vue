@@ -9,7 +9,7 @@
         <ProfileImage
           :image="user.profile?.turl || user.profile?.paththumb"
           :name="user.displayname"
-          class="ms-1 mb-1 inline"
+          class="ms-1 me-1 mb-1 inline"
           is-thumbnail
           size="sm"
         />
