@@ -322,7 +322,7 @@
             <ModMessageWorry v-if="message.worry" :messageid="message.id" />
             <div v-if="expanded">
               <!-- eslint-disable-next-line -->
-              <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
+              <b-form-textarea v-if="editing" v-model="editmessage.textbody" rows="8" class="mb-3" />
               <div v-else-if="editreview">
                 <template v-if="oldBody || newBody">
                   <h4>Differences:</h4>

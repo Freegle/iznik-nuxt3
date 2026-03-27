@@ -384,6 +384,7 @@
               :class="
                 message.collection != 'Approved' ? 'text-danger' : 'text-muted'
               "
+              class="ms-1"
               >{{ message.collection }}</span
             >
             <br />
