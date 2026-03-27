@@ -18,7 +18,6 @@ export const useStoryStore = defineStore({
       const ids =
         (await api(this.config).stories.listv2({
           reviewed: 0,
-          public: 0,
           dontzapfalsey: true,
         })) || []
 
