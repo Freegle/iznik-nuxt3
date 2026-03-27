@@ -95,7 +95,7 @@
                 v-if="
                   message.availableinitially && message.availableinitially > 1
                 "
-                class="small text-info"
+                class="small text-info ms-1"
               >
                 <b-badge
                   v-if="message.availableinitially === message.availablenow"
