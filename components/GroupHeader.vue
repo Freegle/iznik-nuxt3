@@ -295,7 +295,7 @@
       <div v-else>
         <ChatButton
           :groupid="group.id"
-          title="Contact Volunteers"
+          :title="group.mentored ? 'Contact Caretakers' : 'Contact Volunteers'"
           chattype="User2Mod"
           variant="white"
         />
