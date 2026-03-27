@@ -88,7 +88,17 @@
                     :inline="true"
                     class="title-tag ps-1 pe-1"
                   />
-                  <span class="title-subject">{{ strippedSubject }}</span>
+                  <span class="title-subject"
+                    >{{ strippedSubject }}
+                    <b-badge
+                      v-if="message.availablenow > 1"
+                      variant="info"
+                      class="ms-1"
+                      style="font-size: 0.55em; vertical-align: middle"
+                    >
+                      {{ message.availablenow }} available
+                    </b-badge></span
+                  >
                 </div>
                 <div class="photo-actions">
                   <button class="photo-action-btn" @click.stop="share">

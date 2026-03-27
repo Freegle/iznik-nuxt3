@@ -248,7 +248,17 @@
               </div>
             </div>
             <div class="title-row">
-              <span class="title-subject">{{ subjectItemName }}</span>
+              <span class="title-subject"
+                >{{ subjectItemName }}
+                <b-badge
+                  v-if="message.availablenow > 1"
+                  variant="info"
+                  class="ms-1"
+                  style="font-size: 0.55em; vertical-align: middle"
+                >
+                  {{ message.availablenow }} available
+                </b-badge></span
+              >
             </div>
             <div class="location-row">
               <div v-if="subjectLocation" class="title-location">
