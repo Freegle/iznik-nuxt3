@@ -154,7 +154,7 @@ async function save() {
     flag: flag.value,
   })
 
-  await userStore.fetch(props.userid)
+  await userStore.fetch(props.userid, true)
   context.value = null
   bump.value++
 

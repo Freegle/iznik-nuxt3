@@ -338,11 +338,25 @@
             Approved chat message for
             <ModLogUser :userid="logUser.id" />
           </span>
+          <span v-else-if="log.subtype === 'Rejected'">
+            Rejected chat message for
+            <ModLogUser :userid="logUser.id" />
+          </span>
           <span v-else>
             <span class="text-muted"
               >Unknown log type {{ log.type }} subtype {{ log.subtype }}</span
             >
           </span>
+        </span>
+        <span v-else-if="log.type === 'Location'">
+          <span v-if="log.subtype === 'Created'"> Created location </span>
+          <span v-else> {{ log.subtype }} location </span>
+        </span>
+        <span v-else-if="!log.type">
+          <span class="text-muted">{{ log.text || 'Log entry' }}</span>
+        </span>
+        <span v-else>
+          <span class="text-muted">{{ log.type }} {{ log.subtype }}</span>
         </span>
       </b-col>
     </b-row>
