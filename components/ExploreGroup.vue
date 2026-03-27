@@ -47,23 +47,7 @@ const group = computed(() => {
   return groupStore?.get(props.id)
 })
 
-// Methods
-function loadMore($state) {
-  if (toShow.value < messages.value.length) {
-    toShow.value++
-    $state.loaded()
-  } else {
-    $state.complete()
-  }
-}
-
-// Expose methods to parent components
-defineExpose({
-  loadMore,
-})
-
 const bump = ref(0)
-const toShow = ref(20) // Assuming a default value for toShow
 
 await groupStore.fetchMessagesForGroup(props.id)
 
@@ -73,7 +57,7 @@ const messages = computed(() => {
 })
 
 const messagesToShow = computed(() => {
-  const ids = messages.value ? messages.value.slice(0, toShow.value) : []
+  const ids = messages.value ? messages.value : []
   return ids.map((id) => {
     return { id, groupid: props.id }
   })
