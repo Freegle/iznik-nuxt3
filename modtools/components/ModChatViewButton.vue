@@ -9,7 +9,7 @@
     <ModChatModal
       v-if="showModal && id"
       :id="id"
-      :pov="pov"
+      :pov="pov || 0"
       @hidden="showModal = false"
     />
   </div>

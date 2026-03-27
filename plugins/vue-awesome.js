@@ -2,11 +2,6 @@
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library, config } from '@fortawesome/fontawesome-svg-core'
-
-// Prevent fontawesome from injecting CSS via JavaScript at runtime.
-// The CSS is already loaded via nuxt.config.ts css array, so auto-injection
-// causes duplicate styles and SSR hydration mismatches.
-config.autoAddCss = false
 import {
   faAddressBook,
   faArrowCircleLeft,
@@ -64,6 +59,7 @@ import {
   faEllipsisH,
   faEnvelope,
   faEquals,
+  faEraser,
   faExclamationTriangle,
   faExpand,
   faEye,
@@ -155,6 +151,11 @@ import {
   faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons'
 
+// Prevent fontawesome from injecting CSS via JavaScript at runtime.
+// The CSS is already loaded via nuxt.config.ts css array, so auto-injection
+// causes duplicate styles and SSR hydration mismatches.
+config.autoAddCss = false
+
 library.add(
   faAddressBook,
   faAngleDoubleDown,
@@ -212,6 +213,7 @@ library.add(
   faEllipsisH,
   faEnvelope,
   faEquals,
+  faEraser,
   faExclamationTriangle,
   faExpand,
   faEye,

@@ -5,10 +5,12 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
-              :userid="message.fromuser?.id"
+              :userid="
+                message.fromuserid || message.fromuser?.id || message.userid
+              "
               class="me-2"
               tag="From: "
-              :groupid="message.group?.id || 0"
+              :groupid="message.groupid || message.group?.id || 0"
               @reload="reload"
             />
             <v-icon
@@ -17,11 +19,11 @@
               class="mt-1 text-info"
             />
             <ModChatReviewUser
-              v-if="message.touser"
-              :userid="message.touser?.id"
+              v-if="message.touserid || message.touser"
+              :userid="message.touserid || message.touser?.id"
               class="ms-2"
               tag="To: "
-              :groupid="message.group ? message.group.id : 0"
+              :groupid="message.groupid || message.group?.id || 0"
               @reload="reload"
             />
           </div>
@@ -139,7 +141,10 @@
       <b-card-footer>
         <div class="d-flex flex-wrap justify-content-start">
           <template v-if="!message.widerchatreview && isActiveMod">
-            <ModChatViewButton :id="message.chatid" :pov="message.touser?.id" />
+            <ModChatViewButton
+              :id="message.chatid"
+              :pov="message.touserid || message.touser?.id"
+            />
             <b-button
               v-if="message.held && me.id === message.held.id"
               variant="warning"
