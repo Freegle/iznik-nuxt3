@@ -26,7 +26,7 @@
         <OurToggle
           :model-value="Boolean(group.publish)"
           :height="36"
-          :width="170"
+          :width="200"
           :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }"
           disabled
@@ -44,7 +44,7 @@
         <OurToggle
           :model-value="Boolean(group.onlovejunk)"
           :height="36"
-          :width="190"
+          :width="210"
           :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }"
           disabled
@@ -53,7 +53,7 @@
         <OurToggle
           :model-value="Boolean(group.onmap)"
           :height="36"
-          :width="150"
+          :width="160"
           :font-size="14"
           :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled
@@ -192,7 +192,7 @@
       <OurToggle
         :model-value="Boolean(!group.mentored)"
         :height="36"
-        :width="170"
+        :width="210"
         :font-size="14"
         :labels="{ checked: 'Local Volunteers', unchecked: 'Caretakers' }"
         disabled
