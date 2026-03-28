@@ -392,8 +392,7 @@
           <div class="action-left">
             <b-button
               v-if="canmodify"
-              variant="link"
-              class="text-danger"
+              variant="danger"
               :disabled="uploadingPhoto"
               @click="deleteIt"
             >

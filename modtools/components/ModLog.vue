@@ -62,7 +62,7 @@
             >
           </span>
         </span>
-        <span v-if="log.type === 'Message'">
+        <span v-else-if="log.type === 'Message'">
           <span v-if="log.subtype === 'Received'">
             <span
               v-if="

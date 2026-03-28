@@ -164,7 +164,7 @@ function scanChats(closed, chatList) {
   // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
   let result = chatList ? [...chatList] : []
 
-  if (result.length && search.value && searching.value) {
+  if (result.length && search.value) {
     const l = search.value.toLowerCase()
     result = result.filter((chat) => {
       // The API flags chats found via message content search with search=true.

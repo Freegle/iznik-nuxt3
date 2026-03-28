@@ -47,7 +47,7 @@ export default class VolunteeringAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$delv2('/volunteering', { id })
+    return this.$delv2('/volunteering/' + id)
   }
 
   renew(id) {

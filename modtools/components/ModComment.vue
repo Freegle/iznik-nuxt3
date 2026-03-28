@@ -138,7 +138,7 @@ const groupname = computed(() => {
 })
 
 async function updateComments() {
-  await userStore.fetch(props.userid)
+  await userStore.fetch(props.userid, true)
 
   const user = userStore.byId(props.userid)
   const savedCommentId = savedComment.value.id
