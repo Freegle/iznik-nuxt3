@@ -55,7 +55,10 @@ onMounted(async () => {
   chat.value = chatStore.byChatId(id.value)
 
   if (chat.value) {
-    pov.value = chat.value.user1.id
+    pov.value =
+      typeof chat.value.user1 === 'object'
+        ? chat.value.user1.id
+        : chat.value.user1
   } else {
     notfound.value = true
   }
