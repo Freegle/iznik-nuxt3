@@ -117,9 +117,13 @@ watch(work, (newVal, oldVal) => {
 
 // Methods
 function loadMore($state) {
+  if (messages.value.length === 0) {
+    // Data hasn't loaded yet — don't complete or we'll never load more.
+    $state.loaded()
+    return
+  }
+
   if (show.value < messages.value.length) {
-    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
     show.value++
     $state.loaded()
   } else {
