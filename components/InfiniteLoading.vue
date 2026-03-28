@@ -4,9 +4,7 @@
       :key="bump"
       v-observe-visibility="{
         callback: visibilityChanged,
-        options: {
-          rootMargin: '0px 0px ' + distance + 'px 0px',
-        },
+        options: observerOptions,
       }"
       class="infinite-loader"
     >
@@ -17,7 +15,7 @@
   </client-only>
 </template>
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 
 // Derived from https://github.com/oumoussa98/vue3-infinite-loading.  Reworked radically to allow an async event
 // handler, and to make consistent with the rest of this codebase.
@@ -28,6 +26,26 @@ const props = defineProps({
   identifier: { type: [String, Number], required: false, default: null },
   firstload: { type: Boolean, required: false, default: true },
   slots: { type: Object, required: false, default: null },
+  forceUseInfiniteWrapper: { type: String, required: false, default: null },
+})
+
+// When a scroll wrapper is specified, use it as the IntersectionObserver root.
+// This is needed when the infinite loader is inside a nested scroll container
+// (e.g. a chat list with overflow-y: auto) — without this, the observer uses
+// the document viewport and never detects scrolling within the container.
+const observerOptions = computed(() => {
+  const opts = {
+    rootMargin: '0px 0px ' + props.distance + 'px 0px',
+  }
+
+  if (props.forceUseInfiniteWrapper) {
+    const el = document.querySelector(props.forceUseInfiniteWrapper)
+    if (el) {
+      opts.root = el
+    }
+  }
+
+  return opts
 })
 
 const emit = defineEmits(['infinite'])

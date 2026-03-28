@@ -219,16 +219,18 @@ function scanChats(closed, chatList) {
 function loadMore($state) {
   // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
   // we render onscreen the faster vue is to do so.
+  //
+  // Never call $state.complete() here — the chat list can grow asynchronously as
+  // the API returns more data, and complete() permanently stops the observer.
+  // Instead always call loaded() and let the visibility check naturally pause
+  // when the loader scrolls out of view.
   const chatList = filteredChats.value
-  showChats.value++
 
-  if (showChats.value > chatList.length) {
-    showChats.value = chatList.length
-    $state.complete()
-    complete.value = true
-  } else {
-    $state.loaded()
+  if (showChats.value < chatList.length) {
+    showChats.value++
   }
+
+  $state.loaded()
 }
 
 async function markAllRead() {
