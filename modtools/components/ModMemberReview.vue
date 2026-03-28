@@ -36,11 +36,11 @@
           This freegler has role: {{ user.systemrole }}.
         </NoticeMessage>
         <NoticeMessage
-          v-if="user && user.suspectreason"
+          v-if="member && member.reviewreason"
           variant="danger"
           class="mb-2"
         >
-          This freegler is flagged: {{ user.suspectreason }}
+          This freegler is flagged: {{ member.reviewreason }}
         </NoticeMessage>
         <NoticeMessage
           v-if="user && user.activedistance > 50"

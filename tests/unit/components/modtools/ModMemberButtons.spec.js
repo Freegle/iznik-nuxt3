@@ -78,7 +78,7 @@ describe('ModMemberButtons', () => {
     bandate: null,
     memberships: [],
     spammer: null,
-    suspectreason: null,
+    reviewreason: null,
     heldby: null,
     ...overrides,
   })
@@ -258,24 +258,24 @@ describe('ModMemberButtons', () => {
       expect(wrapper.text()).toContain('Mail')
     })
 
-    it('shows spamignore button for approved members with suspectreason', () => {
+    it('shows spamignore button for approved members with reviewreason', () => {
       const wrapper = mountComponent({
         member: createMember({
           memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
-          suspectreason: 'Test reason',
+          reviewreason: 'Test reason',
         }),
         spamignore: true,
       })
       expect(wrapper.text()).toContain('Ignore')
     })
 
-    it('hides spamignore when no suspectreason', () => {
+    it('hides spamignore when no reviewreason', () => {
       const wrapper = mountComponent({
         member: createMember({
           memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
-          suspectreason: null,
+          reviewreason: null,
         }),
         spamignore: true,
       })

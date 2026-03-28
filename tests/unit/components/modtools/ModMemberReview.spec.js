@@ -73,7 +73,7 @@ describe('ModMemberReview', () => {
     profile: { turl: 'https://example.com/profile.jpg' },
     lastaccess: dayjs().subtract(10, 'days').toISOString(),
     systemrole: 'User',
-    suspectreason: null,
+    reviewreason: null,
     activedistance: 10,
     bouncing: false,
     supporter: false,
@@ -252,9 +252,9 @@ describe('ModMemberReview', () => {
       expect(wrapper.text()).not.toContain('role: User')
     })
 
-    it('shows suspectreason when flagged', () => {
+    it('shows reviewreason when flagged', () => {
       const wrapper = mountComponent({
-        user: createUser({ suspectreason: 'Multiple accounts' }),
+        member: createMember({ reviewreason: 'Multiple accounts' }),
       })
       expect(wrapper.text()).toContain('flagged: Multiple accounts')
     })

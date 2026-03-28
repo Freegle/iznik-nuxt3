@@ -62,8 +62,8 @@
           :userid="member.userid"
           :sameip="sameip"
         />
-        <NoticeMessage v-if="user.suspectreason" variant="danger" class="mb-2">
-          This freegler is flagged: {{ user.suspectreason }}
+        <NoticeMessage v-if="member.reviewreason" variant="danger" class="mb-2">
+          This freegler is flagged: {{ member.reviewreason }}
         </NoticeMessage>
         <NoticeMessage
           v-if="user.activedistance > 50"

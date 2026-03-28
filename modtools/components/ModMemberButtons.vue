@@ -109,7 +109,7 @@
         class="me-1"
       />
       <ModMemberButton
-        v-if="spamignore && member.suspectreason"
+        v-if="spamignore && member.reviewreason"
         :userid="member.userid"
         :groupid="member.groupid"
         variant="primary"

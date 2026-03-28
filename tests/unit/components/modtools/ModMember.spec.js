@@ -74,7 +74,7 @@ describe('ModMember', () => {
     spammer: null,
     supporter: false,
     heldby: null,
-    suspectreason: null,
+    reviewreason: null,
     activedistance: 10,
     settings: {
       notifications: {
@@ -465,16 +465,16 @@ describe('ModMember', () => {
   })
 
   describe('suspect reason', () => {
-    it('shows flagged notice when suspectreason set', () => {
+    it('shows flagged notice when reviewreason set', () => {
       const wrapper = mountComponent({
-        member: createMember({ suspectreason: 'Multiple accounts' }),
+        member: createMember({ reviewreason: 'Multiple accounts' }),
       })
       expect(wrapper.text()).toContain('flagged: Multiple accounts')
     })
 
-    it('hides flagged notice when no suspectreason', () => {
+    it('hides flagged notice when no reviewreason', () => {
       const wrapper = mountComponent({
-        member: createMember({ suspectreason: null }),
+        member: createMember({ reviewreason: null }),
       })
       expect(wrapper.text()).not.toContain('flagged:')
     })
