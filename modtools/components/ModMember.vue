@@ -62,7 +62,11 @@
           :userid="member.userid"
           :sameip="sameip"
         />
-        <NoticeMessage v-if="member.reviewreason" variant="danger" class="mb-2">
+        <NoticeMessage
+          v-if="member.reviewreason && member.reviewrequestedat"
+          variant="danger"
+          class="mb-2"
+        >
           This freegler is flagged: {{ member.reviewreason }}
         </NoticeMessage>
         <NoticeMessage

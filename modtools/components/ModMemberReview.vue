@@ -36,7 +36,7 @@
           This freegler has role: {{ user.systemrole }}.
         </NoticeMessage>
         <NoticeMessage
-          v-if="member && member.reviewreason"
+          v-if="member && member.reviewreason && member.reviewrequestedat"
           variant="danger"
           class="mb-2"
         >
