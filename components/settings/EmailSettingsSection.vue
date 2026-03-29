@@ -306,7 +306,7 @@ const changeAllGroups = async (param, value) => {
       userid: me.value.id,
       groupid: group.id,
     }
-    params[param] = value
+    params[param] = parseInt(value)
     await authStore.setGroup(params, true)
   }
   emit('update')
