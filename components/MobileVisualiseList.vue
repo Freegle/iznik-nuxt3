@@ -13,7 +13,7 @@
             :id="item.id"
             :show-freegled="false"
             :show-promised="false"
-            :preload="true"
+            :preload="false"
           />
         </div>
       </div>

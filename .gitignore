@@ -81,3 +81,4 @@ fastlane/test_output
 fastlane/README.md
 fastlane/metadata/android/en-US/changelogs/
 .netlify/
+tests/e2e/test-envs.json

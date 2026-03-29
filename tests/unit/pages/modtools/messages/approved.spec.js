@@ -22,6 +22,7 @@ const mockMessages = ref([])
 const mockVisibleMessages = ref([])
 const mockWork = computed(() => 0)
 const mockNextAfterRemoved = ref(null)
+const mockListingIds = ref(new Set())
 
 vi.mock('~/composables/useModMessages', () => ({
   setupModMessages: () => ({
@@ -42,6 +43,7 @@ vi.mock('~/composables/useModMessages', () => ({
     visibleMessages: mockVisibleMessages,
     work: mockWork,
     nextAfterRemoved: mockNextAfterRemoved,
+    listingIds: mockListingIds,
   }),
 }))
 
@@ -180,6 +182,7 @@ describe('messages/approved/[[id]]/[[term]].vue page', () => {
     mockMemberTerm.value = null
     mockMessageStore.list = {}
     mockMessageStore.context = null
+    mockListingIds.value = new Set()
     mockRouteParams.value = { id: undefined, term: undefined }
     mockRouterPush.mockClear()
   })

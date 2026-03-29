@@ -60,7 +60,7 @@
               <OurMessage
                 :id="m.id"
                 :matchedon="m.matchedon"
-                :preload="ix < 6"
+                :preload="ix < 2"
                 record-view
                 @not-found="messageNotFound(m.id)"
               />
@@ -95,7 +95,7 @@
               <OurMessage
                 :id="m.id"
                 :matchedon="m.matchedon"
-                :preload="ix < 6"
+                :preload="ix < 2"
                 record-view
                 @not-found="messageNotFound(m.id)"
               />
@@ -128,7 +128,7 @@
             <OurMessage
               :id="m.id"
               :matchedon="m.matchedon"
-              :preload="ix < 6"
+              :preload="ix < 2"
               record-view
               @not-found="messageNotFound(m.id)"
             />
