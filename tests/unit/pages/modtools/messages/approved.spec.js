@@ -49,7 +49,7 @@ vi.mock('~/composables/useModMessages', () => ({
 const mockMessageStore = {
   list: {},
   context: null,
-  fetchMessagesMT: vi.fn().mockResolvedValue({}),
+  fetchMessagesMT: vi.fn().mockResolvedValue([]),
   clearContext: vi.fn(),
   clear: vi.fn(),
 }
@@ -189,6 +189,11 @@ describe('messages/approved/[[id]]/[[term]].vue page', () => {
       mockMessages.value = []
       mockBusy.value = false
       const wrapper = mountComponent()
+      await wrapper.vm.$nextTick()
+      // The component gates "Nothing found" behind a `loaded` ref that
+      // becomes true only after loadMore() completes.  Before that it
+      // shows "Please wait...".
+      wrapper.vm.loaded = true
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Nothing found')
     })

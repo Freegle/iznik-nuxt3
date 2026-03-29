@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-between flex-wrap order-0">
+  <div v-if="user" class="d-flex justify-content-between flex-wrap order-0">
     <nuxt-link
       :to="clicklink"
       class="text-success decornone"
@@ -9,7 +9,7 @@
         <ProfileImage
           :image="user.profile?.turl || user.profile?.paththumb"
           :name="user.displayname"
-          class="ms-1 mb-1 inline"
+          class="ms-1 me-1 mb-1 inline"
           is-thumbnail
           size="sm"
         />
@@ -23,7 +23,11 @@
           </span>
           <br class="d-block d-sm-none" />
           <span
-            v-if="!modinfo && user.info.openoffers + user.info.openwanteds > 0"
+            v-if="
+              !modinfo &&
+              user.info &&
+              user.info.openoffers + user.info.openwanteds > 0
+            "
             class="align-middle"
           >
             <span class="d-none d-sm-inline">&bull;</span>
@@ -46,26 +50,22 @@
       <span :class="joinedAge <= 31 ? 'text-danger' : ''"
         >Joined {{ dateshort(membership.added) }}</span
       >
-    </span>
-    <span
-      v-if="modinfo && membership"
-      class="ms-2 text-truncate small email order-3 order-md-1"
-    >
+      <br />
       <!-- eslint-disable-next-line -->
       <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user.id }}
     </span>
     <ModModeration
       v-if="modinfo && membership"
-      :user="user"
+      :userid="userid"
       :membership="membership"
       class="order-2 order-md-3 order-lg-4"
     />
     <ModPostingHistory
       v-if="modinfo"
-      :user="user"
+      :userid="userid"
       class="order-4 order-md-4 order-lg-3 mt-1 mt-md-0"
     />
-    <ModMemberships v-if="modinfo" :user="user" class="order-5" />
+    <ModMemberships v-if="modinfo" :userid="userid" class="order-5" />
   </div>
 </template>
 
@@ -74,10 +74,11 @@ import { computed } from 'vue'
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
 import { useMiscStore } from '~/stores/misc'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
   message: {
@@ -102,24 +103,24 @@ const props = defineProps({
 })
 
 const miscStore = useMiscStore()
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore.byId(props.userid)
+})
 
 const membership = computed(() => {
   let ret = null
 
-  if (
-    props.groupid &&
-    props.message &&
-    props.message.fromuser &&
-    props.message.fromuser.memberof
-  ) {
-    ret = props.message.fromuser.memberof.find((g) => {
-      return g.id === props.groupid
+  if (props.groupid && user.value?.memberships) {
+    ret = user.value.memberships.find((g) => {
+      return g.groupid === props.groupid
     })
 
     if (ret) {
       // Hack around format to match what the component needs.
       ret = JSON.parse(JSON.stringify(ret))
-      ret.userid = props.message.fromuser.id
+      ret.userid = user.value.id
       ret.id = props.groupid
     }
   }
@@ -138,9 +139,9 @@ const joinedAge = computed(() => {
 
 const clicklink = computed(() => {
   if (miscStore.modtools) {
-    return '/members/approved/' + props.groupid + '/' + props.user.id
+    return '/members/approved/' + props.groupid + '/' + props.userid
   } else {
-    return '/profile/' + props.user.id
+    return '/profile/' + props.userid
   }
 })
 
@@ -149,17 +150,17 @@ const milesAwayPlural = computed(() => {
 })
 
 const openOffersPlural = computed(() => {
-  if (props.user?.info?.openoffers) {
+  if (user.value?.info?.openoffers) {
     pluralize.addIrregularRule('open OFFER', 'open OFFERs')
-    return pluralize('open OFFER', props.user.info.openoffers, true)
+    return pluralize('open OFFER', user.value.info.openoffers, true)
   }
   return ''
 })
 
 const openWantedsPlural = computed(() => {
-  if (props.user?.info?.openwanteds) {
+  if (user.value?.info?.openwanteds) {
     pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
-    return pluralize('open WANTED', props.user.info.openwanteds, true)
+    return pluralize('open WANTED', user.value.info.openwanteds, true)
   }
   return ''
 })

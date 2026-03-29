@@ -61,7 +61,7 @@ describe('ModMessageSummary', () => {
           },
           MessageItemLocation: {
             template: '<div class="message-item-location"><slot /></div>',
-            props: ['id', 'matchedon', 'expanded', 'showLocation'],
+            props: ['id', 'expanded', 'showLocation'],
           },
           MessageHistory: {
             template: '<div class="message-history"><slot /></div>',
@@ -69,7 +69,7 @@ describe('ModMessageSummary', () => {
           },
           MessageDescription: {
             template: '<div class="message-description"><slot /></div>',
-            props: ['id', 'matchedon'],
+            props: ['id'],
           },
           MessageAttachments: {
             template: '<div class="message-attachments"><slot /></div>',
@@ -588,11 +588,10 @@ describe('ModMessageSummary', () => {
       expect(wrapper.props('showLocation')).toBe(false)
     })
 
-    it('passes matchedon to MessageItemLocation', () => {
+    it('passes matchedon from message to MessageItemLocation', () => {
       const matchedon = { word: 'test', type: 'subject' }
-      const wrapper = mountComponent({ matchedon })
+      const wrapper = mountComponent({}, createTestMessage({ matchedon }))
       expect(wrapper.find('.message-item-location').exists()).toBe(true)
-      expect(wrapper.props('matchedon')).toEqual(matchedon)
     })
 
     it('passes preload to MessageAttachments', () => {

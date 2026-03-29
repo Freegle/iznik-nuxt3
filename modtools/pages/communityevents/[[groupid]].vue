@@ -4,8 +4,9 @@
       v-for="event in events"
       :key="'eventlist-' + event.id"
       class="p-0 mt-2"
+      style="min-height: 100px"
     >
-      <ModCommunityEvent :event="event" />
+      <ModCommunityEvent :eventid="event.id" />
     </div>
     <NoticeMessage v-if="!Object.keys(events).length && !busy" class="mt-2">
       There are no community events to review at the moment. This will refresh
@@ -60,11 +61,7 @@ onMounted(() => {
 async function loadMore($state) {
   busy.value = true
 
-  await communityEventStore.fetchMT({
-    context: null,
-    limit: 0,
-    pending: true,
-  })
+  await communityEventStore.fetchPending()
   $state.complete()
   busy.value = false
 }

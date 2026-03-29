@@ -9,8 +9,9 @@
     <span v-else-if="warning && supportOrAdmin" class="warning" />
     <span v-else class="fine" />
     <b-modal
+      v-if="showModal"
       id="statusmmodal"
-      ref="modal"
+      v-model="showModal"
       no-stacking
       size="lg"
       :title="'Platform Status: ' + headline"
@@ -51,7 +52,7 @@
         </div>
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide"> Close </b-button>
+        <b-button variant="white" @click="showModal = false"> Close </b-button>
       </template>
     </b-modal>
   </span>
@@ -59,16 +60,15 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useNuxtApp } from '#app'
-import { useOurModal } from '~/composables/useOurModal'
 import { useMe } from '~/composables/useMe'
 
 const { $api } = useNuxtApp()
-const { modal, hide } = useOurModal()
 const { supportOrAdmin } = useMe()
 
 const status = ref(null)
 const updated = ref(null)
 const tried = ref(false)
+const showModal = ref(false)
 let timer = null
 
 const outOfDate = computed(() => {
@@ -122,14 +122,13 @@ async function checkStatus() {
 }
 
 function clicked(e) {
-  modal.value.show()
+  showModal.value = true
   e.preventDefault()
   e.stopPropagation()
 }
 
 onMounted(() => {
   checkStatus()
-  hide()
 })
 
 onBeforeUnmount(() => {

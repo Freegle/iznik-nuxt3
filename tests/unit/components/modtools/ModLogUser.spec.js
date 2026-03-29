@@ -1,6 +1,16 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModLogUser from '~/modtools/components/ModLogUser.vue'
+
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
 
 describe('ModLogUser', () => {
   function mountModLogUser(userOverrides = {}) {
@@ -11,8 +21,14 @@ describe('ModLogUser', () => {
       systemrole: 'User',
       ...userOverrides,
     }
+
+    mockUserStore.byId.mockImplementation((id) => {
+      if (id === defaultUser.id) return defaultUser
+      return null
+    })
+
     return mount(ModLogUser, {
-      props: { user: defaultUser },
+      props: { userid: defaultUser.id },
       global: {
         stubs: {
           'v-icon': {
@@ -28,10 +44,15 @@ describe('ModLogUser', () => {
     })
   }
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+  })
+
   describe('rendering', () => {
-    it('renders nothing when user is null', () => {
+    it('renders fallback when userid is null', () => {
       const wrapper = mount(ModLogUser, {
-        props: { user: null },
+        props: { userid: null },
         global: {
           stubs: {
             'v-icon': {
@@ -45,6 +66,7 @@ describe('ModLogUser', () => {
           },
         },
       })
+      // With null userid, user computed is null, and the v-else-if="userid" is also false
       expect(wrapper.find('span').exists()).toBe(false)
     })
 
@@ -90,6 +112,28 @@ describe('ModLogUser', () => {
     it('hides email section when email is missing', () => {
       const wrapper = mountModLogUser({ email: null })
       expect(wrapper.find('a[href^="mailto:"]').exists()).toBe(false)
+    })
+  })
+
+  describe('userid fallback display', () => {
+    it('shows userid when user not found in store', () => {
+      mockUserStore.byId.mockReturnValue(null)
+      const wrapper = mount(ModLogUser, {
+        props: { userid: 777 },
+        global: {
+          stubs: {
+            'v-icon': {
+              template: '<i :data-icon="icon" :title="title"></i>',
+              props: ['icon', 'title'],
+            },
+            ExternalLink: {
+              template: '<a :href="href"><slot /></a>',
+              props: ['href'],
+            },
+          },
+        },
+      })
+      expect(wrapper.text()).toContain('#777')
     })
   })
 })

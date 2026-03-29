@@ -1,5 +1,5 @@
 <template>
-  <span v-if="loggroup">
+  <span v-if="log && loggroup">
     {{ tag }}
     <a
       :href="'https://www.ilovefreegle.org/explore/' + loggroup.nameshort"
@@ -11,12 +11,12 @@
 <script setup>
 import { computed } from 'vue'
 import { useMe } from '~/composables/useMe'
+import { useLogsStore } from '~/stores/logs'
 
 const props = defineProps({
-  log: {
-    type: Object,
-    required: false,
-    default: null,
+  logid: {
+    type: Number,
+    required: true,
   },
   tag: {
     type: String,
@@ -25,7 +25,10 @@ const props = defineProps({
   },
 })
 
+const logsStore = useLogsStore()
 const { myGroup } = useMe()
+
+const log = computed(() => logsStore.byId(props.logid))
 
 function scanUserForGroup(user) {
   let ret = null
@@ -33,15 +36,15 @@ function scanUserForGroup(user) {
   if (user) {
     if (user.applied) {
       user.applied.forEach((g) => {
-        if (g.id === props.log.groupid) {
+        if (g.groupid === log.value.groupid) {
           ret = g
         }
       })
     }
 
-    if (!ret && user.memberof) {
-      user.memberof.forEach((g) => {
-        if (g.id === props.log.groupid) {
+    if (!ret && user.memberships) {
+      user.memberships.forEach((g) => {
+        if (g.groupid === log.value.groupid) {
           ret = g
         }
       })
@@ -52,27 +55,25 @@ function scanUserForGroup(user) {
 }
 
 const loggroup = computed(() => {
-  if (props.log.group) {
-    return props.log.group
+  if (!log.value) return null
+
+  if (log.value.group) {
+    return log.value.group
   } else if (
-    props.log.message &&
-    props.log.message.groups &&
-    props.log.message.groups.length
+    log.value.message &&
+    log.value.message.groups &&
+    log.value.message.groups.length
   ) {
-    return props.log.message.groups[0]
-  } else if (props.log.groupid) {
-    // We have a groupid.  The group objects are not passed back from the server but we might be able to find it in:
-    // - a user
-    // - a message
-    let ret = scanUserForGroup(props.log.user)
+    return log.value.message.groups[0]
+  } else if (log.value.groupid) {
+    let ret = scanUserForGroup(log.value.user)
 
     if (!ret) {
-      ret = scanUserForGroup(props.log.byuser)
+      ret = scanUserForGroup(log.value.byuser)
     }
 
     if (!ret) {
-      // We might know it - should be one of ours if we're looking at the logs.
-      ret = myGroup(props.log.groupid)
+      ret = myGroup(log.value.groupid)
     }
 
     return ret

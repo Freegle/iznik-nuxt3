@@ -10,7 +10,7 @@
       "
       :disabled="loading"
     />
-    <div v-if="group && group.url">
+    <div v-if="group && group.nameshort">
       <h3 class="mt-2">
         {{ group.nameshort }}
       </h3>
@@ -22,15 +22,15 @@
       >
         {{ group.namedisplay }}
       </h4>
-      <div class="d-flex">
+      <div class="d-flex flex-wrap">
         <OurToggle
           :model-value="Boolean(group.publish)"
           :height="36"
-          :width="150"
+          :width="200"
           :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }"
           disabled
-          class="me-2"
+          class="me-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.ontn)"
@@ -39,25 +39,25 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
           disabled
-          class="me-2"
+          class="me-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onlovejunk)"
           :height="36"
-          :width="150"
+          :width="210"
           :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }"
           disabled
-          class="me-2"
+          class="me-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onmap)"
           :height="36"
-          :width="150"
+          :width="160"
           :font-size="14"
           :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled
-          class="me-2"
+          class="me-2 mb-1"
         />
         <b-form-group>
           <b-form-select
@@ -81,9 +81,9 @@
       >.
       <br />
       <br />
-      <ModClipboard v-if="group.url" class="me-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="groupUrl" class="me-3 mb-1" :value="groupUrl" />
       Explore page:
-      <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
+      <ExternalLink :href="groupUrl">{{ groupUrl }}</ExternalLink>
       <br />
       <ModClipboard
         v-if="group.modsemail"
@@ -192,7 +192,7 @@
       <OurToggle
         :model-value="Boolean(!group.mentored)"
         :height="36"
-        :width="170"
+        :width="210"
         :font-size="14"
         :labels="{ checked: 'Local Volunteers', unchecked: 'Caretakers' }"
         disabled
@@ -264,6 +264,11 @@ const groupid = computed(() => {
 
 const group = computed(() => {
   return modGroupStore.get(groupid.value)
+})
+
+const groupUrl = computed(() => {
+  if (!group.value?.nameshort) return null
+  return 'https://www.ilovefreegle.org/explore/' + group.value.nameshort
 })
 
 const volunteers = computed(() => {
@@ -340,7 +345,7 @@ watch(groupid, async (id) => {
 })
 
 async function loadallgroups(callback) {
-  await modGroupStore.listMT({ grouptype: 'Freegle' })
+  await modGroupStore.listMT({ grouptype: 'Freegle', support: true })
   if (callback) callback()
 }
 

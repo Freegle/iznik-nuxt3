@@ -35,7 +35,7 @@ describe('chats/review.vue page', () => {
           ModHelpChatReview: { template: '<div class="help-stub" />' },
           ModChatReview: {
             template: '<div class="chat-review-stub" />',
-            props: ['id', 'message'],
+            props: ['id', 'messageid'],
             emits: ['reload'],
           },
           SpinButton: {
@@ -137,7 +137,7 @@ describe('chats/review.vue page', () => {
       expect(mockState.loaded).toHaveBeenCalled()
     })
 
-    it('loadMore calls complete when all messages shown', () => {
+    it('loadMore calls loaded (not complete) when messages not loaded yet', () => {
       mockChatStore.messagesById.mockReturnValue([])
       const wrapper = mountComponent()
       const mockState = { loaded: vi.fn(), complete: vi.fn() }
@@ -145,7 +145,10 @@ describe('chats/review.vue page', () => {
       wrapper.vm.show = 0
       wrapper.vm.loadMore(mockState)
 
-      expect(mockState.complete).toHaveBeenCalled()
+      // When messages array is empty, loadMore calls loaded() and returns
+      // early to avoid permanently completing before data arrives.
+      expect(mockState.loaded).toHaveBeenCalled()
+      expect(mockState.complete).not.toHaveBeenCalled()
     })
 
     it('reload clears and loads', async () => {
@@ -224,6 +227,8 @@ describe('chats/review.vue page', () => {
     it('shows notice when no messages', async () => {
       mockChatStore.messagesById.mockReturnValue([])
       const wrapper = mountComponent()
+      // Wait for onMounted clearAndLoad to complete (sets loading=false)
+      await flushPromises()
       wrapper.vm.show = 10
       await wrapper.vm.$nextTick()
 

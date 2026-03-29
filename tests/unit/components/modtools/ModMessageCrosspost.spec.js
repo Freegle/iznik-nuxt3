@@ -2,11 +2,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModMessageCrosspost from '~/modtools/components/ModMessageCrosspost.vue'
 
-// Mock group store
-const mockGroupStore = {
-  get: vi.fn(),
-  fetch: vi.fn(),
-}
+// Mock stores
+const { mockMessageStore, mockGroupStore } = vi.hoisted(() => {
+  const mockMessageStore = {
+    byId: vi.fn(),
+    fetch: vi.fn().mockResolvedValue(),
+  }
+  const mockGroupStore = {
+    get: vi.fn(),
+    fetch: vi.fn().mockResolvedValue({}),
+  }
+  return { mockMessageStore, mockGroupStore }
+})
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
+}))
 
 vi.mock('~/stores/group', () => ({
   useGroupStore: () => mockGroupStore,
@@ -23,10 +34,17 @@ describe('ModMessageCrosspost', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, messageOverrides = {}) {
+    const messageData = createTestMessage(messageOverrides)
+
+    mockMessageStore.byId.mockImplementation((id) => {
+      if (id === messageData.id) return messageData
+      return null
+    })
+
     return mount(ModMessageCrosspost, {
       props: {
-        message: createTestMessage(),
+        messageid: messageData.id,
         ...props,
       },
       global: {
@@ -87,35 +105,33 @@ describe('ModMessageCrosspost', () => {
 
   describe('collection display', () => {
     it('shows collection name when not Approved', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Pending' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'Pending' })
       expect(wrapper.text()).toContain('in')
       expect(wrapper.text()).toContain('Pending')
     })
 
     it('does not show collection when Approved', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Approved' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'Approved' })
       // Check that no dangerSpan contains "Approved" after "in"
       expect(wrapper.text()).not.toMatch(/in\s+Approved/)
     })
 
     it('shows outcome when message is Approved and has outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        {},
+        {
           collection: 'Approved',
           outcome: 'Taken',
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain(', now Taken')
     })
 
     it('shows "still open" when Approved and no outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Approved', outcome: null }),
-      })
+      const wrapper = mountComponent(
+        {},
+        { collection: 'Approved', outcome: null }
+      )
       expect(wrapper.text()).toContain(', still open')
     })
   })
@@ -155,12 +171,25 @@ describe('ModMessageCrosspost', () => {
   })
 
   describe('onMounted', () => {
-    it('fetches group when not in store', () => {
-      mockGroupStore.get.mockReturnValue(null)
-      mountComponent({
-        message: createTestMessage({ groupid: 789 }),
+    it('fetches message when not in store', () => {
+      mockMessageStore.byId.mockReturnValue(null)
+      mount(ModMessageCrosspost, {
+        props: { messageid: 789 },
+        global: {
+          mocks: { timeago: (date) => `${date} ago` },
+          stubs: {
+            'v-icon': {
+              template: '<i :class="icon" />',
+              props: ['icon', 'scale'],
+            },
+            'nuxt-link': {
+              template: '<a :href="to"><slot /></a>',
+              props: ['to'],
+            },
+          },
+        },
       })
-      expect(mockGroupStore.fetch).toHaveBeenCalledWith(789)
+      expect(mockMessageStore.fetch).toHaveBeenCalledWith(789)
     })
 
     it('does not fetch group when already in store', () => {
@@ -190,24 +219,21 @@ describe('ModMessageCrosspost', () => {
 
   describe('edge cases', () => {
     it('handles message without outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: undefined }),
-      })
+      const wrapper = mountComponent({}, { outcome: undefined })
       expect(wrapper.text()).toContain(', still open')
     })
 
     it('handles PendingOther collection', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'PendingOther' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'PendingOther' })
       expect(wrapper.text()).toContain('in')
       expect(wrapper.text()).toContain('PendingOther')
     })
 
     it('handles empty outcome string', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Approved', outcome: '' }),
-      })
+      const wrapper = mountComponent(
+        {},
+        { collection: 'Approved', outcome: '' }
+      )
       // Empty string is falsy, so should show "still open"
       expect(wrapper.text()).toContain(', still open')
     })

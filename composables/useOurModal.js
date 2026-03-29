@@ -1,10 +1,11 @@
-import { ref, onMounted, onUnmounted, useRouter } from '#imports'
+import { ref, onMounted, onUnmounted, nextTick, useRouter } from '#imports'
 
 export function useOurModal() {
   const modal = ref()
   const isShown = ref(false)
 
-  onMounted(() => {
+  onMounted(async () => {
+    await nextTick()
     show()
   })
 
@@ -44,7 +45,10 @@ export function useOurModal() {
     }
   })
 
-  onUnmounted(unregisterNavigationGuard)
+  onUnmounted(() => {
+    isShown.value = false
+    unregisterNavigationGuard()
+  })
 
   return { modal, show, hide }
 }

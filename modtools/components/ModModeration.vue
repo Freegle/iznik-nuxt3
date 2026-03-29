@@ -17,22 +17,18 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 
 const props = defineProps({
   membership: {
     type: Object,
     required: true,
   },
-  user: {
-    type: Object,
-    required: true,
-  },
   userid: {
     type: Number,
-    required: false,
-    default: 0,
+    required: true,
   },
   size: {
     type: String,
@@ -42,16 +38,28 @@ const props = defineProps({
 })
 
 const userStore = useUserStore()
+const memberStore = useMemberStore()
+
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
 
 const postingStatus = computed({
   get() {
-    return props.membership.ourpostingstatus || 'MODERATED'
+    // Go API resolves NULL → 'MODERATED' (V1 parity). Always returns
+    // a non-null string: MODERATED, DEFAULT, or PROHIBITED.
+    return props.membership.ourpostingstatus
   },
   async set(val) {
-    const groupid = props.membership.groupid ?? props.membership.id
-    const userid = props.userid ? props.userid : props.user.id
-    await userStore.edit({
-      id: userid,
+    const groupid = props.membership.groupid
+    await memberStore.updateMembership({
+      userid: props.userid,
       groupid,
       ourPostingStatus: val,
     })
@@ -60,14 +68,11 @@ const postingStatus = computed({
 
 const trustlevel = computed({
   get() {
-    return props.user.trustlevel ? props.user.trustlevel : null
+    return user.value?.trustlevel ?? null
   },
   async set(val) {
-    const groupid = props.membership.groupid ?? props.membership.id
-    const userid = props.userid ? props.userid : props.user.id
     await userStore.edit({
-      id: userid,
-      groupid,
+      id: props.userid,
       trustlevel: val,
     })
   },
@@ -92,6 +97,6 @@ const options = computed(() => {
 </script>
 <style scoped>
 .sel {
-  max-width: 200px;
+  width: auto;
 }
 </style>

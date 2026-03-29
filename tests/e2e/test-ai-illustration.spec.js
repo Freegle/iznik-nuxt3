@@ -122,8 +122,9 @@ test.describe('AI Illustration Tests - Give Flow', () => {
 
     // Type an item name
     const testItemName = 'Sofa'
-    await itemInput.first().type(testItemName, { delay: 100 })
-    console.log(`Typed item name: ${testItemName}`)
+    await itemInput.first().fill('')
+    await itemInput.first().fill(testItemName)
+    console.log(`Filled item name: ${testItemName}`)
 
     // Blur the input to trigger the AI illustration fetch
     await itemInput.first().blur()
@@ -182,14 +183,10 @@ test.describe('AI Illustration Tests - Give Flow', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Clear any existing content first (prevents issues with leftover content
-    // from previous tests or store state), then click to ensure focus
-    await itemInput.first().fill('')
-    await itemInput.first().click()
-
-    // Type an item name with prefix (this should be stripped by the backend)
+    // Set the item name with prefix atomically (type() with delay can lose
+    // characters when Vue watchers or autocomplete fire between keystrokes).
     const testItemName = 'OFFER: Blue Chair'
-    await itemInput.first().type(testItemName, { delay: 100 })
+    await itemInput.first().fill(testItemName)
 
     // Blur to trigger the illustration fetch
     await itemInput.first().blur()
@@ -241,10 +238,12 @@ test.describe('AI Illustration Tests - Find Flow', () => {
     // Take a screenshot before entering the item name
     await takeScreenshot('Find Mobile - Before entering item name')
 
-    // Type an item name
+    // Set the item name atomically (type() with delay can lose characters
+    // when Vue watchers or autocomplete fire between keystrokes).
     const testItemName = 'Desk'
-    await itemInput.first().type(testItemName, { delay: 100 })
-    console.log(`Typed item name: ${testItemName}`)
+    await itemInput.first().fill('')
+    await itemInput.first().fill(testItemName)
+    console.log(`Filled item name: ${testItemName}`)
 
     // Blur the input to trigger the AI illustration fetch
     await itemInput.first().blur()
@@ -310,7 +309,8 @@ test.describe('AI Illustration Tests - Find Flow', () => {
 
     // Type an item name with prefix (this should be stripped by the backend)
     const testItemName = 'WANTED: Red Bicycle'
-    await itemInput.first().type(testItemName, { delay: 100 })
+    await itemInput.first().fill('')
+    await itemInput.first().fill(testItemName)
 
     // Blur to trigger the illustration fetch
     await itemInput.first().blur()
@@ -385,8 +385,9 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
 
       // Type an item name
       const testItemName = 'Bookshelf'
-      await desktopItemInput.first().type(testItemName, { delay: 100 })
-      console.log(`Typed item name: ${testItemName}`)
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().fill(testItemName)
+      console.log(`Filled item name: ${testItemName}`)
 
       // Blur the input to trigger the AI illustration fetch
       await desktopItemInput.first().blur()
@@ -475,7 +476,8 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
 
       // Type an item name with prefix (this should be stripped by the backend)
       const testItemName = 'OFFER: Dining Table'
-      await desktopItemInput.first().type(testItemName, { delay: 100 })
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().fill(testItemName)
 
       // Blur to trigger the illustration fetch
       await desktopItemInput.first().blur()
@@ -555,8 +557,9 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
 
       // Type an item name
       const testItemName = 'Computer Monitor'
-      await desktopItemInput.first().type(testItemName, { delay: 100 })
-      console.log(`Typed item name: ${testItemName}`)
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().fill(testItemName)
+      console.log(`Filled item name: ${testItemName}`)
 
       // Blur the input to trigger the AI illustration fetch
       await desktopItemInput.first().blur()
@@ -645,7 +648,8 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
 
       // Type an item name with prefix (this should be stripped by the backend)
       const testItemName = 'WANTED: Office Chair'
-      await desktopItemInput.first().type(testItemName, { delay: 100 })
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().fill(testItemName)
 
       // Blur to trigger the illustration fetch
       await desktopItemInput.first().blur()

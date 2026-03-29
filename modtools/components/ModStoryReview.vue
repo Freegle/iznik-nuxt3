@@ -1,25 +1,25 @@
 <template>
   <div>
-    <b-card v-if="show" no-body>
+    <b-card v-if="story && show" no-body>
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
-          <span v-if="story.user">
+          <span v-if="storyUser">
             <ProfileImage
-              :image="story.user.profile?.turl || story.user.profile?.paththumb"
-              :name="story.user.displayname || story.user.email"
+              :image="storyUser.profile?.turl || storyUser.profile?.paththumb"
+              :name="storyUser.displayname || primaryEmail"
               class="me-1 ms-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail
               size="sm"
             />
-            <strong>{{ story.user.email }}</strong>
+            <strong>{{ primaryEmail || storyUser.displayname }}</strong>
             <span class="small">
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                story.user.id
+                storyUser.id
               }}
             </span>
           </span>
           <span>
-            member of <strong>{{ story.groupname }}</strong
+            member of <strong>{{ groupName }}</strong
             >, posted {{ timeago(story.date) }}
           </span>
           <span>
@@ -31,9 +31,9 @@
       </b-card-header>
       <b-card-body>
         <!-- eslint-disable-next-line -->
-        <h3>{{ story.headline }}</h3>
+        <h3>{{ twem(story.headline) }}</h3>
         <div class="d-flex fw-bold">
-          {{ story.story }}
+          {{ twem(story.story) }}
           <b-img v-if="story.photo" thumbnail :src="story.photo.paththumb" />
         </div>
         <NoticeMessage v-if="!story.public" variant="info" class="mt-1">
@@ -69,9 +69,9 @@
             </b-button>
           </div>
           <ChatButton
-            v-if="story.user"
-            :userid="story.user.id"
-            :groupid="story.groupid"
+            v-if="storyUser"
+            :userid="storyUser.id"
+            :groupid="firstGroupId"
             title="Chat"
             variant="white"
             class="me-2 mb-1"
@@ -82,13 +82,23 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useGroupStore } from '@/stores/group'
+import { useStoryStore } from '@/stores/stories'
+import { useModMe } from '~/modtools/composables/useModMe'
+import { twem } from '~/composables/useTwem'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const { $api } = useNuxtApp()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const storyStore = useStoryStore()
+const { checkWork } = useModMe()
 
 const props = defineProps({
-  story: {
-    type: Object,
+  storyid: {
+    type: Number,
     required: true,
   },
   newsletter: {
@@ -98,20 +108,58 @@ const props = defineProps({
   },
 })
 
+const story = computed(() => storyStore.byId(props.storyid))
+
 const show = ref(true)
 
+const storyUser = computed(() => {
+  return story.value?.userid ? userStore.byId(story.value.userid) : null
+})
+
+const primaryEmail = usePreferredEmail(storyUser)
+
+const firstGroupId = computed(() => {
+  const u = storyUser.value
+  if (u?.memberships?.length) {
+    return u.memberships[0].groupid
+  }
+  return null
+})
+
+const groupName = computed(() => {
+  const gid = firstGroupId.value
+  if (gid) {
+    const g = groupStore.get(gid)
+    return g?.namedisplay || g?.nameshort || ''
+  }
+  return ''
+})
+
+onMounted(async () => {
+  if (story.value?.userid) {
+    const u = await userStore.fetch(story.value.userid)
+    // Fetch the first group so we can show its name.
+    if (u?.memberships?.length) {
+      await groupStore.fetch(u.memberships[0].groupid)
+    }
+  }
+})
+
 async function useForNewsletter() {
-  await $api.stories.useForNewsletter(props.story.id)
+  await $api.stories.useForNewsletter(story.value.id)
   show.value = false
+  checkWork(true)
 }
 
 async function useForPublicity() {
-  await $api.stories.useForPublicity(props.story.id)
+  await $api.stories.useForPublicity(story.value.id)
   show.value = false
+  checkWork(true)
 }
 
 async function dontUseForPublicity() {
-  await $api.stories.dontUseForPublicity(props.story.id)
+  await $api.stories.dontUseForPublicity(story.value.id)
   show.value = false
+  checkWork(true)
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <span class="border border-info rounded p-1">
+  <span v-if="user" class="border border-info rounded p-1">
     <b-badge
       variant="light"
       class="clickme me-2"
@@ -65,14 +65,14 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :user="user"
+      :userid="userid"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
     <ModLogsModal
       v-if="showLogsModal"
       ref="logs"
-      :userid="user.id"
+      :userid="userid"
       :modmailsonly="modmailsonly"
       @hidden="showLogsModal = false"
     />
@@ -83,13 +83,17 @@ import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
 })
 
 const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore.byId(props.userid)
+})
 
 const history = ref(null)
 const logs = ref(null)
@@ -102,9 +106,9 @@ const showLogsModal = ref(false)
 function countType(typeArg) {
   let count = 0
 
-  if (props.user && props.user.messagehistory) {
-    props.user.messagehistory.forEach((entry) => {
-      if (entry.type === typeArg) {
+  if (user.value?.messagehistory) {
+    user.value.messagehistory.forEach((entry) => {
+      if (entry.type === typeArg && entry.daysago < 31 && !entry.deleted) {
         count++
       }
     })
@@ -122,23 +126,23 @@ const wanteds = computed(() => {
 })
 
 const userinfo = computed(() => {
-  if (props.user.info) {
-    return props.user.info
+  if (user.value?.info) {
+    return user.value.info
   }
 
-  const user = userStore.byId(props.user.id)
+  const storeUser = userStore.byId(props.userid)
 
-  if (user && user.info) {
-    return user.info
+  if (storeUser?.info) {
+    return storeUser.info
   }
 
   return null
 })
 
 onMounted(() => {
-  if (!props.user.info) {
+  if (!user.value?.info) {
     // Fetch with info so that we can display more.
-    userStore.fetch(props.user.id)
+    userStore.fetch(props.userid)
   }
 })
 

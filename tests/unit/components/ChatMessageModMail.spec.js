@@ -68,6 +68,10 @@ vi.mock('~/stores/compose', () => ({
   useComposeStore: () => mockComposeStore,
 }))
 
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => ({ modtools: false }),
+}))
+
 vi.mock('#imports', () => ({
   useRouter: () => ({
     push: mockRouterPush,

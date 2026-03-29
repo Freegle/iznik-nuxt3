@@ -6,7 +6,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -17,6 +17,7 @@ const {
   navigateToMessageViaExplore,
   clickReplyButton,
   fillReplyForm,
+  waitForNuxtHydration,
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Existing User Forced Login', () => {
@@ -40,7 +41,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for existing user forced login reply',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -59,7 +60,10 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       collectText: 'Can collect anytime',
     })
 
-    // Click send - this should trigger the forced login flow
+    // Click send - this should trigger the forced login flow.
+    // Wait for Vue hydration so the click handler is attached.
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
@@ -68,8 +72,8 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       timeout: timeouts.ui.appearance,
     })
     await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
-    // Wait for login modal to appear
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
@@ -114,28 +118,26 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     console.log('[Test] Login modal closed')
 
     // After forced login, the state machine should resume automatically.
-    // But if the page refreshed or state was lost, we might need to click Send again.
-    // Wait for either navigation to /chats/ OR the reply section to still be visible
-    const currentUrl = page.url()
-    if (!currentUrl.includes('/chats/')) {
+    // Wait for navigation to /chats/ — only fall back to clicking Send again
+    // if the state machine genuinely didn't resume (e.g. page refreshed).
+    try {
+      await page.waitForURL(/\/chats\//, {
+        timeout: timeouts.navigation.default,
+      })
+    } catch {
       console.log(
-        '[Test] Not navigated to chats yet, checking if need to click Send again'
+        '[Test] State machine did not auto-resume, clicking Send again'
       )
-
-      // Check if Send button is visible (state machine might need manual trigger)
       const sendButtonAgain = page
         .locator('.btn:has-text("Send your reply")')
         .filter({ visible: true })
       if (await sendButtonAgain.isVisible()) {
-        console.log('[Test] Send button visible, clicking it')
         await sendButtonAgain.click()
+        await page.waitForURL(/\/chats\//, {
+          timeout: timeouts.navigation.default,
+        })
       }
     }
-
-    // Wait for navigation to chats
-    await page.waitForURL(/\/chats\//, {
-      timeout: timeouts.navigation.default,
-    })
 
     // Should navigate to chats after successful login and reply
     expect(page.url()).toContain('/chats/')
@@ -155,6 +157,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     testEmail,
     getTestEmail,
     withdrawPost,
+    testEnv,
   }) => {
     // First create a user by signing up (this will be the "existing" user who will reply)
     const existingEmail = getTestEmail('existing-browse')
@@ -169,7 +172,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for existing user forced login from browse',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -181,7 +184,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     await navigateToMessageViaBrowse(
       page,
       result.id,
-      'FreeglePlayground',
+      testEnv.group.name,
       uniqueItem
     )
     await clickReplyButton(page)
@@ -193,13 +196,19 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       collectText: 'Can collect anytime',
     })
 
-    // Click send
+    // Click send — wait for hydration so event handler is attached
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
+    await sendButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
-    // Wait for login modal
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
@@ -243,25 +252,27 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     })
     console.log('[Test] Login modal closed')
 
-    // After forced login, may need to click Send again
-    const currentUrl = page.url()
-    if (!currentUrl.includes('/chats/')) {
+    // After forced login, the state machine should resume automatically.
+    // Wait for navigation to /chats/ — only fall back to clicking Send again
+    // if the state machine genuinely didn't resume (e.g. page refreshed).
+    try {
+      await page.waitForURL(/\/chats\//, {
+        timeout: timeouts.navigation.default,
+      })
+    } catch {
       console.log(
-        '[Test] Not navigated to chats yet, checking if need to click Send again'
+        '[Test] State machine did not auto-resume, clicking Send again'
       )
       const sendButtonAgain = page
         .locator('.btn:has-text("Send your reply")')
         .filter({ visible: true })
       if (await sendButtonAgain.isVisible()) {
-        console.log('[Test] Send button visible, clicking it')
         await sendButtonAgain.click()
+        await page.waitForURL(/\/chats\//, {
+          timeout: timeouts.navigation.default,
+        })
       }
     }
-
-    // Wait for navigation to chats
-    await page.waitForURL(/\/chats\//, {
-      timeout: timeouts.navigation.default,
-    })
 
     expect(page.url()).toContain('/chats/')
     console.log('[Test] Existing user forced login from browse page successful')
@@ -278,6 +289,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     testEmail,
     getTestEmail,
     withdrawPost,
+    testEnv,
   }) => {
     // First create a user by signing up (this will be the "existing" user who will reply)
     const existingEmail = getTestEmail('existing-explore')
@@ -292,7 +304,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for existing user forced login from explore',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()
@@ -301,7 +313,7 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     await logoutIfLoggedIn(page)
 
     // Navigate via explore page and find our specific message
-    await navigateToMessageViaExplore(page, 'FreeglePlayground', uniqueItem)
+    await navigateToMessageViaExplore(page, testEnv.group.name, uniqueItem)
     await clickReplyButton(page)
 
     // Fill in reply with existing user's email
@@ -311,13 +323,19 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       collectText: 'Can collect anytime',
     })
 
-    // Click send
+    // Click send — wait for hydration so event handler is attached
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
+    await sendButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
-    // Wait for login modal
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
@@ -361,25 +379,27 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     })
     console.log('[Test] Login modal closed')
 
-    // After forced login, may need to click Send again
-    const currentUrl = page.url()
-    if (!currentUrl.includes('/chats/')) {
+    // After forced login, the state machine should resume automatically.
+    // Wait for navigation to /chats/ — only fall back to clicking Send again
+    // if the state machine genuinely didn't resume (e.g. page refreshed).
+    try {
+      await page.waitForURL(/\/chats\//, {
+        timeout: timeouts.navigation.default,
+      })
+    } catch {
       console.log(
-        '[Test] Not navigated to chats yet, checking if need to click Send again'
+        '[Test] State machine did not auto-resume, clicking Send again'
       )
       const sendButtonAgain = page
         .locator('.btn:has-text("Send your reply")')
         .filter({ visible: true })
       if (await sendButtonAgain.isVisible()) {
-        console.log('[Test] Send button visible, clicking it')
         await sendButtonAgain.click()
+        await page.waitForURL(/\/chats\//, {
+          timeout: timeouts.navigation.default,
+        })
       }
     }
-
-    // Wait for navigation to chats
-    await page.waitForURL(/\/chats\//, {
-      timeout: timeouts.navigation.default,
-    })
 
     expect(page.url()).toContain('/chats/')
     console.log(

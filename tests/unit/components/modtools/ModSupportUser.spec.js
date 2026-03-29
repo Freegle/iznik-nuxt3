@@ -3,6 +3,23 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ModSupportUser from '~/modtools/components/ModSupportUser.vue'
 
+// Mock the API module used by ModSupportUser for separate support data fetches.
+const mockApiFns = {
+  fetchChatrooms: vi.fn().mockResolvedValue([]),
+  fetchEmailHistory: vi.fn().mockResolvedValue([]),
+  fetchBans: vi.fn().mockResolvedValue([]),
+  fetchNewsfeed: vi.fn().mockResolvedValue([]),
+  fetchApplied: vi.fn().mockResolvedValue([]),
+  fetchMembershipHistory: vi.fn().mockResolvedValue([]),
+  fetchLogins: vi.fn().mockResolvedValue([]),
+}
+
+vi.mock('~/api', () => ({
+  default: () => ({
+    user: mockApiFns,
+  }),
+}))
+
 // Mock the user store
 const mockFetchMT = vi.fn()
 const mockFetch = vi.fn()
@@ -19,6 +36,7 @@ vi.mock('~/stores/user', () => ({
     edit: mockEdit,
     purge: mockPurge,
     addEmail: mockAddEmail,
+    config: {},
   }),
 }))
 
@@ -53,7 +71,7 @@ describe('ModSupportUser', () => {
     systemrole: 'User',
     bouncing: false,
     spammer: null,
-    memberof: [],
+    memberships: [],
     emails: [{ id: 1, email: 'test@example.com', preferred: true }],
     applied: [],
     membershiphistory: [],
@@ -135,34 +153,34 @@ describe('ModSupportUser', () => {
           },
           ModBouncing: {
             template: '<div class="mod-bouncing" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModMergeButton: {
             template: '<button class="merge-button" />',
           },
           ModDeletedOrForgotten: {
             template: '<div class="deleted-or-forgotten" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModMemberLogins: {
             template: '<div class="member-logins" />',
-            props: ['member'],
+            props: ['userid'],
           },
           ModMemberSummary: {
             template: '<div class="member-summary" />',
-            props: ['member'],
+            props: ['userid'],
           },
           ModSupportMembership: {
             template: '<div class="support-membership" />',
-            props: ['membership', 'userid'],
+            props: ['membershipid', 'userid'],
           },
           ModSupportChatList: {
             template: '<div class="chat-list" />',
@@ -185,12 +203,12 @@ describe('ModSupportUser', () => {
           },
           ModSpammerReport: {
             template: '<div class="spammer-report" />',
-            props: ['user'],
+            props: ['userid'],
             methods: { show: vi.fn() },
           },
           ModCommentAddModal: {
             template: '<div class="comment-add-modal" />',
-            props: ['user'],
+            props: ['userid'],
           },
           SpinButton: {
             template:
@@ -216,6 +234,17 @@ describe('ModSupportUser', () => {
     mockEdit.mockResolvedValue()
     mockPurge.mockResolvedValue()
     mockAddEmail.mockResolvedValue()
+
+    // Re-establish default API mock implementations cleared by clearAllMocks.
+    // Without these, the mocks return undefined and .then() chains in
+    // fetchUser() throw TypeError.
+    mockApiFns.fetchChatrooms.mockResolvedValue([])
+    mockApiFns.fetchEmailHistory.mockResolvedValue([])
+    mockApiFns.fetchBans.mockResolvedValue([])
+    mockApiFns.fetchNewsfeed.mockResolvedValue([])
+    mockApiFns.fetchApplied.mockResolvedValue([])
+    mockApiFns.fetchMembershipHistory.mockResolvedValue([])
+    mockApiFns.fetchLogins.mockResolvedValue([])
   })
 
   describe('rendering', () => {
@@ -289,8 +318,18 @@ describe('ModSupportUser', () => {
         {
           email: null,
           emails: [
-            { id: 1, email: 'other@test.com', preferred: false },
-            { id: 2, email: 'preferred@test.com', preferred: true },
+            {
+              id: 1,
+              email: 'other@test.com',
+              preferred: false,
+              added: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 2,
+              email: 'preferred@test.com',
+              preferred: true,
+              added: '2024-01-02T00:00:00Z',
+            },
           ],
         }
       )
@@ -303,20 +342,22 @@ describe('ModSupportUser', () => {
         {
           email: null,
           emails: [
-            { id: 1, email: 'first@test.com', preferred: false },
-            { id: 2, email: 'second@test.com', preferred: false },
+            {
+              id: 1,
+              email: 'first@test.com',
+              preferred: false,
+              added: '2024-01-01T00:00:00Z',
+            },
+            {
+              id: 2,
+              email: 'second@test.com',
+              preferred: false,
+              added: '2024-01-02T00:00:00Z',
+            },
           ],
         }
       )
       expect(wrapper.vm.preferredemail).toBe('first@test.com')
-    })
-
-    it('reportUser returns correct format', async () => {
-      const wrapper = await mountComponent()
-      expect(wrapper.vm.reportUser).toEqual({
-        userid: 123,
-        displayname: 'Test User',
-      })
     })
 
     it('admin returns true when systemrole is Admin', async () => {
@@ -333,7 +374,7 @@ describe('ModSupportUser', () => {
       const wrapper = await mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             { id: 1, nameshort: 'ZGroup', type: 'Freegle' },
             { id: 2, nameshort: 'AGroup', type: 'Freegle' },
             { id: 3, nameshort: 'Other', type: 'Other' },
@@ -352,9 +393,18 @@ describe('ModSupportUser', () => {
         {
           email: 'primary@test.com',
           emails: [
-            { id: 1, email: 'primary@test.com' },
-            { id: 2, email: 'other@test.com' },
-            { id: 3, email: 'freegle@users.ilovefreegle.org', ourdomain: true },
+            {
+              id: 1,
+              email: 'primary@test.com',
+              added: '2024-01-01T00:00:00Z',
+            },
+            { id: 2, email: 'other@test.com', added: '2024-01-02T00:00:00Z' },
+            {
+              id: 3,
+              email: 'freegle@users.ilovefreegle.org',
+              ourdomain: true,
+              added: '2024-01-03T00:00:00Z',
+            },
           ],
         }
       )
@@ -363,16 +413,13 @@ describe('ModSupportUser', () => {
     })
 
     it('chatsFiltered excludes Mod2Mod and sorts by date', async () => {
-      const wrapper = await mountComponent(
-        {},
-        {
-          chatrooms: [
-            { id: 1, chattype: 'Mod2Mod', lastdate: '2024-01-01' },
-            { id: 2, chattype: 'User2User', lastdate: '2024-01-15' },
-            { id: 3, chattype: 'User2Mod', lastdate: '2024-01-10' },
-          ],
-        }
-      )
+      mockApiFns.fetchChatrooms.mockResolvedValueOnce([
+        { id: 1, chattype: 'Mod2Mod', lastdate: '2024-01-01' },
+        { id: 2, chattype: 'User2User', lastdate: '2024-01-15' },
+        { id: 3, chattype: 'User2Mod', lastdate: '2024-01-10' },
+      ])
+      const wrapper = await mountComponent()
+      await flushPromises()
       const chats = wrapper.vm.chatsFiltered
       expect(chats).toHaveLength(2)
       expect(chats[0].id).toBe(2) // Most recent first
@@ -605,18 +652,15 @@ describe('ModSupportUser', () => {
 
   describe('bans display', () => {
     it('shows bans when present', async () => {
-      const wrapper = await mountComponent(
-        { expand: true },
+      mockApiFns.fetchBans.mockResolvedValueOnce([
         {
-          bans: [
-            {
-              group: 'TestGroup',
-              byemail: 'mod@test.com',
-              date: new Date().toISOString(),
-            },
-          ],
-        }
-      )
+          group: 'TestGroup',
+          byemail: 'mod@test.com',
+          date: new Date().toISOString(),
+        },
+      ])
+      const wrapper = await mountComponent({ expand: true })
+      await flushPromises()
       expect(wrapper.text()).toContain('Banned on')
       expect(wrapper.text()).toContain('TestGroup')
     })

@@ -10,9 +10,12 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (
     to.path === '/login' ||
     to.path === '/forgot' ||
-    to.path === '/discourse'
+    to.path === '/discourse' ||
+    to.query?.noguard
   ) {
-    // Accessing login, forgot and discourse pages always OK
+    // Accessing login, forgot and discourse pages always OK.
+    // noguard is set by login.vue after successful auth — fetchUser may
+    // still be in flight so authStore.user is not yet populated.
     return
   }
   const me = authStore.user

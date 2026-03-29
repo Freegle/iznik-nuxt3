@@ -194,15 +194,15 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     if (pov) {
       if (chat.value?.chattype === 'User2User') {
         // Messages from user1 appear on left when pov is user1, on right otherwise
-        if (pov === chat.value?.user1id) {
-          return chatmessage.value?.userid === chat.value?.user1id
+        if (pov === chat.value?.user1) {
+          return chatmessage.value?.userid === chat.value?.user1
         } else {
-          return chatmessage.value?.userid !== chat.value?.user1id
+          return chatmessage.value?.userid !== chat.value?.user1
         }
       } else if (chat.value?.chattype === 'User2Mod') {
         // For User2Mod chats in ModTools context, messages from user1 (the member)
         // appear on left, messages from any moderator appear on right
-        return chat.value?.user1id !== chatmessage.value?.userid
+        return chat.value?.user1 !== chatmessage.value?.userid
       }
     }
 
@@ -229,10 +229,10 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   const me = computed(() => {
     if (!pov) {
       return realMe.value
-    } else if (chat.value?.user1 && chat.value.user1.id === pov) {
-      return chat.value.user1
-    } else if (chat.value?.user2 && chat.value.user2.id === pov) {
-      return chat.value.user2
+    } else if (chat.value?.user1 === pov) {
+      return userStore.byId(pov)
+    } else if (chat.value?.user2 === pov) {
+      return userStore.byId(pov)
     } else {
       return realMe.value
     }
@@ -245,14 +245,16 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
   // otheruser needs to be pov-aware for User2User chats viewed by moderators
   const otheruserComputed = computed(() => {
-    // For User2User chats with pov, determine the "other" user relative to pov
+    // For User2User chats with pov, determine the "other" user relative to pov.
+    // V2 API returns user1/user2 as numeric IDs; V1 returned nested objects.
     if (pov && chat.value?.chattype === 'User2User') {
-      if (pov === chat.value?.user1id || pov === chat.value?.user1?.id) {
-        // pov is user1, so other user is user2
-        return chat.value?.user2 || userStore.byId(chat.value?.user2id)
+      const u1id = chat.value?.user1
+      const u2id = chat.value?.user2
+
+      if (pov === u1id) {
+        return u2id ? userStore.byId(u2id) : null
       } else {
-        // pov is user2, so other user is user1
-        return chat.value?.user1 || userStore.byId(chat.value?.user1id)
+        return u1id ? userStore.byId(u1id) : null
       }
     }
     // Default: use the shared otheruser

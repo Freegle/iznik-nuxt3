@@ -13,6 +13,7 @@ const mockUserStore = {
   list: {},
   clear: vi.fn(),
   fetchMT: vi.fn().mockResolvedValue({}),
+  searchUsers: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -31,6 +32,8 @@ describe('ModSupportAIAssistant', () => {
     mockUserStore.list = {}
     mockUserStore.clear.mockClear()
     mockUserStore.fetchMT.mockClear()
+    mockUserStore.searchUsers.mockClear()
+    mockUserStore.searchUsers.mockResolvedValue([])
 
     // Default fetch mock - sanitizer available
     mockFetch.mockResolvedValue({
@@ -179,10 +182,13 @@ describe('ModSupportAIAssistant', () => {
       wrapper.vm.userSearch = 'test@example.com'
       await nextTick()
 
-      // Mock the fetchMT to return users
-      mockUserStore.list = {
-        1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
-      }
+      // Mock searchUsers to populate the store list
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
+        }
+        return [{ id: 1, email: 'test@example.com', displayname: 'Test User' }]
+      })
 
       // Find and click search button
       const buttons = wrapper.findAll('button')
@@ -191,10 +197,7 @@ describe('ModSupportAIAssistant', () => {
       await flushPromises()
 
       expect(mockUserStore.clear).toHaveBeenCalled()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        search: 'test@example.com',
-        emailhistory: true,
-      })
+      expect(mockUserStore.searchUsers).toHaveBeenCalledWith('test@example.com')
     })
 
     it('does not search when search term is empty', async () => {
@@ -203,7 +206,7 @@ describe('ModSupportAIAssistant', () => {
       wrapper.vm.userSearch = ''
       await wrapper.vm.searchUsers()
 
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.searchUsers).not.toHaveBeenCalled()
     })
 
     it('displays search results', async () => {
@@ -243,9 +246,12 @@ describe('ModSupportAIAssistant', () => {
       const wrapper = mountComponent()
 
       wrapper.vm.userSearch = 'test'
-      mockUserStore.list = {
-        1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
-      }
+      mockUserStore.searchUsers.mockImplementation(() => {
+        mockUserStore.list = {
+          1: { id: 1, email: 'test@example.com', displayname: 'Test User' },
+        }
+        return [{ id: 1, email: 'test@example.com', displayname: 'Test User' }]
+      })
 
       await wrapper.vm.searchUsers()
       await flushPromises()
@@ -529,32 +535,6 @@ describe('ModSupportAIAssistant', () => {
 
       expect(wrapper.vm.isProcessing).toBe(false)
     })
-
-    it('formatStreamLabels formats stream object correctly', () => {
-      const wrapper = mountComponent()
-      const stream = { app: 'myapp', level: 'info' }
-      const result = wrapper.vm.formatStreamLabels(stream)
-      expect(result).toContain('app="myapp"')
-      expect(result).toContain('level="info"')
-    })
-
-    it('formatStreamLabels returns empty string for null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.formatStreamLabels(null)).toBe('')
-    })
-
-    it('formatLogTimestamp converts nanoseconds to time', () => {
-      const wrapper = mountComponent()
-      // Timestamp in nanoseconds
-      const ts = '1704067200000000000' // 2024-01-01 00:00:00 UTC in ns
-      const result = wrapper.vm.formatLogTimestamp(ts)
-      expect(result).toBeTruthy()
-    })
-
-    it('formatLogTimestamp returns empty for null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.formatLogTimestamp(null)).toBe('')
-    })
   })
 
   describe('debug mode', () => {
@@ -625,193 +605,6 @@ describe('ModSupportAIAssistant', () => {
       expect(wrapper.vm.pendingPrivacyReview).toBeNull()
       expect(wrapper.vm.showPrivacyReview).toBe(false)
       expect(wrapper.vm.query).toBe('')
-    })
-  })
-
-  describe('PII warning', () => {
-    it('confirmPiiQuery clears pending query and modal', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingQuery = 'test query'
-      wrapper.vm.showPiiWarning = true
-
-      // Mock executeQuery to prevent actual execution
-      wrapper.vm.executeQuery = vi.fn()
-
-      wrapper.vm.confirmPiiQuery()
-      await nextTick()
-
-      expect(wrapper.vm.pendingQuery).toBeNull()
-      expect(wrapper.vm.showPiiWarning).toBe(false)
-    })
-
-    it('cancelPiiQuery clears state without executing', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingQuery = 'test query'
-      wrapper.vm.showPiiWarning = true
-
-      wrapper.vm.cancelPiiQuery()
-      await nextTick()
-
-      expect(wrapper.vm.pendingQuery).toBeNull()
-      expect(wrapper.vm.showPiiWarning).toBe(false)
-    })
-  })
-
-  describe('MCP polling', () => {
-    it('startMcpPolling sets interval', () => {
-      const wrapper = mountComponent()
-
-      expect(wrapper.vm.mcpPollInterval).toBeNull()
-      wrapper.vm.startMcpPolling()
-
-      expect(wrapper.vm.mcpPollInterval).not.toBeNull()
-
-      // Clean up
-      wrapper.vm.stopMcpPolling()
-    })
-
-    it('stopMcpPolling clears interval', () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.startMcpPolling()
-      expect(wrapper.vm.mcpPollInterval).not.toBeNull()
-
-      wrapper.vm.stopMcpPolling()
-      expect(wrapper.vm.mcpPollInterval).toBeNull()
-    })
-
-    it('startMcpPolling does nothing if already polling', () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.startMcpPolling()
-      const firstInterval = wrapper.vm.mcpPollInterval
-
-      wrapper.vm.startMcpPolling()
-      expect(wrapper.vm.mcpPollInterval).toBe(firstInterval)
-
-      wrapper.vm.stopMcpPolling()
-    })
-  })
-
-  describe('MCP query approval', () => {
-    it('approveMcpQuery clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingMcpQuery = { id: 'test-123', query: 'test' }
-      wrapper.vm.showMcpQueryApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.approveMcpQuery()
-
-      expect(wrapper.vm.pendingMcpQuery).toBeNull()
-      expect(wrapper.vm.showMcpQueryApproval).toBe(false)
-    })
-
-    it('rejectMcpQuery clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingMcpQuery = { id: 'test-123', query: 'test' }
-      wrapper.vm.showMcpQueryApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.rejectMcpQuery()
-
-      expect(wrapper.vm.pendingMcpQuery).toBeNull()
-      expect(wrapper.vm.showMcpQueryApproval).toBe(false)
-    })
-  })
-
-  describe('MCP results approval', () => {
-    it('approveMcpResults clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingMcpResults = { id: 'test-123', resultCount: 5 }
-      wrapper.vm.showMcpResultsApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.approveMcpResults()
-
-      expect(wrapper.vm.pendingMcpResults).toBeNull()
-      expect(wrapper.vm.showMcpResultsApproval).toBe(false)
-    })
-
-    it('rejectMcpResults clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingMcpResults = { id: 'test-123', resultCount: 5 }
-      wrapper.vm.showMcpResultsApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.rejectMcpResults()
-
-      expect(wrapper.vm.pendingMcpResults).toBeNull()
-      expect(wrapper.vm.showMcpResultsApproval).toBe(false)
-    })
-  })
-
-  describe('DB query approval', () => {
-    it('approveDbQuery clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingDbQuery = { id: 'test-123', query: 'SELECT *' }
-      wrapper.vm.showDbQueryApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.approveDbQuery()
-
-      expect(wrapper.vm.pendingDbQuery).toBeNull()
-      expect(wrapper.vm.showDbQueryApproval).toBe(false)
-    })
-
-    it('rejectDbQuery clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingDbQuery = { id: 'test-123', query: 'SELECT *' }
-      wrapper.vm.showDbQueryApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.rejectDbQuery()
-
-      expect(wrapper.vm.pendingDbQuery).toBeNull()
-      expect(wrapper.vm.showDbQueryApproval).toBe(false)
-    })
-  })
-
-  describe('DB results approval', () => {
-    it('approveDbResults clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingDbResults = { id: 'test-123', rowCount: 10 }
-      wrapper.vm.showDbResultsApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.approveDbResults()
-
-      expect(wrapper.vm.pendingDbResults).toBeNull()
-      expect(wrapper.vm.showDbResultsApproval).toBe(false)
-    })
-
-    it('rejectDbResults clears pending state', async () => {
-      const wrapper = mountComponent()
-
-      wrapper.vm.pendingDbResults = { id: 'test-123', rowCount: 10 }
-      wrapper.vm.showDbResultsApproval = true
-
-      mockFetch.mockResolvedValueOnce({ ok: true })
-
-      await wrapper.vm.rejectDbResults()
-
-      expect(wrapper.vm.pendingDbResults).toBeNull()
-      expect(wrapper.vm.showDbResultsApproval).toBe(false)
     })
   })
 

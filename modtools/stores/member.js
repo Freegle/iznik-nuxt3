@@ -34,6 +34,24 @@ export const useMemberStore = defineStore({
         }
       })
     },
+    async approve(params) {
+      await api(this.config).memberships.approveMember(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    },
+    async reject(params) {
+      await api(this.config).memberships.rejectMember(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    },
     async reply(params) {
       await api(this.config).memberships.reply(
         params.id,
@@ -71,12 +89,9 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
 
-      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
+      // V2 API expects context as a simple ID value
       if (params.context && typeof params.context === 'object') {
-        for (const key of Object.keys(params.context)) {
-          params[`context[${key}]`] = params.context[key]
-        }
-        delete params.context
+        params.context = params.context.id
       }
 
       const { members, context, ratings } = await api(
@@ -87,15 +102,48 @@ export const useMemberStore = defineStore({
 
       if (this.instance === instance) {
         for (let i = 0; i < members.length; i++) {
-          // The server doesn't return the collection but this is useful to have in the store.
-          members[i].collection = params.collection
+          // Ensure collection and groupid are set from params as fallback.
+          if (!members[i].collection) members[i].collection = params.collection
+          if (!members[i].groupid) members[i].groupid = params.groupid
         }
         received += members.length
-        members.forEach((member) => {
-          // console.log('member',member.displayname,member.id)
-          member.rawindex = this.rawindex++
-          this.list[member.id] = member
-        })
+
+        if (params.collection === 'Spam') {
+          // V2 API returns one row per membership. V1 grouped by userid and
+          // nested all memberships under one entry.  Replicate that here so
+          // the review page shows one card per user.
+          const byUser = {}
+          members.forEach((member) => {
+            const uid = member.userid
+            if (!byUser[uid]) {
+              byUser[uid] = {
+                ...member,
+                memberships: [],
+              }
+            }
+            byUser[uid].memberships.push({
+              id: member.id,
+              membershipid: member.id,
+              groupid: member.groupid,
+              added: member.added,
+              collection: member.collection,
+              role: member.role,
+              heldby: member.heldby,
+              reviewrequestedat: member.reviewrequestedat,
+              reviewedat: member.reviewedat,
+              reviewreason: member.reviewreason,
+            })
+          })
+          Object.values(byUser).forEach((member) => {
+            member.rawindex = this.rawindex++
+            this.list[member.id] = member
+          })
+        } else {
+          members.forEach((member) => {
+            member.rawindex = this.rawindex++
+            this.list[member.id] = member
+          })
+        }
 
         if (ratings && ratings.length) {
           this.ratings = ratings
@@ -118,12 +166,30 @@ export const useMemberStore = defineStore({
     },
 
     async spamignore(params) {
-      await api(this.config).user.save({
-        id: params.userid,
-        groupid: params.groupid,
-        suspectcount: 0,
-        suspectreason: null,
-      })
+      await api(this.config).memberships.reviewIgnore(
+        params.userid,
+        params.groupid
+      )
+
+      // Remove just the acted-on membership from the member's memberships
+      // array, not the whole entry. If the member is in review on multiple
+      // groups, the mod needs to act on each one (#324).
+      const key = Object.keys(this.list).find(
+        (k) => parseInt(this.list[k].userid) === parseInt(params.userid)
+      )
+      if (key && this.list[key].memberships) {
+        this.list[key].memberships = this.list[key].memberships.filter(
+          (m) => parseInt(m.groupid) !== parseInt(params.groupid)
+        )
+        // Remove the whole entry only when no memberships remain.
+        if (this.list[key].memberships.length === 0) {
+          delete this.list[key]
+        }
+      }
+    },
+
+    async updateMembership(params) {
+      await api(this.config).memberships.save(params)
     },
 
     async remove(userid, groupid, membershipid) {
@@ -167,13 +233,13 @@ export const useMemberStore = defineStore({
       await api(this.config).memberships.happinessReviewed({
         userid: params.userid,
         groupid: params.groupid,
-        happinessid: params.happinessid,
+        happiness: String(params.happinessid),
         action: 'HappinessReviewed',
       })
     },
     async reviewHold(params) {
       await api(this.config).memberships.reviewHold(
-        params.membershipid,
+        params.userid,
         params.groupid
       )
       const authStore = useAuthStore()
@@ -188,7 +254,7 @@ export const useMemberStore = defineStore({
 
     async reviewRelease(params) {
       await api(this.config).memberships.reviewRelease(
-        params.membershipid,
+        params.userid,
         params.groupid
       )
       this.reviewHeld({
@@ -222,6 +288,8 @@ export const useMemberStore = defineStore({
       if (ret) return ret[0]
       return ret
     },
-    // getRatings: state => state.ratings
+    ratingById: (state) => (id) => {
+      return state.ratings.find((r) => parseInt(r.id) === parseInt(id))
+    },
   },
 })

@@ -240,6 +240,7 @@ import dayjs from 'dayjs'
 
 import { storeToRefs } from 'pinia'
 import { buildHead } from '~/composables/useBuildHead'
+import { useMe } from '~/composables/useMe'
 import { useAuthStore } from '~/stores/auth'
 import { ref, useRoute, useRouter } from '#imports'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -276,6 +277,7 @@ const showMobileNavbar = computed(() => {
   return bp === 'xs' || bp === 'sm'
 })
 
+const { me } = useMe()
 const loggedIn = computed(() => authStore.user !== null)
 
 definePageMeta({
@@ -306,8 +308,9 @@ if (route.query.search) {
   search.value = route.query.search
 }
 
-if (myid) {
-  // Fetch the list of chats.
+if (myid && process.client) {
+  // Fetch the list of chats. Only on client — SSR has no auth token
+  // and the template uses <client-only> anyway.
   await chatStore.fetchChats(search.value, true, id)
 
   // Is this chat in the list?
@@ -343,6 +346,7 @@ const searching = ref(false)
 const searchlast = ref(null)
 const complete = ref(false)
 const bump = ref(1)
+let searchGeneration = 0
 const distance = ref(1000)
 const selectedChatId = ref(null)
 
@@ -421,10 +425,16 @@ watch(search, (newVal, oldVal) => {
 
   if (!newVal) {
     // Force a refresh to remove any old chats.
+    searchGeneration++
     chatStore.fetchChats()
   } else if (newVal.length > 2) {
     // Force a server search to pick up old chats or more subtle matches.
     searchMore()
+  } else {
+    // Short search term — refetch without server search to restore the
+    // normal list (prevents stale search results from staying in the store).
+    searchGeneration++
+    chatStore.fetchChats()
   }
 })
 
@@ -466,11 +476,17 @@ function scanChats(closed, chats) {
   if (chats && search.value) {
     const l = search.value.toLowerCase()
     chats = chats.filter((chat) => {
+      // The API flags chats found via message content search with search=true.
+      // Include those even if the snippet (latest message) doesn't contain
+      // the search term — the match is in an older message.
+      if (chat.search) {
+        return true
+      }
+
       if (
         chat.name.toLowerCase().includes(l) ||
         (chat.snippet && chat.snippet.toLowerCase().includes(l))
       ) {
-        // Found in the name of the chat (which may include a user
         return true
       }
 
@@ -558,20 +574,29 @@ async function searchMore() {
     searchlast.value = search.value
   } else {
     searching.value = search.value
+    const gen = ++searchGeneration
 
     await chatStore.fetchChats(search.value)
 
-    showChats.value = minShowChats.value
-    bump.value++
+    // Only apply results if this is still the latest search.
+    // Prevents stale responses from overwriting newer results.
+    if (gen === searchGeneration) {
+      showChats.value = minShowChats.value
+      bump.value++
+    }
 
     while (searchlast.value) {
       // We have another search queued.
       const val2 = searchlast.value
       searching.value = searchlast.value
       searchlast.value = null
+      const gen2 = ++searchGeneration
       await chatStore.fetchChats(val2)
-      showChats.value = minShowChats.value
-      bump.value++
+
+      if (gen2 === searchGeneration) {
+        showChats.value = minShowChats.value
+        bump.value++
+      }
     }
 
     searching.value = null

@@ -19,6 +19,12 @@
           Please choose a community.
         </NoticeMessage>
       </div>
+      <div v-else-if="!topUsers.length" class="mt-2">
+        <NoticeMessage variant="info">
+          No micro-volunteering activity found for this community in the last 90
+          days.
+        </NoticeMessage>
+      </div>
       <div v-else class="mt-2">
         <h2>Top Micro-volunteers</h2>
         <b-table-simple class="bg-white">
@@ -33,43 +39,43 @@
             </b-tr>
           </b-thead>
           <b-tbody>
-            <b-tr v-for="user in topUsers" :key="user.userid">
+            <b-tr v-for="entry in topUsers" :key="entry.userid">
               <b-td>
                 <nuxt-link
-                  :to="'/members/approved/' + groupid + '/' + user.userid"
+                  :to="'/members/approved/' + groupid + '/' + entry.userid"
                 >
-                  <v-icon icon="hashtag" scale="0.8" />{{ user.userid }}
+                  <v-icon icon="hashtag" scale="0.8" />{{ entry.userid }}
                 </nuxt-link>
               </b-td>
               <b-td>
-                {{ userActivity[user.userid][0].user.displayname }}
+                {{ userStore.byId(entry.userid)?.displayname || '...' }}
               </b-td>
               <b-td>
-                {{ userActivity[user.userid][0].user.trustlevel }}
+                {{ userStore.byId(entry.userid)?.trustlevel || '' }}
               </b-td>
               <b-td>
-                <div v-if="accuracyTotal(userActivity[user.userid]) === 0">
+                <div v-if="accuracyTotal(userActivity[entry.userid]) === 0">
                   <span class="small text-muted"> No data </span>
                 </div>
                 <div v-else>
-                  {{ accuracyPercentage(userActivity[user.userid]) }}%
+                  {{ accuracyPercentage(userActivity[entry.userid]) }}%
                   <span class="small text-muted">
-                    from {{ accuracyTotal(userActivity[user.userid]) }}
+                    from {{ accuracyTotal(userActivity[entry.userid]) }}
                   </span>
                 </div>
               </b-td>
               <b-td>
                 <GChart
                   type="AreaChart"
-                  :data="activityData(userActivity[user.userid])"
+                  :data="activityData(userActivity[entry.userid])"
                   :options="activityOptions"
                   style="width: 300px; height: 100px"
                 />
               </b-td>
               <b-td>
                 <ModMicrovolunteeringDetailsButton
-                  :user="userActivity[user.userid][0].user"
-                  :items="userActivity[user.userid]"
+                  :userid="entry.userid"
+                  :items="userActivity[entry.userid]"
                 />
               </b-td>
             </b-tr>
@@ -85,11 +91,13 @@ import { ref, computed, watch, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
+import { useUserStore } from '~/stores/user'
 
 // Stores
 const microVolunteeringStore = useMicroVolunteeringStore()
+const userStore = useUserStore()
 
-// Local state (formerly data())
+// Local state
 const groupid = ref(0)
 const busy = ref(true)
 
@@ -120,11 +128,11 @@ const userCounts = computed(() => {
   const ret = {}
 
   items.value.forEach((i) => {
-    if (i.user) {
-      if (ret[i.user.id]) {
-        ret[i.user.id]++
+    if (i.userid) {
+      if (ret[i.userid]) {
+        ret[i.userid]++
       } else {
-        ret[i.user.id] = 1
+        ret[i.userid] = 1
       }
     }
   })
@@ -134,7 +142,7 @@ const userCounts = computed(() => {
   for (const r in ret) {
     if (ret[r]) {
       ret2.push({
-        userid: r,
+        userid: parseInt(r),
         count: ret[r],
       })
     }
@@ -155,11 +163,11 @@ const userActivity = computed(() => {
   const ret = {}
 
   items.value.forEach((i) => {
-    if (i.user) {
-      if (ret[i.user.id]) {
-        ret[i.user.id].push(i)
+    if (i.userid) {
+      if (ret[i.userid]) {
+        ret[i.userid].push(i)
       } else {
-        ret[i.user.id] = [i]
+        ret[i.userid] = [i]
       }
     }
   })
@@ -168,7 +176,7 @@ const userActivity = computed(() => {
 })
 
 // Watchers
-watch(groupid, (newVal) => {
+watch(groupid, () => {
   microVolunteeringStore.clear()
   fetchData()
 })
@@ -180,18 +188,24 @@ onMounted(() => {
 })
 
 // Methods
-function fetchData() {
+async function fetchData() {
   busy.value = true
 
   if (groupid.value) {
     const start = dayjs().subtract(90, 'day').format('YYYY-MM-DD')
 
-    microVolunteeringStore.fetch({
+    await microVolunteeringStore.fetch({
       list: true,
       groupid: groupid.value,
       limit: 10000,
       start,
     })
+
+    // Fetch user details for each unique userid in the results.
+    const uniqueUserIds = [
+      ...new Set(items.value.map((i) => i.userid).filter(Boolean)),
+    ]
+    await Promise.all(uniqueUserIds.map((uid) => userStore.fetch(uid, false)))
   }
 
   busy.value = false
@@ -249,7 +263,7 @@ function accuracyTotal(data) {
   return score[0] + score[1]
 }
 
-// Expose fetch method for tests (renamed to avoid conflict with native fetch)
+// Expose fetch method for tests
 defineExpose({
   fetch: fetchData,
 })

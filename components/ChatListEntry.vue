@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="chat"
+    ref="entryEl"
     class="chat-entry"
     :class="{ unread: chat.unseen }"
     @mouseenter="fetch"
@@ -31,11 +32,9 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, watch } from '#imports'
+import { ref, computed, onMounted } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useChatStore } from '~/stores/chat'
-import { useUserStore } from '~/stores/user'
-import { useMiscStore } from '~/stores/misc'
 import { timeago } from '~/composables/useTimeFormat'
 import ChatAvatar from '~/components/ChatAvatar'
 
@@ -52,46 +51,17 @@ const props = defineProps({
 })
 
 const chatStore = useChatStore()
-const userStore = useUserStore()
-const miscStore = useMiscStore()
 const fetched = ref(false)
 
 const chat = computed(() => {
   return chatStore.byChatId(props.id)
 })
 
-// On ModTools, resolve the user profile image instead of relying on chat.icon
-// which uses v1 tuimg_ URLs that only return default gravatars.
-const resolvedIcon = computed(() => {
-  if (miscStore.modtools && chat.value) {
-    const uid = chat.value.user1id || chat.value.user1?.id
-    if (uid) {
-      const user = userStore.byId(uid)
-      const turl = user?.profile?.turl || user?.profile?.paththumb
-      if (turl) {
-        return turl
-      }
-    }
-  }
-  return chat.value?.icon
-})
-
-// On ModTools, fetch the other user's profile so we have their profile image.
-if (miscStore.modtools) {
-  watch(
-    () => chat.value?.user1id || chat.value?.user1?.id,
-    async (uid) => {
-      if (uid && !userStore.byId(uid)) {
-        try {
-          await userStore.fetch(uid)
-        } catch (e) {
-          // Silently ignore - will fall back to chat.icon
-        }
-      }
-    },
-    { immediate: true }
-  )
-}
+// Use chat.icon from the Go listing API. The listing query uses the same
+// ProfileSetPath logic as the user profile, picking the latest users_images
+// row (ORDER BY id DESC LIMIT 1). No need to fetch the user separately —
+// that caused avatar flicker when the user store returned a different URL (#327).
+const resolvedIcon = computed(() => chat.value?.icon)
 
 const esnippet = computed(() => {
   if (chat.value?.snippet === 'null') {
@@ -116,24 +86,24 @@ const fetch = async () => {
   await chatStore.fetchMessages(props.id)
 }
 
+const entryEl = ref(null)
+
 onMounted(() => {
-  if (props.active) {
+  if (props.active && entryEl.value) {
     const cb = () => {
-      const element = document.querySelector('.chat-entry')
-      if (element) {
-        if (element.scrollIntoViewIfNeeded) {
-          element.scrollIntoViewIfNeeded({
-            behavior: 'instant',
-            block: 'start',
-            inline: 'nearest',
-          })
-        } else {
-          element.scrollIntoView({
-            behavior: 'instant',
-            block: 'start',
-            inline: 'nearest',
-          })
-        }
+      if (!entryEl.value) return
+      if (entryEl.value.scrollIntoViewIfNeeded) {
+        entryEl.value.scrollIntoViewIfNeeded({
+          behavior: 'instant',
+          block: 'nearest',
+          inline: 'nearest',
+        })
+      } else {
+        entryEl.value.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest',
+          inline: 'nearest',
+        })
       }
     }
 

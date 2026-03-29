@@ -42,15 +42,15 @@
       </b-row>
     </b-card-header>
     <b-card-body v-if="expanded" class="p-1">
-      <ModBouncing v-if="user.bouncing" :user="user" class="mb-2" />
+      <ModBouncing v-if="user.bouncing" :userid="user.id" class="mb-2" />
       <NoticeMessage v-if="user.systemrole === 'Admin'" class="mb-2">
         This user has admin rights.
       </NoticeMessage>
       <NoticeMessage v-if="user.systemrole === 'Support'" class="mb-2">
         This user has support rights.
       </NoticeMessage>
-      <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
-      <ModComments :user="user" />
+      <ModSpammer v-if="user.spammer" class="mb-2" :userid="user.id" />
+      <ModComments :userid="user.id" />
 
       <div class="d-flex flex-wrap">
         <b-button variant="white" class="me-2 mb-1" @click="spamReport">
@@ -94,7 +94,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
-      <ModDeletedOrForgotten v-if="user" :user="user" />
+      <ModDeletedOrForgotten v-if="user" :userid="user.id" />
       <h3 class="mt-2">Trust Level</h3>
       <p>This controls whether someone is asked to do micromoderation tasks.</p>
       <p>
@@ -219,7 +219,7 @@
         </b-col>
       </b-row>
       <h3 class="mt-2">Logins</h3>
-      <ModMemberLogins :member="user" />
+      <ModMemberLogins :userid="user.id" :logins="supportLogins" />
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input
@@ -275,7 +275,7 @@
           :key="'membership-' + membership.id"
         >
           <ModSupportMembership
-            :membership="membership"
+            :membershipid="membership.id"
             :userid="user.id"
             @fetchuser="fetchUser"
           />
@@ -290,9 +290,9 @@
         </b-button>
       </div>
       <p v-else>No memberships.</p>
-      <div v-if="user.bans">
+      <div v-if="supportBans.length">
         <div
-          v-for="ban in user.bans"
+          v-for="ban in supportBans"
           :key="'ban-' + ban.date"
           class="text-danger"
         >
@@ -314,9 +314,9 @@
       <p v-else>No other emails.</p>
       <h3 class="mt-2">Membership History</h3>
       <h4>Recent Applications</h4>
-      <div v-if="user.applied && user.applied.length">
+      <div v-if="supportApplied.length">
         <div
-          v-for="applied in user.applied"
+          v-for="applied in supportApplied"
           :key="'applied-' + id + '-' + applied.added"
         >
           {{ applied.nameshort }}
@@ -330,14 +330,25 @@
       <div v-if="membershipHistoriesShown.length">
         <div
           v-for="membershiphistory in membershipHistoriesShown"
-          :key="'membershiphistory-' + membershiphistory.timestamp"
+          :key="
+            'membershiphistory-' +
+            (membershiphistory.timestamp || membershiphistory.added)
+          "
         >
-          {{ membershiphistory.group.nameshort }}
+          {{ membershiphistory.nameshort }}
           <span
             class="text-muted"
-            :title="membershiphistory.timestamp.toLocaleString()"
+            :title="
+              (
+                membershiphistory.timestamp ||
+                membershiphistory.added ||
+                ''
+              ).toLocaleString()
+            "
           >
-            {{ timeago(membershiphistory.timestamp) }}
+            {{
+              timeago(membershiphistory.timestamp || membershiphistory.added)
+            }}
           </span>
         </div>
         <b-button
@@ -351,7 +362,7 @@
       </div>
       <div v-else>No application history.</div>
       <h3 class="mt-2">Posting History</h3>
-      <ModMemberSummary :member="user" />
+      <ModMemberSummary :userid="user.id" />
       <div v-if="messageHistoriesShown.length">
         <b-row
           v-for="message in messageHistoriesShown"
@@ -373,6 +384,7 @@
               :class="
                 message.collection != 'Approved' ? 'text-danger' : 'text-muted'
               "
+              class="ms-1"
               >{{ message.collection }}</span
             >
             <br />
@@ -442,7 +454,7 @@
             Suppressed
           </b-form-select-option>
         </b-form-select>
-        <div v-for="newsfeed in user.newsfeed" :key="'newsfeed-' + newsfeed.id">
+        <div v-for="newsfeed in newsfeedShown" :key="'newsfeed-' + newsfeed.id">
           <div class="d-flex">
             <div class="me-2">
               <ExternalLink
@@ -459,7 +471,7 @@
                 class="line-clamp-2"
                 :style="{ strike: newsfeed.hidden || newsfeed.deleted }"
               >
-                {{ newsfeed.message }}
+                {{ newsfeedDisplayMessage(newsfeed) }}
               </div>
               <div v-if="newsfeed.hidden" class="small">
                 Hidden by
@@ -476,6 +488,14 @@
             </div>
           </div>
         </div>
+        <b-button
+          v-if="!showAllNewsfeed && newsfeedUnshown"
+          variant="white"
+          class="mt-1"
+          @click="showAllNewsfeed = true"
+        >
+          Show +{{ newsfeedUnshown }}
+        </b-button>
       </div>
       <h3 class="mt-2">Recent Emails</h3>
       <div v-if="emailHistoriesShown.length">
@@ -540,12 +560,12 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :user="reportUser"
+      :userid="id"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
       v-if="showAddCommentModal"
-      :user="user"
+      :userid="id"
       @added="updateComments"
       @hidden="showAddCommentModal = false"
     />
@@ -556,6 +576,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import ExternalLink from '~/components/ExternalLink'
+import api from '~/api'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const SHOW = 3
 
@@ -573,13 +595,14 @@ const props = defineProps({
 
 const userStore = useUserStore()
 
-const user = ref(null)
+const user = computed(() => userStore.byId(props.id))
 const expanded = ref(true)
 const purgeConfirm = ref(false)
 const showAllMemberships = ref(false)
 const showAllMembershipHistories = ref(false)
 const showAllMessageHistories = ref(false)
 const showAllEmailHistories = ref(false)
+const showAllNewsfeed = ref(false)
 const showSpamModal = ref(false)
 const newpassword = ref(null)
 const newemail = ref(null)
@@ -587,6 +610,15 @@ const newEmailAs = ref(1)
 const showAddCommentModal = ref(false)
 const emailAddError = ref(null)
 const showLogs = ref(false)
+
+// Support data fetched via separate API calls (not on the user object).
+const supportChatrooms = ref([])
+const supportEmailHistory = ref([])
+const supportBans = ref([])
+const supportNewsfeed = ref([])
+const supportApplied = ref([])
+const supportMembershipHistory = ref([])
+const supportLogins = ref([])
 const showProfile = ref(false)
 
 const logs = ref(null)
@@ -594,30 +626,15 @@ const profileRef = ref(null)
 const purgeConfirmRef = ref(null)
 const spamConfirm = ref(null)
 
-const preferredemail = computed(() => {
-  if (user.value.email) return user.value.email
-  if (!user.value.emails) return false
-  if (user.value.emails.length === 0) return false
-  const pref = user.value.emails.find((e) => e.preferred)
-  if (pref) return pref.email
-  return user.value.emails[0].email
-})
-
-const reportUser = computed(() => {
-  return {
-    // Due to inconsistencies about userid vs id in objects.
-    userid: user.value.id,
-    displayname: user.value.displayname,
-  }
-})
+const preferredemail = usePreferredEmail(user)
 
 const admin = computed(() => {
   return user.value && user.value.systemrole === 'Admin'
 })
 
 const freegleMemberships = computed(() => {
-  return user.value && user.value.memberof
-    ? user.value.memberof
+  return user.value && user.value.memberships
+    ? user.value.memberships
         .filter((m) => m.type === 'Freegle')
         .sort(function (a, b) {
           return a.nameshort
@@ -642,7 +659,7 @@ const membershipsUnshown = computed(() => {
 })
 
 const otherEmails = computed(() => {
-  return user.value.emails.filter((e) => {
+  return (user.value?.emails || []).filter((e) => {
     return e.email !== user.value.email && !e.ourdomain
   })
 })
@@ -651,14 +668,13 @@ const membershiphistories = computed(() => {
   const times = []
   const ret = []
 
-  if (user.value && user.value.membershiphistory) {
-    user.value.membershiphistory.forEach((h) => {
-      if (!times.includes(h.timestamp)) {
-        times.push(h.timestamp)
-        ret.push(h)
-      }
-    })
-  }
+  supportMembershipHistory.value.forEach((h) => {
+    const ts = h.added || h.timestamp
+    if (!times.includes(ts)) {
+      times.push(ts)
+      ret.push(h)
+    }
+  })
 
   return ret
 })
@@ -677,25 +693,31 @@ const membershipHistoriesUnshown = computed(() => {
   return ret
 })
 
+const newsfeedShown = computed(() => {
+  return showAllNewsfeed.value
+    ? supportNewsfeed.value
+    : supportNewsfeed.value.slice(0, SHOW)
+})
+
+const newsfeedUnshown = computed(() => {
+  return supportNewsfeed.value.length > SHOW
+    ? supportNewsfeed.value.length - SHOW
+    : 0
+})
+
 const messageHistoriesShown = computed(() => {
-  return showAllMessageHistories.value
-    ? user.value.messagehistory
-    : user.value.messagehistory.slice(0, SHOW)
+  const history = user.value.messagehistory || []
+  return showAllMessageHistories.value ? history : history.slice(0, SHOW)
 })
 
 const messageHistoriesUnshown = computed(() => {
-  const ret =
-    user.value.messagehistory.length > SHOW
-      ? user.value.messagehistory.length - SHOW
-      : 0
+  const history = user.value.messagehistory || []
+  const ret = history.length > SHOW ? history.length - SHOW : 0
   return ret
 })
 
 const sortedHistories = computed(() => {
-  const ret =
-    user.value.emailhistory && user.value.emailhistory.length
-      ? user.value.emailhistory
-      : []
+  const ret = [...supportEmailHistory.value]
 
   ret.sort(function (a, b) {
     return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -711,21 +733,17 @@ const emailHistoriesShown = computed(() => {
 })
 
 const emailHistoriesUnshown = computed(() => {
-  const ret =
-    user.value.emailhistory.length > SHOW
-      ? user.value.emailhistory.length - SHOW
-      : 0
-  return ret
+  return supportEmailHistory.value.length > SHOW
+    ? supportEmailHistory.value.length - SHOW
+    : 0
 })
 
 const chatsFiltered = computed(() => {
-  return user.value.chatrooms
-    ? user.value.chatrooms
-        .filter((c) => c.chattype !== 'Mod2Mod')
-        .sort((a, b) => {
-          return new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
-        })
-    : []
+  return supportChatrooms.value
+    .filter((c) => c.chattype !== 'Mod2Mod')
+    .sort((a, b) => {
+      return new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
+    })
 })
 
 const newsfeedmodstatus = computed({
@@ -755,26 +773,57 @@ const chatmodstatus = computed({
 
 onMounted(async () => {
   expanded.value = props.expand
-  user.value = userStore.byId(props.id)
-  if (user.value) {
-    await fetchUser()
-  }
+  await fetchUser()
 })
+
+function newsfeedDisplayMessage(nf) {
+  if (nf.type === 'Noticeboard' && nf.message && nf.message.startsWith('{')) {
+    try {
+      const data = JSON.parse(nf.message)
+      return data.name || nf.message
+    } catch {
+      return nf.message
+    }
+  }
+  return nf.message
+}
 
 async function fetchUser() {
   if (props.id) {
-    await userStore.fetchMT({
-      search: props.id,
-      emailhistory: true,
-      info: true,
-    })
-    user.value = userStore.byId(props.id)
-    if (user.value && user.value.spammer && user.value.spammer.byuserid) {
-      await userStore.fetchMT({ search: user.value.spammer.byuserid })
-      user.value.spammer.byuser = await userStore.fetch(
-        user.value.spammer.byuserid
-      )
+    // Fetch the user with modtools extras (messagehistory, publiclocation, etc.)
+    try {
+      await userStore.fetchMT({ id: props.id, modtools: true }, true)
+    } catch (e) {
+      console.error('ModSupportUser: fetchMT failed', props.id, e?.message || e)
     }
+
+    // Fetch support-specific data via separate API calls in parallel.
+    const userApi = api(userStore.config).user
+    const fetches = [
+      userApi.fetchChatrooms(props.id).then((d) => {
+        supportChatrooms.value = d || []
+      }),
+      userApi.fetchEmailHistory(props.id).then((d) => {
+        supportEmailHistory.value = d || []
+      }),
+      userApi.fetchBans(props.id).then((d) => {
+        supportBans.value = d || []
+      }),
+      userApi.fetchNewsfeed(props.id).then((d) => {
+        supportNewsfeed.value = d || []
+      }),
+      userApi.fetchApplied(props.id).then((d) => {
+        supportApplied.value = d || []
+      }),
+      userApi.fetchMembershipHistory(props.id).then((d) => {
+        supportMembershipHistory.value = d || []
+      }),
+      userApi.fetchLogins(props.id).then((d) => {
+        supportLogins.value = d || []
+      }),
+    ]
+
+    await Promise.allSettled(fetches)
   }
 }
 
@@ -785,11 +834,7 @@ function showLogsModal() {
 
 async function profile() {
   console.log('MSU profile', props.id)
-  await userStore.fetchMT({
-    // TODO Might need to be search: props.id
-    id: props.id,
-    info: true,
-  })
+  await userStore.fetch(props.id)
   showProfile.value = true
   profileRef.value?.show()
 }
@@ -850,10 +895,7 @@ async function updateComments() {
   const userid = user.value.userid ? user.value.userid : user.value.id
   console.log('updateComments', userid)
 
-  await userStore.fetchMT({
-    id: userid,
-    emailhistory: true,
-  })
+  await userStore.fetch(userid)
   await fetchUser()
 }
 </script>

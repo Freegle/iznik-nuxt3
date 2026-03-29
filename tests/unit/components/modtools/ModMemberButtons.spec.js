@@ -3,6 +3,23 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import ModMemberButtons from '~/modtools/components/ModMemberButtons.vue'
 
+const mockMemberStore = {
+  get: vi.fn(),
+  list: {},
+}
+
+const mockModConfigStore = {
+  configsById: {},
+}
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
+}))
+
+vi.mock('~/stores/modconfig', () => ({
+  useModConfigStore: () => mockModConfigStore,
+}))
+
 // Mock useModMe composable
 vi.mock('~/composables/useModMe', () => ({
   useModMe: () => ({
@@ -59,9 +76,9 @@ describe('ModMemberButtons', () => {
     groupid: 789,
     membershipid: 111,
     bandate: null,
-    memberof: [],
+    memberships: [],
     spammer: null,
-    suspectreason: null,
+    reviewreason: null,
     heldby: null,
     ...overrides,
   })
@@ -71,10 +88,19 @@ describe('ModMemberButtons', () => {
   })
 
   function mountComponent(props = {}) {
+    const memberData = props.member ? props.member : createMember()
+    const { member: _unused, modconfig, ...restProps } = props
+    mockMemberStore.get.mockReturnValue(memberData)
+    if (modconfig) {
+      mockModConfigStore.configsById = { 1: modconfig }
+    } else {
+      mockModConfigStore.configsById = {}
+    }
     return mount(ModMemberButtons, {
       props: {
-        member: createMember(),
-        ...props,
+        membershipid: memberData.id,
+        modconfigid: modconfig ? 1 : null,
+        ...restProps,
       },
       global: {
         stubs: {
@@ -138,6 +164,9 @@ describe('ModMemberButtons', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockMemberStore.get.mockReturnValue(null)
+    mockMemberStore.list = {}
+    mockModConfigStore.configsById = {}
   })
 
   describe('rendering', () => {
@@ -222,31 +251,32 @@ describe('ModMemberButtons', () => {
     it('shows Mail button for approved members', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
       })
       expect(wrapper.text()).toContain('Mail')
     })
 
-    it('shows spamignore button for approved members with suspectreason', () => {
+    it('shows spamignore button for approved members with reviewreason', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
-          suspectreason: 'Test reason',
+          reviewreason: 'Test reason',
+          reviewrequestedat: '2024-01-15T10:00:00Z',
         }),
         spamignore: true,
       })
       expect(wrapper.text()).toContain('Ignore')
     })
 
-    it('hides spamignore when no suspectreason', () => {
+    it('hides spamignore when no reviewreason', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
-          suspectreason: null,
+          reviewreason: null,
         }),
         spamignore: true,
       })
@@ -261,7 +291,7 @@ describe('ModMemberButtons', () => {
     it('returns true when member is in collection', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 789, collection: 'Approved' },
             { id: 999, collection: 'Pending' },
           ],
@@ -274,17 +304,17 @@ describe('ModMemberButtons', () => {
     it('returns false when member not in collection', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Pending' }],
+          memberships: [{ id: 789, collection: 'Pending' }],
           groupid: 789,
         }),
       })
       expect(wrapper.vm.approved).toBe(false)
     })
 
-    it('returns false when memberof is undefined', () => {
+    it('returns false when memberships is undefined', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: undefined,
+          memberships: undefined,
           groupid: 789,
         }),
       })
@@ -296,7 +326,7 @@ describe('ModMemberButtons', () => {
     it('returns approved member actions when approved', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
       })
@@ -309,7 +339,7 @@ describe('ModMemberButtons', () => {
     it('returns empty array when not approved', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [],
+          memberships: [],
           groupid: 789,
         }),
       })
@@ -321,7 +351,7 @@ describe('ModMemberButtons', () => {
     it('filters stdmsgs by valid actions', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -351,7 +381,7 @@ describe('ModMemberButtons', () => {
     it('hides rarely used messages by default', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -376,7 +406,7 @@ describe('ModMemberButtons', () => {
     it('shows rarely used messages when showRare is true', async () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -402,7 +432,7 @@ describe('ModMemberButtons', () => {
     it('calculates rareToShow count correctly', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -432,7 +462,7 @@ describe('ModMemberButtons', () => {
     it('shows expand button when rare messages exist', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -567,7 +597,7 @@ describe('ModMemberButtons', () => {
     it('handles empty modconfig stdmsgs', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([]),
@@ -578,10 +608,22 @@ describe('ModMemberButtons', () => {
     it('handles null modconfig', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: null,
+      })
+      expect(wrapper.vm.filtered.length).toBe(0)
+      expect(wrapper.vm.filterByAction.length).toBe(0)
+    })
+
+    it('handles modconfig without stdmsgs (list endpoint data)', () => {
+      const wrapper = mountComponent({
+        member: createMember({
+          memberships: [{ id: 789, collection: 'Approved' }],
+          groupid: 789,
+        }),
+        modconfig: { id: 1, name: 'Test Config' },
       })
       expect(wrapper.vm.filtered.length).toBe(0)
       expect(wrapper.vm.filterByAction.length).toBe(0)

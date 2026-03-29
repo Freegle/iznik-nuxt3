@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="microvolunteering">
     <div
       v-if="microvolunteering.result === 'Reject'"
       class="border border-warning rounded p-2"
@@ -52,41 +52,58 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
-  microvolunteering: {
-    type: Object,
+  microvolunteeringid: {
+    type: Number,
     required: true,
   },
 })
 
+const messageStore = useMessageStore()
 const userStore = useUserStore()
 
-const user = computed(() => {
-  return userStore?.byId(props.microvolunteering.userid)
+const message = computed(() => {
+  return messageStore?.byId(props.messageid)
 })
 
-const email = computed(() => {
-  let ret = null
-
-  if (user.value && user.value.emails) {
-    user.value.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
+const microvolunteering = computed(() => {
+  const msg = message.value
+  if (msg?.microvolunteering) {
+    return msg.microvolunteering.find((m) => m.id === props.microvolunteeringid)
   }
-
-  return ret
+  return null
 })
+
+watch(
+  () => props.messageid,
+  (newVal) => {
+    if (newVal) {
+      messageStore.fetch(newVal)
+    }
+  },
+  { immediate: true }
+)
+
+const user = computed(() => {
+  return microvolunteering.value
+    ? userStore?.byId(microvolunteering.value.userid)
+    : null
+})
+
+const email = usePreferredEmail(user)
 
 onMounted(() => {
-  userStore.fetch(props.microvolunteering.userid)
+  if (microvolunteering.value?.userid) {
+    userStore.fetch(microvolunteering.value.userid)
+  }
 })
 </script>

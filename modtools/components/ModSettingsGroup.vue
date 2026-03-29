@@ -79,7 +79,7 @@
               <ModSettingShortlink
                 v-for="shortlink in shortlinks"
                 :key="'shortlink-' + shortlink.id"
-                :shortlink="shortlink"
+                :shortlinkid="shortlink.id"
               />
             </div>
             <p>
@@ -828,6 +828,17 @@
               or all caretaker communities
               <!-- eslint-disable-next-line -->
               <nuxt-link to="/map/caretaker">here</nuxt-link>.
+              See also
+              <ExternalLink
+                href="https://wiki.ilovefreegle.org/Community_Mapping"
+                >Community Mapping</ExternalLink
+              >
+              and
+              <ExternalLink
+                href="https://wiki.ilovefreegle.org/Freegle_Affiliated_Community_Area_Guidelines"
+                >Area Guidelines</ExternalLink
+              >
+              on the wiki.
             </b-form-text>
             <b-form-group label="Areas">
               <b-form-text class="mb-2">
@@ -910,12 +921,6 @@
                   </p>
                 </NoticeMessage>
               </div>
-              <ModSettingsGroupFacebook
-                v-for="facebook in group.facebook"
-                :key="'facebook-' + facebook.id"
-                :groupid="group.id"
-                :facebook="facebook"
-              />
             </div>
             <NoticeMessage v-else variant="warning">
               <p>
@@ -1041,7 +1046,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
-import { useNuxtApp } from '#app'
 
 const props = defineProps({
   initialGroup: {
@@ -1051,7 +1055,6 @@ const props = defineProps({
   },
 })
 
-const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const modGroupStore = useModGroupStore()
 const modConfigStore = useModConfigStore()
@@ -1451,10 +1454,7 @@ async function fetchGroup() {
 }
 
 async function fetchConfigs() {
-  await $api.session.fetch({
-    components: ['configs'],
-    modtools: true,
-  })
+  await modConfigStore.fetch({})
 }
 
 function changedrule(rule, newval) {
@@ -1481,7 +1481,7 @@ async function saveMembershipSetting(name, val) {
     userid: myid.value,
     settings,
   })
-  fetchMe(true, ['groups'])
+  fetchMe(true)
 }
 
 function uploadProfile() {

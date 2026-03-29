@@ -64,8 +64,8 @@ describe('ModSupportSpamKeywords', () => {
           },
           ModSpamKeywordBadge: {
             template:
-              '<span class="spam-keyword-badge">{{ spamKeyword.word }}</span>',
-            props: ['spamKeyword'],
+              '<span class="spam-keyword-badge">{{ spamKeywordId }}</span>',
+            props: ['spamKeywordId'],
           },
         },
       },

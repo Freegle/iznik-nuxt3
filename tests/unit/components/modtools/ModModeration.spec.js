@@ -2,13 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import ModModeration from '~/modtools/components/ModModeration.vue'
 
-// Mock store
+// Mock stores
 const mockUserStore = {
   edit: vi.fn(),
+  byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+const mockMemberStore = {
+  updateMembership: vi.fn().mockResolvedValue(),
 }
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
+}))
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
 }))
 
 describe('ModModeration', () => {
@@ -26,11 +36,20 @@ describe('ModModeration', () => {
   })
 
   function mountComponent(props = {}) {
+    const { _userData, ...componentProps } = props
+    const userid = componentProps.userid || 456
+    const userData = _userData || createUser({ id: userid })
+
+    mockUserStore.byId.mockImplementation((id) => {
+      if (id === userid) return userData
+      return null
+    })
+
     return mount(ModModeration, {
       props: {
         membership: createMembership(),
-        user: createUser(),
-        ...props,
+        userid,
+        ...componentProps,
       },
       global: {
         stubs: {
@@ -53,6 +72,8 @@ describe('ModModeration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.edit.mockResolvedValue({})
+    mockUserStore.byId.mockReturnValue(createUser())
+    mockUserStore.fetch.mockResolvedValue({})
   })
 
   describe('rendering', () => {
@@ -88,61 +109,65 @@ describe('ModModeration', () => {
       expect(wrapper.vm.postingStatus).toBe('DEFAULT')
     })
 
-    it('defaults to MODERATED when ourpostingstatus is null', () => {
+    it('returns null when ourpostingstatus is null (Go API resolves NULL server-side)', () => {
+      // The Go API resolves NULL → MODERATED before returning, so null
+      // should never reach the frontend. But if it does, no fallback.
       const wrapper = mountComponent({
         membership: createMembership({ ourpostingstatus: null }),
       })
-      expect(wrapper.vm.postingStatus).toBe('MODERATED')
+      expect(wrapper.vm.postingStatus).toBeNull()
     })
 
     it('calls userStore.edit when setting postingStatus', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        user: createUser({ id: 111 }),
+        userid: 111,
+        _userData: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
       wrapper.vm.postingStatus = 'PROHIBITED'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 111,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 111,
         groupid: 789,
         ourPostingStatus: 'PROHIBITED',
       })
     })
 
-    it('uses userid prop when provided instead of user.id', async () => {
+    it('uses userid prop for edit calls', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        user: createUser({ id: 111 }),
         userid: 999,
+        _userData: createUser({ id: 999 }),
       })
 
       // Directly set the computed property to test the setter
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 999,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 999,
         groupid: 789,
         ourPostingStatus: 'DEFAULT',
       })
     })
 
-    it('uses membership.id as fallback groupid when membership.groupid is null', async () => {
+    it('passes null groupid when membership.groupid is null', async () => {
       const wrapper = mountComponent({
         membership: { id: 555, groupid: null, ourpostingstatus: 'MODERATED' },
-        user: createUser({ id: 111 }),
+        userid: 111,
+        _userData: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith({
-        id: 111,
-        groupid: 555,
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith({
+        userid: 111,
+        groupid: null,
         ourPostingStatus: 'DEFAULT',
       })
     })
@@ -151,14 +176,14 @@ describe('ModModeration', () => {
   describe('trustlevel computed', () => {
     it('returns trustlevel from user', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Basic' }),
+        _userData: createUser({ trustlevel: 'Basic' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Basic')
     })
 
     it('returns null when trustlevel is not set', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: null }),
+        _userData: createUser({ trustlevel: null }),
       })
       expect(wrapper.vm.trustlevel).toBeNull()
     })
@@ -166,7 +191,8 @@ describe('ModModeration', () => {
     it('calls userStore.edit when setting trustlevel', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        user: createUser({ id: 111, trustlevel: null }),
+        userid: 111,
+        _userData: createUser({ id: 111, trustlevel: null }),
       })
 
       // Directly set the computed property to test the setter
@@ -175,16 +201,15 @@ describe('ModModeration', () => {
 
       expect(mockUserStore.edit).toHaveBeenCalledWith({
         id: 111,
-        groupid: 789,
         trustlevel: 'Advanced',
       })
     })
 
-    it('uses userid prop when provided for trustlevel', async () => {
+    it('uses userid prop for trustlevel edit', async () => {
       const wrapper = mountComponent({
         membership: createMembership({ groupid: 789 }),
-        user: createUser({ id: 111 }),
         userid: 888,
+        _userData: createUser({ id: 888 }),
       })
 
       // Directly set the computed property to test the setter
@@ -193,7 +218,6 @@ describe('ModModeration', () => {
 
       expect(mockUserStore.edit).toHaveBeenCalledWith({
         id: 888,
-        groupid: 789,
         trustlevel: 'Moderate',
       })
     })
@@ -225,35 +249,35 @@ describe('ModModeration', () => {
   describe('trust level values', () => {
     it('handles Basic trust level', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Basic' }),
+        _userData: createUser({ trustlevel: 'Basic' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Basic')
     })
 
     it('handles Moderate trust level', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Moderate' }),
+        _userData: createUser({ trustlevel: 'Moderate' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Moderate')
     })
 
     it('handles Advanced trust level', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Advanced' }),
+        _userData: createUser({ trustlevel: 'Advanced' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Advanced')
     })
 
     it('handles Declined trust level', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Declined' }),
+        _userData: createUser({ trustlevel: 'Declined' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Declined')
     })
 
     it('handles Excluded trust level', () => {
       const wrapper = mountComponent({
-        user: createUser({ trustlevel: 'Excluded' }),
+        _userData: createUser({ trustlevel: 'Excluded' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Excluded')
     })
@@ -285,7 +309,7 @@ describe('ModModeration', () => {
   describe('async setters', () => {
     it('setter is async and awaits edit call', async () => {
       let resolveEdit
-      mockUserStore.edit.mockReturnValue(
+      mockMemberStore.updateMembership.mockReturnValue(
         new Promise((resolve) => {
           resolveEdit = resolve
         })
@@ -296,8 +320,8 @@ describe('ModModeration', () => {
       // Directly set the computed property to test the async setter
       wrapper.vm.postingStatus = 'DEFAULT'
 
-      // Edit should be called immediately
-      expect(mockUserStore.edit).toHaveBeenCalled()
+      // updateMembership should be called immediately
+      expect(mockMemberStore.updateMembership).toHaveBeenCalled()
 
       // Resolve the edit
       resolveEdit({})
@@ -309,30 +333,32 @@ describe('ModModeration', () => {
     it('prefers groupid over id', async () => {
       const wrapper = mountComponent({
         membership: { id: 100, groupid: 200, ourpostingstatus: 'MODERATED' },
-        user: createUser({ id: 111 }),
+        userid: 111,
+        _userData: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith(
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith(
         expect.objectContaining({ groupid: 200 })
       )
     })
 
-    it('falls back to membership.id when groupid is undefined', async () => {
+    it('passes undefined groupid when membership has no groupid property', async () => {
       const wrapper = mountComponent({
         membership: { id: 300, ourpostingstatus: 'MODERATED' },
-        user: createUser({ id: 111 }),
+        userid: 111,
+        _userData: createUser({ id: 111 }),
       })
 
       // Directly set the computed property to test the setter
       wrapper.vm.postingStatus = 'DEFAULT'
       await flushPromises()
 
-      expect(mockUserStore.edit).toHaveBeenCalledWith(
-        expect.objectContaining({ groupid: 300 })
+      expect(mockMemberStore.updateMembership).toHaveBeenCalledWith(
+        expect.objectContaining({ groupid: undefined })
       )
     })
   })

@@ -1,14 +1,14 @@
 <template>
-  <div class="bg-white rounded border border-info p-2">
+  <div v-if="user" class="bg-white rounded border border-info p-2">
     <div>
-      {{ tag }}<strong>{{ user.displayname }}</strong>
+      {{ tag }}<strong>{{ user ? user.displayname : '#' + userid }}</strong>
       <span class="small">
-        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ user.id }}
+        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ userid }}
       </span>
-      <div v-if="user.tnuserid" class="text-muted small">
+      <div v-if="user && user.tnuserid" class="text-muted small">
         TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
       </div>
-      <div v-if="user.ljuserid" class="text-muted small">
+      <div v-if="user && user.ljuserid" class="text-muted small">
         LoveJunk user id <v-icon icon="hashtag" scale="0.6" />{{
           user.ljuserid
         }}
@@ -21,18 +21,18 @@
     <b-button variant="white" size="xs" class="mt-1" @click="addAComment">
       <v-icon icon="tag" /> Add note
     </b-button>
-    <div v-if="user.comments" class="mt-1">
+    <div v-if="user && user.comments" class="mt-1">
       <ModComment
         v-for="comment in user.comments"
         :key="'comment-' + comment.id"
-        :comment="comment"
-        :user="user"
+        :commentid="comment.id"
+        :userid="userid"
         @updated="updateComments"
       />
     </div>
     <ModCommentAddModal
       v-if="showAddCommentModal && groupid"
-      :user="user"
+      :userid="userid"
       :groupid="groupid"
       @added="updateComments"
       @hidden="showAddCommentModal = false"
@@ -40,11 +40,13 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useUserStore } from '~/stores/user'
+import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
   tag: {
@@ -60,21 +62,21 @@ const props = defineProps({
 
 const emit = defineEmits(['reload'])
 
+const userStore = useUserStore()
+
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
+
 const showAddCommentModal = ref(false)
 
-const email = computed(() => {
-  let ret = null
-
-  if (props.user && props.user.emails) {
-    props.user.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
+const email = usePreferredEmail(user)
 
 function addAComment() {
   showAddCommentModal.value = true

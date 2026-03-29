@@ -10,7 +10,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -20,6 +20,7 @@ const {
   clickReplyButton,
   fillReplyForm,
   clickSendAndWait,
+  waitForNuxtHydration,
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Edge Cases', () => {
@@ -39,7 +40,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for page refresh recovery',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -107,7 +108,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for browser back recovery',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -188,7 +189,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem1,
         description: 'Test item 1 for message isolation',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
 
@@ -200,7 +201,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem2,
         description: 'Test item 2 for message isolation',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
 
@@ -284,7 +285,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for double-click prevention',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -303,6 +304,9 @@ test.describe('Reply Flow - Edge Cases', () => {
         collectText: 'Can collect anytime',
       })
 
+      // Ensure Vue hydration is complete so @click handlers are attached
+      await waitForNuxtHydration(page)
+
       // Click send multiple times rapidly
       const sendButton = page
         .locator('.btn:has-text("Send your reply")')
@@ -312,8 +316,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         timeout: timeouts.ui.appearance,
       })
 
-      // Rapid double-click - use force:true to attempt click on disabled button
-      // The button should be disabled after first click, preventing double submission
+      // Rapid double-click - the button should be disabled after first click
       await sendButton.click()
       console.log('[Test] Clicked Send button first time')
 
@@ -364,7 +367,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         type: 'OFFER',
         item: uniqueItem,
         description: 'Test item for navbar login during compose',
-        postcode: environment.postcode,
+
         email: testEmail,
       })
       expect(result.id).toBeTruthy()
@@ -404,15 +407,28 @@ test.describe('Reply Flow - Edge Cases', () => {
         timeout: timeouts.ui.appearance,
       })
 
+      // The modal may open in signup mode (showing name field + "Join Freegle!").
+      // Click the "Log in" button in the modal header to switch to login mode.
+      const logInButton = loginModal.locator(
+        'button:has-text("Log in"), a:has-text("Log in")'
+      )
+      if (
+        await logInButton
+          .first()
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await logInButton.first().click()
+        console.log('[Test] Switched modal to login mode')
+      }
+
       // Wait for email input to be fully rendered and interactive
       const emailInput = loginModal.locator('input[type="email"]')
       await emailInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
-      // Clear any pre-filled value and use type() for more realistic input
-      await emailInput.clear()
-      await emailInput.type(loginEmail, { delay: 10 })
+      await emailInput.fill(loginEmail)
 
       const passwordInput = loginModal.locator('input[type="password"]')
       await passwordInput.waitFor({
@@ -421,11 +437,11 @@ test.describe('Reply Flow - Edge Cases', () => {
       })
       await passwordInput.fill(DEFAULT_TEST_PASSWORD)
 
-      // Small delay to let VeeForm validation settle
-      await page.waitForTimeout(timeouts.ui.settleTime)
-
-      // Press Enter to submit the form (more reliable than clicking button)
-      await passwordInput.press('Enter')
+      // Click the Log in button to submit
+      const submitButton = loginModal.locator(
+        'button:has-text("Log in"), button[type="submit"]'
+      )
+      await submitButton.last().click()
       console.log('[Test] Completed navbar login')
 
       // Wait for login modal to close

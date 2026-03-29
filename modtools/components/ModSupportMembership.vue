@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="membership">
     <b-card no-body>
       <b-card-body class="ps-3 pe-2 pt-2 pb-0">
         <b-row>
@@ -37,7 +37,7 @@
             <div class="d-flex flex-column justify-content-between">
               <ModRole
                 :userid="userid"
-                :groupid="membership.id"
+                :groupid="membership.groupid"
                 :role="membership.role"
               />
               <div>
@@ -67,7 +67,7 @@
           </b-form-group>
           <b-form-group label="Moderation status:" class="me-5">
             <!-- eslint-disable-next-line -->
-            <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
+            <b-form-select v-model="postingStatus" @change="changePostingStatus">
               <option value="MODERATED">Moderated</option>
               <option value="DEFAULT">Group Settings</option>
               <option value="PROHIBITED">Can't Post</option>
@@ -105,13 +105,14 @@
   </div>
 </template>
 <script setup>
-// membership.id is groupid and membership.membershipid is membershipid
+import { computed } from 'vue'
 import { useMemberStore } from '~/stores/member'
+import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  membership: {
-    type: Object,
+  membershipid: {
+    type: Number,
     required: true,
   },
   userid: {
@@ -123,12 +124,41 @@ const props = defineProps({
 const emit = defineEmits(['fetchuser'])
 
 const memberStore = useMemberStore()
+const userStore = useUserStore()
 const { checkWork } = useModMe()
+
+const membership = computed(() => {
+  const user = userStore.byId(props.userid)
+
+  if (!user?.memberships) {
+    return null
+  }
+
+  return (
+    user.memberships.find(
+      (m) =>
+        m.id === props.membershipid || m.membershipid === props.membershipid
+    ) || null
+  )
+})
+
+const groupid = computed(
+  () => membership.value?.groupid || membership.value?.id
+)
+
+const postingStatus = computed({
+  get: () => membership.value?.ourpostingstatus || 'DEFAULT',
+  set: (val) => {
+    if (membership.value) {
+      membership.value.ourpostingstatus = val
+    }
+  },
+})
 
 async function changeEvents(newval) {
   const params = {
     userid: props.userid,
-    groupid: props.membership.id,
+    groupid: groupid.value,
     eventsallowed: newval,
   }
 
@@ -138,7 +168,7 @@ async function changeEvents(newval) {
 async function changeVolunteering(newval) {
   const params = {
     userid: props.userid,
-    groupid: props.membership.id,
+    groupid: groupid.value,
     volunteeringallowed: newval,
   }
 
@@ -146,33 +176,28 @@ async function changeVolunteering(newval) {
 }
 
 async function changeFrequency() {
-  // props.membership.emailfrequency has new value
+  // membership.emailfrequency has new value via v-model
   const params = {
     userid: props.userid,
-    groupid: props.membership.id,
-    emailfrequency: props.membership.emailfrequency,
+    groupid: groupid.value,
+    emailfrequency: membership.value?.emailfrequency,
   }
 
   await memberStore.update(params)
 }
 
 async function changePostingStatus() {
-  // props.membership.ourpostingstatus has new value
   const params = {
     userid: props.userid,
-    groupid: props.membership.id,
-    ourpostingstatus: props.membership.ourpostingstatus,
+    groupid: groupid.value,
+    ourPostingStatus: postingStatus.value,
   }
 
   await memberStore.update(params)
 }
 
 function remove(callback) {
-  memberStore.remove(
-    props.userid,
-    props.membership.id,
-    props.membership.membershipid
-  )
+  memberStore.remove(props.userid, groupid.value, props.membershipid)
   emit('fetchuser')
   if (callback) callback()
   checkWork(true)

@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-2 small">
+  <div v-if="user" class="mt-2 small">
     <div v-if="memberof && memberof.length">
       <div
         v-for="m in memberof"
@@ -20,6 +20,27 @@
         >
       </div>
     </div>
+    <div v-else-if="joinHistory && joinHistory.length">
+      <div class="p-1 me-1 text-muted">Not on any communities (history):</div>
+      <div
+        v-for="m in joinHistory"
+        :key="'history-' + m.groupid + '-' + m.timestamp"
+        class="p-1 me-1"
+      >
+        <strong class="me-1">{{
+          (m.namedisplay || '').length > 32
+            ? m.namedisplay.substring(0, 32) + '...'
+            : m.namedisplay || ''
+        }}</strong>
+        <span
+          :class="
+            'small ' +
+            (daysago(m.timestamp) < 31 ? 'text-danger fw-bold' : 'text-muted')
+          "
+          >joined {{ timeago(m.timestamp) }}</span
+        >
+      </div>
+    </div>
     <div v-else class="p-1 me-1">Not on any communities</div>
     <b-badge
       v-if="hiddenmemberofs"
@@ -32,13 +53,13 @@
     <div v-if="visibleApplied && visibleApplied.length">
       <div
         v-for="m in visibleApplied"
-        :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added"
+        :key="'memberapplied-' + m.groupid + '-' + m.added"
         class="p-1 me-1"
       >
         <strong class="me-1">{{
-          m.namedisplay.length > 32
+          (m.namedisplay || '').length > 32
             ? m.namedisplay.substring(0, 32) + '...'
-            : m.namedisplay
+            : m.namedisplay || ''
         }}</strong>
         <span
           :class="
@@ -60,27 +81,61 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import dayjs from 'dayjs'
+import { useUserStore } from '~/stores/user'
+import api from '~/api'
+import { useRuntimeConfig } from '#app'
 
 const MEMBERSHIPS_SHOW = 3
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
 })
 
+const config = useRuntimeConfig()
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore.byId(props.userid)
+})
+
+const applied = ref([])
+const membershipHistory = ref([])
 const allmemberships = ref(false)
+
+const joinHistory = computed(() => {
+  return membershipHistory.value.filter((m) => m.type === 'Joined')
+})
 const allapplied = ref(false)
 
+async function fetchExtra(id) {
+  if (!id) return
+  try {
+    applied.value = (await api(config).user.fetchApplied(id)) || []
+  } catch (e) {
+    applied.value = []
+  }
+  try {
+    membershipHistory.value =
+      (await api(config).user.fetchMembershipHistory(id)) || []
+  } catch (e) {
+    membershipHistory.value = []
+  }
+}
+
+onMounted(() => fetchExtra(props.userid))
+watch(() => props.userid, fetchExtra)
+
 const memberof = computed(() => {
-  if (!props.user || !props.user.memberof) {
+  if (!user.value?.memberships) {
     return null
   }
 
-  const ms = [...props.user.memberof]
+  const ms = [...user.value.memberships]
 
   ms.sort(function (a, b) {
     return new Date(b.added).getTime() - new Date(a.added).getTime()
@@ -96,23 +151,21 @@ const memberof = computed(() => {
 const hiddenmemberofs = computed(() => {
   return allmemberships.value
     ? 0
-    : props.user &&
-      props.user.memberof &&
-      props.user.memberof.length > MEMBERSHIPS_SHOW
-    ? props.user.memberof.length - MEMBERSHIPS_SHOW
+    : user.value?.memberships?.length > MEMBERSHIPS_SHOW
+    ? user.value.memberships.length - MEMBERSHIPS_SHOW
     : 0
 })
 
 const filteredApplied = computed(() => {
-  if (!props.user || !props.user.applied || !props.user.memberof) {
+  if (!applied.value?.length || !user.value?.memberships) {
     return []
   }
 
   // Filter out anything we're already on.
-  const ms = props.user.applied.filter((g) => {
+  const ms = applied.value.filter((g) => {
     let member = false
-    props.user.memberof.forEach((h) => {
-      if (h.id === g.id) {
+    user.value.memberships.forEach((h) => {
+      if (h.groupid === g.groupid) {
         member = true
       }
     })

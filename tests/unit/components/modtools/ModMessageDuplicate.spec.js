@@ -2,6 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ModMessageDuplicate from '~/modtools/components/ModMessageDuplicate.vue'
 
+const { mockMessageStore } = vi.hoisted(() => {
+  const mockMessageStore = {
+    byId: vi.fn(),
+    fetch: vi.fn().mockResolvedValue(),
+  }
+  return { mockMessageStore }
+})
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
+}))
+
 describe('ModMessageDuplicate', () => {
   const createTestMessage = (overrides = {}) => ({
     id: 123,
@@ -13,10 +25,17 @@ describe('ModMessageDuplicate', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, messageOverrides = {}) {
+    const messageData = createTestMessage(messageOverrides)
+
+    mockMessageStore.byId.mockImplementation((id) => {
+      if (id === messageData.id) return messageData
+      return null
+    })
+
     return mount(ModMessageDuplicate, {
       props: {
-        message: createTestMessage(),
+        messageid: messageData.id,
         ...props,
       },
       global: {
@@ -67,46 +86,34 @@ describe('ModMessageDuplicate', () => {
 
   describe('outcome display', () => {
     it('shows outcome when message has outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: 'Taken' }),
-      })
+      const wrapper = mountComponent({}, { outcome: 'Taken' })
       expect(wrapper.text()).toContain(', now Taken')
     })
 
     it('shows "still open" when no outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: null }),
-      })
+      const wrapper = mountComponent({}, { outcome: null })
       expect(wrapper.text()).toContain(', still open')
     })
 
     it('handles different outcomes', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: 'Withdrawn' }),
-      })
+      const wrapper = mountComponent({}, { outcome: 'Withdrawn' })
       expect(wrapper.text()).toContain(', now Withdrawn')
     })
   })
 
   describe('pending indicator', () => {
     it('shows "(pending)" for Pending collection', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Pending' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'Pending' })
       expect(wrapper.text()).toContain('(pending)')
     })
 
     it('shows "(pending)" for PendingOther collection', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'PendingOther' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'PendingOther' })
       expect(wrapper.text()).toContain('(pending)')
     })
 
     it('does not show "(pending)" for Approved collection', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Approved' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'Approved' })
       expect(wrapper.text()).not.toContain('(pending)')
     })
   })
@@ -114,95 +121,105 @@ describe('ModMessageDuplicate', () => {
   describe('computed properties', () => {
     describe('groupid', () => {
       it('returns first group id when groups exist', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ groups: [{ groupid: 789 }] }),
-        })
+        const wrapper = mountComponent({}, { groups: [{ groupid: 789 }] })
         expect(wrapper.vm.groupid).toBe(789)
       })
 
       it('returns 0 when groups array is empty', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ groups: [] }),
-        })
+        const wrapper = mountComponent({}, { groups: [] })
         expect(wrapper.vm.groupid).toBe(0)
       })
 
       it('returns 0 when groups is undefined', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ groups: undefined }),
-        })
+        const wrapper = mountComponent({}, { groups: undefined })
         expect(wrapper.vm.groupid).toBe(0)
       })
 
-      it('returns 0 when message is null', () => {
-        const message = { ...createTestMessage() }
-        delete message.groups
-        const wrapper = mountComponent({ message })
+      it('returns 0 when message has no groups property', () => {
+        const messageData = createTestMessage()
+        delete messageData.groups
+
+        mockMessageStore.byId.mockImplementation((id) => {
+          if (id === messageData.id) return messageData
+          return null
+        })
+
+        const wrapper = mount(ModMessageDuplicate, {
+          props: { messageid: messageData.id },
+          global: {
+            mocks: { timeago: (date) => `${date} ago` },
+            stubs: {
+              'v-icon': {
+                template: '<i :class="icon" />',
+                props: ['icon', 'scale'],
+              },
+              'nuxt-link': {
+                template: '<a :href="to"><slot /></a>',
+                props: ['to'],
+              },
+            },
+          },
+        })
         expect(wrapper.vm.groupid).toBe(0)
       })
     })
 
     describe('isPending', () => {
       it('returns true for Pending collection', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ collection: 'Pending' }),
-        })
+        const wrapper = mountComponent({}, { collection: 'Pending' })
         expect(wrapper.vm.isPending).toBe(true)
       })
 
       it('returns true for PendingOther collection', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ collection: 'PendingOther' }),
-        })
+        const wrapper = mountComponent({}, { collection: 'PendingOther' })
         expect(wrapper.vm.isPending).toBe(true)
       })
 
       it('returns false for Approved collection', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ collection: 'Approved' }),
-        })
+        const wrapper = mountComponent({}, { collection: 'Approved' })
         expect(wrapper.vm.isPending).toBe(false)
       })
 
       it('returns false for other collections', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({ collection: 'Spam' }),
-        })
+        const wrapper = mountComponent({}, { collection: 'Spam' })
         expect(wrapper.vm.isPending).toBe(false)
       })
     })
 
     describe('duplicateLink', () => {
       it('returns pending messages link for pending message', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({
+        const wrapper = mountComponent(
+          {},
+          {
             collection: 'Pending',
             groups: [{ groupid: 456 }],
-          }),
-        })
+          }
+        )
         expect(wrapper.vm.duplicateLink).toBe(
           '/messages/pending?groupid=456&msgid=123'
         )
       })
 
       it('returns approved messages link for approved message', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({
+        const wrapper = mountComponent(
+          {},
+          {
             collection: 'Approved',
             groups: [{ groupid: 456 }],
-          }),
-        })
+          }
+        )
         expect(wrapper.vm.duplicateLink).toBe('/messages/approved/456/123')
       })
 
       it('builds correct link with different groupid and msgid', () => {
-        const wrapper = mountComponent({
-          message: createTestMessage({
+        const wrapper = mountComponent(
+          { messageid: 999 },
+          {
             id: 999,
             collection: 'Pending',
             groups: [{ groupid: 111 }],
-          }),
-        })
+          }
+        )
         expect(wrapper.vm.duplicateLink).toBe(
           '/messages/pending?groupid=111&msgid=999'
         )
@@ -212,12 +229,13 @@ describe('ModMessageDuplicate', () => {
 
   describe('link navigation', () => {
     it('links to correct pending URL', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        {},
+        {
           collection: 'Pending',
           groups: [{ groupid: 456 }],
-        }),
-      })
+        }
+      )
       const link = wrapper.find('a')
       expect(link.attributes('href')).toBe(
         '/messages/pending?groupid=456&msgid=123'
@@ -225,21 +243,22 @@ describe('ModMessageDuplicate', () => {
     })
 
     it('links to correct approved URL', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        {},
+        {
           collection: 'Approved',
           groups: [{ groupid: 456 }],
-        }),
-      })
+        }
+      )
       const link = wrapper.find('a')
       expect(link.attributes('href')).toBe('/messages/approved/456/123')
     })
   })
 
   describe('props', () => {
-    it('message prop is required', () => {
+    it('messageid prop is required', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeDefined()
+      expect(wrapper.props('messageid')).toBeDefined()
     })
   })
 
@@ -255,35 +274,30 @@ describe('ModMessageDuplicate', () => {
     })
 
     it('has text-muted class on pending indicator', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ collection: 'Pending' }),
-      })
+      const wrapper = mountComponent({}, { collection: 'Pending' })
       expect(wrapper.find('span.text-muted').exists()).toBe(true)
     })
   })
 
   describe('edge cases', () => {
     it('handles message with multiple groups (uses first)', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({
+      const wrapper = mountComponent(
+        {},
+        {
           groups: [{ groupid: 111 }, { groupid: 222 }],
-        }),
-      })
+        }
+      )
       expect(wrapper.vm.groupid).toBe(111)
     })
 
     it('handles empty outcome string', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: '' }),
-      })
+      const wrapper = mountComponent({}, { outcome: '' })
       // Empty string is falsy
       expect(wrapper.text()).toContain(', still open')
     })
 
     it('handles undefined outcome', () => {
-      const wrapper = mountComponent({
-        message: createTestMessage({ outcome: undefined }),
-      })
+      const wrapper = mountComponent({}, { outcome: undefined })
       expect(wrapper.text()).toContain(', still open')
     })
   })

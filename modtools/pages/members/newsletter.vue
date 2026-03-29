@@ -9,7 +9,7 @@
       There are no stories to review at the moment.
     </NoticeMessage>
     <div v-for="story in stories" :key="'story-' + story.id" class="mt-2">
-      <ModStoryReview :story="story" newsletter />
+      <ModStoryReview :storyid="story.id" newsletter />
     </div>
   </div>
 </template>
@@ -30,10 +30,6 @@ const stories = computed(() => {
 })
 
 onMounted(async () => {
-  console.log('newsletter mounted')
-  await storyStore.fetchMT({
-    newsletter: true,
-    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
-  })
+  await storyStore.fetchNewsletterReviewing()
 })
 </script>

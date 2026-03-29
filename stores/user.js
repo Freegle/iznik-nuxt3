@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import api from '~/api'
+import { useMiscStore } from '~/stores/misc'
 
 // Debounce delay for batching user fetches (ms)
 const BATCH_DELAY = 50
@@ -32,19 +33,53 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.exists
     },
-    async fetchMT(params) {
-      // id, info, search, emailhistory
-      params.info = true
-      const { user, users } = await api(this.config).user.fetchMT(params)
-      if (user) {
-        this.list[user.id] = user
-        return user
+    async searchUsers(searchTerm) {
+      const data = await api(this.config).user.search(searchTerm)
+      if (data?.users?.length) {
+        // V2 API returns user IDs; fetch each user with modtools data.
+        await Promise.all(
+          data.users.map((id) => this.fetchMT({ id, modtools: true }, true))
+        )
+        return data.users.map((id) => this.list[id]).filter(Boolean)
       }
-      if (users) {
-        for (const user of users) {
+      return []
+    },
+    async fetchMT(params, force = false) {
+      const id = parseInt(params.id)
+      if (!force && id && this.list[id]) {
+        return this.list[id]
+      }
+
+      // Deduplicate concurrent fetches for the same ID.
+      if (id && this.fetching[id]) {
+        await this.fetching[id]
+        return this.list[id]
+      }
+
+      params.info = true
+      params.modtools = true
+
+      const fetchPromise = api(this.config).user.fetchMT(params)
+      if (id) {
+        this.fetching[id] = fetchPromise
+      }
+
+      try {
+        const { user, users } = await fetchPromise
+        if (user) {
           this.list[user.id] = user
+          return user
         }
-        return users
+        if (users) {
+          for (const user of users) {
+            this.list[user.id] = user
+          }
+          return users
+        }
+      } finally {
+        if (id) {
+          delete this.fetching[id]
+        }
       }
     },
     async fetch(id, force) {
@@ -53,6 +88,14 @@ export const useUserStore = defineStore({
         console.log('USEUSERSTORE FETCH ID NULL')
         console.trace()
         return
+      }
+
+      // In modtools context, always use fetchMT so we get emails, memberships,
+      // location, comments etc. This avoids stale cache from non-modtools fetches
+      // and means components don't need to choose between fetch/fetchMT.
+      const miscStore = useMiscStore()
+      if (miscStore.modtools) {
+        return this.fetchMT({ id, info: true }, force)
       }
 
       // If already cached and not forcing, return immediately
@@ -121,7 +164,7 @@ export const useUserStore = defineStore({
         resolve(this.list[id])
       }
     },
-    async fetchMultiple(ids) {
+    async fetchMultiple(ids, modtools = false) {
       // Filter out IDs that are currently being fetched (to avoid duplicate requests)
       // Note: We don't filter by this.list[id] because processBatch() already decided
       // these IDs need fetching (including force-refresh cases)
@@ -140,7 +183,10 @@ export const useUserStore = defineStore({
         // Process each chunk
         for (const chunk of chunks) {
           // Create a shared promise for the batch request
-          const batchPromise = api(this.config).user.fetchMultiple(chunk)
+          const batchPromise = api(this.config).user.fetchMultiple(
+            chunk,
+            modtools
+          )
 
           // Set the same promise for each ID so concurrent fetches wait for the same request
           chunk.forEach((id) => {
@@ -213,6 +259,9 @@ export const useUserStore = defineStore({
     },
     async edit(params) {
       await api(this.config).user.save(params)
+      if (params.id) {
+        await this.fetch(params.id, true)
+      }
     },
     async addEmail(params) {
       await api(this.config).user.addEmail(

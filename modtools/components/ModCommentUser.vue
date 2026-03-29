@@ -1,5 +1,5 @@
 <template>
-  <b-card bg-variant="white" no-body>
+  <b-card v-if="comment.user" bg-variant="white" no-body>
     <b-card-header class="d-flex justify-content-between flex-wrap">
       <div>
         <!-- eslint-disable-next-line -->
@@ -24,33 +24,26 @@
     <b-card-body>
       <ModComment
         :key="'comment-' + comment.id"
-        :comment="comment"
-        :user="comment.user"
+        :commentid="comment.id"
+        :userid="comment.userid"
       />
     </b-card-body>
   </b-card>
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useCommentStore } from '~/modtools/stores/comment'
+import { getPreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const props = defineProps({
-  comment: {
-    type: Object,
+  commentid: {
+    type: Number,
     required: true,
   },
 })
 
-const email = computed(() => {
-  let ret = null
+const commentStore = useCommentStore()
+const comment = computed(() => commentStore.byId(props.commentid))
 
-  if (!props.comment.user.email && props.comment.user.emails) {
-    props.comment.user.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
-})
+const email = computed(() => getPreferredEmail(comment.value.user))
 </script>

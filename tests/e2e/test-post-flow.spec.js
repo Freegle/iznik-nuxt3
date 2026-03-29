@@ -21,7 +21,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -32,27 +32,26 @@ test.describe('Post flow tests', () => {
     expect(result.id).not.toBe(null)
     console.log(`Post created with ID: ${result.id}`)
 
-    // Navigate to /browse and verify a post is visible
-    console.log('Navigating to /browse to verify post visibility')
-    await page.gotoAndVerify('/browse', {
+    // Navigate to /myposts and verify our post is visible
+    console.log('Navigating to /myposts to verify post visibility')
+    await page.gotoAndVerify('/myposts', {
       timeout: timeouts.navigation.default,
     })
 
     // Wait for message cards and verify our specific item is visible
-    // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
-    await page.waitForSelector('.message-summary-mobile, .messagecard', {
+    await page.waitForSelector('.message-card, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
-    // Look for our specific unique item in the message cards.
+    // Look for our specific unique item in the message cards
     const itemLocator = page
-      .locator('.message-summary-mobile, .messagecard')
+      .locator('.message-card, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log(`Found our test item "${uniqueItem}" on browse page`)
+    console.log(`Found our test item "${uniqueItem}" on myposts page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
@@ -77,7 +76,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -109,16 +108,30 @@ test.describe('Post flow tests', () => {
     }
     console.log('Successfully logged in as original user')
 
-    // Go to /chats and verify the reply is visible
+    // Go to /chats and verify the reply is visible.
+    // The reply message is created with processingsuccessful=0 and a background
+    // worker sets it to 1. Until processed, the chat has lastmsg=0 and the
+    // ChatListEntry is hidden. Poll with page reloads until the entry appears.
     console.log('Navigating to /chats to check for reply')
-    await page.gotoAndVerify('/chats')
+    const chatEntry = page.locator('.chat-entry').first()
+    const maxAttempts = 20
+    let chatFound = false
 
-    // Wait for the chat list to load and look for a chat entry
-    await page.waitForSelector('.chat-entry', {
-      timeout: timeouts.background,
-    })
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      await page.gotoAndVerify('/chats')
 
-    // Check that there's one chat entry (the reply)
+      try {
+        await chatEntry.waitFor({ state: 'visible', timeout: 15000 })
+        console.log(`Chat entry appeared on attempt ${attempt}`)
+        chatFound = true
+        break
+      } catch (e) {
+        console.log(`Chat entry not visible on attempt ${attempt}, retrying...`)
+      }
+    }
+
+    expect(chatFound).toBeTruthy()
+
     const chatEntries = page.locator('.chat-entry').filter({ visible: true })
     const chatCount = await chatEntries.count()
     expect(chatCount).toEqual(1)
@@ -171,7 +184,7 @@ test.describe('Post flow tests', () => {
       type: 'WANTED',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -210,11 +223,10 @@ test.describe('Post flow tests', () => {
     await withdrawPost({ item: result.item })
   })
 
-  // TODO: needs updating to work with redesign. Now shows options page before email,
-  // and then opens account creation modal after clicking "Freegle it!".
-  test.skip("Email existence check - prevents posting with someone else's email", async ({
+  test("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
+    testEnv,
     postMessage,
     withdrawPost,
   }) => {
@@ -226,7 +238,7 @@ test.describe('Post flow tests', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
-      postcode: environment.postcode,
+
       email: testEmail,
     })
 
@@ -245,85 +257,38 @@ test.describe('Post flow tests', () => {
     })
 
     // Fill in the item name
-    await page
-      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-      .click()
-    await page
-      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-      .clear()
-    await page
-      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-      .type('test item for email check', { delay: 100 })
+    const itemInput = page.locator(
+      '[id^="what"], .type-input, input[placeholder*="give"]'
+    )
+    await itemInput.click()
+    await itemInput.fill('test item for email check')
 
     // Fill in the description
-    await page.waitForSelector(
-      '[id^="description"], textarea.description, textarea.form-control',
-      { timeout: timeouts.ui.appearance }
+    const descInput = page.locator(
+      '[id^="description"], textarea.description, textarea.form-control'
     )
-    await page
-      .locator(
-        '[id^="description"], textarea.description, textarea.form-control'
-      )
-      .click()
-    await page
-      .locator(
-        '[id^="description"], textarea.description, textarea.form-control'
-      )
-      .clear()
-    await page
-      .locator(
-        '[id^="description"], textarea.description, textarea.form-control'
-      )
-      .type('Test description for email check', { delay: 50 })
-
-    // Wait for Next button to be enabled
-    await page.waitForFunction(
-      () => {
-        const allButtons = document.querySelectorAll('.btn, button')
-        let mobileBtn = null
-        let desktopBtn = null
-
-        for (const btn of allButtons) {
-          if (btn.textContent && btn.textContent.includes('Next')) {
-            if (
-              btn.closest('.d-block.d-md-none') ||
-              btn.classList.contains('d-md-none')
-            ) {
-              mobileBtn = btn
-            }
-            if (
-              btn.closest('.d-none.d-md-flex') ||
-              (btn.classList.contains('d-none') &&
-                btn.classList.contains('d-md-flex'))
-            ) {
-              desktopBtn = btn
-            }
-            if (!mobileBtn && !desktopBtn) {
-              mobileBtn = btn
-            }
-          }
-        }
-
-        return (
-          (mobileBtn && !mobileBtn.disabled) ||
-          (desktopBtn && desktopBtn.offsetParent !== null)
-        )
-      },
-      { timeout: timeouts.ui.appearance }
-    )
-
-    // Scroll and click Next to go to location page
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await page.waitForTimeout(500)
-    await page.locator('.next-btn:has-text("Next")').click()
-
-    // Fill in postcode
-    await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
+    await descInput.waitFor({
+      state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    await page
-      .locator('.pcinp, input[placeholder="Type postcode"]')
-      .fill(environment.postcode)
+    await descInput.fill('Test description for email check')
+
+    // Wait for Next button to be enabled and click it
+    const nextBtn = page.locator('.next-btn:has-text("Next")')
+    await nextBtn.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(500)
+    await nextBtn.click()
+
+    // Fill in postcode
+    const postcodeInput = page.locator(
+      '.pcinp, input[placeholder="Type postcode"]'
+    )
+    await postcodeInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await postcodeInput.fill(testEnv?.postcode || environment.postcode)
 
     // Wait for location confirmation
     const confirmationIcon = page.locator(
@@ -334,7 +299,34 @@ test.describe('Post flow tests', () => {
       timeout: timeouts.api.default,
     })
 
-    // Scroll and click Next to go to email page
+    // Click Next to go to options page
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(500)
+    await page.locator('.next-btn:has-text("Next")').click()
+
+    // Handle the /give/options page (delivery and deadline options)
+    await page.waitForURL(/\/give\/options/, {
+      timeout: timeouts.navigation.default,
+    })
+    console.log('On options page')
+
+    // Set "Maybe" for delivery
+    const maybeDeliveryButton = page.locator('.toggle-btn:has-text("Maybe")')
+    await maybeDeliveryButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await maybeDeliveryButton.click()
+
+    // Click "No deadline"
+    const noDeadlineButton = page.locator('.toggle-btn:has-text("No deadline")')
+    await noDeadlineButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await noDeadlineButton.click()
+
+    // Click Next to go to whoami/email page
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await page.waitForTimeout(500)
     await page.locator('.next-btn:has-text("Next")').click()
@@ -363,25 +355,35 @@ test.describe('Post flow tests', () => {
     console.log('Clicking Freegle it button to trigger email existence check')
     await freegleButton.first().click()
 
-    // Wait for the error message to appear after the API check
-    console.log('Waiting for email validation error message to appear')
+    // Wait for the login modal or error message to appear
+    // The redesigned flow may show a login modal for existing accounts
+    console.log('Waiting for email validation response')
     const errorMessage = page.locator('text=belongs to an existing account')
-    await expect(errorMessage).toBeVisible()
-    console.log(
-      'Email existence check working correctly - error message displayed'
+    const loginModal = page.locator(
+      '#loginModal, .modal-dialog:has-text("Log in")'
     )
 
-    // Verify the "Freegle it!" button is no longer visible after error
-    const isButtonVisible = await freegleButton
-      .first()
-      .isVisible()
-      .catch(() => false)
+    const winner = await Promise.race([
+      errorMessage
+        .first()
+        .waitFor({ state: 'visible', timeout: timeouts.api.default })
+        .then(() => 'error')
+        .catch(() => null),
+      loginModal
+        .first()
+        .waitFor({ state: 'visible', timeout: timeouts.api.default })
+        .then(() => 'modal')
+        .catch(() => null),
+    ])
 
-    // The button should no longer be visible after the error appears
-    expect(isButtonVisible).toBe(false)
-    console.log(
-      'Freegle it button is hidden as expected after email conflict detected'
-    )
+    expect(winner).toBeTruthy()
+    console.log(`Email existence check result: ${winner}`)
+
+    if (winner === 'error') {
+      console.log('Error message displayed for existing account')
+    } else if (winner === 'modal') {
+      console.log('Login modal shown for existing account - user must log in')
+    }
 
     // Clean up - log back in and withdraw the original post
     console.log('Logging back in to clean up the test post')

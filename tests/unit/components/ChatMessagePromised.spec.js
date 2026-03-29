@@ -7,6 +7,7 @@ const {
   mockChat,
   mockChatmessage,
   mockEmessage,
+  mockIsEmptyMessage,
   mockRefmsgid,
   mockRefmsg,
   mockMe,
@@ -25,6 +26,7 @@ const {
       chatid: 1,
     }),
     mockEmessage: ref('Here is the item you requested'),
+    mockIsEmptyMessage: ref(false),
     mockRefmsgid: ref(50),
     mockRefmsg: ref({
       id: 50,
@@ -69,6 +71,7 @@ vi.mock('~/composables/useChat', () => ({
     chat: mockChat,
     chatmessage: mockChatmessage,
     emessage: mockEmessage,
+    isEmptyMessage: mockIsEmptyMessage,
     refmsgid: mockRefmsgid,
     refmsg: mockRefmsg,
     me: mockMe,

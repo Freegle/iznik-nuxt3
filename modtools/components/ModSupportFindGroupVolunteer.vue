@@ -11,9 +11,11 @@
       <span v-else class="text-muted"> (Backup) </span>
     </b-col>
     <b-col cols="12" md="3" class="order-5 order-md-3">
-      <ModClipboard class="me-3" :value="volunteer.email" />
-      <!-- eslint-disable-next-line -->
-      <ExternalLink :href="'mailto:' + volunteer.email">{{ volunteer.email }}</ExternalLink>
+      <template v-if="email">
+        <ModClipboard class="me-3" :value="email" />
+        <!-- eslint-disable-next-line -->
+        <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
+      </template>
     </b-col>
     <b-col cols="4" md="2" class="order-2 order-md-4">
       <ModRole
@@ -23,14 +25,18 @@
       />
     </b-col>
     <b-col cols="4" md="2" class="order-3 order-md-5">
-      <span v-if="volunteer.lastmoderated">
-        {{ timeago(volunteer.lastmoderated) }}
+      <span v-if="user?.lastaccess">
+        {{ timeago(user.lastaccess) }}
       </span>
     </b-col>
   </b-row>
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useUserStore } from '~/stores/user'
+import { usePreferredEmail } from '~/composables/usePreferredEmail'
+
+const userStore = useUserStore()
 
 const props = defineProps({
   volunteer: {
@@ -43,15 +49,18 @@ const props = defineProps({
   },
 })
 
-const active = computed(() => {
-  if (
-    props.volunteer &&
-    props.volunteer.settings &&
-    (props.volunteer.settings.active || !('active' in props.volunteer.settings))
-  ) {
-    return true
-  }
+// Fetch user data to get email (memberships API returns userid but not email).
+if (props.volunteer?.userid) {
+  userStore.fetch(props.volunteer.userid)
+}
 
-  return false
+const user = computed(() => userStore.byId(props.volunteer?.userid))
+const email = usePreferredEmail(user)
+
+const active = computed(() => {
+  if (!props.volunteer) return false
+  if (!props.volunteer.settings) return true
+  if (!('active' in props.volunteer.settings)) return true
+  return !!props.volunteer.settings.active
 })
 </script>

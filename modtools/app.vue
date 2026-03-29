@@ -51,7 +51,6 @@ import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { computed, watch, reloadNuxtApp } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
-import { usePublicityStore } from '~/stores/publicity'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
 
@@ -110,7 +109,6 @@ const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
-const publicityStore = usePublicityStore()
 const systemConfigStore = useSystemConfigStore()
 const emailTrackingStore = useEmailTrackingStore()
 
@@ -154,7 +152,6 @@ modconfigStore.init(runtimeConfig)
 modGroupStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
-publicityStore.init(runtimeConfig)
 systemConfigStore.init(runtimeConfig)
 emailTrackingStore.init(runtimeConfig)
 
@@ -173,27 +170,8 @@ watch(loginCount, async () => {
   }
 })
 
-try {
-  if (route.query.u && route.query.k) {
-    // We are impersonating.
-    try {
-      // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
-      // an incognito tab while impersonating.
-      await authStore.clearRelated()
-
-      // Log in using the username and key.
-      await authStore.login({
-        u: route.query.u,
-        k: route.query.k,
-      })
-    } catch (e) {
-      // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
-      console.log('Login failed', e)
-    }
-  }
-} catch (e) {
-  console.error('Error fetching user', e)
-}
+// u/k impersonation login is handled in modtools/pages/login.vue.
+// The auth middleware redirects to /login with u/k preserved in query params.
 
 if (process.client) {
   if (typeof window !== 'undefined') {

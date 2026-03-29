@@ -33,6 +33,25 @@ vi.mock('~/modtools/composables/useSystemLogFormatter', () => ({
   }),
 }))
 
+// Mock system logs store with logItems for ID-based lookup
+const mockSystemLogsStore = {
+  logItems: {},
+  getLog: vi.fn((id) => mockSystemLogsStore.logItems[id] || null),
+  storeLog: vi.fn((log) => {
+    if (log && log.id) {
+      mockSystemLogsStore.logItems[log.id] = log
+    }
+  }),
+}
+
+vi.mock('~/modtools/stores/systemlogs', () => ({
+  useSystemLogsStore: () => mockSystemLogsStore,
+}))
+
+vi.mock('../stores/systemlogs', () => ({
+  useSystemLogsStore: () => mockSystemLogsStore,
+}))
+
 // Mock user store
 const mockUserStore = {
   list: {},
@@ -46,6 +65,7 @@ vi.mock('~/stores/user', () => ({
 // Mock group store
 const mockGroupStore = {
   list: {},
+  get: vi.fn((id) => mockGroupStore.list[id] || null),
   fetch: vi.fn(),
 }
 
@@ -89,11 +109,17 @@ describe('ModSystemLogEntry', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  // Helper to store a log and mount with its ID
+  function storeAndMount(logOverrides = {}, extraProps = {}) {
+    const log = createLog(logOverrides)
+    mockSystemLogsStore.logItems[log.id] = log
+    mockSystemLogsStore.getLog.mockImplementation(
+      (id) => mockSystemLogsStore.logItems[id] || null
+    )
     return mount(ModSystemLogEntry, {
       props: {
-        log: createLog(),
-        ...props,
+        logId: log.id,
+        ...extraProps,
       },
       global: {
         stubs: {
@@ -131,11 +157,12 @@ describe('ModSystemLogEntry', () => {
     vi.clearAllMocks()
     mockUserStore.list = {}
     mockGroupStore.list = {}
+    mockSystemLogsStore.logItems = {}
   })
 
   describe('rendering', () => {
     it('renders log entry with timestamp, source badge, action text, and details button', () => {
-      const wrapper = mountComponent()
+      const wrapper = storeAndMount()
       expect(wrapper.find('.log-entry').exists()).toBe(true)
       expect(wrapper.find('.timestamp').exists()).toBe(true)
       expect(wrapper.text()).toContain('10:30:00.123')
@@ -154,18 +181,23 @@ describe('ModSystemLogEntry', () => {
       ['laravel-batch', 'Email'],
       ['unknown_source', 'unknown_source'],
     ])('returns %s label for %s source', (source, expected) => {
-      const wrapper = mountComponent({ log: createLog({ source }) })
+      const wrapper = storeAndMount({ source })
       expect(wrapper.vm.sourceLabel).toBe(expected)
     })
 
     it('returns User for logs_table when same user, Mod when different', () => {
-      const sameUser = mountComponent({
-        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 123 }),
+      const sameUser = storeAndMount({
+        source: 'logs_table',
+        user_id: 123,
+        byuser_id: 123,
       })
       expect(sameUser.vm.sourceLabel).toBe('User')
 
-      const diffUser = mountComponent({
-        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 456 }),
+      const diffUser = storeAndMount({
+        id: 2,
+        source: 'logs_table',
+        user_id: 123,
+        byuser_id: 456,
       })
       expect(diffUser.vm.sourceLabel).toBe('Mod')
     })
@@ -173,24 +205,27 @@ describe('ModSystemLogEntry', () => {
 
   describe('sourceVariant computed', () => {
     it('returns primary for user action and secondary for mod action in logs_table', () => {
-      const userAction = mountComponent({
-        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 123 }),
+      const userAction = storeAndMount({
+        source: 'logs_table',
+        user_id: 123,
+        byuser_id: 123,
       })
       expect(userAction.vm.sourceVariant).toBe('primary')
 
-      const modAction = mountComponent({
-        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 456 }),
+      const modAction = storeAndMount({
+        id: 2,
+        source: 'logs_table',
+        user_id: 123,
+        byuser_id: 456,
       })
       expect(modAction.vm.sourceVariant).toBe('secondary')
     })
 
     it('returns success for laravel-batch, uses getLogSourceVariant for others', () => {
-      const laravelBatch = mountComponent({
-        log: createLog({ source: 'laravel-batch' }),
-      })
+      const laravelBatch = storeAndMount({ source: 'laravel-batch' })
       expect(laravelBatch.vm.sourceVariant).toBe('success')
 
-      const api = mountComponent({ log: createLog({ source: 'api' }) })
+      const api = storeAndMount({ source: 'api' })
       expect(api.vm.sourceVariant).toBe('info')
     })
   })
@@ -205,7 +240,7 @@ describe('ModSystemLogEntry', () => {
     ])(
       'returns correct class for %p',
       (logProps, expectedClass, shouldContain) => {
-        const wrapper = mountComponent({ log: createLog(logProps) })
+        const wrapper = storeAndMount(logProps)
         if (expectedClass === 'empty') {
           expect(wrapper.vm.entryClass).toEqual([])
         } else if (shouldContain) {
@@ -219,27 +254,23 @@ describe('ModSystemLogEntry', () => {
 
   describe('rawApiCall computed', () => {
     it('returns null for non-api source or missing endpoint info', () => {
+      expect(storeAndMount({ source: 'client' }).vm.rawApiCall).toBeNull()
       expect(
-        mountComponent({ log: createLog({ source: 'client' }) }).vm.rawApiCall
-      ).toBeNull()
-      expect(
-        mountComponent({
-          log: createLog({ source: 'api', raw: { method: 'GET' } }),
-        }).vm.rawApiCall
+        storeAndMount({ source: 'api', raw: { method: 'GET' } }).vm.rawApiCall
       ).toBeNull()
     })
 
     it('formats v1 API calls with /api prefix and v2 API calls as-is', () => {
-      const v1 = mountComponent({
-        log: createLog({ source: 'api', raw: { method: 'GET', call: 'user' } }),
+      const v1 = storeAndMount({
+        source: 'api',
+        raw: { method: 'GET', call: 'user' },
       })
       expect(v1.vm.rawApiCall).toBe('GET /api/user')
 
-      const v2 = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { method: 'POST', path: '/apiv2/message' },
-        }),
+      const v2 = storeAndMount({
+        id: 2,
+        source: 'api',
+        raw: { method: 'POST', path: '/apiv2/message' },
       })
       expect(v2.vm.rawApiCall).toBe('POST /apiv2/message')
     })
@@ -247,18 +278,18 @@ describe('ModSystemLogEntry', () => {
 
   describe('duration computed', () => {
     it('extracts duration from action text, raw.duration_ms, or returns null', () => {
+      expect(storeAndMount({ text: 'API call (250ms)' }).vm.duration).toBe(
+        '250ms'
+      )
       expect(
-        mountComponent({ log: createLog({ text: 'API call (250ms)' }) }).vm
-          .duration
-      ).toBe('250ms')
-      expect(
-        mountComponent({
-          log: createLog({ text: 'API call', raw: { duration_ms: 150.5 } }),
+        storeAndMount({
+          id: 2,
+          text: 'API call',
+          raw: { duration_ms: 150.5 },
         }).vm.duration
       ).toBe('151ms')
       expect(
-        mountComponent({ log: createLog({ text: 'Simple action' }) }).vm
-          .duration
+        storeAndMount({ id: 3, text: 'Simple action' }).vm.duration
       ).toBeNull()
     })
   })
@@ -272,17 +303,15 @@ describe('ModSystemLogEntry', () => {
       [{ ip: '::' }, null],
       [{}, null],
     ])('returns correct IP for raw=%p', (raw, expected) => {
-      const wrapper = mountComponent({ log: createLog({ raw }) })
+      const wrapper = storeAndMount({ raw })
       expect(wrapper.vm.ipAddress).toBe(expected)
     })
   })
 
   describe('sessionUrl and sessionUrlDisplay computed', () => {
     it('returns URL and formatted display path, truncating long paths', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: { url: 'https://www.ilovefreegle.org/give?type=offer' },
-        }),
+      const wrapper = storeAndMount({
+        raw: { url: 'https://www.ilovefreegle.org/give?type=offer' },
       })
       expect(wrapper.vm.sessionUrl).toBe(
         'https://www.ilovefreegle.org/give?type=offer'
@@ -291,13 +320,14 @@ describe('ModSystemLogEntry', () => {
 
       const longPath =
         '/very/long/path/that/exceeds/fifty/characters/limit/test/more'
-      const longWrapper = mountComponent({
-        log: createLog({ raw: { url: `https://example.com${longPath}` } }),
+      const longWrapper = storeAndMount({
+        id: 2,
+        raw: { url: `https://example.com${longPath}` },
       })
       expect(longWrapper.vm.sessionUrlDisplay.length).toBeLessThanOrEqual(50)
       expect(longWrapper.vm.sessionUrlDisplay).toContain('...')
 
-      const noUrl = mountComponent({ log: createLog({ raw: {} }) })
+      const noUrl = storeAndMount({ id: 3, raw: {} })
       expect(noUrl.vm.sessionUrl).toBeNull()
       expect(noUrl.vm.sessionUrlDisplay).toBeNull()
     })
@@ -309,7 +339,7 @@ describe('ModSystemLogEntry', () => {
       [{ subject: 'WANTED: Table' }, 'WANTED: Table'],
       [{}, null],
     ])('returns subject from raw=%p', (raw, expected) => {
-      const wrapper = mountComponent({ log: createLog({ raw }) })
+      const wrapper = storeAndMount({ raw })
       expect(wrapper.vm.messageSubject).toBe(expected)
     })
   })
@@ -320,20 +350,18 @@ describe('ModSystemLogEntry', () => {
       const body = { name: 'Test' }
       const response = { ret: 0 }
 
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            query_params: params,
-            request_body: body,
-            response_body: response,
-          },
-        }),
+      const wrapper = storeAndMount({
+        raw: {
+          query_params: params,
+          request_body: body,
+          response_body: response,
+        },
       })
       expect(wrapper.vm.queryParams).toEqual(params)
       expect(wrapper.vm.requestBody).toEqual(body)
       expect(wrapper.vm.responseBody).toEqual(response)
 
-      const emptyWrapper = mountComponent({ log: createLog({ raw: {} }) })
+      const emptyWrapper = storeAndMount({ id: 2, raw: {} })
       expect(emptyWrapper.vm.queryParams).toBeNull()
       expect(emptyWrapper.vm.requestBody).toBeNull()
       expect(emptyWrapper.vm.responseBody).toBeNull()
@@ -342,21 +370,13 @@ describe('ModSystemLogEntry', () => {
 
   describe('isApiLog and requestId computed', () => {
     it('returns true for api source and request_id from raw', () => {
-      expect(
-        mountComponent({ log: createLog({ source: 'api' }) }).vm.isApiLog
-      ).toBe(true)
-      expect(
-        mountComponent({ log: createLog({ source: 'client' }) }).vm.isApiLog
-      ).toBe(false)
+      expect(storeAndMount({ source: 'api' }).vm.isApiLog).toBe(true)
+      expect(storeAndMount({ id: 2, source: 'client' }).vm.isApiLog).toBe(false)
 
       expect(
-        mountComponent({
-          log: createLog({ raw: { request_id: 'abc123' } }),
-        }).vm.requestId
+        storeAndMount({ id: 3, raw: { request_id: 'abc123' } }).vm.requestId
       ).toBe('abc123')
-      expect(
-        mountComponent({ log: createLog({ raw: {} }) }).vm.requestId
-      ).toBeNull()
+      expect(storeAndMount({ id: 4, raw: {} }).vm.requestId).toBeNull()
     })
   })
 
@@ -367,8 +387,8 @@ describe('ModSystemLogEntry', () => {
       ['Safari/605.1.15', 'Safari'],
       ['Edg/120.0.0.0', 'Edge'],
     ])('detects %s browser', (ua, browser) => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { user_agent: `Mozilla/5.0 ${ua}` } }),
+      const wrapper = storeAndMount({
+        raw: { user_agent: `Mozilla/5.0 ${ua}` },
       })
       expect(wrapper.vm.deviceInfo.browser).toBe(browser)
     })
@@ -382,34 +402,30 @@ describe('ModSystemLogEntry', () => {
         uaFragment === 'Windows NT'
           ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0'
           : `Mozilla/5.0 (${uaFragment}; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15`
-      const wrapper = mountComponent({
-        log: createLog({ raw: { user_agent: ua } }),
-      })
+      const wrapper = storeAndMount({ raw: { user_agent: ua } })
       expect(wrapper.vm.deviceInfo.type).toBe(type)
     })
 
     it('includes screen size and app info when available', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent: 'Mozilla/5.0 Chrome/120.0',
-            viewport_width: 1920,
-            viewport_height: 1080,
-            app_platform: 'ios',
-            app_model: 'iPhone 15',
-            app_manufacturer: 'Apple',
-            app_version: '2.1.0',
-          },
-        }),
+      const wrapper = storeAndMount({
+        raw: {
+          user_agent: 'Mozilla/5.0 Chrome/120.0',
+          viewport_width: 1920,
+          viewport_height: 1080,
+          app_platform: 'ios',
+          app_model: 'iPhone 15',
+          app_manufacturer: 'Apple',
+          app_version: '2.1.0',
+        },
       })
-      expect(wrapper.vm.deviceInfo.screenSize).toBe('1920×1080')
+      expect(wrapper.vm.deviceInfo.screenSize).toBe('1920\u00D71080')
       expect(wrapper.vm.deviceInfo.isApp).toBe(true)
       expect(wrapper.vm.deviceInfo.appPlatform).toBe('ios')
       expect(wrapper.vm.deviceInfo.appModel).toBe('iPhone 15')
     })
 
     it('returns null when no user agent', () => {
-      const wrapper = mountComponent({ log: createLog({ raw: {} }) })
+      const wrapper = storeAndMount({ raw: {} })
       expect(wrapper.vm.deviceInfo).toBeNull()
     })
   })
@@ -417,46 +433,44 @@ describe('ModSystemLogEntry', () => {
   describe('hasDeviceInfo computed', () => {
     it('returns truthy when browser known or screenSize available, falsy otherwise', () => {
       expect(
-        mountComponent({
-          log: createLog({ raw: { user_agent: 'Mozilla/5.0 Chrome/120.0' } }),
+        storeAndMount({
+          raw: { user_agent: 'Mozilla/5.0 Chrome/120.0' },
         }).vm.hasDeviceInfo
       ).toBeTruthy()
 
       expect(
-        mountComponent({
-          log: createLog({
-            raw: {
-              user_agent: 'Mozilla/5.0',
-              viewport_width: 1920,
-              viewport_height: 1080,
-            },
-          }),
+        storeAndMount({
+          id: 2,
+          raw: {
+            user_agent: 'Mozilla/5.0',
+            viewport_width: 1920,
+            viewport_height: 1080,
+          },
         }).vm.hasDeviceInfo
       ).toBeTruthy()
 
       expect(
-        mountComponent({
-          log: createLog({ raw: { user_agent: 'CustomBot/1.0' } }),
+        storeAndMount({
+          id: 3,
+          raw: { user_agent: 'CustomBot/1.0' },
         }).vm.hasDeviceInfo
       ).toBeFalsy()
 
-      expect(
-        mountComponent({ log: createLog({ raw: {} }) }).vm.hasDeviceInfo
-      ).toBeFalsy()
+      expect(storeAndMount({ id: 4, raw: {} }).vm.hasDeviceInfo).toBeFalsy()
     })
   })
 
   describe('sentryEventId and sentryUrl computed', () => {
     it('returns event ID and URL when present, null otherwise', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { sentry_event_id: 'abc123def456' } }),
+      const wrapper = storeAndMount({
+        raw: { sentry_event_id: 'abc123def456' },
       })
       expect(wrapper.vm.sentryEventId).toBe('abc123def456')
       expect(wrapper.vm.sentryUrl).toBe(
         'https://freegle.sentry.io/issues/?query=abc123def456'
       )
 
-      const emptyWrapper = mountComponent({ log: createLog({ raw: {} }) })
+      const emptyWrapper = storeAndMount({ id: 2, raw: {} })
       expect(emptyWrapper.vm.sentryEventId).toBeNull()
       expect(emptyWrapper.vm.sentryUrl).toBeNull()
     })
@@ -467,8 +481,10 @@ describe('ModSystemLogEntry', () => {
       mockUserStore.list = { 123: { id: 123, displayname: 'Test User' } }
       mockGroupStore.list = { 789: { id: 789, nameshort: 'TestGroup' } }
 
-      const wrapper = mountComponent({
-        log: createLog({ user_id: 123, byuser_id: 456, group_id: 789 }),
+      const wrapper = storeAndMount({
+        user_id: 123,
+        byuser_id: 456,
+        group_id: 789,
       })
       expect(wrapper.vm.displayUser).toEqual({
         id: 123,
@@ -480,8 +496,11 @@ describe('ModSystemLogEntry', () => {
         nameshort: 'TestGroup',
       })
 
-      const noIds = mountComponent({
-        log: createLog({ user_id: null, byuser_id: null, group_id: null }),
+      const noIds = storeAndMount({
+        id: 2,
+        user_id: null,
+        byuser_id: null,
+        group_id: null,
       })
       expect(noIds.vm.displayUser).toBeNull()
       expect(noIds.vm.byUser).toBeNull()
@@ -492,29 +511,32 @@ describe('ModSystemLogEntry', () => {
   describe('formattedRaw computed', () => {
     it('returns formatted JSON or empty object', () => {
       const raw = { key: 'value', nested: { a: 1 } }
-      expect(mountComponent({ log: createLog({ raw }) }).vm.formattedRaw).toBe(
+      expect(storeAndMount({ raw }).vm.formattedRaw).toBe(
         JSON.stringify(raw, null, 2)
       )
 
-      expect(
-        mountComponent({ log: createLog({ raw: undefined }) }).vm.formattedRaw
-      ).toBe('{}')
+      expect(storeAndMount({ id: 2, raw: undefined }).vm.formattedRaw).toBe(
+        '{}'
+      )
     })
   })
 
   describe('count badge and expanded entries', () => {
     it('shows count badge when count > 1 and toggles expanded entries on click', async () => {
-      const wrapper = mountComponent({ count: 1 })
+      const wrapper = storeAndMount({}, { count: 1 })
       expect(wrapper.find('.count-badge').exists()).toBe(false)
 
-      const multiWrapper = mountComponent({
-        count: 3,
-        entries: [
-          { id: 1, timestamp: '2024-01-15T10:00:00Z' },
-          { id: 2, timestamp: '2024-01-15T10:15:00Z' },
-          { id: 3, timestamp: '2024-01-15T10:30:00Z' },
-        ],
-      })
+      const multiWrapper = storeAndMount(
+        {},
+        {
+          count: 3,
+          entries: [
+            { id: 1, timestamp: '2024-01-15T10:00:00Z' },
+            { id: 2, timestamp: '2024-01-15T10:15:00Z' },
+            { id: 3, timestamp: '2024-01-15T10:30:00Z' },
+          ],
+        }
+      )
       expect(multiWrapper.find('.count-badge').exists()).toBe(true)
       expect(multiWrapper.text()).toContain('3x')
       expect(multiWrapper.vm.isExpanded).toBe(false)
@@ -532,9 +554,11 @@ describe('ModSystemLogEntry', () => {
 
   describe('user column visibility', () => {
     it('shows by default, hides when hideUserColumn is true', () => {
-      expect(mountComponent().find('.log-col-user').exists()).toBe(true)
+      expect(storeAndMount().find('.log-col-user').exists()).toBe(true)
       expect(
-        mountComponent({ hideUserColumn: true }).find('.log-col-user').exists()
+        storeAndMount({}, { hideUserColumn: true })
+          .find('.log-col-user')
+          .exists()
       ).toBe(false)
     })
   })
@@ -548,25 +572,23 @@ describe('ModSystemLogEntry', () => {
           profile: { url: 'photo.jpg' },
         },
       }
-      const withUser = mountComponent({ log: createLog({ user_id: 123 }) })
+      const withUser = storeAndMount({ user_id: 123 })
       expect(withUser.find('.user-display').exists()).toBe(true)
       expect(withUser.text()).toContain('Test User')
 
       mockUserStore.list = {}
-      const loading = mountComponent({ log: createLog({ user_id: 123 }) })
+      const loading = storeAndMount({ id: 2, user_id: 123 })
       expect(loading.find('.user-placeholder').exists()).toBe(true)
       expect(loading.text()).toContain('#123')
 
-      const anon = mountComponent({
-        log: createLog({ source: 'api', user_id: null }),
-      })
+      const anon = storeAndMount({ id: 3, source: 'api', user_id: null })
       expect(anon.text()).toContain('Anon')
     })
   })
 
   describe('details modal', () => {
     it('opens on details button click and shows modal content', async () => {
-      const wrapper = mountComponent()
+      const wrapper = storeAndMount()
       expect(wrapper.vm.showModal).toBe(false)
       await wrapper.find('.details-btn').trigger('click')
       expect(wrapper.vm.showModal).toBe(true)
@@ -576,8 +598,9 @@ describe('ModSystemLogEntry', () => {
 
   describe('emits', () => {
     it('emits filter-ip when IP clicked', async () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'api', raw: { ip: '192.168.1.1' } }),
+      const wrapper = storeAndMount({
+        source: 'api',
+        raw: { ip: '192.168.1.1' },
       })
       await wrapper.find('.ip-address').trigger('click')
       expect(wrapper.emitted('filter-ip')).toBeTruthy()
@@ -596,11 +619,9 @@ describe('ModSystemLogEntry', () => {
     ])(
       '%s emits %s and closes modal',
       async (method, event, logProp, logValue) => {
-        const log =
-          logProp === 'raw'
-            ? createLog({ raw: logValue })
-            : createLog({ [logProp]: logValue })
-        const wrapper = mountComponent({ log })
+        const logOverrides =
+          logProp === 'raw' ? { raw: logValue } : { [logProp]: logValue }
+        const wrapper = storeAndMount(logOverrides)
         await wrapper.find('.details-btn').trigger('click')
         wrapper.vm[method]()
         expect(wrapper.emitted(event)).toBeTruthy()
@@ -611,7 +632,7 @@ describe('ModSystemLogEntry', () => {
 
   describe('methods', () => {
     it('toggleExpanded, formatEntryTime, and formatJson work correctly', () => {
-      const wrapper = mountComponent()
+      const wrapper = storeAndMount()
       expect(wrapper.vm.isExpanded).toBe(false)
       wrapper.vm.toggleExpanded()
       expect(wrapper.vm.isExpanded).toBe(true)
@@ -631,9 +652,7 @@ describe('ModSystemLogEntry', () => {
     it('fetches user/group when not in store, skips when already present', () => {
       mockUserStore.list = {}
       mockGroupStore.list = {}
-      mountComponent({
-        log: createLog({ user_id: 123, byuser_id: 456, group_id: 789 }),
-      })
+      storeAndMount({ user_id: 123, byuser_id: 456, group_id: 789 })
       expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
       expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
       expect(mockGroupStore.fetch).toHaveBeenCalledWith(789)
@@ -641,9 +660,7 @@ describe('ModSystemLogEntry', () => {
       vi.clearAllMocks()
       mockUserStore.list = { 123: { id: 123 } }
       mockGroupStore.list = { 789: { id: 789 } }
-      mountComponent({
-        log: createLog({ user_id: 123, group_id: 789 }),
-      })
+      storeAndMount({ id: 2, user_id: 123, group_id: 789 })
       expect(mockUserStore.fetch).not.toHaveBeenCalled()
       expect(mockGroupStore.fetch).not.toHaveBeenCalled()
     })
@@ -652,29 +669,24 @@ describe('ModSystemLogEntry', () => {
   describe('laravelLevel computed', () => {
     it('returns parsed level for laravel-batch, null for others', () => {
       expect(
-        mountComponent({ log: createLog({ source: 'laravel-batch' }) }).vm
-          .laravelLevel
+        storeAndMount({ source: 'laravel-batch' }).vm.laravelLevel
       ).toEqual({ level: 'INFO', variant: 'info' })
-      expect(
-        mountComponent({ log: createLog({ source: 'api' }) }).vm.laravelLevel
-      ).toBeNull()
+      expect(storeAndMount({ id: 2, source: 'api' }).vm.laravelLevel).toBeNull()
     })
   })
 
   describe('group and message display', () => {
     it('shows group tag/id and message tag based on availability', () => {
       mockGroupStore.list = { 789: { id: 789, nameshort: 'TestGroup' } }
-      const withGroup = mountComponent({ log: createLog({ group_id: 789 }) })
+      const withGroup = storeAndMount({ group_id: 789 })
       expect(withGroup.find('.group-tag').exists()).toBe(true)
       expect(withGroup.text()).toContain('TestGroup')
 
       mockGroupStore.list = {}
-      const noGroupData = mountComponent({ log: createLog({ group_id: 789 }) })
+      const noGroupData = storeAndMount({ id: 2, group_id: 789 })
       expect(noGroupData.text()).toContain('group #789')
 
-      const withMessage = mountComponent({
-        log: createLog({ message_id: 555 }),
-      })
+      const withMessage = storeAndMount({ id: 3, message_id: 555 })
       expect(withMessage.find('.message-tag').exists()).toBe(true)
     })
   })
@@ -682,43 +694,35 @@ describe('ModSystemLogEntry', () => {
   describe('sentry indicator', () => {
     it('shows when sentryEventId present, hides otherwise', () => {
       expect(
-        mountComponent({
-          log: createLog({ raw: { sentry_event_id: 'abc123' } }),
-        })
+        storeAndMount({ raw: { sentry_event_id: 'abc123' } })
           .find('.sentry-indicator')
           .exists()
       ).toBe(true)
       expect(
-        mountComponent({ log: createLog({ raw: {} }) })
-          .find('.sentry-indicator')
-          .exists()
+        storeAndMount({ id: 2, raw: {} }).find('.sentry-indicator').exists()
       ).toBe(false)
     })
   })
 
   describe('device info display', () => {
     it('shows device info summary with screen and app chips when available', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent: 'Mozilla/5.0 Chrome/120.0',
-            viewport_width: 1920,
-            viewport_height: 1080,
-            app_platform: 'ios',
-            app_model: 'iPhone 15',
-            app_manufacturer: 'Apple',
-          },
-        }),
+      const wrapper = storeAndMount({
+        raw: {
+          user_agent: 'Mozilla/5.0 Chrome/120.0',
+          viewport_width: 1920,
+          viewport_height: 1080,
+          app_platform: 'ios',
+          app_model: 'iPhone 15',
+          app_manufacturer: 'Apple',
+        },
       })
       expect(wrapper.find('.device-info-summary').exists()).toBe(true)
       expect(wrapper.find('.screen-chip').exists()).toBe(true)
-      expect(wrapper.text()).toContain('1920×1080')
+      expect(wrapper.text()).toContain('1920\u00D71080')
       expect(wrapper.find('.app-chip').exists()).toBe(true)
 
       expect(
-        mountComponent({ log: createLog({ raw: {} }) })
-          .find('.device-info-summary')
-          .exists()
+        storeAndMount({ id: 2, raw: {} }).find('.device-info-summary').exists()
       ).toBe(false)
     })
   })
@@ -728,19 +732,21 @@ describe('ModSystemLogEntry', () => {
       mockUserStore.list = { 123: { id: 123, displayname: 'John Doe' } }
       mockGroupStore.list = { 789: { id: 789, nameshort: 'FreegleTest' } }
 
-      const withDuration = mountComponent({
-        log: createLog({ text: 'API call (250ms)' }),
-      })
+      const withDuration = storeAndMount({ text: 'API call (250ms)' })
       expect(withDuration.vm.actionTextClean).not.toContain('(250ms)')
 
-      const withUser = mountComponent({
-        log: createLog({ user_id: 123, text: 'Action by user #123' }),
+      const withUser = storeAndMount({
+        id: 2,
+        user_id: 123,
+        text: 'Action by user #123',
       })
       expect(withUser.vm.actionTextClean).toContain('John Doe')
       expect(withUser.vm.actionTextClean).not.toContain('user #123')
 
-      const withGroup = mountComponent({
-        log: createLog({ group_id: 789, text: 'Joined group #789' }),
+      const withGroup = storeAndMount({
+        id: 3,
+        group_id: 789,
+        text: 'Joined group #789',
       })
       expect(withGroup.vm.actionTextClean).toContain('FreegleTest')
       expect(withGroup.vm.actionTextClean).not.toContain('group #789')

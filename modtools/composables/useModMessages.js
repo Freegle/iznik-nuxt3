@@ -24,6 +24,7 @@ const workType = ref(null)
 const show = ref(0)
 
 const collection = ref(null)
+const listingIds = ref(new Set())
 const messageTerm = ref(null)
 const memberTerm = ref(null)
 const nextAfterRemoved = ref(null)
@@ -45,6 +46,13 @@ const messages = computed(() => {
     messages = messageStore.getByGroup(groupid.value)
   } else {
     messages = messageStore.all
+  }
+
+  // Filter to only messages from the current listing request.
+  // The store accumulates messages from various sources (user history,
+  // crossposts, other pages) — only show ones from our listing.
+  if (listingIds.value.size > 0) {
+    messages = messages.filter((m) => listingIds.value.has(m.id))
   }
   // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
@@ -94,6 +102,7 @@ export function setupModMessages(reset) {
     limit.value = 10
     workType.value = null
     show.value = 0
+    listingIds.value = new Set()
 
     collection.value = null
     messageTerm.value = null
@@ -123,18 +132,27 @@ export function setupModMessages(reset) {
     // console.log('uMM getMessages',params.limit)
     // params.debug = 'uMM getMessages',
     messageStore.clear()
-    await messageStore.fetchMessagesMT(params)
-
-    // Force them to show.
-    let messages
-
-    if (groupid.value) {
-      messages = messageStore.getByGroup(groupid.value)
-    } else {
-      messages = messageStore.all
+    listingIds.value = new Set()
+    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    if (fetchedIds) {
+      fetchedIds.forEach((id) => listingIds.value.add(id))
     }
 
-    show.value = messages.length
+    // Force them to show.
+    let msgs
+
+    if (groupid.value) {
+      msgs = messageStore.getByGroup(groupid.value)
+    } else {
+      msgs = messageStore.all
+    }
+
+    // Filter to listing IDs only.
+    if (listingIds.value.size > 0) {
+      msgs = msgs.filter((m) => listingIds.value.has(m.id))
+    }
+
+    show.value = msgs.length
   }
 
   const work = computed(() => {
@@ -237,6 +255,7 @@ export function setupModMessages(reset) {
     summarykey,
     summary,
     messages,
+    listingIds,
     visibleMessages,
     work,
     getMessages,

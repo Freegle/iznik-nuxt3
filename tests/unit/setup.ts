@@ -1,5 +1,6 @@
 import { vi, beforeEach, afterEach } from 'vitest'
 import { config } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import {
   ref,
   computed,
@@ -114,7 +115,6 @@ const mockNuxtApp = {
 // Mock useRuntimeConfig
 ;(globalThis as Record<string, unknown>).useRuntimeConfig = () => ({
   public: {
-    APIv1: 'http://apiv1.localhost',
     APIv2: 'http://apiv2.localhost',
     USER_SITE: '',
     GOOGLE_MAPS_KEY: 'test-key',
@@ -215,9 +215,19 @@ config.global.stubs = {
 }
 
 // ============================================
+// PINIA SETUP - Provide active Pinia for each test
+// ============================================
+// Components that use Pinia stores directly (e.g. useUserStore()) need
+// an active Pinia instance. setActivePinia makes stores work even when
+// the test doesn't explicitly install Pinia via mount plugins.
+// Tests that provide their own Pinia (via vi.mock or global.plugins)
+// take precedence — setActivePinia just ensures a fallback exists.
+
+// ============================================
 // RESET BETWEEN TESTS
 // ============================================
 beforeEach(() => {
+  setActivePinia(createPinia())
   vi.clearAllMocks()
 })
 

@@ -11,9 +11,6 @@ export const useImageStore = defineStore({
     async post(data) {
       return await api(this.config).image.post(data)
     },
-    async postForm(data) {
-      return await api(this.config).image.postForm(data, false)
-    },
     async rateRecognise(id, rating) {
       return await api(this.config).image.post({
         id,

@@ -137,8 +137,9 @@ watch(search, (newVal, oldVal) => {
   if (!newVal) {
     // Force a refresh to remove any old chats.
     listChats()
-  } else {
+  } else if (newVal.length > 2) {
     // Force a server search to pick up old chats or more subtle matches.
+    // Only search when the term is long enough to be meaningful.
     searchMore()
   }
 })
@@ -163,16 +164,20 @@ function scanChats(closed, chatList) {
   // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
   let result = chatList ? [...chatList] : []
 
-  if (result.length && search.value && searching.value) {
+  if (result.length && search.value) {
     const l = search.value.toLowerCase()
     result = result.filter((chat) => {
+      // The API flags chats found via message content search with search=true.
+      if (chat.search) {
+        return true
+      }
+
       if (
         chat.name.toLowerCase().includes(l) ||
         (chat.snippet &&
           typeof chat.snippet === 'string' &&
           chat.snippet.toLowerCase().includes(l))
       ) {
-        // Found in the name of the chat (which may include a user
         return true
       }
 
@@ -195,13 +200,8 @@ function scanChats(closed, chatList) {
     })
   }
 
-  // Sort to show unseen first then more recent first
+  // Sort by most recent first.
   result.sort((a, b) => {
-    if (a.unseen === 0 && b.unseen > 0) {
-      return 1
-    } else if (a.unseen > 0 && b.unseen === 0) {
-      return -1
-    }
     if (a.lastdate && b.lastdate) {
       return dayjs(b.lastdate).diff(dayjs(a.lastdate))
     } else if (a.lastdate) {
@@ -219,16 +219,18 @@ function scanChats(closed, chatList) {
 function loadMore($state) {
   // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
   // we render onscreen the faster vue is to do so.
+  //
+  // Never call $state.complete() here — the chat list can grow asynchronously as
+  // the API returns more data, and complete() permanently stops the observer.
+  // Instead always call loaded() and let the visibility check naturally pause
+  // when the loader scrolls out of view.
   const chatList = filteredChats.value
-  showChats.value++
 
-  if (showChats.value > chatList.length) {
-    showChats.value = chatList.length
-    $state.complete()
-    complete.value = true
-  } else {
-    $state.loaded()
+  if (showChats.value < chatList.length) {
+    showChats.value++
   }
+
+  $state.loaded()
 }
 
 async function markAllRead() {
@@ -288,7 +290,8 @@ onMounted(async () => {
 }
 
 .active {
-  background-color: $color-gray--lighter;
+  background-color: #e3f0ff;
+  border-left: 3px solid $color-blue--bright;
 }
 
 .chatlist {

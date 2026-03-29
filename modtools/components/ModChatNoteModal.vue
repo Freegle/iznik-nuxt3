@@ -49,7 +49,7 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useNuxtApp } from '#app'
+
 import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { untwem } from '~/composables/useTwem'
@@ -64,7 +64,6 @@ const props = defineProps({
 
 const emit = defineEmits(['hidden'])
 
-const { $api } = useNuxtApp()
 const chatStore = useChatStore()
 const { modal, hide } = useOurModal()
 const { myGroup } = useMe()
@@ -100,12 +99,7 @@ async function addit() {
 
   console.log('addit', msg)
 
-  // Send it (direct)
-  await $api.chat.sendMT({
-    roomid: props.chatid,
-    message: msg,
-    modnote: true,
-  })
+  await chatStore.send(props.chatid, msg)
 
   hide()
 }

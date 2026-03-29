@@ -10,16 +10,24 @@ export default class UserAPI extends BaseAPI {
   }
 
   // Fetch multiple users in a single request
-  async fetchMultiple(ids) {
+  async fetchMultiple(ids, modtools = false) {
     if (!ids || !ids.length) {
       return []
     }
 
-    return await this.$getv2('/user/' + ids.join(','))
+    const params = modtools ? { modtools: true } : {}
+    return await this.$getv2('/user/' + ids.join(','), params)
   }
 
   async fetchMT(params) {
-    return await this.$get('/user', params)
+    const { id, ...rest } = params
+    const data = await this.$getv2('/user/' + id, { modtools: true, ...rest })
+    // Go returns the user directly; wrap for store compatibility
+    return { user: data }
+  }
+
+  async search(q) {
+    return await this.$getv2('/user/search', { q })
   }
 
   async fetchByEmail(email, logError = true) {
@@ -30,8 +38,37 @@ export default class UserAPI extends BaseAPI {
     return await this.$getv2('/user/' + id + '/publiclocation')
   }
 
+  // Support tools: per-user data endpoints (mod-only).
+  async fetchChatrooms(id) {
+    return await this.$getv2('/user/' + id + '/chatrooms')
+  }
+
+  async fetchEmailHistory(id) {
+    return await this.$getv2('/user/' + id + '/emailhistory')
+  }
+
+  async fetchBans(id) {
+    return await this.$getv2('/user/' + id + '/bans')
+  }
+
+  async fetchNewsfeed(id) {
+    return await this.$getv2('/user/' + id + '/newsfeed')
+  }
+
+  async fetchApplied(id) {
+    return await this.$getv2('/user/' + id + '/applied')
+  }
+
+  async fetchMembershipHistory(id) {
+    return await this.$getv2('/user/' + id + '/membershiphistory')
+  }
+
+  async fetchLogins(id) {
+    return await this.$getv2('/user/' + id + '/logins')
+  }
+
   rate(id, rating, reason, text) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       ratee: id,
       rating,
       action: 'Rate',
@@ -41,34 +78,34 @@ export default class UserAPI extends BaseAPI {
   }
 
   ratingReviewed(ratingid) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       ratingid,
       action: 'RatingReviewed',
     })
   }
 
   unbounce(id) {
-    return this.$post('/user', { id, action: 'Unbounce' })
+    return this.$postv2('/user', { id, action: 'Unbounce' })
   }
 
   addEmail(id, email, primary) {
-    return this.$post('/user', { id, action: 'AddEmail', email, primary })
+    return this.$postv2('/user', { id, action: 'AddEmail', email, primary })
   }
 
   removeEmail(id, email) {
-    return this.$post('/user', { id, action: 'RemoveEmail', email })
+    return this.$postv2('/user', { id, action: 'RemoveEmail', email })
   }
 
   add(email, logError = true) {
-    return this.$put('/user', { email }, logError)
+    return this.$putv2('/user', { email }, logError)
   }
 
   signUp(params, logError = true) {
-    return this.$put('/user', params, logError)
+    return this.$putv2('/user', params, logError)
   }
 
   merge(email1, email2, id1, id2, reason) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       email1,
       email2,
       id1,
@@ -79,31 +116,31 @@ export default class UserAPI extends BaseAPI {
   }
 
   save(event) {
-    return this.$patch('/user', event)
+    return this.$patchv2('/user', event)
   }
 
   muteOnChitChat(userid) {
-    return this.$patch('/user', {
+    return this.$patchv2('/user', {
       id: userid,
       newsfeedmodstatus: 'Suppressed',
     })
   }
 
   unMuteOnChitChat(userid) {
-    return this.$patch('/user', {
+    return this.$patchv2('/user', {
       id: userid,
       newsfeedmodstatus: 'Unmoderated',
     })
   }
 
   purge(id) {
-    return this.$del('/user', {
+    return this.$delv2('/user', {
       id,
     })
   }
 
   engaged(engageid) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       engageid,
     })
   }

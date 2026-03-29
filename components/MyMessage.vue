@@ -88,7 +88,17 @@
                     :inline="true"
                     class="title-tag ps-1 pe-1"
                   />
-                  <span class="title-subject">{{ strippedSubject }}</span>
+                  <span class="title-subject"
+                    >{{ strippedSubject }}
+                    <b-badge
+                      v-if="message.availablenow > 1"
+                      variant="info"
+                      class="ms-1"
+                      style="font-size: 0.55em; vertical-align: middle"
+                    >
+                      {{ message.availablenow }} available
+                    </b-badge></span
+                  >
                 </div>
                 <div class="photo-actions">
                   <button class="photo-action-btn" @click.stop="share">
@@ -1066,6 +1076,7 @@ onMounted(async () => {
   padding: 6px 12px;
   border: none;
   border-radius: var(--radius-xl, 1.25rem);
+  corner-shape: round;
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -1100,7 +1111,8 @@ onMounted(async () => {
 
   &--light {
     background: $color-gray--lighter;
-    color: var(--color-gray-600);
+    color: var(--color-gray-700, #495057);
+    border: 1px solid var(--color-gray-400, #ced4da);
 
     &:hover {
       background: darken($color-gray--lighter, 10%);

@@ -27,17 +27,11 @@ function useChatSharedMT(chatId) {
     let user = null
 
     if (!otheruid) {
-      // MT: try user1id or user1.id
-      otheruid = chat.value?.user1id || chat.value?.user1?.id
+      otheruid = chat.value?.user1
     }
 
     if (otheruid) {
       user = userStore.byId(otheruid)
-    }
-
-    // Final fallback: use user1 object directly if available
-    if (!user && chat.value?.user1) {
-      user = chat.value.user1
     }
 
     return user
@@ -136,7 +130,8 @@ export async function fetchReferencedMessageMT(chatid, id) {
 
 // MT-specific chat message base composable with pov support
 export function useChatMessageBaseMT(chatId, messageId, pov = null) {
-  const { chatStore, authStore, chat, otheruser } = useChatSharedMT(chatId)
+  const { chatStore, userStore, authStore, chat, otheruser } =
+    useChatSharedMT(chatId)
   const messageStore = useMessageStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
@@ -165,14 +160,14 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
   const messageIsFromCurrentUser = computed(() => {
     if (chat.value?.chattype === 'User2User') {
       // For User2User chats viewed by support, use pov to determine perspective
-      if (pov === chat.value?.user1id) {
-        return chat.value?.user1id === chatmessage.value?.userid
+      if (pov === chat.value?.user1) {
+        return chat.value?.user1 === chatmessage.value?.userid
       } else {
-        return chat.value?.user1id !== chatmessage.value?.userid
+        return chat.value?.user1 !== chatmessage.value?.userid
       }
     }
     // For User2Mod chats, messages from user1 (the member) appear on the left
-    return chat.value?.user1id !== chatmessage.value?.userid
+    return chat.value?.user1 !== chatmessage.value?.userid
   })
 
   // MT: refmsg may already be populated directly on the message
@@ -190,17 +185,21 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
     return authStore.user
   })
 
-  // MT: me respects pov for viewing chats from different perspectives
+  // MT: me respects pov for viewing chats from different perspectives.
+  // user1/user2 are numeric IDs from V2 API — resolve from store.
   const me = computed(() => {
     if (!pov) {
       return realMe.value
-    } else if (chat.value?.user1 && chat.value.user1.id === pov) {
-      return chat.value.user1
-    } else if (chat.value?.user2 && chat.value.user2.id === pov) {
-      return chat.value.user2
-    } else {
-      return realMe.value
     }
+
+    const u1 = chat.value?.user1 || chat.value?.user1id
+    const u2 = chat.value?.user2 || chat.value?.user2id
+
+    if (u1 === pov || u2 === pov) {
+      return userStore.byId(pov) || realMe.value
+    }
+
+    return realMe.value
   })
 
   const myid = computed(() => {
@@ -209,14 +208,16 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
 
   // MT: Profile image based on user1 (the member)
   const chatMessageProfileImage = computed(() => {
-    return chat.value?.user1id !== chatmessage.value?.userid
-      ? me.value?.profile?.turl
-      : otheruser.value?.profile?.turl || chat.value?.icon
+    return chat.value?.user1 !== chatmessage.value?.userid
+      ? me.value?.profile?.turl || me.value?.profile?.paththumb
+      : otheruser.value?.profile?.turl ||
+          otheruser.value?.profile?.paththumb ||
+          chat.value?.icon
   })
 
   // MT: Profile name based on user1 (the member)
   const chatMessageProfileName = computed(() => {
-    return chat.value?.user1id !== chatmessage.value?.userid
+    return chat.value?.user1 !== chatmessage.value?.userid
       ? me.value?.displayname
       : otheruser.value?.displayname
   })

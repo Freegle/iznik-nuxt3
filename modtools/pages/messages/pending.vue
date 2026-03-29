@@ -85,6 +85,7 @@ const {
   distance,
   summarykey,
   messages,
+  listingIds,
   visibleMessages,
   nextAfterRemoved,
   getMessages,
@@ -123,7 +124,7 @@ const rulesGroup = computed(() => {
   const mygroupsList = myGroups.value // myGroups has correct role
   for (const groupItem of groups.value) {
     const mygroup = mygroupsList.find((g) => g.id === groupItem.id)
-    const groupRules = groupItem.rules ? JSON.parse(groupItem.rules) : null
+    const groupRules = groupItem.rules || null
     const missingRules = groupItem.rules
       ? [
           'limitgroups',
@@ -240,9 +241,10 @@ async function loadMore($state) {
     console.log('Ignore load more on MT page with no session.')
     $state.complete()
   } else if (show.value < messages.value.length) {
-    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-    show.value++
+    // Show all fetched messages at once.  Previously we incremented by 1, but that caused the
+    // InfiniteLoading loader div to scroll below the viewport after ~9 messages, making
+    // visible=false and stopping further progressive reveal.
+    show.value = messages.value.length
     $state.loaded()
   } else {
     const currentCount = Object.keys(messageStore.list).length
@@ -256,7 +258,10 @@ async function loadMore($state) {
       limit: messages.value.length + distance.value,
     }
 
-    await messageStore.fetchMessagesMT(params)
+    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    if (fetchedIds) {
+      fetchedIds.forEach((id) => listingIds.value.add(id))
+    }
     context.value = messageStore.context
 
     if (currentCount === Object.keys(messageStore.list).length) {

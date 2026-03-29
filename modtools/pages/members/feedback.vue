@@ -79,7 +79,7 @@
             :key="'ratinglist-' + item.id"
             class="p-0 mt-2"
           >
-            <ModMemberRating :rating="item" class="mt-2" />
+            <ModMemberRating :ratingid="item.id" class="mt-2" />
           </div>
         </b-tab>
       </b-tabs>
@@ -274,7 +274,7 @@ async function markAll() {
       }
     })
   })
-  fetchMe(true, ['work'])
+  fetchMe(true)
 }
 
 // Lifecycle

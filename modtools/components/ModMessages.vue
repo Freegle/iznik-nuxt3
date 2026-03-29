@@ -8,7 +8,7 @@
     >
       <div :ref="'top' + message.id" />
       <ModMessage
-        :message="message"
+        :messageid="message.id"
         :next="
           ix < visibleMessages.length - 1 ? visibleMessages[ix + 1].id : null
         "

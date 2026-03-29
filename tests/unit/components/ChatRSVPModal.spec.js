@@ -71,10 +71,10 @@ describe('ChatRSVPModal', () => {
 
   describe('rsvp actions', () => {
     it.each([
-      ['Yes', 1],
-      ['No', 0],
+      ['Yes', true],
+      ['No', false],
     ])(
-      '%s button calls rsvp with %d when message exists',
+      '%s button calls rsvp with %s when message exists',
       async (buttonText, rsvpValue) => {
         mockData.messages = [{ id: 100, chatid: 123, userid: '1' }]
         const wrapper = createWrapper()
@@ -112,7 +112,7 @@ describe('ChatRSVPModal', () => {
         .findAll('button')
         .find((b) => b.text().includes('Yes'))
       await yesBtn.trigger('click')
-      expect(mockRsvp).toHaveBeenCalledWith(4, 123, 1)
+      expect(mockRsvp).toHaveBeenCalledWith(4, 123, true)
     })
   })
 })

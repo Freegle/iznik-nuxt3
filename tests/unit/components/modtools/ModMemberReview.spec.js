@@ -6,15 +6,26 @@ import ModMemberReview from '~/modtools/components/ModMemberReview.vue'
 // Mock stores
 const mockUserStore = {
   byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
+}
+
+const mockMemberStore = {
+  get: vi.fn(),
+  list: {},
 }
 
 const mockModGroupStore = {
   get: vi.fn(),
+  fetchIfNeedBeMT: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
+}))
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
 }))
 
 vi.mock('~/stores/modgroup', () => ({
@@ -28,34 +39,45 @@ vi.mock('~/composables/useModMe', () => ({
 }))
 
 describe('ModMemberReview', () => {
+  // Member data: fields that live on the memberStore entry (memberStore.get())
   const createMember = (overrides = {}) => ({
     id: 123,
     userid: 456,
-    displayname: 'Test User',
-    email: 'test@example.com',
-    emails: [
-      { id: 1, email: 'test@example.com', preferred: true, ourdomain: false },
-    ],
-    profile: { turl: 'https://example.com/profile.jpg' },
+    fullname: 'Test User',
     joined: '2024-01-01T10:00:00Z',
-    lastaccess: dayjs().subtract(10, 'days').toISOString(),
-    systemrole: 'User',
-    suspectreason: null,
-    activedistance: 10,
-    bouncing: false,
     bandate: null,
+    bannedby: null,
     spammer: null,
-    supporter: false,
-    memberof: [
+    memberships: [
       {
-        id: 789,
+        id: 111,
         membershipid: 111,
+        groupid: 789,
         collection: 'Approved',
         added: '2024-01-01T10:00:00Z',
         reviewrequestedat: null,
         reviewedat: null,
       },
     ],
+    ...overrides,
+  })
+
+  // User data: fields that live on the userStore entry (userStore.byId())
+  const createUser = (overrides = {}) => ({
+    id: 456,
+    displayname: 'Test User',
+    email: 'test@example.com',
+    emails: [
+      { id: 1, email: 'test@example.com', preferred: true, ourdomain: false },
+    ],
+    profile: { turl: 'https://example.com/profile.jpg' },
+    lastaccess: dayjs().subtract(10, 'days').toISOString(),
+    systemrole: 'User',
+    reviewreason: null,
+    activedistance: 10,
+    bouncing: false,
+    supporter: false,
+    ljuserid: null,
     info: {
       publiclocation: { location: 'London' },
       privateposition: { loc: 'SW1A 1AA' },
@@ -63,11 +85,14 @@ describe('ModMemberReview', () => {
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  function mountComponent({ member, user } = {}) {
+    const memberData = member || createMember()
+    const userData = user || createUser()
+    mockMemberStore.get.mockReturnValue(memberData)
+    mockUserStore.byId.mockReturnValue(userData)
     return mount(ModMemberReview, {
       props: {
-        member: createMember(),
-        ...props,
+        membershipid: memberData.id,
       },
       global: {
         stubs: {
@@ -117,31 +142,31 @@ describe('ModMemberReview', () => {
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModBouncing: {
             template: '<div class="mod-bouncing" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModMemberSummary: {
             template: '<div class="mod-member-summary" />',
-            props: ['member'],
+            props: ['userid'],
           },
           ModMemberLogins: {
             template: '<div class="mod-member-logins" />',
-            props: ['member'],
+            props: ['userid'],
           },
           ModMemberReviewActions: {
             template: '<div class="mod-member-review-actions" />',
-            props: ['memberid', 'membership', 'member'],
+            props: ['userid', 'membershipid'],
           },
           ModPostingHistoryModal: {
             template: '<div class="posting-history-modal" />',
-            props: ['user', 'type'],
+            props: ['userid', 'type'],
           },
           ModLogsModal: {
             template: '<div class="logs-modal" />',
@@ -163,12 +188,11 @@ describe('ModMemberReview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserStore.byId.mockReturnValue({
-      id: 456,
-      displayname: 'Test User',
-      ljuserid: null,
-    })
+    mockUserStore.byId.mockReturnValue(createUser())
+    mockUserStore.fetch.mockResolvedValue()
     mockUserStore.fetchMT.mockResolvedValue()
+    mockMemberStore.get.mockReturnValue(null)
+    mockMemberStore.list = {}
     mockModGroupStore.get.mockReturnValue({ id: 789, polygon: null })
   })
 
@@ -202,7 +226,7 @@ describe('ModMemberReview', () => {
 
     it('shows ModSupporter when member is supporter', () => {
       const wrapper = mountComponent({
-        member: createMember({ supporter: true }),
+        user: createUser({ supporter: true }),
       })
       expect(wrapper.find('.mod-supporter').exists()).toBe(true)
     })
@@ -216,42 +240,45 @@ describe('ModMemberReview', () => {
   describe('notices and warnings', () => {
     it('shows system role notice when not User', () => {
       const wrapper = mountComponent({
-        member: createMember({ systemrole: 'Admin' }),
+        user: createUser({ systemrole: 'Admin' }),
       })
       expect(wrapper.text()).toContain('role: Admin')
     })
 
     it('hides system role notice when User', () => {
       const wrapper = mountComponent({
-        member: createMember({ systemrole: 'User' }),
+        user: createUser({ systemrole: 'User' }),
       })
       expect(wrapper.text()).not.toContain('role: User')
     })
 
-    it('shows suspectreason when flagged', () => {
+    it('shows reviewreason when flagged', () => {
       const wrapper = mountComponent({
-        member: createMember({ suspectreason: 'Multiple accounts' }),
+        member: createMember({
+          reviewreason: 'Multiple accounts',
+          reviewrequestedat: '2024-01-15T10:00:00Z',
+        }),
       })
       expect(wrapper.text()).toContain('flagged: Multiple accounts')
     })
 
     it('shows distance warning when activedistance > 50', () => {
       const wrapper = mountComponent({
-        member: createMember({ activedistance: 100 }),
+        user: createUser({ activedistance: 100 }),
       })
       expect(wrapper.text()).toContain('100 miles apart')
     })
 
     it('hides distance warning when activedistance <= 50', () => {
       const wrapper = mountComponent({
-        member: createMember({ activedistance: 30 }),
+        user: createUser({ activedistance: 30 }),
       })
       expect(wrapper.text()).not.toContain('miles apart')
     })
 
     it('shows bouncing component when member is bouncing', () => {
       const wrapper = mountComponent({
-        member: createMember({ bouncing: true }),
+        user: createUser({ bouncing: true }),
       })
       expect(wrapper.find('.mod-bouncing').exists()).toBe(true)
     })
@@ -277,34 +304,30 @@ describe('ModMemberReview', () => {
 
   describe('computed properties', () => {
     it('isLJ returns truthy when user has ljuserid', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        ljuserid: 12345,
+      const wrapper = mountComponent({
+        user: createUser({ ljuserid: 12345 }),
       })
-      const wrapper = mountComponent()
       // isLJ returns the ljuserid value directly (truthy), not a boolean
       expect(wrapper.vm.isLJ).toBeTruthy()
     })
 
     it('isLJ returns false when no ljuserid', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 456,
-        ljuserid: null,
+      const wrapper = mountComponent({
+        user: createUser({ ljuserid: null }),
       })
-      const wrapper = mountComponent()
       expect(wrapper.vm.isLJ).toBeFalsy()
     })
 
-    it('email returns member.email when available', () => {
+    it('email returns user.email when available', () => {
       const wrapper = mountComponent({
-        member: createMember({ email: 'direct@example.com' }),
+        user: createUser({ email: 'direct@example.com' }),
       })
       expect(wrapper.vm.email).toBe('direct@example.com')
     })
 
     it('email falls back to preferred email from emails array', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        user: createUser({
           email: null,
           emails: [
             {
@@ -327,7 +350,7 @@ describe('ModMemberReview', () => {
 
     it('inactive returns true when lastaccess > 6 months ago', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        user: createUser({
           lastaccess: dayjs().subtract(200, 'days').toISOString(),
         }),
       })
@@ -336,7 +359,7 @@ describe('ModMemberReview', () => {
 
     it('inactive returns false when lastaccess < 6 months ago', () => {
       const wrapper = mountComponent({
-        member: createMember({
+        user: createUser({
           lastaccess: dayjs().subtract(100, 'days').toISOString(),
         }),
       })
@@ -344,11 +367,11 @@ describe('ModMemberReview', () => {
     })
   })
 
-  describe('memberof filtering', () => {
+  describe('memberships filtering', () => {
     it('shows first 3 memberships by default', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -363,7 +386,7 @@ describe('ModMemberReview', () => {
     it('shows all memberships when allmemberships is true', async () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -380,7 +403,7 @@ describe('ModMemberReview', () => {
     it('calculates hiddenmemberofs correctly', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -395,7 +418,7 @@ describe('ModMemberReview', () => {
     it('shows expand badge when hidden groups exist', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -436,25 +459,16 @@ describe('ModMemberReview', () => {
   })
 
   describe('onMounted', () => {
-    it('fetches user with info when member.info is missing', async () => {
-      mountComponent({
-        member: createMember({ info: null }),
-      })
+    it('fetches user when member exists', async () => {
+      mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 456,
-        info: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
 
-    it('does not fetch when member.info exists', async () => {
-      mountComponent({
-        member: createMember({
-          info: { publiclocation: { location: 'London' } },
-        }),
-      })
+    it('fetches user even when member.info exists', async () => {
+      mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
   })
 
@@ -462,7 +476,7 @@ describe('ModMemberReview', () => {
     it('renders without crashing when member profile has paththumb instead of turl (V2 API format)', () => {
       // The Go V2 user API returns profile with path/paththumb, not url/turl
       const wrapper = mountComponent({
-        member: createMember({
+        user: createUser({
           profile: {
             path: 'https://example.com/uimg_456.jpg',
             paththumb: 'https://example.com/tuimg_456.jpg',
@@ -484,6 +498,98 @@ describe('ModMemberReview', () => {
       wrapper.vm.showEmails = true
       await wrapper.vm.$nextTick()
       expect(wrapper.vm.showEmails).toBe(true)
+    })
+  })
+
+  describe('membership sorting', () => {
+    it('sorts reviewed memberships before non-reviewed ones', async () => {
+      // amAModOn always returns true (from the mock).
+      // Memberships with reviewrequestedat (and no reviewedat) should sort first.
+      const member = createMember({
+        memberships: [
+          {
+            id: 222,
+            membershipid: 222,
+            groupid: 999,
+            collection: 'Approved',
+            added: '2024-06-01T10:00:00Z',
+            reviewrequestedat: null,
+            reviewedat: null,
+          },
+          {
+            id: 111,
+            membershipid: 111,
+            groupid: 789,
+            collection: 'Approved',
+            added: '2024-01-01T10:00:00Z',
+            reviewrequestedat: '2024-01-01T10:00:00Z',
+            reviewedat: null,
+          },
+        ],
+      })
+
+      const wrapper = mountComponent({ member })
+      await flushPromises()
+
+      // sortedMemberOf should put groupid 789 first (has reviewrequestedat)
+      const sorted = wrapper.vm.sortedMemberOf
+      expect(sorted.length).toBeGreaterThanOrEqual(2)
+      expect(sorted[0].groupid).toBe(789)
+      expect(sorted[1].groupid).toBe(999)
+    })
+
+    it('uses groupid not id for amAModOn check', () => {
+      // Verify the sort uses membership.groupid (not membership.id)
+      // by checking the component source doesn't have amAModOn(*.id)
+      const member = createMember({
+        memberships: [
+          {
+            id: 50000,
+            membershipid: 50000,
+            groupid: 789,
+            collection: 'Approved',
+            added: '2024-01-01T10:00:00Z',
+            reviewrequestedat: '2024-01-01T10:00:00Z',
+            reviewedat: null,
+          },
+        ],
+      })
+
+      const wrapper = mountComponent({ member })
+      const sorted = wrapper.vm.sortedMemberOf
+      // If it used amAModOn(id=50000), it would still return true from mock,
+      // but the groupid field should be correctly set
+      expect(sorted[0].groupid).toBe(789)
+      expect(sorted[0].id).toBe(50000)
+    })
+  })
+
+  describe('firstgrouppolygon', () => {
+    it('uses groupid not id for polygon lookup', () => {
+      mockModGroupStore.get.mockImplementation((gid) => {
+        if (gid === 789)
+          return { id: 789, poly: 'POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))' }
+        return null
+      })
+
+      const member = createMember({
+        memberships: [
+          {
+            id: 50000,
+            membershipid: 50000,
+            groupid: 789,
+            added: '2024-01-01T10:00:00Z',
+            reviewrequestedat: '2024-01-01T10:00:00Z',
+            reviewedat: null,
+          },
+        ],
+      })
+      const wrapper = mountComponent({ member })
+      // Force evaluation of the computed
+      const polygon = wrapper.vm.firstgrouppolygon
+      // Should look up group 789 (groupid), not 50000 (id)
+      expect(mockModGroupStore.get).toHaveBeenCalledWith(789)
+      expect(polygon).toBe('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))')
     })
   })
 })

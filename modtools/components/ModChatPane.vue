@@ -28,7 +28,7 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
-          <ChatTypingIndicator :chatid="id" :icon="chat?.icon" />
+          <ChatTypingIndicator :chatid="id" :icon="chat?.icon || ''" />
           <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -37,7 +37,7 @@
               v-if="index < messagesToShow"
               :id="chatmessage.id"
               :chatid="chatmessage.chatid"
-              :pov="chat?.user1id"
+              :pov="chat?.user1"
               :last="
                 chatmessage.id === chatmessages[chatmessages.length - 1].id
               "
@@ -127,10 +127,9 @@ if (props.id) {
     // Fetch the messages.  No need to wait, as we might already have the messages in store.
     chatStore.fetchMessages(props.id)
 
-    // Fetch the user via v1 API to include comments/notes for MT
-    if (chat.value.user1id) {
-      const otheruid = chat.value.user1id
-      await userStore.fetchMT({ id: otheruid })
+    const otheruid = chat.value.otheruid || chat.value.user1
+    if (otheruid) {
+      await userStore.fetch(otheruid)
       chat.value.otheruid = otheruid
     }
   }
@@ -185,10 +184,9 @@ watch(me, async (newVal, oldVal) => {
 
       chatStore.fetchMessages(props.id)
 
-      // Fetch the user via v1 API to include comments/notes for MT
-      if (chat?.value?.user1id) {
-        const otheruid = chat.value.user1id
-        await userStore.fetchMT({ id: otheruid })
+      if (chat?.value?.user1) {
+        const otheruid = chat.value.user1
+        await userStore.fetch(otheruid)
         chat.value.otheruid = otheruid
       }
     }

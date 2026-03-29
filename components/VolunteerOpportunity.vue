@@ -242,6 +242,7 @@ const volunteering = computed(() => {
   return null
 })
 
+// eslint-disable-next-line no-unused-vars
 const groups = computed(() => {
   const ret = []
   volunteering.value?.groups?.forEach((id) => {

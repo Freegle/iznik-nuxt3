@@ -1,11 +1,9 @@
 <template>
-  <b-card no-body>
+  <b-card v-if="membership" no-body>
     <b-card-body class="p-2">
       <div>
         <strong>{{
-          membership.namedisplay.length > 32
-            ? membership.namedisplay.substring(0, 32) + '...'
-            : membership.namedisplay
+          groupName.length > 32 ? groupName.substring(0, 32) + '...' : groupName
         }}</strong>
         <span
           :class="
@@ -24,27 +22,25 @@
           {{ membership.reviewreason }}
         </span>
       </div>
-      <div v-if="amAModOn(membership.id) && needsReview && membership.heldby">
+      <div v-if="amAModOn(membership.groupid) && needsReview && heldById">
         <NoticeMessage variant="warning" class="mt-2 mb-2">
-          <p v-if="me.id === membership.heldby">
+          <p v-if="myid === heldById">
             You held this member. Other people will see a warning to check with
             you before releasing them.
           </p>
           <p v-else>
             Held by
-            <v-icon icon="hashtag" class="text-muted" scale="0.5" /><strong>{{
-              membership.heldby
-            }}</strong
+            <strong>{{ heldByUser?.displayname }}</strong
             >. Please check before releasing them.
           </p>
         </NoticeMessage>
       </div>
       <div
-        v-if="amAModOn(membership.id) && needsReview"
+        v-if="amAModOn(membership.groupid) && needsReview"
         class="d-flex mt-2 flex-wrap"
       >
         <SpinButton
-          v-if="!membership.heldby || membership.heldby.id === myid"
+          v-if="!heldById || heldById === myid"
           icon-name="check"
           spinclass="success"
           variant="primary"
@@ -53,7 +49,7 @@
           @handle="ignore"
         />
         <SpinButton
-          v-if="!membership.heldby || membership.heldby.id === myid"
+          v-if="!heldById || heldById === myid"
           icon-name="trash-alt"
           spinclass="success"
           variant="warning"
@@ -63,26 +59,30 @@
         />
         <ModMemberButton
           v-if="!membership.heldby"
-          :member="membership"
+          :userid="userid"
+          :membershipid="membership.membershipid || membership.id"
+          :groupid="membership.groupid"
           variant="warning"
           icon="pause"
           reviewhold
-          :reviewgroupid="groupid"
+          :reviewgroupid="membership.groupid"
           label="Hold"
           class="me-2"
         />
         <ModMemberButton
           v-else
-          :member="membership"
+          :userid="userid"
+          :membershipid="membership.membershipid || membership.id"
+          :groupid="membership.groupid"
           variant="warning"
           icon="play"
           reviewrelease
-          :reviewgroupid="groupid"
+          :reviewgroupid="membership.groupid"
           label="Release"
           class="me-2"
         />
         <b-button
-          :to="'/members/approved/' + membership.id + '/' + member.userid"
+          :to="'/members/approved/' + membership.groupid + '/' + userid"
           variant="secondary"
           class="mb-1"
         >
@@ -94,7 +94,11 @@
       v-if="showConfirmModal"
       ref="removeConfirm"
       :title="
-        'Remove ' + member.displayname + ' from ' + membership.namedisplay + '?'
+        'Remove ' +
+        (user ? user.displayname : '#' + userid) +
+        ' from ' +
+        groupName +
+        '?'
       "
       @confirm="removeConfirmed"
       @hidden="showConfirmModal = false"
@@ -102,23 +106,21 @@
   </b-card>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useMemberStore } from '~/stores/member'
+import { useUserStore } from '~/stores/user'
+import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  memberid: {
+  userid: {
     type: Number,
     required: true,
   },
-  member: {
-    type: Object,
-    required: true,
-  },
-  membership: {
-    type: Object,
+  membershipid: {
+    type: Number,
     required: true,
   },
 })
@@ -126,35 +128,113 @@ const props = defineProps({
 const emit = defineEmits(['forcerefresh'])
 
 const memberStore = useMemberStore()
-const { me, myid } = useMe()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const { myid } = useMe()
 const { amAModOn } = useModMe()
 
 const removeConfirm = ref(null)
 
+const membership = computed(() => {
+  // First check the member store (has review data for flagged memberships).
+  const members = Object.values(memberStore.list)
+  const member = members.find(
+    (m) => parseInt(m.userid) === parseInt(props.userid)
+  )
+  if (member && member.memberships) {
+    const found = member.memberships.find(
+      (ms) => parseInt(ms.membershipid) === parseInt(props.membershipid)
+    )
+    if (found) return found
+  }
+
+  // Fall back to the user store for non-flagged memberships (cross-group display).
+  const user = userStore.byId(props.userid)
+  if (user && user.memberships) {
+    const um = user.memberships.find(
+      (ms) => parseInt(ms.id) === parseInt(props.membershipid)
+    )
+    if (um) {
+      return {
+        id: um.id,
+        membershipid: um.id,
+        groupid: um.groupid,
+        added: um.added,
+        role: um.role,
+      }
+    }
+  }
+
+  return null
+})
+
+const user = computed(() => userStore.byId(props.userid))
+
+const groupName = computed(() => {
+  if (!membership.value) return ''
+  const group = groupStore.get(membership.value.groupid)
+  return group
+    ? group.namedisplay || group.namefull || '#' + group.id
+    : '#' + membership.value.groupid
+})
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => membership.value?.groupid,
+  (gid) => {
+    if (gid && !groupStore.get(gid)) {
+      groupStore.fetch(gid)
+    }
+  },
+  { immediate: true }
+)
+
+// V2 API returns heldby as a numeric user ID, not an object.
+const heldById = computed(() => {
+  if (!membership.value) return null
+  const hb = membership.value.heldby
+  if (!hb) return null
+  if (typeof hb === 'object') return hb.id
+  return hb
+})
+
+const heldByUser = computed(() => {
+  if (!membership.value) return null
+  const hb = membership.value.heldby
+  if (!hb) return null
+  if (typeof hb === 'object') return hb
+  return userStore.byId(hb) || { id: hb, displayname: '#' + hb }
+})
+
+onMounted(() => {
+  if (!membership.value) return
+  const hb = membership.value.heldby
+  if (hb && typeof hb !== 'object' && !userStore.byId(hb)) {
+    userStore.fetch(hb)
+  }
+})
+
 const reviewed = ref(false)
 const showConfirmModal = ref(false)
-
-const groupid = computed(() => {
-  let ret = null
-
-  props.member.memberof.forEach((h) => {
-    if (h.id === props.membership.id) {
-      ret = h.id
-    }
-  })
-
-  return ret
-})
 
 const needsReview = computed(() => {
   if (reviewed.value) {
     return false
   }
 
+  if (!membership.value) return false
+
   return (
-    !props.membership.reviewedat ||
-    new Date(props.membership.reviewrequestedat).getTime() >=
-      new Date(props.membership.reviewedat).getTime()
+    !membership.value.reviewedat ||
+    new Date(membership.value.reviewrequestedat).getTime() >=
+      new Date(membership.value.reviewedat).getTime()
   )
 })
 
@@ -169,7 +249,7 @@ function remove(callback) {
 }
 
 async function removeConfirmed() {
-  await memberStore.remove(props.member.userid, props.membership.id)
+  await memberStore.remove(props.userid, membership.value.groupid)
 
   setTimeout(() => {
     reviewed.value = true
@@ -179,8 +259,8 @@ async function removeConfirmed() {
 
 async function ignore(callback) {
   await memberStore.spamignore({
-    userid: props.member.userid,
-    groupid: props.membership.id,
+    userid: props.userid,
+    groupid: membership.value.groupid,
   })
 
   setTimeout(() => {

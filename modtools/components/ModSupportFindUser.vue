@@ -89,10 +89,7 @@ async function usersearch() {
     show.value = 0
     userStore.clear()
 
-    await userStore.fetchMT({
-      search: val,
-      emailhistory: true,
-    })
+    await userStore.searchUsers(val)
     searching.value = false
     searched.value = true
 

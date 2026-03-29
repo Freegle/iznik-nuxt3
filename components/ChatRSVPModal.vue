@@ -82,7 +82,7 @@ const mylast = computed(() => {
 
 async function yes() {
   if (mylast.value) {
-    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, 1)
+    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, true)
   }
 
   hide()
@@ -90,7 +90,7 @@ async function yes() {
 
 async function no() {
   if (mylast.value) {
-    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, 0)
+    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, false)
   }
 
   if (dohide.value) {

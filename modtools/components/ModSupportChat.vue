@@ -1,5 +1,5 @@
 <template>
-  <div class="layout">
+  <div v-if="chat" class="layout">
     <div class="type">
       <v-icon
         v-if="chat.chattype === 'User2User'"
@@ -15,11 +15,13 @@
     <div class="id text-muted">
       Chat <v-icon icon="hashtag" scale="0.5" class="text-muted" />{{ chat.id }}
     </div>
-    <ModChatViewButton :id="chat.id" :chat="chat" :pov="pov" class="button" />
+    <ModChatViewButton :id="chat.id" :pov="pov" class="button" />
     <div class="name d-flex">
-      {{ chat.name }}&nbsp;
-      <span v-if="otheruser" class="text-muted">
-        <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{ otheruser }}
+      {{ otheruserName }}&nbsp;
+      <span v-if="otheruserid" class="text-muted">
+        <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+          otheruserid
+        }}
       </span>
     </div>
     <div class="time">
@@ -34,10 +36,15 @@
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useChatStore } from '~/stores/chat'
+import { useUserStore } from '~/stores/user'
+
+const chatStore = useChatStore()
+const userStore = useUserStore()
 
 const props = defineProps({
-  chat: {
-    type: Object,
+  chatid: {
+    type: Number,
     required: true,
   },
   pov: {
@@ -47,12 +54,27 @@ const props = defineProps({
   },
 })
 
-const otheruser = computed(() => {
-  if (!props.chat || props.chat.chattype !== 'User2User') {
+const chat = computed(() => chatStore.byChatId(props.chatid))
+
+const otheruserid = computed(() => {
+  if (!chat.value || chat.value.chattype !== 'User2User') {
     return null
   } else {
-    return props.chat.user1 === props.pov ? props.chat.user2 : props.chat.user1
+    return chat.value.user1 === props.pov ? chat.value.user2 : chat.value.user1
   }
+})
+
+// Fetch the other user so we can show their displayname.
+if (otheruserid.value) {
+  userStore.fetch(otheruserid.value)
+}
+
+const otheruserName = computed(() => {
+  if (otheruserid.value) {
+    const u = userStore.byId(otheruserid.value)
+    return u?.displayname || chat.value?.name || ''
+  }
+  return chat.value?.name || ''
 })
 </script>
 <style scoped lang="scss">
@@ -65,6 +87,7 @@ const otheruser = computed(() => {
   display: grid;
   grid-template-rows: auto;
   grid-template-columns: 20px 1fr 130px 3fr 130px;
+  gap: 0 8px;
 
   @include media-breakpoint-down(sm) {
     grid-template-rows: auto auto auto auto;

@@ -126,7 +126,10 @@
     </div>
 
     <div class="mobile-volunteers">
-      <p class="mobile-volunteers__label">Questions? Contact our volunteers:</p>
+      <p class="mobile-volunteers__label">
+        Questions? Contact our
+        {{ group.mentored ? 'caretakers' : 'volunteers' }}:
+      </p>
       <div class="mobile-volunteers__list">
         <ExternalLink v-if="!me" :href="'mailto:' + group.modsemail">
           <span class="btn btn-sm btn-primary">Contact</span>
@@ -270,10 +273,13 @@
     <div>
       <hr class="mt-2" />
       <h2 class="header--size5 mb-3">
-        If you have questions, you can contact our lovely local volunteers here:
+        If you have questions, you can contact our lovely local
+        {{ group.mentored ? 'caretakers' : 'volunteers' }} here:
       </h2>
       <ExternalLink v-if="!me" :href="'mailto:' + group.modsemail">
-        <span class="btn btn-white mb-3"> Contact&nbsp;volunteers </span>
+        <span class="btn btn-white mb-3">
+          Contact&nbsp;{{ group.mentored ? 'caretakers' : 'volunteers' }}
+        </span>
         <div
           v-if="group.showmods && group.showmods.length"
           class="d-flex flex-wrap justify-content-start"
@@ -289,7 +295,7 @@
       <div v-else>
         <ChatButton
           :groupid="group.id"
-          title="Contact Volunteers"
+          :title="group.mentored ? 'Contact Caretakers' : 'Contact Volunteers'"
           chattype="User2Mod"
           variant="white"
         />

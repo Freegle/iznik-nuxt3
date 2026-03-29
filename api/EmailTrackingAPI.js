@@ -9,7 +9,7 @@ export default class EmailTrackingAPI extends BaseAPI {
    * @param {string} [params.end] - End date (YYYY-MM-DD)
    */
   async fetchStats(params = {}) {
-    return await this.$getv2('/email/stats', params)
+    return await this.$getv2('/modtools/email/stats', params)
   }
 
   /**
@@ -22,19 +22,12 @@ export default class EmailTrackingAPI extends BaseAPI {
   async fetchUserEmails(userIdOrEmail, params = {}) {
     // If userIdOrEmail looks like an email, use ID 0 and pass email as query param.
     if (typeof userIdOrEmail === 'string' && userIdOrEmail.includes('@')) {
-      return await this.$getv2('/email/user/0', {
+      return await this.$getv2('/modtools/email/user/0', {
         ...params,
         email: userIdOrEmail,
       })
     }
-    return await this.$getv2(`/email/user/${userIdOrEmail}`, params)
-  }
-
-  /**
-   * Fetch email types for filtering.
-   */
-  async fetchEmailTypes() {
-    return await this.$getv2('/email/types')
+    return await this.$getv2(`/modtools/email/user/${userIdOrEmail}`, params)
   }
 
   /**
@@ -45,7 +38,7 @@ export default class EmailTrackingAPI extends BaseAPI {
    * @param {string} [params.end] - End date (YYYY-MM-DD)
    */
   async fetchTimeSeries(params = {}) {
-    return await this.$getv2('/email/stats/timeseries', params)
+    return await this.$getv2('/modtools/email/stats/timeseries', params)
   }
 
   /**
@@ -55,7 +48,7 @@ export default class EmailTrackingAPI extends BaseAPI {
    * @param {string} [params.end] - End date (YYYY-MM-DD)
    */
   async fetchStatsByType(params = {}) {
-    return await this.$getv2('/email/stats/bytype', params)
+    return await this.$getv2('/modtools/email/stats/bytype', params)
   }
 
   /**
@@ -67,6 +60,6 @@ export default class EmailTrackingAPI extends BaseAPI {
    * @param {boolean} [params.aggregate] - Whether to aggregate by normalized URL (default true)
    */
   async fetchTopClickedLinks(params = {}) {
-    return await this.$getv2('/email/stats/clicks', params)
+    return await this.$getv2('/modtools/email/stats/clicks', params)
   }
 }

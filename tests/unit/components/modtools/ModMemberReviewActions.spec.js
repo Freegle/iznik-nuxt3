@@ -3,14 +3,37 @@ import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
 import ModMemberReviewActions from '~/modtools/components/ModMemberReviewActions.vue'
 
-// Mock member store
+// Mock member store with reactive list
+const mockMemberStoreList = {}
 const mockMemberStore = {
+  list: mockMemberStoreList,
   remove: vi.fn(),
   spamignore: vi.fn(),
 }
 
 vi.mock('~/stores/member', () => ({
   useMemberStore: () => mockMemberStore,
+}))
+
+// Mock user store
+const mockUsers = {}
+const mockUserStore = {
+  byId: (id) => mockUsers[id] || null,
+  fetch: vi.fn(),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+// Mock group store
+const mockGroups = {}
+const mockGroupStore = {
+  get: (id) => mockGroups[id] || null,
+}
+
+vi.mock('~/stores/group', () => ({
+  useGroupStore: () => mockGroupStore,
 }))
 
 // Mock useMe composable
@@ -29,34 +52,52 @@ vi.mock('~/composables/useModMe', () => ({
 }))
 
 describe('ModMemberReviewActions', () => {
-  const createMember = (overrides = {}) => ({
-    userid: 456,
-    displayname: 'Test User',
-    memberof: [
-      { id: 789, namedisplay: 'Test Group' },
-      { id: 111, namedisplay: 'Other Group' },
-    ],
-    ...overrides,
-  })
-
-  const createMembership = (overrides = {}) => ({
+  const defaultMembership = () => ({
     id: 789,
+    groupid: 789,
+    membershipid: 100,
     namedisplay: 'Test Group',
     added: dayjs().subtract(10, 'day').toISOString(),
     reviewreason: null,
     reviewrequestedat: null,
     reviewedat: null,
     heldby: null,
-    ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  /**
+   * Populate the mock member store list with a member record that the
+   * component's computed `membership` will find by userid + membershipid.
+   */
+  function setupStoreData(membershipOverrides = {}) {
+    const ms = { ...defaultMembership(), ...membershipOverrides }
+
+    // Clear previous data
+    Object.keys(mockMemberStoreList).forEach(
+      (k) => delete mockMemberStoreList[k]
+    )
+    Object.keys(mockGroups).forEach((k) => delete mockGroups[k])
+    Object.keys(mockUsers).forEach((k) => delete mockUsers[k])
+
+    // The component searches memberStore.list for a member matching userid,
+    // then finds a membership in its memberships array matching membershipid.
+    mockMemberStoreList['member-456'] = {
+      userid: 456,
+      displayname: 'Test User',
+      memberships: [ms, { id: 111, membershipid: 200, namedisplay: 'Other' }],
+    }
+
+    mockGroups[ms.groupid] = { namedisplay: ms.namedisplay }
+    mockUsers[456] = { id: 456, displayname: 'Test User' }
+  }
+
+  function mountComponent(membershipOverrides = {}, propOverrides = {}) {
+    setupStoreData(membershipOverrides)
+
     return mount(ModMemberReviewActions, {
       props: {
-        memberid: 123,
-        member: createMember(),
-        membership: createMembership(),
-        ...props,
+        userid: 456,
+        membershipid: membershipOverrides.membershipid || 100,
+        ...propOverrides,
       },
       global: {
         stubs: {
@@ -89,7 +130,9 @@ describe('ModMemberReviewActions', () => {
           ModMemberButton: {
             template: '<div class="mod-member-button" />',
             props: [
-              'member',
+              'userid',
+              'membershipid',
+              'groupid',
               'variant',
               'icon',
               'reviewhold',
@@ -125,26 +168,20 @@ describe('ModMemberReviewActions', () => {
 
   describe('rendering', () => {
     it('displays group namedisplay', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ namedisplay: 'My Group' }),
-      })
+      const wrapper = mountComponent({ namedisplay: 'My Group' })
       expect(wrapper.text()).toContain('My Group')
     })
 
     it('truncates long group names', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          namedisplay:
-            'This is a very long group name that exceeds 32 characters',
-        }),
+        namedisplay:
+          'This is a very long group name that exceeds 32 characters',
       })
       expect(wrapper.text()).toContain('...')
     })
 
     it('does not truncate short group names', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ namedisplay: 'Short Name' }),
-      })
+      const wrapper = mountComponent({ namedisplay: 'Short Name' })
       expect(wrapper.text()).not.toContain('...')
     })
 
@@ -154,18 +191,14 @@ describe('ModMemberReviewActions', () => {
     })
 
     it('shows review reason when present', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ reviewreason: 'Suspicious activity' }),
-      })
+      const wrapper = mountComponent({ reviewreason: 'Suspicious activity' })
       expect(wrapper.text()).toContain('Suspicious activity')
     })
 
     it('shows flagged date when present', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          reviewreason: 'Suspicious',
-          reviewrequestedat: dayjs().subtract(2, 'day').toISOString(),
-        }),
+        reviewreason: 'Suspicious',
+        reviewrequestedat: dayjs().subtract(2, 'day').toISOString(),
       })
       expect(wrapper.text()).toContain('flagged')
     })
@@ -174,18 +207,14 @@ describe('ModMemberReviewActions', () => {
   describe('join date styling', () => {
     it('shows danger class for recent joins (< 31 days)', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          added: dayjs().subtract(10, 'day').toISOString(),
-        }),
+        added: dayjs().subtract(10, 'day').toISOString(),
       })
       expect(wrapper.html()).toContain('text-danger')
     })
 
     it('shows muted class for old joins (>= 31 days)', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          added: dayjs().subtract(60, 'day').toISOString(),
-        }),
+        added: dayjs().subtract(60, 'day').toISOString(),
       })
       expect(wrapper.html()).toContain('text-muted')
     })
@@ -194,29 +223,23 @@ describe('ModMemberReviewActions', () => {
   describe('held member notice', () => {
     it('shows notice when held by current user', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          heldby: 999,
-          reviewreason: 'Test',
-        }),
+        heldby: 999,
+        reviewreason: 'Test',
       })
       expect(wrapper.text()).toContain('You held this member')
     })
 
     it('shows notice when held by another user', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          heldby: 888,
-          reviewreason: 'Test',
-        }),
+        heldby: 888,
+        reviewreason: 'Test',
       })
       expect(wrapper.text()).toContain('Held by')
       expect(wrapper.text()).toContain('888')
     })
 
     it('does not show held notice when not held', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ heldby: null }),
-      })
+      const wrapper = mountComponent({ heldby: null })
       expect(wrapper.find('.notice-message').exists()).toBe(false)
     })
   })
@@ -224,73 +247,57 @@ describe('ModMemberReviewActions', () => {
   describe('action buttons visibility', () => {
     it('shows Ignore button when needs review and not held', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          heldby: null,
-          reviewedat: null,
-        }),
+        heldby: null,
+        reviewedat: null,
       })
       expect(wrapper.text()).toContain('Ignore')
     })
 
     it('shows Remove button when needs review and not held', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          heldby: null,
-          reviewedat: null,
-        }),
+        heldby: null,
+        reviewedat: null,
       })
       expect(wrapper.text()).toContain('Remove')
     })
 
     it('shows Hold button when not held', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          heldby: null,
-          reviewedat: null,
-        }),
+        heldby: null,
+        reviewedat: null,
       })
       expect(wrapper.findAll('.mod-member-button').length).toBeGreaterThan(0)
     })
 
     it('hides action buttons when not a mod on group', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ id: 999 }),
-      })
+      const wrapper = mountComponent({ groupid: 999 })
       expect(wrapper.find('.spin-button').exists()).toBe(false)
     })
 
     it('shows Go to membership button', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ reviewedat: null }),
-      })
+      const wrapper = mountComponent({ reviewedat: null })
       expect(wrapper.text()).toContain('Go to membership')
     })
   })
 
   describe('needsReview computed', () => {
     it('returns true when reviewedat is null', () => {
-      const wrapper = mountComponent({
-        membership: createMembership({ reviewedat: null }),
-      })
+      const wrapper = mountComponent({ reviewedat: null })
       expect(wrapper.vm.needsReview).toBe(true)
     })
 
     it('returns true when reviewrequestedat >= reviewedat', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          reviewrequestedat: dayjs().subtract(1, 'day').toISOString(),
-          reviewedat: dayjs().subtract(2, 'day').toISOString(),
-        }),
+        reviewrequestedat: dayjs().subtract(1, 'day').toISOString(),
+        reviewedat: dayjs().subtract(2, 'day').toISOString(),
       })
       expect(wrapper.vm.needsReview).toBe(true)
     })
 
     it('returns false when reviewedat > reviewrequestedat', () => {
       const wrapper = mountComponent({
-        membership: createMembership({
-          reviewrequestedat: dayjs().subtract(3, 'day').toISOString(),
-          reviewedat: dayjs().subtract(1, 'day').toISOString(),
-        }),
+        reviewrequestedat: dayjs().subtract(3, 'day').toISOString(),
+        reviewedat: dayjs().subtract(1, 'day').toISOString(),
       })
       expect(wrapper.vm.needsReview).toBe(false)
     })
@@ -299,28 +306,6 @@ describe('ModMemberReviewActions', () => {
       const wrapper = mountComponent()
       wrapper.vm.reviewed = true
       expect(wrapper.vm.needsReview).toBe(false)
-    })
-  })
-
-  describe('groupid computed', () => {
-    it('returns group id when member is part of membership', () => {
-      const wrapper = mountComponent({
-        member: createMember({
-          memberof: [{ id: 789 }, { id: 111 }],
-        }),
-        membership: createMembership({ id: 789 }),
-      })
-      expect(wrapper.vm.groupid).toBe(789)
-    })
-
-    it('returns null when member is not part of membership', () => {
-      const wrapper = mountComponent({
-        member: createMember({
-          memberof: [{ id: 111 }],
-        }),
-        membership: createMembership({ id: 789 }),
-      })
-      expect(wrapper.vm.groupid).toBeNull()
     })
   })
 
@@ -351,10 +336,7 @@ describe('ModMemberReviewActions', () => {
 
   describe('removeConfirmed method', () => {
     it('calls memberStore.remove with correct params', async () => {
-      const wrapper = mountComponent({
-        member: createMember({ userid: 456 }),
-        membership: createMembership({ id: 789 }),
-      })
+      const wrapper = mountComponent()
       await wrapper.vm.removeConfirmed()
       expect(mockMemberStore.remove).toHaveBeenCalledWith(456, 789)
     })
@@ -376,10 +358,7 @@ describe('ModMemberReviewActions', () => {
 
   describe('ignore method', () => {
     it('calls memberStore.spamignore with correct params', async () => {
-      const wrapper = mountComponent({
-        member: createMember({ userid: 456 }),
-        membership: createMembership({ id: 789 }),
-      })
+      const wrapper = mountComponent()
       const callback = vi.fn()
       await wrapper.vm.ignore(callback)
       expect(mockMemberStore.spamignore).toHaveBeenCalledWith({
@@ -435,13 +414,45 @@ describe('ModMemberReviewActions', () => {
   })
 
   describe('link destinations', () => {
-    it('Go to membership links to correct URL', () => {
+    it('Go to membership links to correct URL using groupid', () => {
+      const wrapper = mountComponent({ reviewedat: null, groupid: 789 })
+      const button = wrapper.find('button[to]')
+      expect(button.attributes('to')).toBe('/members/approved/789/456')
+    })
+
+    it('uses groupid not membership.id for route URL', () => {
+      /* groupid and id differ -- the route must use groupid */
       const wrapper = mountComponent({
-        member: createMember({ userid: 456 }),
-        membership: createMembership({ id: 789, reviewedat: null }),
+        reviewedat: null,
+        groupid: 789,
+        id: 999,
       })
       const button = wrapper.find('button[to]')
       expect(button.attributes('to')).toBe('/members/approved/789/456')
+    })
+  })
+
+  describe('groupid usage', () => {
+    it('uses membership.groupid for amAModOn checks', () => {
+      /* amAModOn mock returns true only for groupid 789 */
+      const wrapper = mountComponent({ groupid: 789, reviewedat: null })
+      expect(wrapper.find('.spin-button').exists()).toBe(true)
+    })
+
+    it('passes groupid to memberStore.remove', async () => {
+      const wrapper = mountComponent({ groupid: 789 })
+      await wrapper.vm.removeConfirmed()
+      expect(mockMemberStore.remove).toHaveBeenCalledWith(456, 789)
+    })
+
+    it('passes groupid to memberStore.spamignore', async () => {
+      const wrapper = mountComponent({ groupid: 789 })
+      const callback = vi.fn()
+      await wrapper.vm.ignore(callback)
+      expect(mockMemberStore.spamignore).toHaveBeenCalledWith({
+        userid: 456,
+        groupid: 789,
+      })
     })
   })
 })

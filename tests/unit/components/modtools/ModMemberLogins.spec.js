@@ -1,21 +1,29 @@
-import { describe, it, expect, vi } from 'vitest'
-import { mount, config } from '@vue/test-utils'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mount } from '@vue/test-utils'
 import ModMemberLogins from '~/modtools/components/ModMemberLogins.vue'
 
-// Mock the timeago global
-config.global.mocks = {
-  ...config.global.mocks,
-  timeago: vi.fn((date) => '2 days ago'),
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
 }
 
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModMemberLogins', () => {
+  const createUser = (overrides = {}) => ({
+    id: 456,
+    logins: [],
+    ...overrides,
+  })
+
   function mountModMemberLogins(memberOverrides = {}) {
-    const defaultMember = {
-      logins: [],
-      ...memberOverrides,
-    }
+    const userData = createUser(memberOverrides)
+    mockUserStore.byId.mockReturnValue(userData)
     return mount(ModMemberLogins, {
-      props: { member: defaultMember },
+      props: { userid: userData.id },
       global: {
         stubs: {
           'b-badge': {
@@ -30,6 +38,12 @@ describe('ModMemberLogins', () => {
       },
     })
   }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
+  })
 
   describe('rendering', () => {
     it('renders a div container', () => {
@@ -83,6 +97,40 @@ describe('ModMemberLogins', () => {
         logins: [{ id: 1, type: 'Native', lastaccess: '2024-01-01' }],
       })
       expect(wrapper.text()).toContain('login')
+    })
+  })
+
+  describe('logins prop', () => {
+    it('uses logins prop over user store data', () => {
+      const userData = createUser({
+        logins: [{ id: 1, type: 'Native', lastaccess: '2024-01-01' }],
+      })
+      mockUserStore.byId.mockReturnValue(userData)
+      const wrapper = mount(ModMemberLogins, {
+        props: {
+          userid: userData.id,
+          logins: [
+            { id: 10, type: 'Google', lastaccess: '2024-06-01' },
+            { id: 11, type: 'Facebook', lastaccess: '2024-06-02' },
+          ],
+        },
+        global: {
+          stubs: {
+            'b-badge': {
+              template:
+                '<span class="badge" :class="\'badge-\' + variant"><slot /></span>',
+              props: ['variant'],
+            },
+          },
+          mocks: {
+            timeago: vi.fn((date) => '2 days ago'),
+          },
+        },
+      })
+      // Should show 2 badges from prop, not 1 from store
+      expect(wrapper.findAll('.badge').length).toBe(2)
+      expect(wrapper.text()).toContain('Google')
+      expect(wrapper.text()).toContain('Facebook')
     })
   })
 })

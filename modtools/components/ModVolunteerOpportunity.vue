@@ -10,29 +10,24 @@
             }}
           </b-col>
           <b-col cols="6" md="4">
-            <span v-if="volunteering.user">
-              {{ volunteering.user.displayname }}
+            <span v-if="volunteering.userid">
+              {{ volUser?.displayname }}
               <span class="text-muted">
                 <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                  volunteering.user.id
+                  volunteering.userid
                 }}
               </span>
             </span>
             <span v-else> System added </span>
           </b-col>
           <b-col cols="12" md="4">
-            <span v-if="volunteering.groupsmt && volunteering.groupsmt.length">
-              on {{ volunteering.groupsmt[0].nameshort }}
-            </span>
+            <span v-if="groups.length"> on {{ groups[0].nameshort }} </span>
           </b-col>
         </b-row>
       </b-card-header>
       <b-card-body>
         <NoticeMessage
-          v-if="
-            volunteering.groups.length &&
-            volunteering.groups[0].ourPostingStatus === 'PROHIBITED'
-          "
+          v-if="groups.length && groups[0].ourPostingStatus === 'PROHIBITED'"
           variant="danger"
           class="mb-2"
         >
@@ -58,9 +53,9 @@
           v-if="
             volunteering.groups &&
             volunteering.groups.length &&
-            volunteering.user
+            volunteering.userid
           "
-          :userid="volunteering.user.id"
+          :userid="volunteering.userid"
           :groupid="volunteering.groups[0]"
           title="Chat"
           variant="white"
@@ -86,20 +81,56 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useVolunteeringStore } from '@/stores/volunteering'
+import { useGroupStore } from '~/stores/group'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  volunteering: {
-    type: Object,
+  volunteeringid: {
+    type: Number,
     required: true,
   },
 })
 
 const volunteeringStore = useVolunteeringStore()
+const groupStore = useGroupStore()
+const userStore = useUserStore()
+
+const volunteering = computed(() =>
+  volunteeringStore.byId(props.volunteeringid)
+)
 
 const modalShown = ref(false)
 const showDeleteConfirm = ref(false)
+
+// Fetch user details for display
+watch(
+  () => volunteering.value?.userid,
+  (userid) => {
+    if (userid) {
+      userStore.fetch(userid)
+    }
+  },
+  { immediate: true }
+)
+
+const volUser = computed(() => {
+  return volunteering.value?.userid
+    ? userStore.byId(volunteering.value.userid)
+    : null
+})
+
+const groups = computed(() => {
+  const ret = []
+  volunteering.value?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+    if (group) {
+      ret.push(group)
+    }
+  })
+  return ret
+})
 
 function edit() {
   modalShown.value = true
@@ -110,15 +141,15 @@ function confirmDelete() {
 }
 
 function deleteme() {
-  volunteeringStore.delete(props.volunteering.id)
+  volunteeringStore.delete(volunteering.value.id)
   showDeleteConfirm.value = false
 }
 
-function approve() {
-  volunteeringStore.save({
-    id: props.volunteering.id,
+async function approve() {
+  await volunteeringStore.save({
+    id: volunteering.value.id,
     pending: false,
   })
-  volunteeringStore.remove(props.volunteering.id)
+  volunteeringStore.remove(volunteering.value.id)
 }
 </script>

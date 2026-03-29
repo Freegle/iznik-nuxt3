@@ -5,6 +5,7 @@ import ModMemberSummary from '~/modtools/components/ModMemberSummary.vue'
 // Mock user store
 const mockUserStore = {
   byId: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
 }
 
@@ -26,7 +27,7 @@ vi.mock('~/modtools/composables/usePluralise', () => ({
 describe('ModMemberSummary', () => {
   // Sample member data
   const createMember = (overrides = {}) => ({
-    id: 123,
+    id: 456,
     userid: 456,
     modmails: 0,
     messagehistory: [],
@@ -44,10 +45,13 @@ describe('ModMemberSummary', () => {
     }))
 
   function mountComponent(props = {}) {
+    const memberData = props.member ? props.member : createMember()
+    const { member: _unused, ...restProps } = props
+    mockUserStore.byId.mockReturnValue(memberData)
     return mount(ModMemberSummary, {
       props: {
-        member: createMember(),
-        ...props,
+        userid: memberData.userid || memberData.id,
+        ...restProps,
       },
       global: {
         stubs: {
@@ -86,6 +90,7 @@ describe('ModMemberSummary', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
     mockUserStore.fetchMT.mockResolvedValue()
   })
 
@@ -244,20 +249,7 @@ describe('ModMemberSummary', () => {
       expect(wrapper.text()).toContain('2 RSVPs')
     })
 
-    it('falls back to userStore when member.info is null', () => {
-      mockUserStore.byId.mockReturnValue({
-        info: { repliesoffer: 10, replieswanted: 7, expectedreplies: 1 },
-      })
-      const wrapper = mountComponent({
-        member: createMember({ info: null }),
-      })
-      expect(wrapper.text()).toContain('10')
-      expect(wrapper.text()).toContain('7')
-      expect(wrapper.text()).toContain('1 RSVP')
-    })
-
     it('returns null when no info available', () => {
-      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
         member: createMember({ info: null }),
       })
@@ -279,31 +271,54 @@ describe('ModMemberSummary', () => {
   })
 
   describe('onMounted', () => {
-    it('fetches user data when member.id exists and not in store', () => {
+    const mountStubs = {
+      'b-badge': {
+        template:
+          '<span class="badge" :class="variant" :title="title" @click="$emit(\'click\')"><slot /></span>',
+        props: ['variant', 'title'],
+      },
+      'v-icon': {
+        template: '<i :class="icon" />',
+        props: ['icon'],
+      },
+      ModPostingHistoryModal: {
+        template: '<div class="posting-history-modal" />',
+        methods: { show: vi.fn() },
+      },
+      ModLogsModal: {
+        template: '<div class="logs-modal" />',
+        props: ['userid', 'modmailsonly'],
+        methods: { show: vi.fn() },
+      },
+    }
+
+    const mountMocks = {
+      pluralise: (word, count, withNumber) => {
+        const num = withNumber ? `${count} ` : ''
+        if (Array.isArray(word)) {
+          return num + (count === 1 ? word[0] : word[1])
+        }
+        return num + (count === 1 ? word : word + 's')
+      },
+    }
+
+    it('fetches user data when userid exists and not in store', () => {
+      // Don't pre-populate the store so the watch triggers a fetch
       mockUserStore.byId.mockReturnValue(null)
-      mountComponent({
-        member: createMember({ id: 789 }),
+      mount(ModMemberSummary, {
+        props: { userid: 789 },
+        global: { stubs: mountStubs, mocks: mountMocks },
       })
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 789,
-        info: true,
-        emailhistory: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
 
     it('does not fetch when user already in store', () => {
       mockUserStore.byId.mockReturnValue({ id: 789, info: {} })
-      mountComponent({
-        member: createMember({ id: 789 }),
+      mount(ModMemberSummary, {
+        props: { userid: 789 },
+        global: { stubs: mountStubs, mocks: mountMocks },
       })
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
-    })
-
-    it('does not fetch when member.id is falsy', () => {
-      mountComponent({
-        member: createMember({ id: null }),
-      })
-      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+      expect(mockUserStore.fetch).not.toHaveBeenCalled()
     })
   })
 

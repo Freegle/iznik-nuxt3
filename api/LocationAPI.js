@@ -13,7 +13,7 @@ export default class LocationAPI extends BaseAPI {
   }
 
   fetch(params) {
-    return this.$get('/locations', params)
+    return this.$getv2('/locations', params)
   }
 
   fetchv2(id) {
@@ -25,15 +25,15 @@ export default class LocationAPI extends BaseAPI {
   }
 
   add(data) {
-    return this.$put('/locations', data)
+    return this.$putv2('/locations', data)
   }
 
   update(data) {
-    return this.$patch('/locations', data)
+    return this.$patchv2('/locations', data)
   }
 
   del(id, groupid) {
-    return this.$post('/locations', {
+    return this.$postv2('/locations', {
       id,
       action: 'Exclude',
       byname: false,
@@ -42,7 +42,7 @@ export default class LocationAPI extends BaseAPI {
   }
 
   convertKML(kml) {
-    return this.$post('/locations/kml', {
+    return this.$postv2('/locations/kml', {
       action: 'ConvertKML',
       kml,
     })

@@ -2,17 +2,15 @@ import BaseAPI from './BaseAPI'
 
 export default class SessionAPI extends BaseAPI {
   fetch(params) {
-    // Add the build date to the call.  This is used by the server to spot out of date apps, but we need
-    // to make it clear that we're not an app at all.
-    return this.$get('/session', params)
+    return this.$getv2('/session', params)
   }
 
   fetchv2(params, log = true) {
-    return this.$getv2('/user', params, log)
+    return this.$getv2('/session', params, log)
   }
 
   save(data, log) {
-    return this.$patch('/session', data, log)
+    return this.$patchv2('/session', data, log)
   }
 
   login(
@@ -31,11 +29,10 @@ export default class SessionAPI extends BaseAPI {
       appversion,
       applecredentials,
       applelogin,
-      modtools,
     },
     log
   ) {
-    return this.$post(
+    return this.$postv2(
       '/session',
       {
         email,
@@ -52,43 +49,39 @@ export default class SessionAPI extends BaseAPI {
         appversion,
         applecredentials,
         applelogin,
-        modtools,
       },
       log
     )
   }
 
   logout() {
-    return this.$del('/session')
-  }
-
-  lostPassword(email, log) {
-    return this.$post('/session', { action: 'LostPassword', email }, log)
-  }
-
-  unsubscribe(email, log) {
-    return this.$post('/session', { action: 'Unsubscribe', email }, log)
-  }
-
-  forget() {
-    return this.$post('/session', { action: 'Forget' })
-  }
-
-  restore() {
-    return this.$patch('/session', { deleted: null })
-  }
-
-  related(userlist) {
-    return this.$post('/session', {
-      action: 'Related',
-      userlist,
+    // Use a dedicated AbortController so this call is not killed by
+    // enterLogoutMode() which aborts the global controller.
+    return this.$delv2('/session', null, true, {
+      ownAbortController: new AbortController(),
     })
   }
 
-  yahooCodeLogin(yahoocodelogin) {
-    // ModTools
-    return this.$post('/session', {
-      yahoocodelogin,
+  lostPassword(email, log) {
+    return this.$postv2('/session', { action: 'LostPassword', email }, log)
+  }
+
+  unsubscribe(email, log) {
+    return this.$postv2('/session', { action: 'Unsubscribe', email }, log)
+  }
+
+  forget() {
+    return this.$postv2('/session', { action: 'Forget' })
+  }
+
+  restore() {
+    return this.$patchv2('/session', { deleted: null })
+  }
+
+  related(userlist) {
+    return this.$postv2('/session', {
+      action: 'Related',
+      userlist,
     })
   }
 }

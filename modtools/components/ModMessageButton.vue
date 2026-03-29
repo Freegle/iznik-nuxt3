@@ -23,22 +23,23 @@
     <ConfirmModal
       v-if="showDeleteModal"
       ref="deleteConfirm"
-      :title="'Delete: ' + message.subject"
+      :title="'Delete: ' + message?.subject"
       @confirm="deleteConfirmed"
       @hidden="showDeleteModal = false"
     />
     <ConfirmModal
       v-if="showSpamModal"
       ref="spamConfirm"
-      :title="'Mark as Spam: ' + message.subject"
+      :title="'Mark as Spam: ' + message?.subject"
       @confirm="spamConfirmed"
       @hidden="showSpamModal = false"
     />
     <ModStdMessageModal
       v-if="showStdMsgModal"
       ref="stdmodal"
-      :stdmsg="stdmsg"
-      :message="message"
+      :stdmsgid="stdmsgId"
+      :stdmsgaction="stdmsgAction"
+      :messageid="message?.id"
       :autosend="autosend"
       @hidden="showStdMsgModal = false"
     />
@@ -47,14 +48,14 @@
 <script setup>
 // SEE WORK EXPLANATION IN useModMessages.js
 
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
   stdmsgid: {
@@ -140,18 +141,31 @@ const messageStore = useMessageStore()
 const stdmsgStore = useStdmsgStore()
 const { checkWorkDeferGetMessages } = useModMe()
 
+const message = computed(() => messageStore.byId(props.messageid))
+
+watch(
+  () => props.messageid,
+  (newVal) => {
+    if (newVal && !messageStore.byId(newVal)) {
+      messageStore.fetch(newVal)
+    }
+  },
+  { immediate: true }
+)
+
 const stdmodal = ref(null)
 
 const showDeleteModal = ref(false)
 const showStdMsgModal = ref(false)
 const showSpamModal = ref(false)
-const stdmsg = ref(null)
+const stdmsgId = ref(null)
+const stdmsgAction = ref(null)
 
 const groupid = computed(() => {
   let ret = null
 
-  if (props.message && props.message.groups && props.message.groups.length) {
-    ret = props.message.groups[0].groupid
+  if (message.value && message.value.groups && message.value.groups.length) {
+    ret = message.value.groups[0].groupid
   }
 
   return ret
@@ -168,14 +182,11 @@ const spinclass = computed(() => {
 
 const confirmButton = computed(() => {
   // We confirm any actions on held messages, except where we have a separate confirm.
-  return props.message.heldby && !props.spam && !props.delete
+  return message.value?.heldby && !props.spam && !props.delete
 })
 
 async function approveIt() {
-  await messageStore.approve({
-    id: props.message.id,
-    groupid: groupid.value,
-  })
+  await messageStore.approve(message.value.id, groupid.value)
   checkWorkDeferGetMessages()
 }
 
@@ -185,7 +196,7 @@ function deleteIt() {
 
 async function deleteConfirmed() {
   await messageStore.delete({
-    id: props.message.id,
+    id: message.value.id,
     groupid: groupid.value,
   })
   checkWorkDeferGetMessages()
@@ -193,7 +204,7 @@ async function deleteConfirmed() {
 
 async function spamConfirmed() {
   await messageStore.spam({
-    id: props.message.id,
+    id: message.value.id,
     groupid: groupid.value,
   })
   checkWorkDeferGetMessages()
@@ -201,28 +212,28 @@ async function spamConfirmed() {
 
 async function holdIt() {
   await messageStore.hold({
-    id: props.message.id,
+    id: message.value.id,
   })
   checkWorkDeferGetMessages()
 }
 
 async function releaseIt() {
   await messageStore.release({
-    id: props.message.id,
+    id: message.value.id,
   })
   checkWorkDeferGetMessages()
 }
 
 async function approveEdits() {
   await messageStore.approveedits({
-    id: props.message.id,
+    id: message.value.id,
   })
   checkWorkDeferGetMessages()
 }
 
 async function revertEdits() {
   await messageStore.revertedits({
-    id: props.message.id,
+    id: message.value.id,
   })
   checkWorkDeferGetMessages()
 }
@@ -249,17 +260,17 @@ async function click(callback) {
     await revertEdits()
   } else {
     // We want to show a modal.
+    stdmsgId.value = null
+    stdmsgAction.value = null
+
     if (props.reject) {
-      stdmsg.value = {
-        action: 'Reject',
-      }
+      stdmsgAction.value = 'Reject'
     } else if (props.leave) {
-      stdmsg.value = {
-        action: 'Leave',
-      }
+      stdmsgAction.value = 'Leave'
     } else if (props.stdmsgid) {
-      // We have a standard message.  Fetch it.
-      stdmsg.value = await stdmsgStore.fetch(props.stdmsgid)
+      // We have a standard message.  Fetch it into the store.
+      await stdmsgStore.fetch(props.stdmsgid)
+      stdmsgId.value = props.stdmsgid
     }
 
     showStdMsgModal.value = true

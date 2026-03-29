@@ -48,12 +48,14 @@
       </b-col>
       <b-col cols="6" md="4" class="">
         <SpinButton
+          class="mb-2"
           variant="white"
           icon-name="save"
           label="Save Changes"
           @handle="save"
         />
         <SpinButton
+          class="mb-2"
           variant="warning"
           icon-name="trash-alt"
           label="Give Up"
@@ -61,6 +63,7 @@
           @handle="giveup"
         />
         <SpinButton
+          class="mb-2"
           variant="success"
           icon-name="check"
           label="Looks Good"
@@ -84,15 +87,19 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNuxtApp } from '#app'
+import { useModMe } from '~/modtools/composables/useModMe'
+import { useGiftAidStore } from '~/modtools/stores/giftaid'
 
 const props = defineProps({
-  giftaid: {
-    type: Object,
+  giftaidid: {
+    type: Number,
     required: true,
   },
 })
 
 const { $api } = useNuxtApp()
+const { checkWork } = useModMe()
+const giftAidStore = useGiftAidStore()
 
 const editgiftaid = ref(false)
 const hide = ref(false)
@@ -116,18 +123,7 @@ const houseInvalid = computed(() => {
 })
 
 const email = computed(() => {
-  let emailVal = null
-  if (!editgiftaid.value) return emailVal
-
-  if (editgiftaid.value?.email) {
-    editgiftaid.value.email.forEach((e) => {
-      if (!e.ourdomain && (e.preferred || emailVal === null)) {
-        emailVal = e.email
-      }
-    })
-  }
-
-  return emailVal
+  return editgiftaid.value?.email || null
 })
 
 function save(callback) {
@@ -149,6 +145,7 @@ function reviewed(callback) {
   $api.giftaid.edit(editgiftaid.value.id, null, null, null, null, null, true)
   if (callback) callback()
   hide.value = true
+  checkWork(true)
 }
 
 function giveup(callback) {
@@ -167,11 +164,12 @@ function giveup(callback) {
       true
     )
     hide.value = true
+    checkWork(true)
   }
   callback()
 }
 
 onMounted(() => {
-  editgiftaid.value = props.giftaid
+  editgiftaid.value = giftAidStore.byId(props.giftaidid)
 })
 </script>

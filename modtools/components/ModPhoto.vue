@@ -1,5 +1,5 @@
 <template>
-  <span class="clickme">
+  <span v-if="attachment" class="clickme">
     <PostPhoto
       v-bind="attachment"
       :externalmods="mods"
@@ -11,9 +11,8 @@
     <ModPhotoModal
       v-if="zoom"
       ref="modphotomodal"
-      :attachment="attachment"
-      :message="message"
-      :externalmods="mods"
+      :messageid="messageid"
+      :attachmentid="attachmentid"
     />
   </span>
 </template>
@@ -27,12 +26,12 @@ const PostPhoto = defineAsyncComponent(() =>
 )
 
 const props = defineProps({
-  attachment: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
-  message: {
-    type: Object,
+  attachmentid: {
+    type: Number,
     required: true,
   },
 })
@@ -42,11 +41,22 @@ const messageStore = useMessageStore()
 const zoom = ref(false)
 const modphotomodal = ref(null)
 
+const message = computed(() => messageStore.byId(props.messageid))
+
+const attachment = computed(() => {
+  return message.value?.attachments?.find((a) => a.id === props.attachmentid)
+})
+
 const mods = computed(() => {
-  if (props.attachment.mods) {
-    const jsonmods = JSON.parse(props.attachment.mods)
-    if (!jsonmods) return {}
-    return jsonmods
+  const raw = attachment.value?.externalmods || attachment.value?.mods
+  if (raw) {
+    try {
+      const jsonmods = typeof raw === 'string' ? JSON.parse(raw) : raw
+      if (!jsonmods) return {}
+      return jsonmods
+    } catch (e) {
+      return {}
+    }
   }
   return {}
 })
@@ -57,20 +67,20 @@ function showModal() {
 }
 
 async function removePhoto(id) {
-  console.log('MP removePhoto', id, props.message.id)
+  console.log('MP removePhoto', id, props.messageid)
   const attachments = []
 
-  props.message.attachments.forEach((a) => {
+  message.value?.attachments?.forEach((a) => {
     if (a.id !== id) {
       attachments.push(a.id)
     }
   })
 
-  await messageStore.patch({ id: props.message.id, attachments })
+  await messageStore.patch({ id: props.messageid, attachments })
 }
 
 async function updatedPhoto() {
-  await messageStore.patch({ id: props.message.id })
+  await messageStore.patch({ id: props.messageid })
 }
 </script>
 
@@ -86,6 +96,8 @@ async function updatedPhoto() {
 }
 
 :deep(img) {
-  width: 100%;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
 }
 </style>

@@ -7,6 +7,7 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/APIErrors'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useMiscStore } from '~/stores/misc'
 
@@ -373,16 +374,14 @@ export const useMessageStore = defineStore({
     async patch(params) {
       const data = await api(this.config).message.save(params)
 
-      // Clear from store to ensure no attachments.
-      this.remove({
-        id: params.id,
-      })
-
+      // Re-fetch the message to get the updated server state (e.g. after
+      // deleting a photo).  Don't remove-then-readd — that destroys and
+      // recreates any mounted component, losing local state such as
+      // expanded/collapsed in summary view (#299).
       const miscStore = useMiscStore()
       if (miscStore.modtools) {
         const message = await this.fetchMT({
           id: params.id,
-          messagehistory: true,
         })
         if (message) {
           this.list[message.id] = message
@@ -464,15 +463,26 @@ export const useMessageStore = defineStore({
     },
     // ModTools-specific methods below
     async searchMT(params) {
-      const { messages } = await api(this.config).message.fetchMessages({
+      const data = await api(this.config).message.fetchMessages({
         subaction: 'searchall',
         search: params.term,
         exactonly: true,
         groupid: params.groupid,
       })
-      for (const message of messages) {
-        this.list[message.id] = message
-      }
+      if (!data.messages || data.messages.length === 0) return
+      // Response is IDs only — fetch full details for each.
+      await Promise.all(
+        data.messages.map(async (id) => {
+          try {
+            const message = await this.fetchMT({ id })
+            if (message) {
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
+          }
+        })
+      )
     },
     async fetchMessagesMT(params) {
       if (params.context) {
@@ -482,21 +492,37 @@ export const useMessageStore = defineStore({
       if (!params.context) params.context = null
 
       const data = await api(this.config).message.fetchMessages(params)
-      if (!data.messages) return
-      const messages = data.messages
+      if (!data.messages || data.messages.length === 0) return
+      const messageIDs = data.messages // Now returns IDs only (uint64 array)
       const context = data.context // Can be undefined if search complete
 
       if (params.collection !== 'Draft') {
         // We don't use context for drafts - there aren't many.
         this.context = context
       }
-      for (const message of messages) {
-        if (!message.subject) message.subject = ''
-        this.list[message.id] = message
-      }
+
+      // Fetch full message details in parallel for each ID.
+      // Individual fetches may 404 if a message was deleted between listing and fetching.
+      await Promise.all(
+        messageIDs.map(async (id) => {
+          try {
+            const message = await this.fetchMT({
+              id,
+            })
+            if (message) {
+              if (!message.subject) message.subject = ''
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
+          }
+        })
+      )
+
+      return messageIDs
     },
-    async fetchMT(params) {
-      const { message } = await api(this.config).message.fetchMT(params)
+    async fetchMT(params, logError = true) {
+      const message = await api(this.config).message.fetchMT(params, logError)
       if (message && !message.subject) message.subject = ''
       return message
     },
@@ -532,27 +558,46 @@ export const useMessageStore = defineStore({
       })
       this.remove({ id })
     },
-    async approve(params) {
+    async approve(id, groupid, subject, stdmsgid, body) {
+      const msg = this.byId(id)
+      const fromuser = msg?.fromuser
+
       await api(this.config).message.approve(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
+        id,
+        groupid,
+        subject,
+        stdmsgid,
+        body
       )
+      this.remove({ id })
 
-      this.remove({ id: params.id })
+      // Re-fetch the sender so posting status changes from stdmsg take effect.
+      if (fromuser) {
+        const uid = typeof fromuser === 'number' ? fromuser : fromuser.id
+        if (uid) {
+          useUserStore().fetch(uid, true)
+        }
+      }
     },
-    async reject(params) {
-      await api(this.config).message.reject(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
+    async reject(id, groupid, subject, stdmsgid, body) {
+      const msg = this.byId(id)
+      const fromuser = msg?.fromuser
 
-      this.remove({ id: params.id })
+      await api(this.config).message.reject(
+        id,
+        groupid,
+        subject,
+        stdmsgid,
+        body
+      )
+      this.remove({ id })
+
+      if (fromuser) {
+        const uid = typeof fromuser === 'number' ? fromuser : fromuser.id
+        if (uid) {
+          useUserStore().fetch(uid, true)
+        }
+      }
     },
     async reply(params) {
       await api(this.config).message.reply(
@@ -566,17 +611,15 @@ export const useMessageStore = defineStore({
     },
     async hold(params) {
       await api(this.config).message.hold(params.id)
-      const { message } = await api(this.config).message.fetchMT({
+      const message = await api(this.config).message.fetchMT({
         id: params.id,
-        messagehistory: true,
       })
       this.list[message.id] = message
     },
     async release(params) {
       await api(this.config).message.release(params.id)
-      const { message } = await api(this.config).message.fetchMT({
+      const message = await api(this.config).message.fetchMT({
         id: params.id,
-        messagehistory: true,
       })
       this.list[message.id] = message
     },
@@ -592,25 +635,32 @@ export const useMessageStore = defineStore({
         action: 'Move',
       })
 
-      // Use fetchMT (PHP API) not fetch (Go API) - the Go API returns fromuser
-      // as a bare numeric ID, losing the full user object with profile data that
-      // ModTools components need. Same pattern as hold() and release().
-      const { message } = await api(this.config).message.fetchMT({
+      const message = await api(this.config).message.fetchMT({
         id: params.id,
-        messagehistory: true,
       })
       this.list[message.id] = message
     },
     async searchMember(term, groupid) {
-      const { messages } = await api(this.config).message.fetchMessages({
+      const data = await api(this.config).message.fetchMessages({
         subaction: 'searchmemb',
         search: term,
         groupid,
       })
       await this.clear()
-      for (const message of messages) {
-        this.list[message.id] = message
-      }
+      if (!data.messages || data.messages.length === 0) return
+      // Response is IDs only — fetch full details for each.
+      await Promise.all(
+        data.messages.map(async (id) => {
+          try {
+            const message = await this.fetchMT({ id })
+            if (message) {
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
+          }
+        })
+      )
     },
   },
   getters: {

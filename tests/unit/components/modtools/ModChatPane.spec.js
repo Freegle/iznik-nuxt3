@@ -191,12 +191,12 @@ describe('ModChatPane', () => {
     it('renders chat holder when user is logged in and chat id provided', async () => {
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 456,
+        user1: 456,
         icon: '/icon.png',
       })
       mockChat.value = {
         id: 123,
-        user1id: 456,
+        user1: 456,
         icon: '/icon.png',
       }
 
@@ -219,11 +219,11 @@ describe('ModChatPane', () => {
     it('shows loader when chat is busy and no messages', async () => {
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 456,
+        user1: 456,
       })
       mockChat.value = {
         id: 123,
-        user1id: 456,
+        user1: 456,
       }
       mockChatStore.messagesById.mockReturnValue([])
 
@@ -353,8 +353,8 @@ describe('ModChatPane', () => {
         'on %s screen, typing(%s) calls collapse(%s)',
         async (breakpoint, typingState, expectedCollapse) => {
           mockMiscStore.breakpoint = breakpoint
-          mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
-          mockChat.value = { id: 123, user1id: 456 }
+          mockChatStore.byChatId.mockReturnValue({ id: 123, user1: 456 })
+          mockChat.value = { id: 123, user1: 456 }
 
           const wrapper = await mountComponent()
           await flushPromises()
@@ -371,8 +371,8 @@ describe('ModChatPane', () => {
 
       it('does not collapse header on large screens', async () => {
         mockMiscStore.breakpoint = 'lg'
-        mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
-        mockChat.value = { id: 123, user1id: 456 }
+        mockChatStore.byChatId.mockReturnValue({ id: 123, user1: 456 })
+        mockChat.value = { id: 123, user1: 456 }
 
         const wrapper = await mountComponent()
         await flushPromises()
@@ -388,8 +388,8 @@ describe('ModChatPane', () => {
 
       it('handles missing chatheader gracefully', async () => {
         mockMiscStore.breakpoint = 'xs'
-        mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
-        mockChat.value = { id: 123, user1id: 456 }
+        mockChatStore.byChatId.mockReturnValue({ id: 123, user1: 456 })
+        mockChat.value = { id: 123, user1: 456 }
 
         const wrapper = await mountComponent()
         await flushPromises()
@@ -514,12 +514,12 @@ describe('ModChatPane', () => {
       mockChatStore.messagesById.mockReturnValue(messages)
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 456,
+        user1: 456,
         icon: '/icon.png',
       })
       mockChat.value = {
         id: 123,
-        user1id: 456,
+        user1: 456,
         icon: '/icon.png',
       }
 
@@ -567,9 +567,9 @@ describe('ModChatPane', () => {
       mockMiscStore.stickyAdRendered = true
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 456,
+        user1: 456,
       })
-      mockChat.value = { id: 123, user1id: 456 }
+      mockChat.value = { id: 123, user1: 456 }
 
       const wrapper = await mountComponent()
       await flushPromises()
@@ -605,18 +605,18 @@ describe('ModChatPane', () => {
     it('fetches messages and user when chat is found', async () => {
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 789,
+        user1: 789,
       })
       mockChat.value = {
         id: 123,
-        user1id: 789,
+        user1: 789,
       }
 
       await mountComponent({ id: 123 })
       await flushPromises()
 
       expect(mockChatStore.fetchMessages).toHaveBeenCalledWith(123)
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({ id: 789 })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
   })
 })

@@ -4,70 +4,72 @@
       <ChatNotice v-if="otheruser?.deleted" variant="info">
         This freegler has deleted their account, so you can't chat to them.
       </ChatNotice>
-      <div v-else-if="showNotices && noticesToShow" class="notices-container">
+      <template v-else>
         <ChatNotice
-          v-if="otheruser?.spammer"
+          v-if="showSpammerWarning && otheruser?.spammer"
           variant="danger"
           title="Spammer Alert"
           dismissible
-          @dismiss="showNotices = false"
+          @dismiss="showSpammerWarning = false"
         >
           This person has been reported as a spammer or scammer. Please do not
           talk to them and under no circumstances send them any money. Do not
           arrange anything by courier.
         </ChatNotice>
-        <ChatNotice
-          v-if="badratings && !otheruser?.spammer"
-          variant="warning"
-          title="Low Ratings"
-          dismissible
-          @click="showInfo"
-          @dismiss="showNotices = false"
-        >
-          This freegler has a lot of thumbs down ratings. That might not be
-          their fault, but please make very clear arrangements. If you have a
-          good experience with them, give them a thumbs up.
-          <UserRatings
-            v-if="chat.otheruid"
-            :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
-            class="mt-2"
-          />
-        </ChatNotice>
-        <ChatNotice
-          v-else-if="expectedreplies && !otheruser?.spammer"
-          variant="warning"
-          title="Slow Replies"
-          dismissible
-          @click="showInfo"
-          @dismiss="showNotices = false"
-        >
-          {{ expectedreplies }} still waiting for them to reply on here.
-        </ChatNotice>
-        <ChatNotice
-          v-if="faraway && !otheruser?.spammer"
-          variant="warning"
-          title="Far Away"
-          icon="map-marker-alt"
-          dismissible
-          @click="showInfo"
-          @dismiss="showNotices = false"
-        >
-          This freegler is {{ milesstring }} from you. If you are collecting
-          from them, please make sure you can get there. If they are collecting
-          from you, please double-check they have transport.
-        </ChatNotice>
-        <ChatNotice
-          v-if="thumbsdown && !otheruser?.spammer"
-          variant="warning"
-          title="Previous Rating"
-          icon="thumbs-down"
-          dismissible
-          @dismiss="showNotices = false"
-        >
-          You previously gave this freegler a thumbs down.
-        </ChatNotice>
-      </div>
+        <div v-if="showNotices && noticesToShow" class="notices-container">
+          <ChatNotice
+            v-if="badratings && !otheruser?.spammer"
+            variant="warning"
+            title="Low Ratings"
+            dismissible
+            @click="showInfo"
+            @dismiss="showNotices = false"
+          >
+            This freegler has a lot of thumbs down ratings. That might not be
+            their fault, but please make very clear arrangements. If you have a
+            good experience with them, give them a thumbs up.
+            <UserRatings
+              v-if="chat.otheruid"
+              :id="chat.otheruid"
+              :key="'otheruser-' + chat.otheruid"
+              class="mt-2"
+            />
+          </ChatNotice>
+          <ChatNotice
+            v-else-if="expectedreplies && !otheruser?.spammer"
+            variant="warning"
+            title="Slow Replies"
+            dismissible
+            @click="showInfo"
+            @dismiss="showNotices = false"
+          >
+            {{ expectedreplies }} still waiting for them to reply on here.
+          </ChatNotice>
+          <ChatNotice
+            v-if="faraway && !otheruser?.spammer"
+            variant="warning"
+            title="Far Away"
+            icon="map-marker-alt"
+            dismissible
+            @click="showInfo"
+            @dismiss="showNotices = false"
+          >
+            This freegler is {{ milesstring }} from you. If you are collecting
+            from them, please make sure you can get there. If they are
+            collecting from you, please double-check they have transport.
+          </ChatNotice>
+          <ChatNotice
+            v-if="thumbsdown && !otheruser?.spammer"
+            variant="warning"
+            title="Previous Rating"
+            icon="thumbs-down"
+            dismissible
+            @dismiss="showNotices = false"
+          >
+            You previously gave this freegler a thumbs down.
+          </ChatNotice>
+        </div>
+      </template>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
           <OurUploader
@@ -436,6 +438,7 @@ const sending = ref(false)
 const uploading = ref(false)
 const showMicrovolunteering = ref(false)
 const showNotices = ref(true)
+const showSpammerWarning = ref(true)
 const showPromise = ref(false)
 const showPromiseMaybe = ref(false)
 const showProfileModal = ref(false)
@@ -480,7 +483,6 @@ const noticesToShow = computed(() => {
   return (
     badratings.value ||
     expectedreplies.value ||
-    otheruser.value?.spammer ||
     otheruser.value?.deleted ||
     thumbsdown.value ||
     faraway.value

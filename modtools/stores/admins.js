@@ -4,7 +4,7 @@ import api from '~/api'
 export const useAdminsStore = defineStore({
   id: 'admins',
   state: () => ({
-    list: [],
+    list: {},
   }),
   actions: {
     init(config) {
@@ -12,16 +12,19 @@ export const useAdminsStore = defineStore({
       this.$api = api(config)
     },
     clear() {
-      this.list = []
+      this.list = {}
     },
     clearAdmin(id) {
       delete this.list[id]
     },
     async fetch(params) {
-      const { admin, admins } = await api(this.config).admins.fetch(params)
+      const data = await api(this.config).admins.fetch(params)
       if (params && params.id) {
-        this.list[params.id] = admin
+        // Single admin fetch — V2 returns the admin object directly.
+        this.list[params.id] = data
       } else {
+        // List fetch — V2 returns a naked array.
+        const admins = Array.isArray(data) ? data : data?.admins || []
         for (const admin of admins) {
           this.list[admin.id] = admin
         }

@@ -20,6 +20,7 @@
 <script setup>
 import { computed } from 'vue'
 import { LCircleMarker, LGeoJson, LTooltip } from '@vue-leaflet/vue-leaflet'
+import { useLocationStore } from '~/stores/location'
 
 let Wkt = null
 
@@ -33,9 +34,11 @@ const FILL_OPACITY = 0.5
 const AREA_BOUNDARY_COLOUR = 'darkblue'
 // const SELECTED = '#990000'
 
+const locationStore = useLocationStore()
+
 const props = defineProps({
-  location: {
-    type: Object,
+  locationid: {
+    type: Number,
     required: true,
   },
   shade: {
@@ -58,6 +61,23 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'edit'])
 
+const location = computed(() => {
+  const loc = locationStore.byId(props.locationid)
+
+  if (!loc?.polygon || !Wkt) {
+    return loc || {}
+  }
+
+  try {
+    const wkt = new Wkt.Wkt()
+    wkt.read(loc.polygon)
+    return { ...loc, json: wkt.toJson() }
+  } catch (e) {
+    console.log('WKT error', loc, e)
+    return loc
+  }
+})
+
 const locationOptions = computed(() => ({
   // Needs to be set using setStyle ie not reactive
   fillColor: AREA_FILL_COLOUR,
@@ -70,14 +90,14 @@ const centre = computed(() => {
   let lng = 0
   let ret = null
 
-  if (props.location.json?.coordinates?.length === 1) {
-    props.location.json.coordinates[0].forEach((c) => {
+  if (location.value?.json?.coordinates?.length === 1) {
+    location.value.json.coordinates[0].forEach((c) => {
       lat += parseFloat(c[1])
       lng += parseFloat(c[0])
     })
 
-    lat /= props.location.json.coordinates[0].length
-    lng /= props.location.json.coordinates[0].length
+    lat /= location.value.json.coordinates[0].length
+    lng /= location.value.json.coordinates[0].length
 
     ret = {
       lat,

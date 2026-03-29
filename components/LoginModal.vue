@@ -441,6 +441,7 @@ function loginNative(e) {
                 })
                 .catch((err) => {
                   console.error('Failed to save credentials', err)
+                  pleaseShowModal.value = false
                 })
             } catch (e) {
               pleaseShowModal.value = false
@@ -507,12 +508,7 @@ function loginNative(e) {
       .catch((e) => {
         console.log('Login error', e)
         if (e instanceof LoginError) {
-          // Check if login failed due to email issues
-          if (e.status.includes('email') || e.status.includes('Email')) {
-            nativeLoginError.value = 'Please enter a valid email address.'
-          } else {
-            nativeLoginError.value = e.status
-          }
+          nativeLoginError.value = e.status
         } else {
           throw e // let others bubble up
         }
@@ -540,6 +536,7 @@ function loginNative(e) {
               })
               .catch((err) => {
                 console.error('Failed to save credentials', err)
+                pleaseShowModal.value = false
               })
           } catch (e) {
             console.log('Failed to save credentials2', e)
@@ -972,6 +969,8 @@ defineExpose({
   show,
   hide,
   tryLater,
+  showModal,
+  email,
 })
 </script>
 <style scoped lang="scss">

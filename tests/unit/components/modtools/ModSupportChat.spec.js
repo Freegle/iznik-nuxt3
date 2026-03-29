@@ -1,26 +1,71 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
 import ModSupportChat from '~/modtools/components/ModSupportChat.vue'
+import { useChatStore } from '~/stores/chat'
+
+const mockUserStore = {
+  byId: vi.fn().mockReturnValue(null),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
 
 describe('ModSupportChat', () => {
+  const defaultChat = {
+    id: 123,
+    chattype: 'User2User',
+    name: 'Test Chat',
+    lastdate: '2024-01-15T10:30:00Z',
+    user1: 1,
+    user2: 2,
+  }
+
   const defaultProps = {
-    chat: {
-      id: 123,
-      chattype: 'User2User',
-      name: 'Test Chat',
-      lastdate: '2024-01-15T10:30:00Z',
-      user1: 1,
-      user2: 2,
-    },
+    chatid: 123,
     pov: 1,
   }
 
+  let chatStore
+
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue({})
+    setActivePinia(createPinia())
+
+    const store = {
+      list: [],
+      listMT: [],
+      listByChatId: {
+        123: { ...defaultChat },
+      },
+      messageById: () => null,
+      byChatId(id) {
+        return this.listByChatId[id] || null
+      },
+      fetchMessages: async () => {},
+      fetchMT: async () => {},
+    }
+
+    globalThis.__mockChatStore = store
+
+    chatStore = useChatStore()
   })
 
-  function mountComponent(props = {}) {
+  afterEach(() => {
+    globalThis.__mockChatStore = null
+  })
+
+  function mountComponent(props = {}, chatOverrides = null) {
+    if (chatOverrides) {
+      const chatid = props.chatid || defaultProps.chatid
+      chatStore.listByChatId[chatid] = chatOverrides
+    }
+
     return mount(ModSupportChat, {
       props: { ...defaultProps, ...props },
       global: {
@@ -31,7 +76,7 @@ describe('ModSupportChat', () => {
           },
           ModChatViewButton: {
             template: '<button class="chat-view-button">View Chat</button>',
-            props: ['id', 'chat', 'pov'],
+            props: ['id', 'pov'],
           },
         },
         mocks: {
@@ -64,48 +109,58 @@ describe('ModSupportChat', () => {
     })
 
     it('displays "No messages" when lastdate is empty', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           lastdate: null,
-        },
-      })
+        }
+      )
       expect(wrapper.text()).toContain('No messages')
+    })
+
+    it('renders nothing when chat is not in store', () => {
+      chatStore.listByChatId = {}
+      const wrapper = mountComponent({ chatid: 999 })
+      expect(wrapper.find('.layout').exists()).toBe(false)
     })
   })
 
   describe('chat type icons', () => {
     it('shows user icon for User2User chat', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           chattype: 'User2User',
-        },
-      })
+        }
+      )
       const icons = wrapper.findAll('.icon')
       const userIcon = icons.find((i) => i.classes().includes('user'))
       expect(userIcon).toBeTruthy()
     })
 
     it('shows crown icon for User2Mod chat', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           chattype: 'User2Mod',
-        },
-      })
+        }
+      )
       const icons = wrapper.findAll('.icon')
       const crownIcon = icons.find((i) => i.classes().includes('crown'))
       expect(crownIcon).toBeTruthy()
     })
 
     it('shows crown icon for Mod2Mod chat', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           chattype: 'Mod2Mod',
-        },
-      })
+        }
+      )
       const icons = wrapper.findAll('.icon')
       const crownIcon = icons.find((i) => i.classes().includes('crown'))
       expect(crownIcon).toBeTruthy()
@@ -113,99 +168,92 @@ describe('ModSupportChat', () => {
   })
 
   describe('computed properties', () => {
-    describe('otheruser', () => {
+    describe('otheruserid', () => {
       it('returns user2 when pov equals user1', () => {
-        const wrapper = mountComponent({
-          chat: {
-            ...defaultProps.chat,
+        const wrapper = mountComponent(
+          { chatid: 123, pov: 100 },
+          {
+            ...defaultChat,
             chattype: 'User2User',
             user1: 100,
             user2: 200,
-          },
-          pov: 100,
-        })
-        expect(wrapper.vm.otheruser).toBe(200)
+          }
+        )
+        expect(wrapper.vm.otheruserid).toBe(200)
       })
 
       it('returns user1 when pov equals user2', () => {
-        const wrapper = mountComponent({
-          chat: {
-            ...defaultProps.chat,
+        const wrapper = mountComponent(
+          { chatid: 123, pov: 200 },
+          {
+            ...defaultChat,
             chattype: 'User2User',
             user1: 100,
             user2: 200,
-          },
-          pov: 200,
-        })
-        expect(wrapper.vm.otheruser).toBe(100)
+          }
+        )
+        expect(wrapper.vm.otheruserid).toBe(100)
       })
 
       it('returns null for non-User2User chat types', () => {
-        const wrapper = mountComponent({
-          chat: {
-            ...defaultProps.chat,
+        const wrapper = mountComponent(
+          { chatid: 123, pov: 100 },
+          {
+            ...defaultChat,
             chattype: 'User2Mod',
             user1: 100,
             user2: 200,
-          },
-          pov: 100,
-        })
-        expect(wrapper.vm.otheruser).toBeNull()
+          }
+        )
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
 
-      it('returns null when chat is empty object', () => {
-        const wrapper = mountComponent({
-          chat: {
-            id: 1,
-            chattype: 'User2User',
-            name: 'Empty',
-          },
-          pov: 100,
-        })
-        // With no user1/user2, otheruser returns undefined
-        expect(wrapper.vm.otheruser).toBeUndefined()
+      it('returns null when chat is not found in store', () => {
+        chatStore.listByChatId = {}
+        const wrapper = mountComponent({ chatid: 999 })
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
 
       it('returns null for Mod2Mod chat type', () => {
-        const wrapper = mountComponent({
-          chat: {
-            ...defaultProps.chat,
+        const wrapper = mountComponent(
+          { chatid: 123, pov: 100 },
+          {
+            ...defaultChat,
             chattype: 'Mod2Mod',
             user1: 100,
             user2: 200,
-          },
-          pov: 100,
-        })
-        expect(wrapper.vm.otheruser).toBeNull()
+          }
+        )
+        expect(wrapper.vm.otheruserid).toBeNull()
       })
     })
   })
 
   describe('other user display', () => {
     it('displays other user ID for User2User chat', async () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        { chatid: 123, pov: 100 },
+        {
+          ...defaultChat,
           chattype: 'User2User',
           user1: 100,
           user2: 200,
-        },
-        pov: 100,
-      })
+        }
+      )
       await nextTick()
       expect(wrapper.text()).toContain('200')
     })
 
     it('does not display other user ID for non-User2User chat', async () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        { chatid: 123, pov: 100 },
+        {
+          ...defaultChat,
           chattype: 'User2Mod',
           user1: 100,
           user2: 200,
-        },
-        pov: 100,
-      })
+        }
+      )
       await nextTick()
 
       // Should not show user2 ID in the name section (may appear in Chat ID)
@@ -218,7 +266,7 @@ describe('ModSupportChat', () => {
     it('has optional pov prop with null default', () => {
       const wrapper = mount(ModSupportChat, {
         props: {
-          chat: defaultProps.chat,
+          chatid: 123,
         },
         global: {
           stubs: {
@@ -271,26 +319,22 @@ describe('ModSupportChat', () => {
 
   describe('ModChatViewButton rendering', () => {
     it('renders ModChatViewButton with chat id', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
-          id: 456,
-        },
-      })
-      // The stub is rendered with a button class
+      chatStore.listByChatId[456] = {
+        ...defaultChat,
+        id: 456,
+      }
+      const wrapper = mountComponent({ chatid: 456 })
       const button = wrapper.find('.chat-view-button')
       expect(button.exists()).toBe(true)
     })
 
     it('renders ModChatViewButton component', () => {
-      const chatData = {
-        ...defaultProps.chat,
+      chatStore.listByChatId[789] = {
+        ...defaultChat,
         id: 789,
         name: 'Custom Chat',
       }
-      const wrapper = mountComponent({
-        chat: chatData,
-      })
+      const wrapper = mountComponent({ chatid: 789 })
       const button = wrapper.find('.chat-view-button')
       expect(button.exists()).toBe(true)
     })
@@ -299,7 +343,6 @@ describe('ModSupportChat', () => {
       const wrapper = mountComponent({
         pov: 555,
       })
-      // The button is within the .layout grid - verify the chat-view-button stub exists
       const layout = wrapper.find('.layout')
       const button = layout.find('.chat-view-button')
       expect(button.exists()).toBe(true)
@@ -308,42 +351,41 @@ describe('ModSupportChat', () => {
 
   describe('chat with missing data', () => {
     it('handles chat without user1', () => {
-      const wrapper = mountComponent({
-        chat: {
+      const wrapper = mountComponent(
+        { chatid: 123, pov: 100 },
+        {
           id: 123,
           chattype: 'User2User',
           name: 'Test',
           user2: 200,
-        },
-        pov: 100,
-      })
+        }
+      )
       // When user1 is missing and pov doesn't match undefined, returns user1 (undefined)
-      // or user2 depending on comparison
-      expect(wrapper.vm.otheruser).toBeUndefined()
+      expect(wrapper.vm.otheruserid).toBeUndefined()
     })
 
     it('handles chat without user2', () => {
-      const wrapper = mountComponent({
-        chat: {
+      const wrapper = mountComponent(
+        { chatid: 123, pov: 100 },
+        {
           id: 123,
           chattype: 'User2User',
           name: 'Test',
           user1: 100,
-        },
-        pov: 100,
-      })
-      // Should not throw
-      expect(wrapper.vm.otheruser).toBeUndefined()
+        }
+      )
+      expect(wrapper.vm.otheruserid).toBeUndefined()
     })
 
     it('handles chat without name', () => {
-      const wrapper = mountComponent({
-        chat: {
+      const wrapper = mountComponent(
+        { chatid: 123 },
+        {
           id: 123,
           chattype: 'User2User',
           lastdate: '2024-01-15',
-        },
-      })
+        }
+      )
       expect(wrapper.find('.name').exists()).toBe(true)
     })
   })
@@ -355,24 +397,26 @@ describe('ModSupportChat', () => {
     })
 
     it('shows user icon for User2User chat type', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           chattype: 'User2User',
-        },
-      })
+        }
+      )
       const icons = wrapper.findAll('.icon')
       const userIcon = icons.find((i) => i.classes().includes('user'))
       expect(userIcon).toBeTruthy()
     })
 
     it('shows crown icon for User2Mod chat type', () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           chattype: 'User2Mod',
-        },
-      })
+        }
+      )
       const icons = wrapper.findAll('.icon')
       const crownIcon = icons.find((i) => i.classes().includes('crown'))
       expect(crownIcon).toBeTruthy()
@@ -381,12 +425,13 @@ describe('ModSupportChat', () => {
 
   describe('time display', () => {
     it('shows time in span with title attribute for datetime', async () => {
-      const wrapper = mountComponent({
-        chat: {
-          ...defaultProps.chat,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultChat,
           lastdate: '2024-01-15T10:30:00Z',
-        },
-      })
+        }
+      )
       await nextTick()
 
       const timeSpan = wrapper.find('.time span[title]')

@@ -87,7 +87,7 @@ describe('support/[[id]].vue page', () => {
           },
           ModMessage: {
             template: '<div class="mod-message" />',
-            props: ['message', 'noactions'],
+            props: ['messageid', 'noactions'],
           },
           ModSystemLogs: {
             template: '<div class="mod-system-logs" />',
@@ -199,20 +199,20 @@ describe('support/[[id]].vue page', () => {
       const wrapper = mountComponent()
       wrapper.vm.messageTerm = '12345'
       await wrapper.vm.searchedMessage()
-      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
-        id: '12345',
-        messagehistory: true,
-      })
+      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith(
+        { id: '12345' },
+        false
+      )
     })
 
     it('searchedMessage calls searchById for #id term', async () => {
       const wrapper = mountComponent()
       wrapper.vm.messageTerm = '#12345'
       await wrapper.vm.searchedMessage()
-      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
-        id: '12345',
-        messagehistory: true,
-      })
+      expect(mockMessageStore.fetchMT).toHaveBeenCalledWith(
+        { id: '12345' },
+        false
+      )
     })
 
     it('searchedMessage calls searchBySubject for text term', async () => {
@@ -223,13 +223,6 @@ describe('support/[[id]].vue page', () => {
         term: 'test subject',
         groupid: undefined,
       })
-    })
-
-    it('onSystemLogsTab sets showSystemLogs and clears store', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onSystemLogsTab()
-      expect(wrapper.vm.showSystemLogs).toBe(true)
-      expect(mockSystemLogsStore.clear).toHaveBeenCalled()
     })
 
     it('onEmailStatsTab sets showEmailStats', () => {
@@ -252,15 +245,6 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.$nextTick()
       await flushPromises()
       expect(wrapper.vm.activeTab).toBe(1)
-    })
-
-    it('sets logsSubTab from query param', async () => {
-      mockRouteQuery.value = { tab: 'logs', subtab: 'ai' } // 'ai' maps to index 1 in logsSubTabMap
-      const wrapper = mountComponent()
-      await wrapper.vm.$nextTick()
-      await flushPromises()
-      expect(wrapper.vm.activeTab).toBe(5) // Logs tab is now at index 5
-      expect(wrapper.vm.logsSubTab).toBe(1) // 'ai' subtab is index 1
     })
   })
 })

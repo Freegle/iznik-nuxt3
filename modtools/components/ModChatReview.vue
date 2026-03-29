@@ -5,10 +5,12 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
-              :user="message.fromuser"
+              :userid="
+                message.fromuserid || message.fromuser?.id || message.userid
+              "
               class="me-2"
               tag="From: "
-              :groupid="message.group ? message.group.id : 0"
+              :groupid="message.groupid || message.group?.id || 0"
               @reload="reload"
             />
             <v-icon
@@ -17,23 +19,19 @@
               class="mt-1 text-info"
             />
             <ModChatReviewUser
-              v-if="message.touser"
-              :user="message.touser"
+              v-if="message.touserid || message.touser"
+              :userid="message.touserid || message.touser?.id"
               class="ms-2"
               tag="To: "
-              :groupid="message.group ? message.group.id : 0"
+              :groupid="message.groupid || message.group?.id || 0"
               @reload="reload"
             />
           </div>
-          <b-button
-            v-if="message.bymailid || message.msgid"
-            size="lg"
-            variant="white"
-            class="ms-2"
-            @click="showOriginal = true"
-          >
-            <v-icon icon="info-circle" /> View original email
-          </b-button>
+          <div v-if="message.bymailid || message.msgid">
+            <b-button variant="white" class="ms-2" @click="showOriginal = true">
+              <v-icon icon="info-circle" /> View original email
+            </b-button>
+          </div>
         </div>
       </b-card-header>
       <b-card-body>
@@ -69,13 +67,16 @@
           <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /-->
           <!-- :chatusers="chatusers" -->
         </div>
-        <ModSpammer v-if="message.touser?.spammer" :user="message.touser" />
+        <ModSpammer
+          v-if="message.touser?.spammer"
+          :userid="message.touser?.id"
+        />
         <div class="d-flex justify-content-between flex-wrap">
           <span>
             {{ timeago(message.date) }}
           </span>
           <span v-if="message.widerchatreview" class="text-danger">
-            <v-icon icon="info-circle" />
+            <v-icon icon="info-circle" class="me-1" />
             <em>Quicker Chat Review</em>
           </span>
           <span v-if="message.group">
@@ -104,15 +105,20 @@
             }}
           </span>
         </div>
-        <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
+        <ModSpammer
+          v-if="message.fromuser?.spammer"
+          :userid="message.fromuser?.id"
+        />
         <div class="d-flex justify-content-around">
-          <div v-if="!message.widerchatreview">
+          <div v-if="isActiveMod && message.fromuser">
             <span>
               <!-- eslint-disable-next-line -->
-              <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
+              <v-icon icon="info-circle" /> {{ message.fromuser?.displayname }} is
               <span>
                 <span v-if="message.groupfrom"
-                  >on {{ message.groupfrom.namedisplay }}, which you mod. </span
+                  >on {{ message.groupfrom.namedisplay
+                  }}<span v-if="!message.widerchatreview">, which you mod</span
+                  >. </span
                 ><span v-else>not on any groups which you actively mod. </span>
                 <b-button
                   v-if="message.groupfrom"
@@ -120,7 +126,7 @@
                     '/members/approved/' +
                     message.groupfrom.id +
                     '/' +
-                    message.fromuser.id
+                    message.fromuser?.id
                   "
                   variant="link"
                   class="p-0 border-0 align-top"
@@ -134,8 +140,11 @@
       </b-card-body>
       <b-card-footer>
         <div class="d-flex flex-wrap justify-content-start">
-          <template v-if="!message.widerchatreview">
-            <ModChatViewButton :id="message.chatid" :pov="message.touser?.id" />
+          <template v-if="!message.widerchatreview && isActiveMod">
+            <ModChatViewButton
+              :id="message.chatid"
+              :pov="message.touserid || message.touser?.id"
+            />
             <b-button
               v-if="message.held && me.id === message.held.id"
               variant="warning"
@@ -170,7 +179,7 @@
             class="me-2 mb-1"
             @handle="approve"
           />
-          <template v-if="!message.widerchatreview">
+          <template v-if="!message.widerchatreview && isActiveMod">
             <SpinButton
               v-if="!message.held"
               icon-name="check"
@@ -227,22 +236,38 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/modtools/composables/useModMe'
+import { useChatStore } from '~/stores/chat'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   id: {
     type: Number,
     required: true,
   },
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
 })
 
+const chatStore = useChatStore()
+const authStore = useAuthStore()
+
+const message = computed(() => chatStore.messageById(props.messageid))
+
+const isActiveMod = computed(() => {
+  const groupid = message.value?.group?.id
+  if (!groupid) return true
+  const membership = authStore.groups?.find((g) => g.groupid === groupid)
+  if (membership?.active === 0) return false
+  return true
+})
+
 const emit = defineEmits(['reload'])
 
-const { $api } = useNuxtApp()
 const { me } = useMe()
+const { checkWork } = useModMe()
 
 const modnote = ref(null)
 
@@ -252,8 +277,8 @@ const showModChatNoteModal = ref(false)
 const reviewreason = computed(() => {
   let ret = null
 
-  if (props.message && props.message.reviewreason) {
-    switch (props.message.reviewreason) {
+  if (message.value && message.value.reviewreason) {
+    switch (message.value.reviewreason) {
       case 'Last': {
         ret = 'Earlier message was held for review, so this one is too.'
         break
@@ -367,7 +392,7 @@ const reviewreason = computed(() => {
         break
       }
       default: {
-        ret = props.message.reviewreason
+        ret = message.value.reviewreason
       }
     }
   }
@@ -380,36 +405,36 @@ function reload() {
 }
 
 async function release() {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Release' })
+  await chatStore.releaseChat(props.messageid)
   emit('reload')
+  checkWork(true)
 }
 
 async function hold(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Hold' })
+  await chatStore.holdChat(props.messageid)
   emit('reload')
+  checkWork(true)
   callback()
 }
 
 async function approve(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Approve' })
+  await chatStore.approveChat(props.messageid)
   emit('reload')
+  checkWork(true)
   callback()
 }
 
 async function reject(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Reject' })
-  // chatStore.removeMessageMT(REVIEWCHAT, props.message.id)
-  // console.log('reject', props.message.id, chatStore.messages[REVIEWCHAT])
+  await chatStore.rejectChat(props.messageid)
   emit('reload')
+  checkWork(true)
   callback()
 }
 
 async function whitelist(callback) {
-  await $api.chat.sendMT({
-    id: props.message.id,
-    action: 'ApproveAllFuture',
-  })
+  await chatStore.approveAllFutureChat(props.messageid)
   emit('reload')
+  checkWork(true)
   callback()
 }
 
@@ -420,7 +445,7 @@ function showModnote(callback) {
 }
 
 async function redactEmails(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Redact' })
+  await chatStore.redactChat(props.messageid)
   emit('reload')
   callback()
 }

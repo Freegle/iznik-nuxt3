@@ -74,7 +74,7 @@
               <ModMessage
                 v-for="message in messages"
                 :key="'message-' + message.id"
-                :message="message"
+                :messageid="message.id"
                 noactions
               />
             </div>
@@ -106,11 +106,11 @@
             />
           </b-tab>
 
-          <!-- Logs Tab with sub-tabs -->
-          <b-tab @click="onLogsTab">
+          <!-- AI Support Helper Tab -->
+          <b-tab @click="onAITab">
             <template #title>
               <h2 class="ms-2 me-2">
-                Logs
+                AI Support Helper
                 <b-badge
                   variant="danger"
                   class="ms-1"
@@ -120,43 +120,18 @@
               </h2>
             </template>
             <NoticeMessage variant="warning" class="mb-2">
-              <b>Work in Progress:</b> We're part way through a slow migration
-              from our own logging infrastructure to third-party solutions. This
-              will include more detailed information to help diagnose problems -
-              such as device type, screen size, browser, and a detailed trace of
-              user actions. Please report bugs or usability issues to
+              <b>Work in Progress:</b> This is the AI Support Helper. It can
+              help diagnose problems using device type, screen size, browser,
+              and a detailed trace of user actions. Please report bugs or
+              usability issues to
               <ExternalLink href="mailto:geeks@ilovefreegle.org">
                 geeks@ilovefreegle.org </ExternalLink
-              >. See
-              <ExternalLink
-                href="https://github.com/Freegle/FreegleDocker/blob/master/Logging.md"
-              >
-                Logging.md
-              </ExternalLink>
-              for technical details.
+              >.
             </NoticeMessage>
-            <div class="subtabs-wrapper">
-              <b-tabs v-model="logsSubTab" content-class="mt-3" class="subtabs">
-                <b-tab @click="onSystemLogsTab">
-                  <template #title>
-                    <span class="subtab-title">System Logs</span>
-                  </template>
-                  <ModSystemLogs
-                    v-if="showSystemLogs"
-                    :key="'systemlogs-' + systemLogsBump"
-                  />
-                </b-tab>
-                <b-tab @click="onAIAssistantTab">
-                  <template #title>
-                    <span class="subtab-title">AI Support Helper</span>
-                  </template>
-                  <ModSupportAIAssistant
-                    v-if="showAIAssistant"
-                    :key="'aiassistant-' + aiAssistantBump"
-                  />
-                </b-tab>
-              </b-tabs>
-            </div>
+            <ModSupportAIAssistant
+              v-if="showAIAssistant"
+              :key="'aiassistant-' + aiAssistantBump"
+            />
           </b-tab>
 
           <!-- Spam Tab with sub-tabs -->
@@ -195,13 +170,11 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useMessageStore } from '~/stores/message'
-import { useSystemLogsStore } from '~/stores/systemlogs'
 import { useMe } from '~/composables/useMe'
 
 // Stores
 const chatStore = useChatStore()
 const messageStore = useMessageStore()
-const systemLogsStore = useSystemLogsStore()
 
 // Composables
 const { supportOrAdmin } = useMe()
@@ -219,8 +192,6 @@ const spamKeywordsComponent = ref(null)
 const error = ref(false)
 const messageTerm = ref(null)
 const id = ref('id' in route.params ? parseInt(route.params.id) : 0)
-const showSystemLogs = ref(false)
-const systemLogsBump = ref(0)
 const showEmailStats = ref(false)
 const emailStatsBump = ref(0)
 const showIncomingEmail = ref(false)
@@ -229,7 +200,6 @@ const showAIAssistant = ref(false)
 const aiAssistantBump = ref(0)
 const activeTab = ref(0)
 const communitySubTab = ref(0)
-const logsSubTab = ref(0)
 const spamSubTab = ref(0)
 
 // Tab name to index mapping
@@ -239,7 +209,7 @@ const topTabMap = {
   message: 2,
   outgoing: 3,
   incoming: 4,
-  logs: 5,
+  ai: 5,
   spam: 6,
 }
 
@@ -249,11 +219,6 @@ const communitySubTabMap = {
   contact: 2,
   add: 3,
   volunteers: 4,
-}
-
-const logsSubTabMap = {
-  system: 0,
-  ai: 1,
 }
 
 const spamSubTabMap = {
@@ -295,19 +260,8 @@ onMounted(() => {
         onEmailStatsTab()
       } else if (tabParam === 'incoming') {
         onIncomingEmailTab()
-      } else if (tabParam === 'logs') {
-        onLogsTab()
-        if (subTabParam && logsSubTabMap[subTabParam] !== undefined) {
-          logsSubTab.value = logsSubTabMap[subTabParam]
-          if (subTabParam === 'system') {
-            onSystemLogsTab()
-          } else if (subTabParam === 'ai') {
-            onAIAssistantTab()
-          }
-        } else {
-          // Default to system logs.
-          onSystemLogsTab()
-        }
+      } else if (tabParam === 'ai') {
+        onAITab()
       } else if (tabParam === 'spam') {
         onSpamTab()
         if (subTabParam && spamSubTabMap[subTabParam] !== undefined) {
@@ -350,10 +304,12 @@ async function searchById(msgId) {
   error.value = false
 
   try {
-    const message = await messageStore.fetchMT({
-      id: msgId,
-      messagehistory: true,
-    })
+    const message = await messageStore.fetchMT(
+      {
+        id: msgId,
+      },
+      false
+    )
     if (message) messageStore.list[msgId] = message
   } catch (e) {
     console.log("Couldn't fetch", e)
@@ -401,18 +357,11 @@ async function onListCommunitiesTab() {
   }
 }
 
-function onLogsTab() {
-  // Initialize logs tab - show system logs by default.
+function onAITab() {
+  // Initialize AI Support Helper tab.
   nextTick(() => {
-    onSystemLogsTab()
+    onAIAssistantTab()
   })
-}
-
-function onSystemLogsTab() {
-  // Initialize system logs when tab is clicked.
-  systemLogsBump.value = Date.now()
-  showSystemLogs.value = true
-  systemLogsStore.clear()
 }
 
 function onEmailStatsTab() {

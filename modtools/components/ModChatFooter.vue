@@ -46,7 +46,7 @@
           </notice-message>
           <ModComments
             v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
-            :user="otheruser"
+            :userid="otheruser.id"
             class="mt-1"
             @editing="editing"
           />
@@ -401,14 +401,14 @@
       @hidden="showConfirmModal = false"
     />
     <ModSpammerReport
-      v-if="showSpamModal && modchatuser"
-      :user="modchatuser"
+      v-if="showSpamModal && chat.user1"
+      :userid="chat.user1"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
-      v-if="showAddCommentModal && modchatuser"
-      :user="modchatuser"
-      :groupid="chat.group.id"
+      v-if="showAddCommentModal && chat.user1"
+      :userid="chat.user1"
+      :groupid="chat.groupid || chat.group?.id || 0"
       @hidden="showAddCommentModal = false"
     />
   </div>
@@ -532,12 +532,9 @@ const rsvp = ref(null)
 const showSpamModal = ref(false)
 const showConfirmModal = ref(false)
 const showAddCommentModal = ref(false)
-const modchatuser = ref(null)
 
-// MT: Fetch the user1 (member) via v1 API to include comments/notes
-if (chat.value?.user1id) {
-  await userStore.fetchMT({ id: chat.value.user1id })
-  modchatuser.value = userStore.byId(chat.value.user1id)
+if (chat.value?.user1) {
+  await userStore.fetch(chat.value.user1)
 }
 
 // Computed properties
@@ -707,8 +704,15 @@ const applySuggestedAddress = async () => {
 const _updateAfterSend = async () => {
   sending.value = false
 
-  // Fetch the messages again to pick up the new one.
-  await fetchMessages()
+  // Mark read immediately — the mod has clearly seen this chat.
+  // This optimistically clears the unread badge without waiting for API.
+  await chatStore.markRead(props.id)
+
+  // Force-fetch messages to pick up the newly sent one. The force flag
+  // bypasses the length check in the store — without it, a race between
+  // the fire-and-forget fetch in send() and this fetch can result in
+  // both returning stale data, with the length check preventing update.
+  await chatStore.fetchMessages(props.id, true)
   emit('scrollbottom')
 
   // We also want to trigger an update in the chat list.

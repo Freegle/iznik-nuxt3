@@ -352,7 +352,7 @@ describe('MessageEditModal', () => {
   })
 
   describe('message without location', () => {
-    it('shows simple subject input when no location', () => {
+    it('shows simple subject input when no location and no item', () => {
       mockMessageStore.byId.mockReturnValue({
         id: 1,
         subject: 'Test Subject',
@@ -368,6 +368,154 @@ describe('MessageEditModal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.edit-form').exists()).toBe(false)
       expect(wrapper.find('.b-form-input').exists()).toBe(true)
+    })
+
+    it('shows full edit form when location is null but item exists', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'OFFER: Widget (AB1 2CD)',
+        textbody: 'A nice widget',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: null,
+        item: { name: 'Widget' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      expect(wrapper.find('.edit-form').exists()).toBe(true)
+      expect(wrapper.find('.b-form-input').exists()).toBe(false)
+      expect(wrapper.find('.post-item').exists()).toBe(true)
+      expect(wrapper.find('.post-code').exists()).toBe(true)
+    })
+
+    it('shows full edit form when item is null but location exists', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'OFFER: Gadget (AB1 2CD)',
+        textbody: 'A gadget',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'AB1 2CD' },
+        item: null,
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      expect(wrapper.find('.edit-form').exists()).toBe(true)
+      expect(wrapper.find('.b-form-input').exists()).toBe(false)
+    })
+  })
+
+  describe('itemName extraction from subject', () => {
+    it('uses item.name when available', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'OFFER: Something Else (AB1 2CD)',
+        textbody: 'desc',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'AB1 2CD' },
+        item: { name: 'Preferred Name' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('Preferred Name')
+    })
+
+    it('extracts item name from subject when item.name is empty', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'OFFER: Kitchen Table (EH1 1AA)',
+        textbody: 'desc',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'EH1 1AA' },
+        item: { name: '' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('Kitchen Table')
+    })
+
+    it('extracts item name from Wanted subject', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'WANTED: Garden Tools (SW1 1AA)',
+        textbody: 'desc',
+        type: 'Wanted',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'SW1 1AA' },
+        item: { name: '' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('Garden Tools')
+    })
+
+    it('extracts item name from subject without location suffix', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'Offer: Blue Sofa',
+        textbody: 'desc',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'AB1 2CD' },
+        item: { name: '' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('Blue Sofa')
+    })
+
+    it('returns empty string when subject does not match pattern', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'Random subject line',
+        textbody: 'desc',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'AB1 2CD' },
+        item: { name: '' },
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('')
+    })
+
+    it('handles null item object by extracting from subject', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'OFFER: Bookshelf (N1 1AA)',
+        textbody: 'desc',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'N1 1AA' },
+        item: null,
+        attachments: [],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      const input = wrapper.find('.post-item input')
+      expect(input.element.value).toBe('Bookshelf')
     })
   })
 

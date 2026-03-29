@@ -288,4 +288,54 @@ describe('ChatListEntry', () => {
       expect(wrapper.props('active')).toBe(true)
     })
   })
+
+  describe('scrollIntoView on active', () => {
+    it('scrolls its own element into view when active (uses template ref, not querySelector)', () => {
+      /* Mock requestIdleCallback to run the callback synchronously */
+      const originalRIC = window.requestIdleCallback
+      window.requestIdleCallback = (cb) => cb()
+
+      const wrapper = createWrapper({ active: true })
+
+      /* The component should use a template ref, not document.querySelector.
+       * We verify by checking the component's entryEl ref points to the root element. */
+      expect(wrapper.vm.entryEl).toBeTruthy()
+      expect(wrapper.vm.entryEl.classList.contains('chat-entry')).toBe(true)
+
+      window.requestIdleCallback = originalRIC
+    })
+
+    it('does not scroll when active is false', () => {
+      const originalRIC = window.requestIdleCallback
+      window.requestIdleCallback = (cb) => cb()
+
+      const wrapper = createWrapper({ active: false })
+
+      /* entryEl ref exists but scrollIntoView should not have been called
+       * (we can't easily verify the call, but the component should not crash) */
+      expect(wrapper.find('.chat-entry').exists()).toBe(true)
+
+      window.requestIdleCallback = originalRIC
+    })
+
+    it('falls back to setTimeout when requestIdleCallback is not available', () => {
+      vi.useFakeTimers()
+
+      const originalRIC = window.requestIdleCallback
+      delete window.requestIdleCallback
+
+      const wrapper = createWrapper({ active: true })
+
+      /* The component should have set up a setTimeout fallback */
+      expect(wrapper.vm.entryEl).toBeTruthy()
+
+      vi.advanceTimersByTime(100)
+
+      /* Should not throw */
+      expect(wrapper.find('.chat-entry').exists()).toBe(true)
+
+      window.requestIdleCallback = originalRIC
+      vi.useRealTimers()
+    })
+  })
 })

@@ -649,7 +649,7 @@ if (existingHomepage !== 'mygroups') {
 
 .selection__wrapper {
   background-color: $color-blue--x-light;
-  border: 1px solid #BEE5EB;
+  border: 1px solid #bee5eb;
   border-radius: var(--radius-sm, 0.375rem);
 }
 

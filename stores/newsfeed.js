@@ -218,7 +218,7 @@ export const useNewsfeedStore = defineStore({
       if (id !== threadhead) {
         await this.fetch(threadhead, true)
       } else {
-        this.list[id] = null
+        delete this.list[id]
         this.feed = this.feed.filter((item) => item.id !== id)
       }
     },

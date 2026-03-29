@@ -13,6 +13,10 @@ export const useSystemLogsStore = defineStore({
     traceChildren: {}, // Map of trace_id → logs (loaded on demand)
     loadingTraces: {}, // Map of trace_id → boolean (loading state)
 
+    // ID-based lookup maps for log entries and tree nodes
+    logItems: {}, // Map of log.id → log object
+    nodeItems: {}, // Map of nodeKey → node object (populated by logsAsTree getter)
+
     // Filters
     sources: [], // Empty = show all sources
     types: [],
@@ -60,11 +64,35 @@ export const useSystemLogsStore = defineStore({
       this.summaries = []
       this.traceChildren = {}
       this.loadingTraces = {}
+      this.logItems = {}
+      this.nodeItems = {}
       this.hasMore = true
       this.lastTimestamp = null
       this.stats = null
       this.error = null
       this.expandedGroups = {}
+    },
+
+    // Store a log entry by its ID for lookup.
+    storeLog(log) {
+      if (log && log.id) {
+        this.logItems[log.id] = log
+      }
+    },
+
+    // Store a tree node by its key for lookup.
+    storeNode(nodeKey, node) {
+      this.nodeItems[nodeKey] = node
+    },
+
+    // Get a log entry by ID.
+    getLog(id) {
+      return this.logItems[id] || null
+    },
+
+    // Get a tree node by key.
+    getNode(nodeKey) {
+      return this.nodeItems[nodeKey] || null
     },
 
     // Fetch summaries for tree view (lazy loading - just trace headers).
@@ -95,6 +123,15 @@ export const useSystemLogsStore = defineStore({
           this.summaries.push(...response.summaries)
         } else if (response.summaries) {
           this.summaries = response.summaries
+        }
+
+        // Store log entries from summaries for ID-based lookup.
+        if (response.summaries) {
+          for (const summary of response.summaries) {
+            if (summary.first_log) {
+              this.storeLog(summary.first_log)
+            }
+          }
         }
 
         this.stats = response.stats
@@ -145,7 +182,13 @@ export const useSystemLogsStore = defineStore({
         }
 
         const response = await api(this.config).systemlogs.fetch(queryParams)
-        this.traceChildren[traceId] = response.logs || []
+        const logs = response.logs || []
+        this.traceChildren[traceId] = logs
+
+        // Store log entries for ID-based lookup.
+        for (const log of logs) {
+          this.storeLog(log)
+        }
       } catch (e) {
         console.error(`Failed to fetch trace ${traceId}:`, e)
         this.traceChildren[traceId] = [] // Mark as loaded but empty
@@ -376,7 +419,20 @@ export const useSystemLogsStore = defineStore({
       if (state.summaries.length > 0) {
         // First pass: collect nodes and identify page load groups
         const nodes = []
+        const newNodeItems = {}
         let currentPageLoadGroup = null
+
+        // Helper to generate a unique node key.
+        const getNodeKey = (node) => {
+          if (node.type === 'standalone') {
+            return 'standalone-' + node.log.id
+          } else if (node.type === 'trace-group') {
+            return 'trace-' + node.trace_id
+          } else if (node.type === 'page-load-group') {
+            return node.groupKey
+          }
+          return 'node-' + Math.random().toString(36).slice(2)
+        }
 
         for (const summary of state.summaries) {
           // Skip polling logs if filter is active
@@ -458,6 +514,9 @@ export const useSystemLogsStore = defineStore({
             }
           }
 
+          // Assign nodeKey to the node.
+          node.nodeKey = getNodeKey(node)
+
           // Group page load logs together
           if (isPageLoad && summary.first_log.source === 'client') {
             // Start or continue a page load group
@@ -470,6 +529,7 @@ export const useSystemLogsStore = defineStore({
               currentPageLoadGroup = {
                 type: 'page-load-group',
                 groupKey,
+                nodeKey: groupKey,
                 firstTimestamp: summary.first_timestamp,
                 lastTimestamp: summary.last_timestamp,
                 childCount: 1,
@@ -487,13 +547,18 @@ export const useSystemLogsStore = defineStore({
             if (currentPageLoadGroup) {
               // Only create group if there are multiple entries
               if (currentPageLoadGroup.children.length > 1) {
+                newNodeItems[currentPageLoadGroup.nodeKey] =
+                  currentPageLoadGroup
                 nodes.push(currentPageLoadGroup)
               } else {
                 // Single entry, just add it directly
-                nodes.push(currentPageLoadGroup.children[0])
+                const singleNode = currentPageLoadGroup.children[0]
+                newNodeItems[singleNode.nodeKey] = singleNode
+                nodes.push(singleNode)
               }
               currentPageLoadGroup = null
             }
+            newNodeItems[node.nodeKey] = node
             nodes.push(node)
           }
         }
@@ -501,11 +566,18 @@ export const useSystemLogsStore = defineStore({
         // Flush any remaining page load group
         if (currentPageLoadGroup) {
           if (currentPageLoadGroup.children.length > 1) {
+            newNodeItems[currentPageLoadGroup.nodeKey] = currentPageLoadGroup
             nodes.push(currentPageLoadGroup)
           } else {
-            nodes.push(currentPageLoadGroup.children[0])
+            const singleNode = currentPageLoadGroup.children[0]
+            newNodeItems[singleNode.nodeKey] = singleNode
+            nodes.push(singleNode)
           }
         }
+
+        // Store all nodes for ID-based lookup.
+        // Use Object.assign to avoid replacing the reactive object reference.
+        Object.assign(state.nodeItems, newNodeItems)
 
         return nodes
       }

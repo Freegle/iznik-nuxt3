@@ -3,11 +3,21 @@ import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
 import ModMemberRating from '~/modtools/components/ModMemberRating.vue'
 
+// Mock member store
+const mockMemberStore = {
+  ratings: [],
+  ratingById: vi.fn(),
+}
+
 // Mock user store
 const mockUserStore = {
   byId: vi.fn(),
   ratingReviewed: vi.fn(),
 }
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
+}))
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
@@ -37,10 +47,16 @@ describe('ModMemberRating', () => {
   })
 
   function mountComponent(props = {}) {
+    const ratingData = props.rating || createRating()
+
+    mockMemberStore.ratingById.mockImplementation((id) => {
+      if (parseInt(id) === parseInt(ratingData.id)) return ratingData
+      return undefined
+    })
+
     return mount(ModMemberRating, {
       props: {
-        rating: createRating(),
-        ...props,
+        ratingid: ratingData.id,
       },
       global: {
         stubs: {
@@ -87,7 +103,7 @@ describe('ModMemberRating', () => {
     vi.clearAllMocks()
     mockUserStore.byId.mockReturnValue({
       id: 456,
-      memberof: [{ id: 789, namedisplay: 'Test Group' }],
+      memberships: [{ id: 789, namedisplay: 'Test Group' }],
     })
     mockUserStore.ratingReviewed.mockResolvedValue()
   })
@@ -199,7 +215,7 @@ describe('ModMemberRating', () => {
     it('returns group name when rater is member of group', () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,
-        memberof: [{ id: 789, namedisplay: 'Test Group' }],
+        memberships: [{ id: 789, namedisplay: 'Test Group' }],
       })
       const wrapper = mountComponent({
         rating: createRating({ rater: 456, groupid: 789 }),
@@ -207,8 +223,8 @@ describe('ModMemberRating', () => {
       expect(wrapper.vm.groupName).toBe('Test Group')
     })
 
-    it('returns null when rater has no memberof', () => {
-      mockUserStore.byId.mockReturnValue({ id: 456, memberof: null })
+    it('returns null when rater has no memberships', () => {
+      mockUserStore.byId.mockReturnValue({ id: 456, memberships: null })
       const wrapper = mountComponent()
       expect(wrapper.vm.groupName).toBeNull()
     })
@@ -222,7 +238,7 @@ describe('ModMemberRating', () => {
     it('returns null when rater is not member of the group', () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,
-        memberof: [{ id: 999, namedisplay: 'Other Group' }],
+        memberships: [{ id: 999, namedisplay: 'Other Group' }],
       })
       const wrapper = mountComponent({ rating: createRating({ groupid: 789 }) })
       expect(wrapper.vm.groupName).toBeNull()
@@ -231,7 +247,7 @@ describe('ModMemberRating', () => {
     it('returns null when not a mod on the group', () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,
-        memberof: [{ id: 888, namedisplay: 'Non-Mod Group' }],
+        memberships: [{ id: 888, namedisplay: 'Non-Mod Group' }],
       })
       const wrapper = mountComponent({ rating: createRating({ groupid: 888 }) })
       expect(wrapper.vm.groupName).toBeNull()

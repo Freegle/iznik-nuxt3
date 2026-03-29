@@ -220,6 +220,10 @@ describe('MyMessage', () => {
             template: '<a :href="to" class="nuxt-link"><slot /></a>',
             props: ['to'],
           },
+          'b-badge': {
+            template: '<span class="b-badge"><slot /></span>',
+            props: ['variant'],
+          },
           NuxtPicture: {
             template:
               '<picture class="nuxt-picture"><img :src="src" /></picture>',

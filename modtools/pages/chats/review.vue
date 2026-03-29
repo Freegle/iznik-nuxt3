@@ -10,7 +10,7 @@
         >
           <ModChatReview
             :id="message.chatid"
-            :message="message"
+            :messageid="message.id"
             @reload="reload"
           />
         </div>
@@ -26,7 +26,10 @@
             <Spinner :size="50" />
           </template>
           <template #complete>
-            <notice-message v-if="!visibleMessages?.length">
+            <div v-if="loading" class="d-flex justify-content-center">
+              <Spinner :size="50" />
+            </div>
+            <notice-message v-else-if="!visibleMessages?.length">
               There are no chat messages to review at the moment.
             </notice-message>
           </template>
@@ -71,6 +74,7 @@ const limit = ref(5)
 const show = ref(0)
 const bump = ref(0)
 const showDeleteModal = ref(false)
+const loading = ref(true)
 
 // Computed properties
 const messages = computed(() => {
@@ -113,9 +117,13 @@ watch(work, (newVal, oldVal) => {
 
 // Methods
 function loadMore($state) {
+  if (messages.value.length === 0) {
+    // Data hasn't loaded yet — don't complete or we'll never load more.
+    $state.loaded()
+    return
+  }
+
   if (show.value < messages.value.length) {
-    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
     show.value++
     $state.loaded()
   } else {
@@ -129,6 +137,7 @@ async function reload() {
 
 async function clearAndLoad() {
   console.log('review clearAndLoad')
+  loading.value = true
   // There's new stuff to do.  Reload.
   // We don't want to pick up any real chat messages.
   await chatStore.clear()
@@ -137,6 +146,7 @@ async function clearAndLoad() {
     limit: limit.value,
   })
 
+  loading.value = false
   bump.value++
 }
 

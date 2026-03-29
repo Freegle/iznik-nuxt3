@@ -98,7 +98,7 @@
           <ModWorryWordBadge
             v-for="worryword in filteredWorrywords"
             :key="worryword.id"
-            :worryword="worryword"
+            :worrywordid="worryword.id"
           />
         </div>
       </div>

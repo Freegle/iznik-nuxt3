@@ -42,6 +42,7 @@ export function createMockUserStore(overrides = {}) {
     add: vi.fn().mockResolvedValue(123), // Returns user ID
     fetch: vi.fn().mockResolvedValue({}),
     fetchMT: vi.fn().mockResolvedValue({}),
+    searchUsers: vi.fn().mockResolvedValue([]),
     updateUser: vi.fn().mockResolvedValue({}),
     byId: vi.fn().mockReturnValue(null),
     ...overrides,

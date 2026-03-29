@@ -72,7 +72,7 @@ defineProps({
 .wizard__progress-bar {
   width: 100%;
   box-shadow: none;
-  background: #FBE8AA;
+  background: #fbe8aa;
   border-radius: var(--radius-lg, 0.5rem);
   overflow: hidden;
 }

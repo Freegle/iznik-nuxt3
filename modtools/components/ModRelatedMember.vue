@@ -3,10 +3,10 @@
     <b-card-body>
       <b-row>
         <b-col cols="12" md="6">
-          <ModMember :member="user1" />
+          <ModMember :membershipid="user1.id" />
         </b-col>
         <b-col cols="12" md="6">
-          <ModMember :member="user2" />
+          <ModMember :membershipid="user2.id" />
         </b-col>
       </b-row>
       <div class="d-flex flex-wrap justify-content-start pills mt-2">
@@ -47,12 +47,13 @@
 import { computed } from 'vue'
 import dayjs from 'dayjs'
 import { useMemberStore } from '~/stores/member'
+import { getPreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const LONG_THRESHOLD = 4
 
 const props = defineProps({
-  member: {
-    type: Object,
+  memberid: {
+    type: Number,
     required: true,
   },
 })
@@ -61,12 +62,14 @@ const emit = defineEmits(['processed'])
 
 const memberStore = useMemberStore()
 
+const member = computed(() => memberStore.get(props.memberid))
+
 function posted(member) {
   return member.messagehistory && member.messagehistory.length
 }
 
 function isMember(member) {
-  return member.memberof && member.memberof.length
+  return member.memberships && member.memberships.length
 }
 
 function count(l, r) {
@@ -82,18 +85,7 @@ function count(l, r) {
 }
 
 function getEmail(member) {
-  // Depending on which context we're used it, we might or might not have an email returned.
-  let ret = member.email
-
-  if (!member.email && member.emails) {
-    member.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
-  }
-
-  return ret
+  return getPreferredEmail(member)
 }
 
 function findLongest(str1, str2) {
@@ -165,17 +157,17 @@ function findLongest(str1, str2) {
 }
 
 const user1 = computed(() => {
-  const m1 = new Date(props.member.lastaccess)
-  const m2 = new Date(props.member.relatedto.lastaccess)
+  const m1 = new Date(member.value.lastaccess)
+  const m2 = new Date(member.value.relatedto.lastaccess)
 
-  return m1 > m2 ? props.member : props.member.relatedto
+  return m1 > m2 ? member.value : member.value.relatedto
 })
 
 const user2 = computed(() => {
-  const m1 = new Date(props.member.lastaccess)
-  const m2 = new Date(props.member.relatedto.lastaccess)
+  const m1 = new Date(member.value.lastaccess)
+  const m2 = new Date(member.value.relatedto.lastaccess)
 
-  return m1 <= m2 ? props.member : props.member.relatedto
+  return m1 <= m2 ? member.value : member.value.relatedto
 })
 
 const posted1 = computed(() => posted(user1.value))
@@ -194,11 +186,11 @@ const activeSameDay = computed(() => {
 })
 
 const groupsInCommon = computed(() => {
-  const common = user1.value.memberof.filter((group) => {
+  const common = user1.value.memberships.filter((group) => {
     const gid = group.id
     let found = false
 
-    user2.value.memberof.forEach((group2) => {
+    user2.value.memberships.forEach((group2) => {
       if (group2.id === gid) {
         found = true
       }
@@ -245,7 +237,7 @@ function updateWork() {
 }
 
 async function ask() {
-  await memberStore.askMerge(props.member.id, {
+  await memberStore.askMerge(props.memberid, {
     user1: user1.value.id,
     user2: user2.value.id,
   })
@@ -254,7 +246,7 @@ async function ask() {
 }
 
 async function ignore() {
-  await memberStore.ignoreMerge(props.member.id, {
+  await memberStore.ignoreMerge(props.memberid, {
     user1: user1.value.id,
     user2: user2.value.id,
   })

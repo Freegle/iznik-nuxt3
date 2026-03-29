@@ -1,15 +1,39 @@
 /* eslint-disable no-template-curly-in-string */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { computed } from 'vue'
 import ModSupportFindGroupVolunteer from '~/modtools/components/ModSupportFindGroupVolunteer.vue'
+
+// Default user data returned by the mock user store.
+const defaultStoreUser = {
+  id: 123,
+  displayname: 'Test Volunteer',
+  email: 'volunteer@example.com',
+  lastaccess: '2024-01-15T10:00:00Z',
+}
+
+const mockUserStore = {
+  byId: vi.fn().mockReturnValue(defaultStoreUser),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+vi.mock('~/composables/usePreferredEmail', () => ({
+  usePreferredEmail: (userRef) =>
+    computed(() => {
+      const u = userRef.value
+      return u?.email || null
+    }),
+}))
 
 describe('ModSupportFindGroupVolunteer', () => {
   const createVolunteer = (overrides = {}) => ({
     userid: 123,
     displayname: 'Test Volunteer',
-    email: 'volunteer@example.com',
     role: 'Moderator',
-    lastmoderated: '2024-01-15T10:00:00Z',
     settings: {
       active: true,
     },
@@ -61,6 +85,8 @@ describe('ModSupportFindGroupVolunteer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue({ ...defaultStoreUser })
+    mockUserStore.fetch.mockResolvedValue({})
   })
 
   describe('rendering', () => {
@@ -79,26 +105,32 @@ describe('ModSupportFindGroupVolunteer', () => {
       expect(wrapper.text()).toContain('John Doe')
     })
 
-    it('displays the volunteer email', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({ email: 'test@example.org' }),
+    it('displays the volunteer email from usePreferredEmail', () => {
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        email: 'test@example.org',
       })
+      const wrapper = mountComponent()
       expect(wrapper.text()).toContain('test@example.org')
     })
 
     it('renders ModClipboard with email value', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({ email: 'copy@test.com' }),
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        email: 'copy@test.com',
       })
+      const wrapper = mountComponent()
       const clipboard = wrapper.find('.mod-clipboard')
       expect(clipboard.exists()).toBe(true)
       expect(clipboard.attributes('data-value')).toBe('copy@test.com')
     })
 
     it('renders ExternalLink with mailto href', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({ email: 'mailto@test.com' }),
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        email: 'mailto@test.com',
       })
+      const wrapper = mountComponent()
       const link = wrapper.find('.external-link')
       expect(link.exists()).toBe(true)
       expect(link.attributes('href')).toBe('mailto:mailto@test.com')
@@ -145,13 +177,13 @@ describe('ModSupportFindGroupVolunteer', () => {
       expect(wrapper.vm.active).toBe(false)
     })
 
-    it('returns false when volunteer.settings is null', () => {
+    it('returns true when volunteer.settings is null (default active)', () => {
       const wrapper = mountComponent({
         volunteer: createVolunteer({
           settings: null,
         }),
       })
-      expect(wrapper.vm.active).toBe(false)
+      expect(wrapper.vm.active).toBe(true)
     })
 
     // Note: Passing null for a required Object prop would trigger a Vue warning,
@@ -205,34 +237,41 @@ describe('ModSupportFindGroupVolunteer', () => {
     })
   })
 
-  describe('lastmoderated display', () => {
-    it('shows lastmoderated time when available', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({
-          lastmoderated: '2024-06-01T12:00:00Z',
-        }),
+  describe('lastaccess display', () => {
+    it('shows lastaccess time when available in user store', () => {
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        lastaccess: '2024-06-01T12:00:00Z',
       })
+      const wrapper = mountComponent()
       expect(wrapper.text()).toContain('2024-06-01T12:00:00Z ago')
     })
 
-    it('does not show time when lastmoderated is null', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({
-          lastmoderated: null,
-        }),
+    it('does not show time when lastaccess is null', () => {
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        lastaccess: null,
       })
-      // The span with timeago should not be rendered
-      // Check that the wrapper doesn't contain "ago" pattern
+      const wrapper = mountComponent()
       expect(wrapper.text()).not.toContain('ago')
     })
 
-    it('does not show time when lastmoderated is undefined', () => {
-      const wrapper = mountComponent({
-        volunteer: createVolunteer({
-          lastmoderated: undefined,
-        }),
+    it('does not show time when lastaccess is undefined', () => {
+      mockUserStore.byId.mockReturnValue({
+        ...defaultStoreUser,
+        lastaccess: undefined,
       })
+      const wrapper = mountComponent()
       expect(wrapper.text()).not.toContain('ago')
+    })
+  })
+
+  describe('user store fetch', () => {
+    it('fetches user data on component mount', () => {
+      mountComponent({
+        volunteer: createVolunteer({ userid: 555 }),
+      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(555)
     })
   })
 
@@ -259,19 +298,19 @@ describe('ModSupportFindGroupVolunteer', () => {
 
   describe('edge cases', () => {
     it('handles volunteer with minimal data', () => {
+      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
         volunteer: {
           userid: 1,
           displayname: '',
-          email: '',
           role: 'Member',
-          lastmoderated: null,
           settings: null,
         },
         groupid: 1,
       })
       expect(wrapper.find('.row').exists()).toBe(true)
-      expect(wrapper.vm.active).toBe(false)
+      // null settings means default = Active
+      expect(wrapper.vm.active).toBe(true)
     })
 
     it('handles empty settings object', () => {

@@ -4,7 +4,7 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-md-1 pb-md-1 pl-md-1">
+      <div class="nameinfo pt-md-1 pb-md-1 ps-md-1">
         <div
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >
@@ -472,7 +472,10 @@ const showblock = () => {
 const showInfo = () => {
   // MT: Navigate to member page instead of showing profile modal
   navigateTo(
-    '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+    '/members/approved/' +
+      (chat.value.groupid || chat.value.group?.id) +
+      '/' +
+      (chat.value.otheruid || chat.value.user1)
   )
 }
 
@@ -495,7 +498,9 @@ const markRead = async () => {
 .outer {
   background-color: $color-blue--x-light;
   border: 1px solid $color-gray--light;
-  box-shadow: 0px 4px 2px -2px $color-black-opacity-60 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15) !important;
+  position: relative;
+  z-index: 2;
 }
 
 .nameinfo {
@@ -510,6 +515,11 @@ const markRead = async () => {
   .name {
     grid-column: 3;
     grid-row: 1 / 2;
+    font-size: clamp(0.85rem, 2.5vw, 1.25rem);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .ratings {

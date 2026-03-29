@@ -160,7 +160,7 @@
     <ModGiftAid
       v-for="giftaid in giftaids"
       :key="'giftaid-' + giftaid.id"
-      :giftaid="giftaid"
+      :giftaidid="giftaid.id"
       class="mt-1"
     />
     <p v-if="!giftaids.length" class="mt-2 fw-bold">No gift aid to review.</p>
@@ -174,11 +174,13 @@ import dayjs from 'dayjs'
 import { useNuxtApp } from '#app'
 import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
+import { useGiftAidStore } from '~/modtools/stores/giftaid'
 
 const { $api } = useNuxtApp()
 
 const donationStore = useDonationStore()
 const userStore = useUserStore()
+const giftAidStore = useGiftAidStore()
 
 const giftaids = ref([])
 const search = ref(null)
@@ -196,6 +198,11 @@ const csvDonations = ref([])
 
 async function getGiftAid() {
   const giftaidList = await $api.giftaid.list()
+
+  // Store each giftaid in the store.
+  for (const g of giftaidList) {
+    giftAidStore.add(g)
+  }
 
   // Sort so that the easy ones are at the top.
   giftaids.value = giftaidList.sort((a, b) => {
@@ -314,7 +321,7 @@ async function validateCSVDonations(callback) {
     }
 
     // Check if the userid matches a valid user.
-    await userStore.fetchMT({ id: rowUserid })
+    await userStore.fetch(rowUserid)
 
     const user = userStore.byId(rowUserid)
 

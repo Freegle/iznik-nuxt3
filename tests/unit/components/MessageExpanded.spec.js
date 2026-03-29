@@ -286,6 +286,10 @@ describe('MessageExpanded', () => {
             template: '<div class="b-alert" :class="variant"><slot /></div>',
             props: ['variant', 'modelValue'],
           },
+          'b-badge': {
+            template: '<span class="b-badge" :class="variant"><slot /></span>',
+            props: ['variant'],
+          },
           Teleport: {
             template: '<div class="teleport-stub"><slot /></div>',
           },

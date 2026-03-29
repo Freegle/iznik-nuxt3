@@ -35,6 +35,7 @@ const mockGroupStore = {
 }
 
 const mockUserStore = {
+  fetch: vi.fn().mockResolvedValue(),
   fetchMT: vi.fn(),
   byId: vi.fn(),
   deleteComment: vi.fn(),
@@ -64,7 +65,6 @@ describe('ModComment', () => {
 
   const defaultUser = {
     id: 123,
-    userid: 123,
     displayname: 'Test User',
     comments: [defaultComment],
   }
@@ -74,10 +74,19 @@ describe('ModComment', () => {
     userOverrides = {},
     extraProps = {}
   ) {
+    const comment = { ...defaultComment, ...commentOverrides }
+    const user = {
+      ...defaultUser,
+      ...userOverrides,
+      comments: [comment],
+    }
+
+    mockUserStore.byId.mockReturnValue(user)
+
     const wrapper = mount(ModComment, {
       props: {
-        comment: { ...defaultComment, ...commentOverrides },
-        user: { ...defaultUser, ...userOverrides },
+        commentid: comment.id,
+        userid: user.id,
         expandComments: false,
         ...extraProps,
       },
@@ -106,7 +115,7 @@ describe('ModComment', () => {
           },
           ModCommentEditModal: {
             template: '<div class="edit-modal" />',
-            props: ['user', 'comment', 'groupname'],
+            props: ['userid', 'comment', 'groupname'],
           },
         },
       },
@@ -296,20 +305,17 @@ describe('ModComment', () => {
   })
 
   describe('edge cases', () => {
-    it('handles user without userid property (uses id instead)', async () => {
+    it('handles updateComments correctly', async () => {
       mockUserStore.byId.mockReturnValue({
         id: 123,
         displayname: 'Test User',
         comments: [defaultComment],
       })
 
-      const wrapper = await createWrapper({}, { userid: undefined, id: 123 })
+      const wrapper = await createWrapper()
       await wrapper.vm.updateComments()
 
-      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
-        id: 123,
-        emailhistory: true,
-      })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(123, true)
     })
 
     it('handles null comment fields gracefully', async () => {

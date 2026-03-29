@@ -18,12 +18,31 @@ const mockMiscStore = {
   set: vi.fn(),
 }
 
+const mockModGroupStore = {
+  list: {},
+  fetchIfNeedBeMT: vi.fn(),
+}
+
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+  fetchMultiple: vi.fn(),
+}
+
 vi.mock('~/stores/modconfig', () => ({
   useModConfigStore: () => mockModConfigStore,
 }))
 
 vi.mock('@/stores/misc', () => ({
   useMiscStore: () => mockMiscStore,
+}))
+
+vi.mock('~/stores/modgroup', () => ({
+  useModGroupStore: () => mockModGroupStore,
+}))
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
 }))
 
 vi.mock('~/composables/useMe', () => ({
@@ -163,6 +182,11 @@ describe('ModSettingsModConfig', () => {
     mockModConfigStore.delete.mockResolvedValue()
     mockMiscStore.get.mockReturnValue(1)
     mockMiscStore.set.mockResolvedValue()
+    mockModGroupStore.list = {}
+    mockModGroupStore.fetchIfNeedBeMT.mockResolvedValue()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
+    mockUserStore.fetchMultiple.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -428,7 +452,7 @@ describe('ModSettingsModConfig', () => {
     it('shows using notice when config has users', async () => {
       mockModConfigStore.current = {
         ...defaultConfig,
-        using: [{ id: 1, fullname: 'Test User', userid: 100 }],
+        using: [100],
       }
       const wrapper = mountComponent()
       await flushPromises()
@@ -554,7 +578,7 @@ describe('ModSettingsModConfig', () => {
     it('hides delete button when config has users', () => {
       mockModConfigStore.current = {
         ...defaultConfig,
-        using: [{ id: 1, fullname: 'User', userid: 100 }],
+        using: [100],
       }
       const wrapper = mountComponent()
       const deleteBtn = wrapper
@@ -603,8 +627,15 @@ describe('ModSettingsModConfig', () => {
       mockModConfigStore.current = {
         ...defaultConfig,
         cansee: 'Shared',
-        sharedby: { displayname: 'Other User' },
-        sharedon: { namedisplay: 'Test Group' },
+        sharedbyid: 456,
+        sharedonid: 789,
+      }
+      mockUserStore.byId.mockImplementation((id) => {
+        if (id === 456) return { displayname: 'Other User' }
+        return null
+      })
+      mockModGroupStore.list = {
+        789: { namedisplay: 'Test Group' },
       }
       const wrapper = mountComponent()
       await flushPromises()

@@ -804,6 +804,7 @@ import {
   onMounted,
   defineAsyncComponent,
   useRuntimeConfig,
+  useNuxtApp,
   useMe,
 } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
@@ -821,6 +822,7 @@ const ExternalLink = defineAsyncComponent(() =>
 )
 
 const authStore = useAuthStore()
+const { $api } = useNuxtApp()
 const { me } = useMe()
 const mod = computed(() => me?.value?.isModerator)
 const runtimeConfig = useRuntimeConfig()
@@ -833,13 +835,13 @@ const started = ref(false)
 
 const downloadlink = computed(() => {
   return (
-    runtimeConfig.public.APIv1 +
+    runtimeConfig.public.APIv2 +
     '/export?id=' +
     id.value +
     '&tag=' +
     tag.value +
-    '&persistent=' +
-    JSON.stringify(authStore?.auth?.persistent)
+    '&jwt=' +
+    authStore?.auth?.jwt
   )
 })
 
@@ -851,21 +853,7 @@ async function checkStatus() {
   console.log('Check status')
 
   try {
-    const rsp = await fetch(
-      runtimeConfig.public.APIv1 +
-        '/export?' +
-        new URLSearchParams({
-          id: id.value,
-          tag: tag.value,
-        }),
-      {
-        headers: {
-          Authorization: 'Iznik ' + JSON.stringify(authStore.auth?.persistent),
-        },
-      }
-    )
-
-    const ret = await rsp.json()
+    const ret = await $api.export.status(id.value, tag.value)
     status.value = ret.export
 
     if (!status.value.completed) {
@@ -898,17 +886,7 @@ function datetime(timestamp) {
 
 onMounted(async () => {
   try {
-    const rsp = await fetch(runtimeConfig.public.APIv1 + '/export', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Iznik ' + JSON.stringify(authStore.auth?.persistent),
-      },
-      body: JSON.stringify({
-        dup: Date.now(),
-      }),
-    })
-    const ret = await rsp.json()
+    const ret = await $api.export.create()
     console.log('Fetch status', ret)
     id.value = ret.id
     tag.value = ret.tag
