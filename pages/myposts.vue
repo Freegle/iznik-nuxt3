@@ -147,8 +147,9 @@ watch(
 
       loading.value = false
 
-      // No need to wait for searches - often below the fold.
+      // No need to wait for searches and trysts - often below the fold.
       searchStore.fetch(newMyid)
+      trystStore.fetch()
     }
   },
   {
@@ -177,8 +178,6 @@ function loadMore(infiniteLoaderInstance) {
 function forceLogin() {
   authStore.forceLogin = true
 }
-
-trystStore.fetch()
 
 onMounted(() => {
   type.value = window.history.state?.type || null
