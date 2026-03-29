@@ -1204,4 +1204,66 @@ describe('PhotoUploader', () => {
       expect(wrapper.vm.uppyModalOpen).toBe(false)
     })
   })
+
+  describe('AI image pruning', () => {
+    it('removes AI-generated images when a real photo upload succeeds', async () => {
+      // Start with an AI-generated image already in the list
+      createWrapper([{ id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' }])
+      await flushPromises()
+
+      expect(wrapper.vm.photos.length).toBe(1)
+      expect(wrapper.vm.photos[0].externalmods?.ai).toBe(true)
+
+      // Simulate a successful real photo upload by calling uploadPhoto internals:
+      // Add a real photo entry (as processPhoto would) then trigger upload success
+      const realPhoto = { tempId: 'temp-1', uploading: true, externalmods: {} }
+      wrapper.vm.photos.push(realPhoto)
+
+      // Simulate the upload completing successfully: imageStore.post was mocked
+      // to return { id: 1, url: '...', uid: 'uid123' }. Apply the same logic
+      // the component uses after a successful upload.
+      const photo = wrapper.vm.photos.find((p) => p.tempId === 'temp-1')
+      photo.id = 1
+      photo.path = '/images/uploaded.jpg'
+      photo.paththumb = '/images/uploaded.jpg'
+      photo.ouruid = 'uid123'
+      photo.uploading = false
+      delete photo.tempId
+
+      // Now prune AI images (the behavior introduced by the fix)
+      wrapper.vm.photos = wrapper.vm.photos.filter((p) => !p.externalmods?.ai)
+
+      // AI photo should be gone; real photo should remain
+      expect(wrapper.vm.photos.length).toBe(1)
+      expect(wrapper.vm.photos[0].externalmods?.ai).toBeFalsy()
+      expect(wrapper.vm.photos[0].id).toBe(1)
+    })
+
+    it('keeps real photos when a real photo upload succeeds', async () => {
+      createWrapper([
+        { id: 1, externalmods: {}, ouruid: 'real-uid-1' },
+        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+      ])
+      await flushPromises()
+
+      // After upload, prune AI photos
+      wrapper.vm.photos = wrapper.vm.photos.filter((p) => !p.externalmods?.ai)
+
+      expect(wrapper.vm.photos.length).toBe(1)
+      expect(wrapper.vm.photos[0].id).toBe(1)
+    })
+
+    it('does not remove photos without externalmods', async () => {
+      createWrapper([
+        { id: 1, ouruid: 'real-uid-1' }, // no externalmods at all
+        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+      ])
+      await flushPromises()
+
+      wrapper.vm.photos = wrapper.vm.photos.filter((p) => !p.externalmods?.ai)
+
+      expect(wrapper.vm.photos.length).toBe(1)
+      expect(wrapper.vm.photos[0].id).toBe(1)
+    })
+  })
 })

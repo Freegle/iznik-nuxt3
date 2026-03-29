@@ -13,6 +13,7 @@ const {
   mockCapacitorStripe,
   mockDonationStore,
   mockMobileStore,
+  mockAuthStore,
 } = vi.hoisted(() => {
   const mockIsApp = { value: false }
   const mockIsiOS = { value: false }
@@ -26,6 +27,11 @@ const {
     Promise.resolve({
       clientSecret: 'test_subscription_secret_123',
     })
+
+  const mockAuthStore = {
+    auth: { jwt: 'test-jwt', persistent: 'test-persistent' },
+    fetchUser: vi.fn(() => Promise.resolve()),
+  }
 
   return {
     mockIsApp,
@@ -67,6 +73,7 @@ const {
         return mockIsiOS.value
       },
     },
+    mockAuthStore,
   }
 })
 
@@ -78,6 +85,7 @@ vi.mock('@stripe/stripe-js', () => ({
 // Mock Sentry
 vi.mock('@sentry/browser', () => ({
   captureMessage: () => {},
+  captureException: () => {},
 }))
 
 // Mock Capacitor Stripe
@@ -122,6 +130,10 @@ vi.mock('~/stores/mobile', () => ({
   useMobileStore: () => mockMobileStore,
 }))
 
+vi.mock('~/stores/auth', () => ({
+  useAuthStore: () => mockAuthStore,
+}))
+
 // Mock useRuntimeConfig
 const mockRuntimeConfig = {
   public: {
@@ -147,6 +159,8 @@ describe('StripeDonate', () => {
     vi.clearAllMocks()
     mockIsApp.value = false
     mockIsiOS.value = false
+    mockAuthStore.auth = { jwt: 'test-jwt', persistent: 'test-persistent' }
+    mockAuthStore.fetchUser = vi.fn(() => Promise.resolve())
 
     // Create spy-able versions of the mock functions
     mockExpressCheckoutElement = {
@@ -531,6 +545,87 @@ describe('StripeDonate', () => {
       expect(emits).toContain('error')
       expect(emits).toContain('success')
       expect(emits).toContain('noPaymentMethods')
+    })
+  })
+
+  describe('session refresh before payment (JWT expiry recovery)', () => {
+    beforeEach(() => {
+      mockIsApp.value = true
+      mockIsiOS.value = false
+    })
+
+    it('refreshes session via fetchUser before creating intent in app mode', async () => {
+      mockDonationStore.stripeIntent = vi.fn(() =>
+        Promise.resolve({ client_secret: 'cs_fresh' })
+      )
+
+      const wrapper = await createWrapper()
+      const component = wrapper.findComponent(StripeDonate)
+
+      // fetchUser should have been called once during onMounted intent creation
+      expect(mockAuthStore.fetchUser).toHaveBeenCalled()
+
+      // Click PayPal button to trigger ensureIntent
+      const paypalBtn = wrapper.find('button[aria-label*="PayPay"]')
+      await paypalBtn.trigger('click')
+      await flushPromises()
+
+      // fetchUser called again in ensureIntent (intent was already set from mount)
+      // At minimum it was called during mount
+      expect(mockAuthStore.fetchUser).toHaveBeenCalled()
+      expect(component.emitted('error')).toBeFalsy()
+    })
+
+    it('shows session-expired message when tokens are cleared after fetchUser fails', async () => {
+      // Simulate: tokens exist but fetchUser fails (both tokens expired)
+      // BaseAPI clears tokens on 401 before error reaches component
+      mockAuthStore.fetchUser = vi.fn(() => {
+        mockAuthStore.auth = { jwt: null, persistent: null }
+        return Promise.reject(new Error('401'))
+      })
+      // stripeIntent also fails (no tokens)
+      mockDonationStore.stripeIntent = vi.fn(() =>
+        Promise.reject(new Error('401'))
+      )
+
+      const wrapper = await createWrapper()
+
+      // Click PayPal to trigger ensureIntent
+      const paypalBtn = wrapper.find('button[aria-label*="PayPay"]')
+      await paypalBtn.trigger('click')
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('session has expired')
+      expect(wrapper.text()).toContain('log in again')
+    })
+
+    it('does not call fetchUser when no tokens exist', async () => {
+      mockAuthStore.auth = { jwt: null, persistent: null }
+
+      await createWrapper()
+      const fetchUserCallCount = mockAuthStore.fetchUser.mock.calls.length
+
+      // The fetchUser should not have been called since no tokens exist
+      // (both mount and ensureIntent skip the refresh when auth is empty)
+      expect(fetchUserCallCount).toBe(0)
+    })
+
+    it('proceeds with payment after successful session refresh', async () => {
+      // Simulate expired JWT: fetchUser refreshes and restores tokens
+      mockAuthStore.fetchUser = vi.fn(() => {
+        mockAuthStore.auth = { jwt: 'fresh-jwt', persistent: 'test-persistent' }
+        return Promise.resolve()
+      })
+      mockDonationStore.stripeIntent = vi.fn(() =>
+        Promise.resolve({ client_secret: 'cs_after_refresh' })
+      )
+
+      const wrapper = await createWrapper()
+      const component = wrapper.findComponent(StripeDonate)
+
+      // Should emit loaded (not error) — payment succeeded
+      expect(component.emitted('error')).toBeFalsy()
+      expect(component.vm.error).toBeFalsy()
     })
   })
 })
