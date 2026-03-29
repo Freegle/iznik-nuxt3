@@ -1245,7 +1245,8 @@ jobs:
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
 
             # Validate certificate password immediately — fail fast with a clear message
-            if ! openssl pkcs12 -in ~/certificates/ios_distribution.p12 -nokeys \
+            # Use -legacy flag as the p12 is in legacy format (required for macOS security import)
+            if ! openssl pkcs12 -legacy -in ~/certificates/ios_distribution.p12 -nokeys \
                 -passin "pass:${IOS_CERTIFICATE_PASSWORD}" 2>&1 | grep -q "BEGIN CERTIFICATE"; then
               echo ""
               echo "❌ Certificate password validation FAILED"
@@ -1443,7 +1444,8 @@ jobs:
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
 
             # Validate certificate password immediately — fail fast with a clear message
-            if ! openssl pkcs12 -in ~/certificates/ios_distribution.p12 -nokeys \
+            # Use -legacy flag as the p12 is in legacy format (required for macOS security import)
+            if ! openssl pkcs12 -legacy -in ~/certificates/ios_distribution.p12 -nokeys \
                 -passin "pass:${IOS_CERTIFICATE_PASSWORD}" 2>&1 | grep -q "BEGIN CERTIFICATE"; then
               echo ""
               echo "❌ Certificate password validation FAILED"
