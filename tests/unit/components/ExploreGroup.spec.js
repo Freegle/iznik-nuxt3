@@ -184,48 +184,13 @@ describe('ExploreGroup', () => {
     })
   })
 
-  describe('loadMore method', () => {
-    it('increments toShow and calls loaded', async () => {
-      const wrapper = await createWrapper()
-      const component = wrapper.findComponent(ExploreGroup)
-
-      const mockState = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
-
-      component.vm.toShow = 3
+  describe('message display', () => {
+    it('shows all messages without pagination', async () => {
       mockGroupStore.getMessages.mockReturnValue([1, 2, 3, 4, 5])
-
-      component.vm.loadMore(mockState)
-
-      expect(component.vm.toShow).toBe(4)
-      expect(mockState.loaded).toHaveBeenCalled()
-    })
-
-    it('calls complete when all messages shown', async () => {
       const wrapper = await createWrapper()
       const component = wrapper.findComponent(ExploreGroup)
-
-      const mockState = {
-        loaded: vi.fn(),
-        complete: vi.fn(),
-      }
-
-      component.vm.toShow = 5
-      mockGroupStore.getMessages.mockReturnValue([1, 2, 3, 4, 5])
-
-      component.vm.loadMore(mockState)
-
-      expect(mockState.complete).toHaveBeenCalled()
-    })
-  })
-
-  describe('exposed methods', () => {
-    it('exposes loadMore method', async () => {
-      const wrapper = await createWrapper()
-      const component = wrapper.findComponent(ExploreGroup)
-      expect(typeof component.vm.loadMore).toBe('function')
+      // Component now shows all messages directly via messagesToShow
+      expect(component.vm.messagesToShow).toHaveLength(5)
     })
   })
 })

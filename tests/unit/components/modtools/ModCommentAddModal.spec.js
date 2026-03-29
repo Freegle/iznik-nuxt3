@@ -335,7 +335,7 @@ describe('ModCommentAddModal', () => {
         await wrapper.vm.save()
         await flushPromises()
 
-        expect(mockUserStore.fetch).toHaveBeenCalledWith(555)
+        expect(mockUserStore.fetch).toHaveBeenCalledWith(555, true)
       })
 
       it('resets context to null after save', async () => {

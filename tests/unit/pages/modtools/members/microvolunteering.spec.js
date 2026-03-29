@@ -143,21 +143,21 @@ describe('members/microvolunteering/[[id]].vue page', () => {
 
     it('userCounts counts items per user', () => {
       mockMicroVolunteeringStore.list = {
-        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', user: { id: 100 } },
-        2: { id: 2, timestamp: '2024-01-20T10:00:00Z', user: { id: 100 } },
-        3: { id: 3, timestamp: '2024-01-18T10:00:00Z', user: { id: 200 } },
+        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', userid: 100 },
+        2: { id: 2, timestamp: '2024-01-20T10:00:00Z', userid: 100 },
+        3: { id: 3, timestamp: '2024-01-18T10:00:00Z', userid: 200 },
       }
       const wrapper = mountComponent()
       const counts = wrapper.vm.userCounts
       expect(counts).toHaveLength(2)
       // User 100 should be first with count 2
-      expect(counts[0].userid).toBe('100')
+      expect(counts[0].userid).toBe(100)
       expect(counts[0].count).toBe(2)
     })
 
     it('topUsers returns top 10 users', () => {
       mockMicroVolunteeringStore.list = {
-        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', user: { id: 100 } },
+        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', userid: 100 },
       }
       const wrapper = mountComponent()
       const topUsers = wrapper.vm.topUsers
@@ -166,8 +166,8 @@ describe('members/microvolunteering/[[id]].vue page', () => {
 
     it('userActivity groups items by user', () => {
       mockMicroVolunteeringStore.list = {
-        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', user: { id: 100 } },
-        2: { id: 2, timestamp: '2024-01-20T10:00:00Z', user: { id: 100 } },
+        1: { id: 1, timestamp: '2024-01-15T10:00:00Z', userid: 100 },
+        2: { id: 2, timestamp: '2024-01-20T10:00:00Z', userid: 100 },
       }
       const wrapper = mountComponent()
       const activity = wrapper.vm.userActivity

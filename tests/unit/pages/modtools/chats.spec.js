@@ -173,14 +173,14 @@ describe('chats/[[id]].vue page', () => {
       expect(mockState.loaded).toHaveBeenCalled()
     })
 
-    it('loadMore completes when all chats shown', () => {
+    it('loadMore always calls loaded (never complete) when all chats shown', () => {
       mockChatStore.list = [{ id: 1, status: 'Active' }]
       const wrapper = mountComponent()
       wrapper.vm.showChats = 1
       const mockState = { loaded: vi.fn(), complete: vi.fn() }
       wrapper.vm.loadMore(mockState)
-      expect(mockState.complete).toHaveBeenCalled()
-      expect(wrapper.vm.complete).toBe(true)
+      // Chat list loadMore never calls complete() — the list can grow asynchronously
+      expect(mockState.loaded).toHaveBeenCalled()
     })
 
     it('markAllRead clears store and reloads', async () => {

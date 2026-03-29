@@ -137,7 +137,7 @@ describe('chats/review.vue page', () => {
       expect(mockState.loaded).toHaveBeenCalled()
     })
 
-    it('loadMore calls complete when all messages shown', () => {
+    it('loadMore calls loaded (not complete) when messages not loaded yet', () => {
       mockChatStore.messagesById.mockReturnValue([])
       const wrapper = mountComponent()
       const mockState = { loaded: vi.fn(), complete: vi.fn() }
@@ -145,7 +145,10 @@ describe('chats/review.vue page', () => {
       wrapper.vm.show = 0
       wrapper.vm.loadMore(mockState)
 
-      expect(mockState.complete).toHaveBeenCalled()
+      // When messages array is empty, loadMore calls loaded() and returns
+      // early to avoid permanently completing before data arrives.
+      expect(mockState.loaded).toHaveBeenCalled()
+      expect(mockState.complete).not.toHaveBeenCalled()
     })
 
     it('reload clears and loads', async () => {

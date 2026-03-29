@@ -264,6 +264,7 @@ describe('ModMemberButtons', () => {
           memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
           reviewreason: 'Test reason',
+          reviewrequestedat: '2024-01-15T10:00:00Z',
         }),
         spamignore: true,
       })

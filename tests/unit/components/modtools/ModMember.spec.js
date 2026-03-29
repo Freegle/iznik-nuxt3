@@ -467,7 +467,10 @@ describe('ModMember', () => {
   describe('suspect reason', () => {
     it('shows flagged notice when reviewreason set', () => {
       const wrapper = mountComponent({
-        member: createMember({ reviewreason: 'Multiple accounts' }),
+        member: createMember({
+          reviewreason: 'Multiple accounts',
+          reviewrequestedat: '2024-01-15T10:00:00Z',
+        }),
       })
       expect(wrapper.text()).toContain('flagged: Multiple accounts')
     })

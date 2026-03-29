@@ -315,7 +315,7 @@ describe('ModComment', () => {
       const wrapper = await createWrapper()
       await wrapper.vm.updateComments()
 
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(123, true)
     })
 
     it('handles null comment fields gracefully', async () => {
