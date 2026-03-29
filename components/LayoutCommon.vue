@@ -240,7 +240,11 @@ function adFailed() {
 }
 
 function replySent() {
-  showInterestedModal.value = true
+  if (replyToUser.value && replyToSend.value?.replyMsgId) {
+    interestedInOthersUserId.value = replyToUser.value
+    interestedInOthersMsgid.value = replyToSend.value.replyMsgId
+    showInterestedModal.value = true
+  }
 }
 
 const replyToPostChatButton = ref(null)
