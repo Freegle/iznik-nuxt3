@@ -363,12 +363,13 @@ describe('messages/approved/[[id]]/[[term]].vue page', () => {
     })
 
     describe('loadMore', () => {
-      it('completes when no user', async () => {
+      it('calls loaded (not complete) when no user', async () => {
         const wrapper = mountComponent()
         wrapper.vm.me = null
         const mockState = { loaded: vi.fn(), complete: vi.fn() }
         await wrapper.vm.loadMore(mockState)
-        expect(mockState.complete).toHaveBeenCalled()
+        expect(mockState.loaded).toHaveBeenCalled()
+        expect(mockState.complete).not.toHaveBeenCalled()
       })
 
       it('increments show when more messages to display', async () => {
