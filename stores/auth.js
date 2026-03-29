@@ -226,10 +226,7 @@ export const useAuthStore = defineStore({
           params.modtools = true
         }
 
-        const res = await this.$api.session.login(params, function (data) {
-          // Don't log expected errors for wrong email/password (HTTP 400).
-          return data?.error !== 400
-        })
+        const res = await this.$api.session.login(params, false)
 
         const { persistent, jwt } = res
         this.setAuth(jwt, persistent)

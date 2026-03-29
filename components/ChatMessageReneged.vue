@@ -82,7 +82,7 @@
                 @error="brokenImage"
               />
               <ProfileImage
-                :image="me.profile.path"
+                :image="me?.profile?.path"
                 :name="me.displayname"
                 class="me-1 mb-1 mt-1 inline"
                 is-thumbnail

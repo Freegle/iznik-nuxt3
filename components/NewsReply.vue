@@ -181,8 +181,8 @@
           <template #prepend>
             <span class="input-group-text ps-1 pe-1">
               <ProfileImage
-                v-if="me.profile.path"
-                :image="me.profile.path"
+                v-if="me?.profile?.path"
+                :image="me?.profile?.path"
                 class="m-0 inline"
                 is-thumbnail
                 size="sm"
@@ -216,8 +216,8 @@
             <slot name="prepend">
               <span class="input-group-text ps-1 pe-1">
                 <ProfileImage
-                  v-if="me.profile.path"
-                  :image="me.profile.path"
+                  v-if="me?.profile?.path"
+                  :image="me?.profile?.path"
                   class="m-0 inline"
                   is-thumbnail
                   size="sm"
