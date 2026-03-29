@@ -10,6 +10,19 @@ const publicPages = [
   { path: '/disclaimer', title: 'Disclaimer' },
   { path: '/forgot', title: 'Lost Password' },
   { path: '/jobs', title: 'Jobs' },
+  { path: '/communityevents', title: 'Freegle' },
+  { path: '/volunteerings', title: 'Freegle' },
+  { path: '/stories', title: 'Freegle' },
+  { path: '/stats', title: 'Freegle' },
+  { path: '/stats/authorities', title: 'Statistics by Authority' },
+  { path: '/stats/heatmap', title: 'Heatmap' },
+  { path: '/promote', title: 'Promote Freegle' },
+  { path: '/mobile', title: 'Our mobile app' },
+  { path: '/giftaid', title: 'Gift Aid' },
+  { path: '/stories/summary', title: 'Story summary' },
+  { path: '/shortlinks', title: 'Freegle' },
+  { path: '/NationalReuseDay', title: 'National Reuse Day' },
+  { path: '/unsubscribe/unsubscribed', title: 'Freegle' },
 ]
 
 test.describe('Public pages tests', () => {
