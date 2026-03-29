@@ -184,7 +184,7 @@ describe('MobileVisualiseList', () => {
       const summary = wrapper.findComponent('.message-summary')
       expect(summary.props('showFreegled')).toBe(false)
       expect(summary.props('showPromised')).toBe(false)
-      expect(summary.props('preload')).toBe(true)
+      expect(summary.props('preload')).toBe(false)
     })
   })
 
