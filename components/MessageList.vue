@@ -12,7 +12,15 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
 
-    <div v-if="initialFetchDone && !loading && selectedSort === 'Unseen' && showCountsUnseen && me">
+    <div
+      v-if="
+        initialFetchDone &&
+        !loading &&
+        selectedSort === 'Unseen' &&
+        showCountsUnseen &&
+        me
+      "
+    >
       <MessageListCounts
         v-if="browseCount && !search"
         :count="browseCount"
@@ -24,7 +32,13 @@
          Gated on initialFetchDone to prevent CLS from divider appearing then
          disappearing as message de-duplication changes seen/unseen split. -->
     <template
-      v-if="initialFetchDone && !loading && selectedSort === 'Unseen' && showCountsUnseen && me"
+      v-if="
+        initialFetchDone &&
+        !loading &&
+        selectedSort === 'Unseen' &&
+        showCountsUnseen &&
+        me
+      "
     >
       <!-- Unseen messages grid -->
       <ScrollGrid
@@ -511,7 +525,7 @@ watch(
 watch(
   duplicates,
   (newVal) => {
-    if (me && newVal?.length) {
+    if (me.value && newVal?.length) {
       const ids = []
 
       newVal.forEach((m) => {

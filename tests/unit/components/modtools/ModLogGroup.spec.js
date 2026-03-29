@@ -12,6 +12,15 @@ vi.mock('~/stores/logs', () => ({
   useLogsStore: () => mockLogsStore,
 }))
 
+// Mock modgroup store - by default returns null (group not in store)
+const mockModGroupStore = {
+  get: vi.fn().mockReturnValue(null),
+}
+
+vi.mock('~/stores/modgroup', () => ({
+  useModGroupStore: () => mockModGroupStore,
+}))
+
 // Mock useMe composable
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
@@ -46,6 +55,7 @@ describe('ModLogGroup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockLogsStore.list = []
+    mockModGroupStore.get.mockReturnValue(null)
   })
 
   describe('rendering', () => {
@@ -191,9 +201,25 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.nameshort).toBe('TestGroup')
     })
 
-    it('returns null when no group can be found', () => {
+    it('falls back to modGroupStore when myGroup fails - regression for TN member activity on another group', () => {
+      // Regression: TN member activity on Aylesbury. The current mod does not
+      // moderate Aylesbury so myGroup returns null. The group IS in modGroupStore
+      // because _enrichLogs fetched it. Group name should still display.
+      mockModGroupStore.get.mockReturnValue({
+        id: 999,
+        nameshort: 'Aylesbury',
+        namedisplay: 'Aylesbury Freegle',
+      })
       const wrapper = createWrapper({
         groupid: 999, // myGroup returns null for this
+      })
+      expect(wrapper.vm.loggroup.nameshort).toBe('Aylesbury')
+    })
+
+    it('returns null when no group can be found anywhere', () => {
+      // modGroupStore.get returns null (default mock), myGroup returns null
+      const wrapper = createWrapper({
+        groupid: 999,
       })
       expect(wrapper.vm.loggroup).toBeNull()
     })
@@ -299,7 +325,7 @@ describe('ModLogGroup', () => {
           memberships: [],
         },
       })
-      // Should fall back to myGroup or null
+      // Falls through to myGroup (null for 777) then modGroupStore.get (null by default)
       expect(wrapper.vm.loggroup).toBeNull()
     })
   })

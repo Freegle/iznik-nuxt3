@@ -331,16 +331,36 @@ async function clickReplyButton(page) {
     timeout: timeouts.ui.appearance,
   })
 
-  // Click once — hydration should be complete by now
-  await replyButton.click()
-  console.log('[Reply] Clicked Reply button')
-
+  // Click and retry if the textarea doesn't appear.
+  // Vue SSR hydration can cause the first click to be swallowed if event
+  // handlers aren't fully attached yet despite __vue_app__ being set.
   const replyTextarea = page.locator('textarea[name="reply"]')
-  await replyTextarea.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
-  console.log('[Reply] Reply section expanded')
+  const maxRetries = 3
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    await replyButton.click({ force: attempt > 1 })
+    console.log(
+      `[Reply] Clicked Reply button (attempt ${attempt}/${maxRetries})`
+    )
+
+    try {
+      await replyTextarea.waitFor({
+        state: 'visible',
+        timeout: attempt < maxRetries ? 10000 : timeouts.ui.appearance,
+      })
+      console.log('[Reply] Reply section expanded')
+      return
+    } catch (e) {
+      if (attempt === maxRetries) {
+        throw new Error(
+          `Reply textarea did not appear after ${maxRetries} click attempts`
+        )
+      }
+      console.log(
+        `[Reply] Textarea not visible after attempt ${attempt}, retrying...`
+      )
+    }
+  }
 }
 
 /**

@@ -278,7 +278,7 @@ describe('PendingPage', () => {
       expect(mockState.loaded).toHaveBeenCalled()
     })
 
-    it('loadMore completes when no user', async () => {
+    it('loadMore calls loaded (not complete) when no user', async () => {
       const wrapper = mountComponent()
       // Access through useMe mock - set me to null
       wrapper.vm.me = null
@@ -286,7 +286,8 @@ describe('PendingPage', () => {
 
       await wrapper.vm.loadMore(mockState)
 
-      expect(mockState.complete).toHaveBeenCalled()
+      expect(mockState.loaded).toHaveBeenCalled()
+      expect(mockState.complete).not.toHaveBeenCalled()
     })
 
     it('loadMore fetches more messages when show equals messages length', async () => {

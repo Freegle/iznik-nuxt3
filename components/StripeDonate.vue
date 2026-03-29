@@ -67,11 +67,13 @@ import {
 import { uid } from '~/composables/useId'
 import { useDonationStore } from '~/stores/donations'
 import { useMobileStore } from '@/stores/mobile'
+import { useAuthStore } from '~/stores/auth'
 
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const donationStore = useDonationStore()
 const mobileStore = useMobileStore()
+const authStore = useAuthStore()
 
 // Detect iOS robustly - mobileStore.isiOS can be overwritten asynchronously by
 // Device.getInfo() returning unexpected platform values on iPad.
@@ -206,6 +208,16 @@ onMounted(async () => {
       // (the Stripe plugin's addListener triggers a fatal error in the
       // WKWebView process). The actual payment flow uses await on
       // presentPaymentSheet/presentApplePay/presentGooglePay directly.
+
+      // Refresh session before creating intent so an expired JWT doesn't cause a
+      // silent 401 failure here (which would force a retry via ensureIntent later).
+      if (authStore.auth?.jwt || authStore.auth?.persistent) {
+        try {
+          await authStore.fetchUser()
+        } catch (e) {
+          console.log('Pre-intent session refresh failed at mount', e)
+        }
+      }
 
       try {
         if (props.monthly) {
@@ -394,6 +406,27 @@ onMounted(async () => {
 async function ensureIntent() {
   if (intent.value?.client_secret) {
     return true
+  }
+
+  // Proactively refresh the session before attempting payment. The JWT is short-lived;
+  // if the user opened the app after some time away the JWT may have expired while the
+  // persistent token is still valid. Refreshing here gives the server a chance to issue
+  // a fresh JWT before we hit /stripecreateintent, preventing a 401 that would silently
+  // wipe auth and lose the donation.
+  if (authStore.auth?.jwt || authStore.auth?.persistent) {
+    try {
+      await authStore.fetchUser()
+    } catch (e) {
+      // fetchUser failed (e.g. both tokens expired). BaseAPI already cleared auth.
+      console.log('Pre-payment session refresh failed', e)
+    }
+  }
+
+  // If tokens are gone after the refresh attempt, the user is not authenticated.
+  if (!authStore.auth?.jwt && !authStore.auth?.persistent) {
+    error.value =
+      'Your session has expired. Please log in again to complete your donation.'
+    return false
   }
 
   try {

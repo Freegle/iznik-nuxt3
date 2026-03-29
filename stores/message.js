@@ -445,7 +445,16 @@ export const useMessageStore = defineStore({
         : 0
     },
     async markSeen(ids) {
-      await api(this.config).message.markSeen(ids)
+      try {
+        await api(this.config).message.markSeen(ids)
+      } catch (e) {
+        if (e?.response?.status === 401) {
+          // Session expired while scrolling — not critical, silently ignore.
+          return
+        }
+
+        throw e
+      }
 
       const isochroneStore = useIsochroneStore()
       isochroneStore.markSeen(ids)

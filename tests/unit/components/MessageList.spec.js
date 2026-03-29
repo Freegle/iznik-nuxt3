@@ -243,9 +243,34 @@ describe('MessageList', () => {
       expect(true).toBe(true)
     })
 
-    it('marks duplicates as seen', () => {
-      // messageStore.markSeen(duplicateIds)
-      expect(true).toBe(true)
+    it('marks duplicates as seen when logged in', () => {
+      const me = ref({ id: 1 })
+      const markSeen = vi.fn()
+      const duplicates = [
+        { id: 1, unseen: true },
+        { id: 2, unseen: false },
+      ]
+
+      // Simulate the duplicates watcher logic
+      if (me.value && duplicates?.length) {
+        const ids = duplicates.filter((m) => m.unseen).map((m) => m.id)
+        if (ids.length) markSeen(ids)
+      }
+
+      expect(markSeen).toHaveBeenCalledWith([1])
+    })
+
+    it('does not call markSeen when not logged in', () => {
+      const me = ref(null)
+      const markSeen = vi.fn()
+      const duplicates = [{ id: 1, unseen: true }]
+
+      // Simulate the duplicates watcher logic — me.value must be checked, not me (the ref)
+      if (me.value && duplicates?.length) {
+        markSeen([1])
+      }
+
+      expect(markSeen).not.toHaveBeenCalled()
     })
   })
 

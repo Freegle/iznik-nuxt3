@@ -1244,6 +1244,19 @@ jobs:
             echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
 
+            # Validate certificate password immediately — fail fast with a clear message
+            # Use -legacy flag as the p12 is in legacy format (required for macOS security import)
+            if ! openssl pkcs12 -legacy -in ~/certificates/ios_distribution.p12 -nokeys \
+                -passin "pass:${IOS_CERTIFICATE_PASSWORD}" 2>&1 | grep -q "BEGIN CERTIFICATE"; then
+              echo ""
+              echo "❌ Certificate password validation FAILED"
+              echo "IOS_CERTIFICATE_PASSWORD does not match IOS_DISTRIBUTION_CERT."
+              echo "Fix: re-export the iOS Distribution cert from Apple Developer Portal and"
+              echo "update IOS_DISTRIBUTION_CERT + IOS_CERTIFICATE_PASSWORD in CircleCI project settings."
+              exit 1
+            fi
+            echo "✅ Certificate password validated successfully"
+
       # Expire any test versions (99.x.x) that might block the upload
       - run:
           name: Expire Test Versions
@@ -1429,6 +1442,19 @@ jobs:
             echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
             echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
+
+            # Validate certificate password immediately — fail fast with a clear message
+            # Use -legacy flag as the p12 is in legacy format (required for macOS security import)
+            if ! openssl pkcs12 -legacy -in ~/certificates/ios_distribution.p12 -nokeys \
+                -passin "pass:${IOS_CERTIFICATE_PASSWORD}" 2>&1 | grep -q "BEGIN CERTIFICATE"; then
+              echo ""
+              echo "❌ Certificate password validation FAILED"
+              echo "IOS_CERTIFICATE_PASSWORD does not match IOS_DISTRIBUTION_CERT."
+              echo "Fix: re-export the iOS Distribution cert from Apple Developer Portal and"
+              echo "update IOS_DISTRIBUTION_CERT + IOS_CERTIFICATE_PASSWORD in CircleCI project settings."
+              exit 1
+            fi
+            echo "✅ Certificate password validated successfully"
 
       - run:
           name: Build and Deploy to TestFlight
