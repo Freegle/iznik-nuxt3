@@ -18,6 +18,6 @@ export default class AddressAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$delv2('/address', { id })
+    return this.$delv2('/address/' + id)
   }
 }
