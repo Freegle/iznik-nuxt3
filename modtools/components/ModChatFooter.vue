@@ -597,7 +597,7 @@ const enterNewLine = computed({
 const expectedreplies = computed(() => {
   if (otheruser.value?.expectedreplies) {
     pluralize.addIrregularRule('freegler is', 'freeglers are')
-    return pluralize('member is', otheruser.value?.expectedreplies, true)
+    return pluralize('freegler is', otheruser.value?.expectedreplies, true)
   }
 
   return null
