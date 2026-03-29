@@ -12,6 +12,7 @@
 import { computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 import { useLogsStore } from '~/stores/logs'
+import { useModGroupStore } from '~/stores/modgroup'
 
 const props = defineProps({
   logid: {
@@ -26,6 +27,7 @@ const props = defineProps({
 })
 
 const logsStore = useLogsStore()
+const modGroupStore = useModGroupStore()
 const { myGroup } = useMe()
 
 const log = computed(() => logsStore.byId(props.logid))
@@ -74,6 +76,12 @@ const loggroup = computed(() => {
 
     if (!ret) {
       ret = myGroup(log.value.groupid)
+    }
+
+    if (!ret) {
+      // Fallback: group may not be in the current mod's groups (e.g. activity
+      // on a group the mod doesn't moderate). Try the modgroup store directly.
+      ret = modGroupStore.get(log.value.groupid)
     }
 
     return ret
