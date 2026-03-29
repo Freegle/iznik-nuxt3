@@ -443,9 +443,7 @@ async function uploadPhoto(photo, webPath) {
             delete photo.tempId
 
             // Remove any AI-generated images now that a real photo has been added
-            photos.value = photos.value.filter(
-              (p) => !p.externalmods?.ai
-            )
+            photos.value = photos.value.filter((p) => !p.externalmods?.ai)
 
             emit('photoProcessed', ret.id)
             resolve()

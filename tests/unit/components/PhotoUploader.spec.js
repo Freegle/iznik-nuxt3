@@ -1208,7 +1208,9 @@ describe('PhotoUploader', () => {
   describe('AI image pruning', () => {
     it('removes AI-generated images when a real photo upload succeeds', async () => {
       // Start with an AI-generated image already in the list
-      createWrapper([{ id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' }])
+      createWrapper([
+        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+      ])
       await flushPromises()
 
       expect(wrapper.vm.photos.length).toBe(1)
