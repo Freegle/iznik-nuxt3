@@ -211,3 +211,135 @@ describe('Chat message alignment (useChatMT.js — ModTools)', () => {
     })
   })
 })
+
+// Test the MT me/otheruser computed logic with numeric user IDs from V2 API
+describe('useChatMT — me/otheruser with numeric IDs', () => {
+  // Simulates the me computed from useChatMT.js
+  function makeMeComputed({ pov, user1, user2, realMe, userStoreById }) {
+    if (!pov) {
+      return realMe
+    }
+    const u1 = user1
+    const u2 = user2
+    if (u1 === pov || u2 === pov) {
+      return userStoreById(pov) || realMe
+    }
+    return realMe
+  }
+
+  // Simulates the otheruser computed from useChatMT.js
+  function makeOtheruserComputed({ otheruid, user1, userStoreById }) {
+    let uid = otheruid
+    if (!uid) uid = user1
+    if (uid) return userStoreById(uid)
+    return null
+  }
+
+  const realMe = { id: 999, displayname: 'Mod Alice' }
+  const user100 = { id: 100, displayname: 'User Bob' }
+  const user200 = { id: 200, displayname: 'User Carol' }
+  const storeById = (id) => {
+    if (id === 100) return user100
+    if (id === 200) return user200
+    return null
+  }
+
+  describe('me computed', () => {
+    it('returns realMe when no pov', () => {
+      const me = makeMeComputed({
+        pov: null,
+        user1: 100,
+        user2: 200,
+        realMe,
+        userStoreById: storeById,
+      })
+      expect(me).toBe(realMe)
+    })
+
+    it('returns user object (not numeric ID) when pov matches user1', () => {
+      const me = makeMeComputed({
+        pov: 100,
+        user1: 100,
+        user2: 200,
+        realMe,
+        userStoreById: storeById,
+      })
+      expect(me).toBe(user100)
+      expect(me.id).toBe(100)
+      expect(me.displayname).toBe('User Bob')
+    })
+
+    it('returns user object when pov matches user2', () => {
+      const me = makeMeComputed({
+        pov: 200,
+        user1: 100,
+        user2: 200,
+        realMe,
+        userStoreById: storeById,
+      })
+      expect(me).toBe(user200)
+      expect(me.id).toBe(200)
+    })
+
+    it('falls back to realMe when pov user not in store', () => {
+      const me = makeMeComputed({
+        pov: 999,
+        user1: 100,
+        user2: 200,
+        realMe,
+        userStoreById: () => null,
+      })
+      expect(me).toBe(realMe)
+    })
+
+    it('never returns a numeric ID', () => {
+      const me = makeMeComputed({
+        pov: 100,
+        user1: 100,
+        user2: 200,
+        realMe,
+        userStoreById: storeById,
+      })
+      expect(typeof me).toBe('object')
+      expect(typeof me).not.toBe('number')
+    })
+  })
+
+  describe('otheruser computed', () => {
+    it('returns user from store via otheruid', () => {
+      const user = makeOtheruserComputed({
+        otheruid: 100,
+        user1: 200,
+        userStoreById: storeById,
+      })
+      expect(user).toBe(user100)
+    })
+
+    it('falls back to user1 when otheruid not set', () => {
+      const user = makeOtheruserComputed({
+        otheruid: null,
+        user1: 200,
+        userStoreById: storeById,
+      })
+      expect(user).toBe(user200)
+    })
+
+    it('returns null when user not in store (not a numeric ID)', () => {
+      const user = makeOtheruserComputed({
+        otheruid: 999,
+        user1: null,
+        userStoreById: () => null,
+      })
+      expect(user).toBeNull()
+    })
+
+    it('never returns a numeric ID as the user', () => {
+      const user = makeOtheruserComputed({
+        otheruid: null,
+        user1: 100,
+        userStoreById: storeById,
+      })
+      expect(typeof user).toBe('object')
+    })
+  })
+})

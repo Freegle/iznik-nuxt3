@@ -34,11 +34,6 @@ function useChatSharedMT(chatId) {
       user = userStore.byId(otheruid)
     }
 
-    // Final fallback: use user1 object directly if available
-    if (!user && chat.value?.user1) {
-      user = chat.value.user1
-    }
-
     return user
   })
 
@@ -135,7 +130,8 @@ export async function fetchReferencedMessageMT(chatid, id) {
 
 // MT-specific chat message base composable with pov support
 export function useChatMessageBaseMT(chatId, messageId, pov = null) {
-  const { chatStore, authStore, chat, otheruser } = useChatSharedMT(chatId)
+  const { chatStore, userStore, authStore, chat, otheruser } =
+    useChatSharedMT(chatId)
   const messageStore = useMessageStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
@@ -189,17 +185,21 @@ export function useChatMessageBaseMT(chatId, messageId, pov = null) {
     return authStore.user
   })
 
-  // MT: me respects pov for viewing chats from different perspectives
+  // MT: me respects pov for viewing chats from different perspectives.
+  // user1/user2 are numeric IDs from V2 API — resolve from store.
   const me = computed(() => {
     if (!pov) {
       return realMe.value
-    } else if (chat.value?.user1 && chat.value?.user1 === pov) {
-      return chat.value.user1
-    } else if (chat.value?.user2 && chat.value.user2.id === pov) {
-      return chat.value.user2
-    } else {
-      return realMe.value
     }
+
+    const u1 = chat.value?.user1 || chat.value?.user1id
+    const u2 = chat.value?.user2 || chat.value?.user2id
+
+    if (u1 === pov || u2 === pov) {
+      return userStore.byId(pov) || realMe.value
+    }
+
+    return realMe.value
   })
 
   const myid = computed(() => {
