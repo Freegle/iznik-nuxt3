@@ -3,12 +3,12 @@ import { mount, flushPromises } from '@vue/test-utils'
 import NewUserInfo from '~/components/NewUserInfo.vue'
 
 const { mockMe, mockMyGroups } = vi.hoisted(() => {
-  const { ref } = require('vue')
+  const { ref, computed } = require('vue')
   return {
-    mockMe: {
+    mockMe: computed(() => ({
       id: 1,
       displayname: 'Test User',
-    },
+    })),
     mockMyGroups: ref([
       { id: 100, nameshort: 'Group1' },
       { id: 200, nameshort: 'Group2' },
