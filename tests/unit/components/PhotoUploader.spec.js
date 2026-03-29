@@ -1208,9 +1208,11 @@ describe('PhotoUploader', () => {
   describe('AI image pruning', () => {
     it('removes AI-generated images when a real photo upload succeeds', async () => {
       // Start with an AI-generated image already in the list
-      createWrapper([
-        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
-      ])
+      createWrapper({
+        modelValue: [
+          { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+        ],
+      })
       await flushPromises()
 
       expect(wrapper.vm.photos.length).toBe(1)
@@ -1242,10 +1244,12 @@ describe('PhotoUploader', () => {
     })
 
     it('keeps real photos when a real photo upload succeeds', async () => {
-      createWrapper([
-        { id: 1, externalmods: {}, ouruid: 'real-uid-1' },
-        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
-      ])
+      createWrapper({
+        modelValue: [
+          { id: 1, externalmods: {}, ouruid: 'real-uid-1' },
+          { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+        ],
+      })
       await flushPromises()
 
       // After upload, prune AI photos
@@ -1256,10 +1260,12 @@ describe('PhotoUploader', () => {
     })
 
     it('does not remove photos without externalmods', async () => {
-      createWrapper([
-        { id: 1, ouruid: 'real-uid-1' }, // no externalmods at all
-        { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
-      ])
+      createWrapper({
+        modelValue: [
+          { id: 1, ouruid: 'real-uid-1' }, // no externalmods at all
+          { id: 99, externalmods: { ai: true }, ouruid: 'ai-uid-1' },
+        ],
+      })
       await flushPromises()
 
       wrapper.vm.photos = wrapper.vm.photos.filter((p) => !p.externalmods?.ai)
