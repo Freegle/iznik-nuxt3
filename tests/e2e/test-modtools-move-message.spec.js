@@ -17,72 +17,86 @@ test.describe('ModTools move message', () => {
     page,
     testEnv,
   }) => {
-    // Step 1: Log in via API and inject auth tokens
+    const msgId = testEnv.messages?.offer
+    const group1Id = testEnv.group?.id
+    const group2Id = testEnv.group2?.id
+
+    // Step 1: Log in
     await loginViaModTools(page, testEnv.mod.email)
 
-    // Step 2: Navigate to approved messages (auth tokens in localStorage)
-    await page.goto(`${MODTOOLS_URL}/messages/approved`, {
-      timeout: timeouts.navigation.initial,
+    // Step 2: Ensure the message is approved (on whichever group it's on).
+    // A previous run may have left it Pending.
+    const jwt = await page.evaluate(() => {
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}')
+      return auth?.auth?.jwt
     })
 
-    // Wait for page to load and be authenticated
-    // The communities dropdown appears when logged in as a moderator
-    const groupSelect = page.locator('#communitieslist')
-    await expect(groupSelect).toBeVisible({
-      timeout: timeouts.navigation.slowPage,
-    })
+    if (jwt && msgId) {
+      // Approve without groupid — approves on whichever group it's on
+      await page.request
+        .post(`${MODTOOLS_URL}/api/message`, {
+          data: { id: msgId, action: 'Approve' },
+          headers: { Authorization: `Bearer ${jwt}` },
+        })
+        .catch(() => {})
+    }
 
-    // Dismiss the cake modal if it appears (it overlays the page after load).
-    // Use JS to remove the modal and backdrop since clicking Close can leave
-    // the backdrop behind due to animation timing.
-    await page.evaluate(() => {
-      const modal = document.getElementById('modcakemodal')
-      if (modal) {
-        modal.classList.remove('show')
-        modal.style.display = 'none'
+    // Step 3: Try both groups — the message may be on either one from a previous run.
+    // Navigate to the group that has the approved message.
+    let foundGroup = null
+
+    for (const gid of [group1Id, group2Id]) {
+      await page.goto(`${MODTOOLS_URL}/messages/approved/${gid}`, {
+        timeout: timeouts.navigation.initial,
+      })
+
+      // Wait for page to load
+      await expect(page.locator('#communitieslist')).toBeVisible({
+        timeout: timeouts.navigation.slowPage,
+      })
+
+      // Dismiss modals
+      await page.evaluate(() => {
+        const modal = document.getElementById('modcakemodal')
+        if (modal) {
+          modal.classList.remove('show')
+          modal.style.display = 'none'
+        }
+        document
+          .querySelectorAll('.modal-backdrop')
+          .forEach((el) => el.remove())
+        document.body.classList.remove('modal-open')
+        document.body.style.removeProperty('overflow')
+        document.body.style.removeProperty('padding-right')
+      })
+
+      // Check if messages are visible (short timeout)
+      try {
+        await expect(page.locator('.card').first()).toBeVisible({
+          timeout: 15000,
+        })
+        foundGroup = gid
+        console.log(`Found approved messages on group ${gid}`)
+        break
+      } catch {
+        console.log(`No approved messages on group ${gid}, trying next...`)
       }
-      document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
-      document.body.classList.remove('modal-open')
-      document.body.style.removeProperty('overflow')
-      document.body.style.removeProperty('padding-right')
-    })
-    await page.waitForTimeout(500)
+    }
 
-    // Find the test group option
-    const playgroundOption = groupSelect.locator(
-      `option:has-text("${testEnv.group.name}")`
-    )
-    await expect(playgroundOption.first()).toBeAttached({
-      timeout: timeouts.ui.appearance,
-    })
-    const playgroundValue = await playgroundOption.first().getAttribute('value')
-    expect(playgroundValue).toBeTruthy()
-    await groupSelect.selectOption(playgroundValue)
+    expect(foundGroup).toBeTruthy()
 
-    // Selecting a group triggers router.push — wait for navigation to complete
-    await page.waitForURL(/\/messages\/approved\/\d+/, {
-      timeout: timeouts.navigation.default,
-    })
-
-    // Wait for messages to load — look for message cards
+    // Step 4: Click on the first message to expand it
     const messageCards = page.locator('.card')
-    await expect(messageCards.first()).toBeVisible({
-      timeout: timeouts.navigation.slowPage,
-    })
-
-    // Step 3: Click on the first message to expand it
     await messageCards.first().click()
 
-    // Step 4: Click the Edit button
+    // Step 5: Click the Edit button
     const editButton = page.locator('button:has-text("Edit")').first()
     await expect(editButton).toBeVisible({
       timeout: timeouts.ui.appearance,
     })
     await editButton.click()
 
-    // Step 5: The group select inside the message edit form should be visible
-    // There are two #communitieslist selects on the page: the page-level filter
-    // and the one inside the message card. Scope to the message card.
+    // Step 6: Find the group select inside the message card and change group
     const editGroupSelect = page
       .locator('[id^="msg-"] select#communitieslist')
       .first()
@@ -90,7 +104,6 @@ test.describe('ModTools move message', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Get the current group and find a different one
     const currentGroupId = await editGroupSelect.inputValue()
     const options = await editGroupSelect.locator('option').all()
 
@@ -105,10 +118,10 @@ test.describe('ModTools move message', () => {
 
     expect(targetGroupId).toBeTruthy()
 
-    // Step 6: Change the group (triggers move on save)
+    // Step 7: Change the group (triggers move on save)
     await editGroupSelect.selectOption(targetGroupId)
 
-    // Step 7: Listen for errors before clicking Save
+    // Step 8: Listen for errors before clicking Save
     const errors = []
     page.on('pageerror', (error) => {
       errors.push(error.message)
@@ -121,7 +134,7 @@ test.describe('ModTools move message', () => {
     })
     await saveButton.click()
 
-    // Step 8: Wait and verify no turl error
+    // Step 9: Wait and verify no turl error
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     const bodyText = await page.textContent('body')
@@ -132,29 +145,5 @@ test.describe('ModTools move message', () => {
 
     const turlErrors = errors.filter((e) => e.includes('turl'))
     expect(turlErrors).toHaveLength(0)
-
-    // Step 9: Move message back to original group to avoid side effects
-    const editButtonAfter = page.locator('button:has-text("Edit")').first()
-
-    if (await editButtonAfter.isVisible().catch(() => false)) {
-      await editButtonAfter.click()
-
-      const groupSelectAfter = page
-        .locator('[id^="msg-"] select#communitieslist')
-        .first()
-      await expect(groupSelectAfter).toBeVisible({
-        timeout: timeouts.ui.appearance,
-      })
-
-      await groupSelectAfter.selectOption(currentGroupId)
-
-      const saveButtonAfter = page.locator('button:has-text("Save")').first()
-      await saveButtonAfter.click()
-
-      await page.waitForTimeout(timeouts.ui.settleTime)
-
-      const bodyTextAfter = await page.textContent('body')
-      expect(bodyTextAfter).not.toContain('Oh dear')
-    }
   })
 })
