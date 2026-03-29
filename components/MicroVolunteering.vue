@@ -95,6 +95,9 @@
                 <span v-else-if="task.type === 'PhotoRotate'">
                   Photo Rotate
                 </span>
+                <span v-else-if="task.type === 'AIImageReview'">
+                  AI Image Review
+                </span>
               </h1>
               <div class="fw-bold">
                 These little things help Freegle run smoothly. Thank you!
@@ -141,6 +144,12 @@
               </div>
               <div v-else-if="task.type === 'Survey2'">
                 <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
+              </div>
+              <div v-else-if="task.type === 'AIImageReview'">
+                <MicroVolunteeringAIImageReview
+                  :aiimage="task.aiimage"
+                  @next="considerNext"
+                />
               </div>
               <div v-else-if="task.type === 'Invite'">
                 <MicroVolunteeringInvite @next="considerNext" />
@@ -196,6 +205,9 @@ const MicroVolunteeringSurvey = defineAsyncComponent(() =>
 const MicroVolunteeringInvite = defineAsyncComponent(() =>
   import('./MicroVolunteeringInvite')
 )
+const MicroVolunteeringAIImageReview = defineAsyncComponent(() =>
+  import('./MicroVolunteeringAIImageReview')
+)
 
 const props = defineProps({
   force: {
@@ -228,7 +240,13 @@ const showTask = ref(false)
 const task = ref(null)
 const todo = ref(5)
 const done = ref(0)
-const types = ref(['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'])
+const types = ref([
+  'CheckMessage',
+  'PhotoRotate',
+  'Survey2',
+  'Invite',
+  'AIImageReview',
+])
 const bump = ref(1)
 
 const inviteAccepted = computed(() => {
@@ -318,6 +336,7 @@ async function getTask() {
       task.value.type === 'Facebook' ||
       task.value.type === 'PhotoRotate' ||
       task.value.type === 'Survey2' ||
+      task.value.type === 'AIImageReview' ||
       task.value.type === 'Invite'
     ) {
       showTask.value = true

@@ -96,6 +96,9 @@
             </span>
             <span v-else-if="task.type === 'SearchTerm'"> Word Match </span>
             <span v-else-if="task.type === 'PhotoRotate'"> Photo Rotate </span>
+            <span v-else-if="task.type === 'AIImageReview'">
+              AI Image Review
+            </span>
           </h1>
           <div v-if="task.type === 'CheckMessage'">
             <MicroVolunteeringCheckMessage
@@ -123,6 +126,12 @@
           </div>
           <div v-else-if="task.type === 'Survey2'">
             <MicroVolunteeringSurvey :url="task.url" @done="considerNext" />
+          </div>
+          <div v-else-if="task.type === 'AIImageReview'">
+            <MicroVolunteeringAIImageReview
+              :aiimage="task.aiimage"
+              @next="considerNext"
+            />
           </div>
           <div v-else-if="task.type === 'Invite'">
             <MicroVolunteeringInvite @next="considerNext" />
@@ -174,6 +183,9 @@ const MicroVolunteeringSurvey = defineAsyncComponent(() =>
 )
 const MicroVolunteeringInvite = defineAsyncComponent(() =>
   import('~/components/MicroVolunteeringInvite')
+)
+const MicroVolunteeringAIImageReview = defineAsyncComponent(() =>
+  import('~/components/MicroVolunteeringAIImageReview')
 )
 
 definePageMeta({
@@ -227,7 +239,13 @@ if (allowed.value) {
 async function getTask() {
   // Try to get a task.
   task.value = await microVolunteeringStore.challenge({
-    types: ['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'],
+    types: [
+      'CheckMessage',
+      'PhotoRotate',
+      'Survey2',
+      'Invite',
+      'AIImageReview',
+    ],
   })
 
   if (task.value) {
@@ -245,6 +263,8 @@ async function getTask() {
     } else if (task.value.type === 'PhotoRotate') {
       showTask.value = true
     } else if (task.value.type === 'Survey2') {
+      showTask.value = true
+    } else if (task.value.type === 'AIImageReview') {
       showTask.value = true
     } else if (task.value.type === 'Invite') {
       showTask.value = true
