@@ -177,8 +177,11 @@ function searchedMember(term) {
 async function loadMore($state) {
   busy.value = true
   if (!me.value) {
-    console.log('Ignore load more on MT page with no session.')
-    $state.complete()
+    // Auth hasn't hydrated yet — don't call complete() as that permanently
+    // stops the observer. Call loaded() and let it retry on next scroll.
+    $state.loaded()
+    busy.value = false
+    return
   } else if (show.value < messages.value.length) {
     // This means that we will gradually add the messages that we have fetched from the server into the DOM.
     // Doing that means that we will complete our initial render more rapidly and thus appear faster.

@@ -59,6 +59,11 @@ test.describe('ModTools move message', () => {
     expect(playgroundValue).toBeTruthy()
     await groupSelect.selectOption(playgroundValue)
 
+    // Selecting a group triggers router.push — wait for navigation to complete
+    await page.waitForURL(/\/messages\/approved\/\d+/, {
+      timeout: timeouts.navigation.default,
+    })
+
     // Wait for messages to load — look for message cards
     const messageCards = page.locator('.card')
     await expect(messageCards.first()).toBeVisible({

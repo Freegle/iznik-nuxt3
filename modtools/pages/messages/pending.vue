@@ -238,8 +238,11 @@ async function loadMore($state) {
   busy.value = true
 
   if (!me.value) {
-    console.log('Ignore load more on MT page with no session.')
-    $state.complete()
+    // Auth hasn't hydrated yet — don't call complete() as that permanently
+    // stops the observer. Call loaded() and let it retry on next scroll.
+    $state.loaded()
+    busy.value = false
+    return
   } else if (show.value < messages.value.length) {
     // Show all fetched messages at once.  Previously we incremented by 1, but that caused the
     // InfiniteLoading loader div to scroll below the viewport after ~9 messages, making
