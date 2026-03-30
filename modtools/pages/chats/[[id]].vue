@@ -291,7 +291,7 @@ onMounted(async () => {
 
 .active {
   background-color: #e3f0ff;
-  border-left: 3px solid $color-blue--bright;
+  border-left-color: $color-blue--bright;
 }
 
 .chatlist {
