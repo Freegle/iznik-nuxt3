@@ -1319,16 +1319,14 @@ async function loginViaModTools(page, email, password = 'freegle') {
   // Wait for auth to persist to localStorage
   await waitForAuthPersistence(page)
 
-  // After modal login, the Pinia auth store may not be fully hydrated yet.
-  // If we navigate directly to a protected page, the auth middleware fires
-  // before store rehydration, causing a redirect to /login → /?noguard=true
-  // which aborts the intended navigation. Fix: navigate to modtools root
-  // with noguard to let the app fully initialize with the auth state.
-  await page.goto(`${modtoolsBaseUrl}/?noguard=true`, {
+  // After login, login.vue redirects to /?noguard=true which hydrates the
+  // auth store. Wait for this redirect chain to settle before returning,
+  // otherwise the next page.goto can collide with the in-flight redirect.
+  await page.waitForURL('**/noguard=true**', {
     timeout: timeouts.navigation.initial,
-    waitUntil: 'domcontentloaded',
   })
-  console.log('Auth store hydrated after noguard navigation')
+  await page.waitForLoadState('domcontentloaded')
+  console.log('Post-login redirect settled')
 
   return true
 }
