@@ -207,6 +207,8 @@ async function save(callbackorvalue) {
       const top = props.name.substring(0, p)
       const topobj = modGroupStore.get(props.groupid)
 
+      if (!topobj) return
+
       setDeep(topobj, props.name.split('.'), val)
       data[top] = topobj[top]
     }

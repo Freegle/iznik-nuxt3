@@ -145,4 +145,12 @@ onMounted(() => {
     opacity: 1;
   }
 }
+
+/* First image renders immediately — no opacity animation.
+   This is the LCP candidate; waiting for Vue hydration to add .loaded
+   delays LCP by ~2s (the time between image download and onMounted). */
+.photo-cell:first-child :deep(.grid-photo img) {
+  opacity: 1;
+  transition: none;
+}
 </style>

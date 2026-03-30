@@ -33,16 +33,29 @@ export const useNotificationStore = defineStore({
       }
     },
     async fetchList() {
-      this.list = await api(this.config).notification.list()
+      try {
+        this.list = await api(this.config).notification.list()
 
-      this.list.forEach((item) => {
-        // Notifications are immutable so we can avoid triggering a re-render.
-        if (!this.listById[item.id]) {
-          this.listById[item.id] = item
+        this.list.forEach((item) => {
+          // Notifications are immutable so we can avoid triggering a re-render.
+          if (!this.listById[item.id]) {
+            this.listById[item.id] = item
+          }
+        })
+
+        return this.list
+      } catch (e) {
+        // Mirror fetchCount error handling. Network failures (e.g. "Too many retries")
+        // produce APIError with status null/"undefined" — swallow these since the
+        // notification list is non-critical UI. Re-throw real API errors.
+        if (e instanceof APIError) {
+          if (e?.response?.status === 401) {
+            console.log('Ignore unauthorised for notification list')
+          } else if (e?.response?.status !== null) {
+            throw e
+          }
         }
-      })
-
-      return this.list
+      }
     },
     async seen(id) {
       await api(this.config).notification.seen(id)

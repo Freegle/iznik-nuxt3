@@ -436,6 +436,11 @@ export const useMessageStore = defineStore({
       const authStore = useAuthStore()
       const userUid = authStore.user?.id
 
+      if (!userUid) {
+        this.activePostsCounter = 0
+        return
+      }
+
       const activeMessages = await api(this.config).message.fetchByUser(
         userUid,
         true

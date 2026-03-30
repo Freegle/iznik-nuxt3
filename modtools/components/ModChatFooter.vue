@@ -422,7 +422,6 @@ import {
   nextTick,
   defineAsyncComponent,
 } from 'vue'
-import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
 import { storeToRefs } from 'pinia'
@@ -595,9 +594,9 @@ const enterNewLine = computed({
 })
 
 const expectedreplies = computed(() => {
-  if (otheruser.value?.expectedreplies) {
-    pluralize.addIrregularRule('freegler is', 'freeglers are')
-    return pluralize('member is', otheruser.value?.expectedreplies, true)
+  const count = otheruser.value?.expectedreplies
+  if (count) {
+    return count === 1 ? '1 freegler is' : `${count} freeglers are`
   }
 
   return null

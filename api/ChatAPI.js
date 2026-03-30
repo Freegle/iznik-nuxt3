@@ -28,6 +28,7 @@ export default class ChatAPI extends BaseAPI {
         since,
         search,
         keepChat,
+        chattypes: ['User2User', 'User2Mod'],
       },
       logError
     )

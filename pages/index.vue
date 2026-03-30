@@ -150,20 +150,6 @@ const head = buildHead(
   }
 )
 
-// Preload some images to speed page load
-const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.IMAGE_DELIVERY
-
-const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
-
-head.link = [
-  {
-    rel: 'preload',
-    as: 'image',
-    href: logo,
-  },
-]
-
 useHead(head)
 
 await groupStore.fetch()
@@ -471,6 +457,8 @@ onBeforeUnmount(() => {
 /* Sample Offers Section */
 .sample-section {
   padding: 1rem 0.5rem;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 .sample-stack {
@@ -531,6 +519,8 @@ onBeforeUnmount(() => {
   padding: 0.75rem 1rem;
   margin: 0 1rem;
   background: $color-gray--lighter;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 60px;
 }
 
 .app-badge {

@@ -102,9 +102,21 @@ export const useIsochroneStore = defineStore({
             const wkt = new Wkt.Wkt()
             wkt.read(i.polygon)
             const obj = wkt.toObject()
-            const thisbounds = obj.getBounds()
-            const thissw = thisbounds.getSouthWest()
-            const thisne = thisbounds.getNorthEast()
+
+            let thissw, thisne
+
+            if (typeof obj.getBounds === 'function') {
+              const thisbounds = obj.getBounds()
+              thissw = thisbounds.getSouthWest()
+              thisne = thisbounds.getNorthEast()
+            } else if (typeof obj.getLatLng === 'function') {
+              // POINT geometry — no bounds, use the single coordinate.
+              const ll = obj.getLatLng()
+              thissw = ll
+              thisne = ll
+            } else {
+              return
+            }
 
             swlat = swlat === null ? thissw.lat : Math.min(swlat, thissw.lat)
             swlng = swlng === null ? thissw.lng : Math.min(swlng, thissw.lng)
