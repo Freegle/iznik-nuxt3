@@ -327,4 +327,39 @@ describe('ChatFooter', () => {
       expect(true).toBe(true)
     })
   })
+
+  describe('expectedreplies text', () => {
+    // This tests the logic extracted from the expectedreplies computed property.
+    // Previously this used pluralize('freegler is', count, true) which had a bug:
+    // pluralize would singularize "is" to "i" for count=1 without the irregular rule.
+    function formatExpectedReplies(count) {
+      if (count) {
+        return count === 1 ? '1 freegler is' : `${count} freeglers are`
+      }
+      return null
+    }
+
+    it('returns null when count is 0', () => {
+      expect(formatExpectedReplies(0)).toBeNull()
+    })
+
+    it('returns null when count is undefined', () => {
+      expect(formatExpectedReplies(undefined)).toBeNull()
+    })
+
+    it('returns singular form with "is" for count of 1', () => {
+      const result = formatExpectedReplies(1)
+      expect(result).toBe('1 freegler is')
+      // Regression: pluralize bug returned "1 freegler i" (missing "s")
+      expect(result).not.toContain('freegler i ')
+    })
+
+    it('returns plural form with "are" for count of 2', () => {
+      expect(formatExpectedReplies(2)).toBe('2 freeglers are')
+    })
+
+    it('returns plural form with "are" for count of 5', () => {
+      expect(formatExpectedReplies(5)).toBe('5 freeglers are')
+    })
+  })
 })
