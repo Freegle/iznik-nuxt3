@@ -4,11 +4,13 @@ import { ref } from 'vue'
 import ModChatNoteModal from '~/modtools/components/ModChatNoteModal.vue'
 
 const mockHide = vi.fn()
+const mockSend = vi.fn().mockResolvedValue({})
 const mockChatStore = {
   byChatId: vi.fn().mockReturnValue({
     user1: { displayname: 'User One', id: 1 },
     user2: { displayname: 'User Two', id: 2 },
   }),
+  send: mockSend,
 }
 const mockMyGroup = vi.fn().mockReturnValue({
   namedisplay: 'Test Group',
@@ -147,6 +149,25 @@ describe('ModChatNoteModal', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.show).toBeDefined()
       expect(wrapper.vm.hide).toBeDefined()
+    })
+  })
+
+  describe('addit', () => {
+    it('sends message with modnote=true via chatStore.send', async () => {
+      const wrapper = mountComponent()
+      wrapper.vm.note = 'Test mod note'
+      wrapper.vm.groupid = 1
+
+      await wrapper.vm.addit()
+
+      expect(mockSend).toHaveBeenCalledWith(
+        123, // chatid
+        'Test mod note\n\nTest Group Volunteer', // message with group suffix
+        null, // addressid
+        null, // imageid
+        null, // refmsgid
+        true // modnote
+      )
     })
   })
 })

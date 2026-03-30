@@ -315,7 +315,7 @@ export const useChatStore = defineStore({
     async typing(chatid) {
       await api(this.config).chat.typing(chatid)
     },
-    async send(chatid, message, addressid, imageid, refmsgid) {
+    async send(chatid, message, addressid, imageid, refmsgid, modnote) {
       const data = {
         roomid: chatid,
       }
@@ -335,6 +335,10 @@ export const useChatStore = defineStore({
 
       if (refmsgid) {
         data.refmsgid = refmsgid
+      }
+
+      if (modnote) {
+        data.modnote = true
       }
 
       await api(this.config).chat.send(data)
