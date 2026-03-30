@@ -1,12 +1,12 @@
 <template>
-  <b-card no-body>
+  <b-card v-if="pair" no-body>
     <b-card-body>
       <b-row>
         <b-col cols="12" md="6">
-          <ModMember :membershipid="user1.id" />
+          <ModMember :membershipid="pair.user1" />
         </b-col>
         <b-col cols="12" md="6">
-          <ModMember :membershipid="user2.id" />
+          <ModMember :membershipid="pair.user2" />
         </b-col>
       </b-row>
       <div class="d-flex flex-wrap justify-content-start pills mt-2">
@@ -47,6 +47,7 @@
 import { computed } from 'vue'
 import dayjs from 'dayjs'
 import { useMemberStore } from '~/stores/member'
+import { useUserStore } from '~/stores/user'
 import { getPreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
 const LONG_THRESHOLD = 4
@@ -61,15 +62,36 @@ const props = defineProps({
 const emit = defineEmits(['processed'])
 
 const memberStore = useMemberStore()
+const userStore = useUserStore()
 
-const member = computed(() => memberStore.get(props.memberid))
+// The pair {id, user1, user2} from the member store.
+const pair = computed(() => memberStore.get(props.memberid))
 
-function posted(member) {
-  return member.messagehistory && member.messagehistory.length
+// Full user data from the user store (fetched by ModMember on mount).
+const userData1 = computed(() => userStore.list[pair.value?.user1])
+const userData2 = computed(() => userStore.list[pair.value?.user2])
+
+// Order by lastaccess (most recent first), matching V1 behaviour.
+const user1 = computed(() => {
+  if (!userData1.value || !userData2.value) return userData1.value
+  const m1 = new Date(userData1.value.lastaccess)
+  const m2 = new Date(userData2.value.lastaccess)
+  return m1 > m2 ? userData1.value : userData2.value
+})
+
+const user2 = computed(() => {
+  if (!userData1.value || !userData2.value) return userData2.value
+  const m1 = new Date(userData1.value.lastaccess)
+  const m2 = new Date(userData2.value.lastaccess)
+  return m1 <= m2 ? userData1.value : userData2.value
+})
+
+function posted(user) {
+  return user?.messagehistory && user.messagehistory.length
 }
 
-function isMember(member) {
-  return member.memberships && member.memberships.length
+function isMember(user) {
+  return user?.memberships && user.memberships.length
 }
 
 function count(l, r) {
@@ -84,8 +106,8 @@ function count(l, r) {
   }
 }
 
-function getEmail(member) {
-  return getPreferredEmail(member)
+function getEmail(user) {
+  return getPreferredEmail(user)
 }
 
 function findLongest(str1, str2) {
@@ -156,20 +178,6 @@ function findLongest(str1, str2) {
   }
 }
 
-const user1 = computed(() => {
-  const m1 = new Date(member.value.lastaccess)
-  const m2 = new Date(member.value.relatedto.lastaccess)
-
-  return m1 > m2 ? member.value : member.value.relatedto
-})
-
-const user2 = computed(() => {
-  const m1 = new Date(member.value.lastaccess)
-  const m2 = new Date(member.value.relatedto.lastaccess)
-
-  return m1 <= m2 ? member.value : member.value.relatedto
-})
-
 const posted1 = computed(() => posted(user1.value))
 const posted2 = computed(() => posted(user2.value))
 const whichposted = computed(() => count(posted1.value, posted2.value))
@@ -179,6 +187,7 @@ const joined2 = computed(() => isMember(user2.value))
 const whichjoined = computed(() => count(joined1.value, joined2.value))
 
 const activeSameDay = computed(() => {
+  if (!user1.value?.lastaccess || !user2.value?.lastaccess) return false
   return dayjs(user1.value.lastaccess).isSame(
     dayjs(user2.value.lastaccess),
     'day'
@@ -186,6 +195,7 @@ const activeSameDay = computed(() => {
 })
 
 const groupsInCommon = computed(() => {
+  if (!user1.value?.memberships || !user2.value?.memberships) return false
   const common = user1.value.memberships.filter((group) => {
     const gid = group.id
     let found = false
@@ -203,6 +213,7 @@ const groupsInCommon = computed(() => {
 })
 
 const similarNameOrEmail = computed(() => {
+  if (!user1.value || !user2.value) return false
   let ret = false
   let e1 = getEmail(user1.value)
   let e2 = getEmail(user2.value)
@@ -238,8 +249,8 @@ function updateWork() {
 
 async function ask() {
   await memberStore.askMerge(props.memberid, {
-    user1: user1.value.id,
-    user2: user2.value.id,
+    user1: pair.value.user1,
+    user2: pair.value.user2,
   })
 
   updateWork()
@@ -247,8 +258,8 @@ async function ask() {
 
 async function ignore() {
   await memberStore.ignoreMerge(props.memberid, {
-    user1: user1.value.id,
-    user2: user2.value.id,
+    user1: pair.value.user1,
+    user2: pair.value.user2,
   })
 
   updateWork()

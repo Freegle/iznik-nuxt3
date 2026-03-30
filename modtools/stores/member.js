@@ -108,7 +108,29 @@ export const useMemberStore = defineStore({
         }
         received += members.length
 
-        if (params.collection === 'Spam') {
+        if (params.collection === 'Related') {
+          // V2 API returns {id, user1, user2} pairs.  Store each pair keyed
+          // by its id, and create synthetic member entries for each user so
+          // that ModMember can look them up.
+          members.forEach((pair) => {
+            pair.rawindex = this.rawindex++
+            pair.collection = 'Related'
+            this.list[pair.id] = pair
+
+            // Synthetic member entries so ModMember can resolve them.
+            for (const uid of [pair.user1, pair.user2]) {
+              if (!this.list[uid]) {
+                this.list[uid] = {
+                  id: uid,
+                  userid: uid,
+                  collection: 'Related',
+                  rawindex: this.rawindex++,
+                  _syntheticRelated: true,
+                }
+              }
+            }
+          })
+        } else if (params.collection === 'Spam') {
           // V2 API returns one row per membership. V1 grouped by userid and
           // nested all memberships under one entry.  Replicate that here so
           // the review page shows one card per user.

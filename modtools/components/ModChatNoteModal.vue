@@ -99,7 +99,7 @@ async function addit() {
 
   console.log('addit', msg)
 
-  await chatStore.send(props.chatid, msg)
+  await chatStore.send(props.chatid, msg, null, null, null, true)
 
   hide()
 }

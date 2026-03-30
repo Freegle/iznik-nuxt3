@@ -58,7 +58,7 @@
           <ChatMessage
             :id="message.id"
             :chatid="message.chatid"
-            :pov="message.touser?.id"
+            :pov="chatPov"
             last
             highlight-emails
             is-m-t
@@ -255,6 +255,14 @@ const chatStore = useChatStore()
 const authStore = useAuthStore()
 
 const message = computed(() => chatStore.messageById(props.messageid))
+
+// Use a consistent pov based on the chatroom's user2, not the per-message touser.
+// This ensures messages from user1 always appear on the left and user2 on the right,
+// regardless of which direction the reviewed message was sent.
+const chatPov = computed(() => {
+  const chat = chatStore.byChatId(message.value?.chatid)
+  return chat?.user2 || message.value?.touserid || message.value?.touser?.id
+})
 
 const isActiveMod = computed(() => {
   const groupid = message.value?.group?.id

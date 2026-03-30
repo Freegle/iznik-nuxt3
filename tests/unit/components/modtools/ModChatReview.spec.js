@@ -141,6 +141,11 @@ describe('ModChatReview', () => {
     mockRedactChat.mockClear()
     globalThis.__mockChatStore = {
       messageById: vi.fn(() => mockMessageData),
+      byChatId: vi.fn(() => ({
+        user1: 456,
+        user2: 789,
+        chattype: 'User2User',
+      })),
       approveChat: mockApproveChat,
       approveAllFutureChat: mockApproveAllFutureChat,
       rejectChat: mockRejectChat,

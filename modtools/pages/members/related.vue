@@ -43,42 +43,38 @@
 import { computed, onMounted } from 'vue'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useMemberStore } from '~/stores/member'
+import { useUserStore } from '~/stores/user'
 
 const memberStore = useMemberStore()
+const userStore = useUserStore()
 const { bump, collection, distance, groupid, loadMore } = setupModMembers(true)
 collection.value = 'Related'
 
-// Computed
+// Only the related pair entries (not the synthetic per-user entries).
 const members = computed(() => {
   if (!memberStore) return []
-  console.log('members related all list')
-  return Object.values(memberStore.list)
+  return Object.values(memberStore.list).filter(
+    (m) => m.collection === 'Related' && !m._syntheticRelated
+  )
 })
 
 const visibleMembers = computed(() => {
-  const ret = members.value.filter((member) => {
+  return members.value.filter((pair) => {
     if (groupid.value <= 0) {
-      // No group filter
       return true
     }
 
-    let found = false
-    member.memberships.forEach((group) => {
-      if (parseInt(group.id) === groupid.value) {
-        found = true
-      }
-    })
+    // Check if either user in the pair is a member of the selected group.
+    const u1 = userStore.list[pair.user1]
+    const u2 = userStore.list[pair.user2]
 
-    member.relatedto.memberships.forEach((group) => {
-      if (parseInt(group.id) === groupid.value) {
-        found = true
-      }
-    })
+    const inGroup = (user) => {
+      if (!user?.memberships) return false
+      return user.memberships.some((g) => parseInt(g.id) === groupid.value)
+    }
 
-    return found
+    return inGroup(u1) || inGroup(u2)
   })
-
-  return ret
 })
 
 // Lifecycle

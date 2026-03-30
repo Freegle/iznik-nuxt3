@@ -109,6 +109,7 @@ const messages = computed(() => {
         message.groupname = group.namedisplay
       } else {
         message.groupname = '#' + message.groupid
+        groupStore.fetch(message.groupid)
       }
     })
 

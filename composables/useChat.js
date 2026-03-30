@@ -262,9 +262,19 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const chatMessageProfileImage = computed(() => {
-    return chatmessage.value?.userid === myidComputed.value
-      ? me.value?.profile?.paththumb
-      : chat.value?.icon
+    if (chatmessage.value?.userid === myidComputed.value) {
+      return me.value?.profile?.paththumb
+    }
+    // For User2User chats, prefer the other user's profile from the user store.
+    // Fall back to chat.icon (which is the same image from the listing API)
+    // to avoid a blank avatar while the user store is still loading.
+    // In chat review, chat.icon is not populated so this gracefully degrades.
+    if (chat.value?.chattype === 'User2User') {
+      return otheruserComputed.value?.profile?.paththumb || chat.value?.icon
+    }
+    // For User2Mod: chat.icon is the group icon (member side) or member
+    // profile (mod side). Prefer it over otheruser profile.
+    return chat.value?.icon || otheruserComputed.value?.profile?.paththumb
   })
 
   const chatMessageProfileName = computed(() => {

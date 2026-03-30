@@ -11,6 +11,7 @@ const groupData = {
 
 const mockGroupStore = {
   get: (id) => groupData[id] || null,
+  fetch: vi.fn().mockResolvedValue(null),
 }
 
 let mockUserData = {}
