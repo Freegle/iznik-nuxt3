@@ -1319,6 +1319,12 @@ async function loginViaModTools(page, email, password = 'freegle') {
   // Wait for auth to persist to localStorage
   await waitForAuthPersistence(page)
 
+  // After login, login.vue redirects to /?noguard=true which hydrates the
+  // auth store. Wait for the redirect chain to settle before returning,
+  // otherwise the next page.goto can collide with the in-flight redirect.
+  await page.waitForLoadState('domcontentloaded')
+  console.log('Post-login page settled')
+
   return true
 }
 
