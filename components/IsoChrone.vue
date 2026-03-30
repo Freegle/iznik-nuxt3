@@ -284,7 +284,7 @@ function changeMinutes(newVal) {
     isochroneStore.edit({
       id: props.id,
       minutes: newVal,
-      transport: isochrone.value.transport,
+      transport: isochrone.value?.transport,
     })
 
     if (me.value?.settings?.browseView) {

@@ -195,6 +195,12 @@ function getModalName(el) {
 }
 
 function extractElementInfo(el) {
+  // Text nodes don't have .closest(); walk up to the parent element.
+  if (!(el instanceof Element)) {
+    el = el.parentElement
+    if (!el) return null
+  }
+
   // Find meaningful interactive element.
   const interactive = el.closest(
     'button, a, [role="button"], input, select, textarea, ' +
