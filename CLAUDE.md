@@ -46,8 +46,8 @@ IMPORTANT: When making visual/layout changes (CSS, templates, component structur
 ### WSL Testing Considerations
 
 - When in WSL, and running lint, use run-lint-on-changed.sh
-- Don't run npm run test - you can't in WSL
-- When running Playwright tests in WSL, use --headed option and only run using the Chrome browser
+- Don't run `npm run test` directly in WSL — instead run Playwright tests via the status container
+- When running Playwright tests in WSL with `--headed`, use Chrome browser only (requires X server)
 
 ### Playwright Setup Notes
 

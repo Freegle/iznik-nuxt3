@@ -34,7 +34,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       const miscStore = useMiscStore()
       miscStore.setErrorDetails(err)
 
-      Sentry.captureMessage('API error')
+      Sentry.captureException(err)
 
       return true
     } else if (suppressException(err)) {
@@ -47,15 +47,17 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   window.addEventListener('unhandledrejection', function (event) {
-    const reason = event?.reason?.message
+    const reason = event?.reason
 
-    if (reason?.includes('Maintenance error')) {
+    if (reason?.message?.includes('Maintenance error')) {
       // The API may throw this, and it may not get caught.
       const router = useRouter()
       router.push('/maintenance')
     } else if (reason) {
-      // No point alerting the user if we have no info.
-      Sentry.captureMessage('Unhandled promise', reason)
+      // Use captureException with the actual Error object so Sentry gets
+      // the full stack trace. The previous captureMessage('Unhandled promise')
+      // discarded all diagnostic information.
+      Sentry.captureException(reason)
     }
   })
 })
