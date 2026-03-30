@@ -46,9 +46,7 @@ const me = computed(() => authStore.user)
 const showConfirm = ref(false)
 
 async function requestMerge() {
-  const data = await authStore.saveEmail({
-    email: props.theirs,
-  })
+  const data = await authStore.saveEmail(props.theirs)
 
   console.log('Merge data', data)
 

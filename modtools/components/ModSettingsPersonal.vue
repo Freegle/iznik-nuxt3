@@ -229,9 +229,7 @@ async function saveName(callback) {
 
 async function saveEmail(callback) {
   if (me.value.email) {
-    const data = await authStore.saveEmail({
-      email: me.value.email,
-    })
+    const data = await authStore.saveEmail(me.value.email)
 
     if (data && data.ret === 10) {
       showEmailConfirmModal.value = true

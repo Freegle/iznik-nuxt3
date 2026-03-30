@@ -139,9 +139,7 @@ const closed = () => {
 }
 
 const resend = async () => {
-  const data = await authStore.saveEmail({
-    email: email.value,
-  })
+  const data = await authStore.saveEmail(email.value)
 
   if (data && (data.ret === 0 || data.ret === 10)) {
     resent.value = true

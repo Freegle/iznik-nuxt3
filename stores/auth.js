@@ -440,8 +440,8 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return data
     },
-    async saveEmail(params) {
-      const data = await this.$api.session.save(params)
+    async saveEmail(email) {
+      const data = await this.$api.session.save({ email })
       await this.fetchUser()
       return data
     },

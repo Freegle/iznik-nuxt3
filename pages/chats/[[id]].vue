@@ -616,13 +616,14 @@ async function searchMore() {
   background-color: $color-yellow--light;
 }
 
-.active {
-  background-color: rgba($color-green-background, 0.15) !important;
-  border-left: 3px solid $color-green-background;
+.chat {
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
 }
 
-.chat {
-  transition: all var(--transition-fast);
+.active {
+  background-color: rgba($color-green-background, 0.15) !important;
+  border-left-color: $color-green-background;
 }
 
 .chat:hover {

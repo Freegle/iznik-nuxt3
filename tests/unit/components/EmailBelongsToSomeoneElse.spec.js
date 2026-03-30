@@ -75,9 +75,7 @@ describe('EmailBelongsToSomeoneElse', () => {
       const button = wrapper.find('button')
       await button.trigger('click')
 
-      expect(mockAuthStore.saveEmail).toHaveBeenCalledWith({
-        email: 'other@example.com',
-      })
+      expect(mockAuthStore.saveEmail).toHaveBeenCalledWith('other@example.com')
     })
 
     it('shows confirmation after requesting merge', async () => {

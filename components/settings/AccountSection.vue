@@ -125,9 +125,7 @@ const clearPostcode = () => {
 
 const saveEmail = async (callback) => {
   if (emailLocal.value) {
-    const data = await authStore.saveEmail({
-      email: emailLocal.value,
-    })
+    const data = await authStore.saveEmail(emailLocal.value)
 
     if (data && data.ret === 10) {
       emit('show-email-confirm-modal')

@@ -129,6 +129,7 @@ onMounted(() => {
   cursor: pointer;
   transition: background-color var(--transition-fast);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-left: 3px solid transparent;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.04);

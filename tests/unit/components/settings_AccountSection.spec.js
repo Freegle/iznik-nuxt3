@@ -336,7 +336,7 @@ describe('AccountSection', () => {
         const callback = vi.fn()
         await wrapper.vm.saveEmail(callback)
 
-        expect(mockSaveEmail).toHaveBeenCalledWith({ email: 'new@example.com' })
+        expect(mockSaveEmail).toHaveBeenCalledWith('new@example.com')
       })
 
       it('emits show-email-confirm-modal when ret is 10', async () => {
