@@ -330,9 +330,7 @@ describe('ModSettingsPersonal', () => {
         const wrapper = mountComponent()
         const callback = vi.fn()
         await wrapper.vm.saveEmail(callback)
-        expect(mockAuthStore.saveEmail).toHaveBeenCalledWith({
-          email: 'new@example.com',
-        })
+        expect(mockAuthStore.saveEmail).toHaveBeenCalledWith('new@example.com')
         expect(callback).toHaveBeenCalled()
       })
 
