@@ -217,7 +217,8 @@ const maxDate = computed(() => {
 
 const buttonDisabled = computed(() => {
   return (
-    currentlySelected.value <= 0 ||
+    currentlySelected.value === 0 ||
+    currentlySelected.value === null ||
     !props.messages ||
     props.messages.length === 0 ||
     !message.value ||
@@ -279,6 +280,12 @@ const userOptions = computed(() => {
         selected: parseInt(message.value) === parseInt(user.id),
       })
     }
+
+    // Allow promising to someone not in the list (e.g. arranged outside Freegle).
+    options.push({
+      value: -1,
+      text: 'Someone else',
+    })
   }
 
   return options
@@ -338,8 +345,11 @@ watch(
 )
 
 async function promise(callback) {
-  if (currentlySelected.value > 0) {
-    await messageStore.promise(message.value, currentlySelected.value)
+  if (currentlySelected.value > 0 || currentlySelected.value === -1) {
+    // -1 means "Someone else" — pass null userid so the API records it as promised-to-unknown.
+    const userid =
+      currentlySelected.value === -1 ? null : currentlySelected.value
+    await messageStore.promise(message.value, userid)
 
     console.log('Date arranged for', time.value, date.value)
 
