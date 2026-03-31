@@ -1172,10 +1172,37 @@ jobs:
           max_auto_reruns: 2
           auto_rerun_delay: 30s
 
-      # Sync Capacitor to iOS
+      # Restore CocoaPods cache (avoids GitHub CDN rate limits on pod install)
+      - restore_cache:
+          keys:
+            - pods-v1-{{ checksum "ios/App/Podfile" }}
+            - pods-v1-
+
+      # Sync Capacitor to iOS (with retry for CocoaPods CDN rate limits)
       - run:
           name: Sync Capacitor to iOS
-          command: npx cap sync ios
+          command: |
+            for attempt in 1 2 3; do
+              echo "Attempt $attempt of 3..."
+              if npx cap sync ios; then
+                echo "✅ Capacitor sync succeeded"
+                break
+              fi
+              if [ $attempt -lt 3 ]; then
+                echo "⚠️ pod install failed (likely CDN rate limit), retrying in 30s..."
+                sleep 30
+              else
+                echo "❌ All attempts failed"
+                exit 1
+              fi
+            done
+
+      # Cache CocoaPods for next build
+      - save_cache:
+          key: pods-v1-{{ checksum "ios/App/Podfile" }}
+          paths:
+            - ios/App/Pods
+            - ~/.cocoapods
 
       # Decode and place GoogleService-Info.plist for Firebase
       - run:
@@ -1397,9 +1424,37 @@ jobs:
           max_auto_reruns: 2
           auto_rerun_delay: 30s
 
+      # Restore CocoaPods cache (avoids GitHub CDN rate limits on pod install)
+      - restore_cache:
+          keys:
+            - pods-v1-{{ checksum "ios/App/Podfile" }}
+            - pods-v1-
+
+      # Sync Capacitor to iOS (with retry for CocoaPods CDN rate limits)
       - run:
           name: Sync Capacitor to iOS
-          command: npx cap sync ios
+          command: |
+            for attempt in 1 2 3; do
+              echo "Attempt $attempt of 3..."
+              if npx cap sync ios; then
+                echo "✅ Capacitor sync succeeded"
+                break
+              fi
+              if [ $attempt -lt 3 ]; then
+                echo "⚠️ pod install failed (likely CDN rate limit), retrying in 30s..."
+                sleep 30
+              else
+                echo "❌ All attempts failed"
+                exit 1
+              fi
+            done
+
+      # Cache CocoaPods for next build
+      - save_cache:
+          key: pods-v1-{{ checksum "ios/App/Podfile" }}
+          paths:
+            - ios/App/Pods
+            - ~/.cocoapods
 
       - run:
           name: Setup Firebase Configuration for iOS
