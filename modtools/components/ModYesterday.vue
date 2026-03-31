@@ -17,7 +17,10 @@
       ❌ Latest restore attempt failed - check logs</span
     >
     <span v-if="backupStatus === 'unreachable'"> ❌ Server unreachable</span>
-    <span v-if="isRestoring"> ⚠️ Backup is currently restoring</span>
+    <span v-if="isRestoring">
+      ⚠️ Backup is currently restoring
+      <span v-if="restoreEta"> — ETA: {{ restoreEta }}</span>
+    </span>
   </div>
 </template>
 
@@ -31,6 +34,7 @@ dayjs.extend(customParseFormat)
 const latestMessage = ref(null)
 const backupStatus = ref(null)
 const isRestoring = ref(false)
+const restoreEta = ref(null)
 
 onMounted(async () => {
   try {
@@ -50,6 +54,15 @@ onMounted(async () => {
         latestMessage.value = `Restoring backup from ${formattedDate}...`
         backupStatus.value = 'warning'
         isRestoring.value = true
+
+        if (
+          restoreData.eta &&
+          restoreData.eta.estimatedMinutesRemaining != null
+        ) {
+          const mins = restoreData.eta.estimatedMinutesRemaining
+          restoreEta.value =
+            mins <= 1 ? 'less than a minute' : `~${mins} minutes`
+        }
       } else if (
         restoreData.status === 'failed' ||
         restoreData.status === 'completed' ||

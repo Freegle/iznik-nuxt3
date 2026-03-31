@@ -102,6 +102,32 @@ describe('ModYesterday', () => {
       await flushPromises()
       expect(wrapper.text()).toContain('Backup is currently restoring')
     })
+
+    it('shows ETA when available', async () => {
+      mockFetch.mockResolvedValueOnce(
+        mockRestoreResponse({
+          inProgress: true,
+          backupDate: '20240114',
+          eta: { estimatedMinutesRemaining: 45 },
+        })
+      )
+      const wrapper = mountComponent()
+      await flushPromises()
+      expect(wrapper.text()).toContain('~45 minutes')
+    })
+
+    it('shows less than a minute for short ETA', async () => {
+      mockFetch.mockResolvedValueOnce(
+        mockRestoreResponse({
+          inProgress: true,
+          backupDate: '20240114',
+          eta: { estimatedMinutesRemaining: 1 },
+        })
+      )
+      const wrapper = mountComponent()
+      await flushPromises()
+      expect(wrapper.text()).toContain('less than a minute')
+    })
   })
 
   describe('backup status - idle/completed', () => {
