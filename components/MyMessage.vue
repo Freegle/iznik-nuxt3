@@ -1,5 +1,5 @@
 <template>
-  <div v-observe-visibility="visibilityChanged" class="my-message-mobile">
+  <div v-observe-visibility="visibilityChanged" class="my-message-mobile" :style="!visible ? 'min-height: 150px' : ''">
     <div v-if="visible && message?.id">
       <div
         v-if="showOld || !message.outcomes?.length"
