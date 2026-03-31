@@ -80,70 +80,71 @@
           </div>
         </div>
 
-        <!-- Post preview -->
+        <!-- Post preview in phone frame -->
         <div class="preview-section">
           <h2 class="section-title">What your posts will look like</h2>
           <p class="section-subtitle">
             Charity Partner posts stand out in the feed with a blue border and
             badge.
           </p>
-          <div class="preview-cards">
-            <!-- Normal post -->
-            <div class="preview-card">
-              <div class="preview-photo">
-                <img
-                  src="https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=400&h=400&fit=crop"
-                  alt="Children's bike"
-                  class="preview-photo-img"
-                />
-                <span class="preview-tag preview-tag--offer">OFFER</span>
-                <div class="preview-overlay">
-                  <div class="preview-overlay-info">
-                    <span class="preview-overlay-location">
-                      <v-icon icon="map-marker-alt" /> 2 miles
-                    </span>
-                    <span class="preview-overlay-time">
-                      <v-icon icon="clock" /> 3h
-                    </span>
-                  </div>
-                  <div class="preview-overlay-title">
+          <div class="phone-frame">
+            <div class="phone-notch" />
+            <div class="phone-screen">
+              <div class="phone-browse-grid">
+                <!-- Normal post -->
+                <div class="browse-card">
+                  <img
+                    src="https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=300&h=400&fit=crop"
+                    alt="Children's bike"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--offer">OFFER</span>
+                  <div class="browse-title-overlay">
                     Children's bike - good condition
                   </div>
                 </div>
-              </div>
-              <div class="preview-normal-bar">
-                <span class="preview-normal-name">Jane S.</span>
-                <span class="preview-normal-meta">3 offers</span>
-              </div>
-            </div>
-            <!-- Charity Partner post -->
-            <div class="preview-card preview-card--charity">
-              <div class="preview-photo">
-                <img
-                  src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&h=400&fit=crop"
-                  alt="Winter coats"
-                  class="preview-photo-img"
-                />
-                <span class="preview-tag preview-tag--wanted">WANTED</span>
-                <div class="preview-overlay">
-                  <div class="preview-overlay-info">
-                    <span class="preview-overlay-location">
-                      <v-icon icon="map-marker-alt" /> Wandsworth
-                    </span>
-                    <span class="preview-overlay-time">
-                      <v-icon icon="clock" /> 1h
-                    </span>
-                  </div>
-                  <div class="preview-overlay-title">
+                <!-- Charity Partner post -->
+                <div class="browse-card browse-card--charity">
+                  <img
+                    src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300&h=400&fit=crop"
+                    alt="Winter coats"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--wanted">WANTED</span>
+                  <div class="browse-title-overlay">
                     Winter coats - all sizes needed
                   </div>
+                  <div class="browse-charity-strip">
+                    <CharityBadge />
+                  </div>
                 </div>
-              </div>
-              <div class="preview-charity-bar">
-                <span class="preview-charity-name">
-                  Wandsworth Community Aid
-                </span>
-                <CharityBadge />
+                <!-- Normal post -->
+                <div class="browse-card">
+                  <img
+                    src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=400&fit=crop"
+                    alt="Sofa"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--offer">OFFER</span>
+                  <div class="browse-title-overlay">
+                    3 seater sofa - collection only
+                  </div>
+                </div>
+                <!-- Charity Partner post -->
+                <div class="browse-card browse-card--charity">
+                  <img
+                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&h=400&fit=crop"
+                    alt="Clothes"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--wanted">WANTED</span>
+                  <div class="browse-title-overlay">
+                    Children's clothes ages 5-8
+                  </div>
+                  <div class="browse-charity-strip">
+                    <CharityBadge />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -488,67 +489,74 @@ $charity-blue-light: #eff6ff;
   }
 }
 
-/* Post preview */
+/* Post preview in phone frame */
 .preview-section {
   margin-bottom: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  padding: 1.5rem;
+  text-align: center;
 }
 
-.preview-cards {
+.phone-frame {
+  display: inline-block;
+  background: #1a1a1a;
+  border-radius: 32px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.phone-notch {
+  width: 100px;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  margin: 4px auto 10px;
+}
+
+.phone-screen {
+  background: $gray-100;
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.phone-browse-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-
-  @media (max-width: 500px) {
-    grid-template-columns: 1fr;
-    max-width: 280px;
-    margin: 0 auto;
-  }
+  gap: 4px;
 }
 
-.preview-card {
+.browse-card {
+  position: relative;
   border-radius: 0.375rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  background: white;
-  cursor: default;
+  background: $gray-200;
+  aspect-ratio: 3 / 4;
 
   &--charity {
     border: 2px solid $charity-blue;
   }
 }
 
-.preview-photo {
-  position: relative;
-  height: 240px;
-  overflow: hidden;
-  background: $gray-200;
-}
-
-.preview-photo-img {
-  position: absolute;
-  top: 0;
-  left: 0;
+.browse-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.preview-tag {
+.browse-tag {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 1.1rem;
+  top: 6px;
+  left: 6px;
+  font-size: 0.6rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 0.375rem;
+  padding: 1px 5px;
+  border-radius: 3px;
   color: white;
   text-transform: uppercase;
-  z-index: 5;
+  z-index: 2;
 
   &--offer {
     background: $color-success-fg;
@@ -559,62 +567,44 @@ $charity-blue-light: #eff6ff;
   }
 }
 
-.preview-overlay {
+.browse-title-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 2rem 0.625rem 0.5rem;
+  padding: 1.5rem 6px 6px;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
   color: white;
-}
-
-.preview-overlay-info {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.75rem;
-  margin-bottom: 0.25rem;
-  opacity: 0.9;
-}
-
-.preview-overlay-title {
-  font-size: 0.95rem;
+  font-size: 0.65rem;
   font-weight: 600;
   line-height: 1.3;
+  z-index: 1;
+
+  .browse-card--charity & {
+    bottom: 22px;
+  }
 }
 
-.preview-charity-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.625rem;
+.browse-charity-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3px 6px;
   background: $charity-blue-light;
-  flex-wrap: wrap;
-}
-
-.preview-charity-name {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: $charity-blue;
-}
-
-.preview-normal-bar {
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.625rem;
-  background: $gray-100;
-}
 
-.preview-normal-name {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: $color-gray--darker;
-}
+  :deep(.charity-partner) {
+    font-size: 0.5rem !important;
+    padding: 1px 4px !important;
+  }
 
-.preview-normal-meta {
-  font-size: 0.75rem;
-  color: var(--color-gray-600);
+  :deep(.charity-icon) {
+    width: 10px !important;
+    height: 10px !important;
+  }
 }
 
 /* Signup form */
