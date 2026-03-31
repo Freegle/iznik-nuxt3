@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 660" fill="none">
+  <defs>
+    <mask id="screen-hole">
+      <rect width="320" height="660" fill="white"/>
+      <rect x="12" y="52" width="296" height="576" rx="28" fill="black"/>
+    </mask>
+  </defs>
+  <!-- Phone body with screen hole cut out -->
+  <rect x="2" y="2" width="316" height="656" rx="42" fill="#1a1a1c" stroke="#333" stroke-width="2" mask="url(#screen-hole)"/>
+  <!-- Inner bezel (also masked) -->
+  <rect x="6" y="6" width="308" height="648" rx="39" fill="#2c2c2e" mask="url(#screen-hole)"/>
+  <!-- Dynamic island -->
+  <rect x="115" y="18" width="90" height="24" rx="12" fill="#000"/>
+  <!-- Side buttons -->
+  <rect x="-2" y="110" width="4" height="32" rx="2" fill="#3a3a3c"/>
+  <rect x="-2" y="152" width="4" height="32" rx="2" fill="#3a3a3c"/>
+  <rect x="318" y="130" width="4" height="44" rx="2" fill="#3a3a3c"/>
+</svg>

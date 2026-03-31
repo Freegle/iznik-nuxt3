@@ -87,9 +87,26 @@
             Charity Partner posts stand out in the feed with a blue border and
             badge.
           </p>
-          <div class="phone-frame">
-            <div class="phone-notch" />
-            <div class="phone-screen">
+          <div class="phone-mockup">
+            <!-- Phone frame image -->
+            <img
+              src="/phone-frame.svg"
+              alt=""
+              class="phone-frame-img"
+              aria-hidden="true"
+            />
+            <!-- Screen content positioned inside the frame -->
+            <div class="phone-screen-content">
+              <!-- Freegle header bar -->
+              <div class="phone-header">
+                <svg viewBox="0 0 24 24" width="14" height="14">
+                  <path
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                    fill="white"
+                  />
+                </svg>
+                <span class="phone-header-title">Browse</span>
+              </div>
               <div class="phone-browse-grid">
                 <!-- Normal post -->
                 <div class="browse-card">
@@ -112,10 +129,10 @@
                   />
                   <span class="browse-tag browse-tag--wanted">WANTED</span>
                   <div class="browse-title-overlay">
-                    Winter coats - all sizes needed
-                  </div>
-                  <div class="browse-charity-strip">
-                    <CharityBadge />
+                    <CharityBadge class="browse-charity-badge" />
+                    <div class="browse-title-text">
+                      Winter coats - all sizes needed
+                    </div>
                   </div>
                 </div>
                 <!-- Normal post -->
@@ -127,7 +144,9 @@
                   />
                   <span class="browse-tag browse-tag--offer">OFFER</span>
                   <div class="browse-title-overlay">
-                    3 seater sofa - collection only
+                    <div class="browse-title-text">
+                      3 seater sofa - collection only
+                    </div>
                   </div>
                 </div>
                 <!-- Charity Partner post -->
@@ -139,10 +158,10 @@
                   />
                   <span class="browse-tag browse-tag--wanted">WANTED</span>
                   <div class="browse-title-overlay">
-                    Children's clothes ages 5-8
-                  </div>
-                  <div class="browse-charity-strip">
-                    <CharityBadge />
+                    <CharityBadge class="browse-charity-badge" />
+                    <div class="browse-title-text">
+                      Children's clothes ages 5-8
+                    </div>
                   </div>
                 </div>
               </div>
@@ -495,36 +514,52 @@ $charity-blue-light: #eff6ff;
   text-align: center;
 }
 
-.phone-frame {
+.phone-mockup {
   display: inline-block;
-  background: #1a1a1a;
-  border-radius: 32px;
-  padding: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  max-width: 320px;
+  position: relative;
+  max-width: 280px;
   width: 100%;
   margin: 0 auto;
 }
 
-.phone-notch {
-  width: 100px;
-  height: 6px;
-  background: #333;
-  border-radius: 3px;
-  margin: 4px auto 10px;
+.phone-frame-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.2));
 }
 
-.phone-screen {
-  background: $gray-100;
-  border-radius: 20px;
+.phone-screen-content {
+  position: absolute;
+  top: 7.9%;
+  left: 3.8%;
+  width: 92.4%;
+  bottom: 4.8%;
+  z-index: 1;
   overflow: hidden;
-  padding: 6px;
+  border-radius: 20px;
+  background: $gray-100;
+}
+
+.phone-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: $color-green-background;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .phone-browse-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
+  padding: 4px;
 }
 
 .browse-card {
@@ -572,29 +607,21 @@ $charity-blue-light: #eff6ff;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1.5rem 6px 6px;
+  padding: 2rem 6px 6px;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
   color: white;
   font-size: 0.65rem;
   font-weight: 600;
   line-height: 1.3;
   z-index: 1;
-
-  .browse-card--charity & {
-    bottom: 22px;
-  }
 }
 
-.browse-charity-strip {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 3px 6px;
-  background: $charity-blue-light;
-  z-index: 2;
-  display: flex;
-  align-items: center;
+.browse-title-text {
+  margin: 0;
+}
+
+.browse-charity-badge {
+  margin-bottom: 3px;
 
   :deep(.charity-partner) {
     font-size: 0.5rem !important;
