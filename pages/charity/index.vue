@@ -99,13 +99,14 @@
             <div class="phone-screen-content">
               <!-- Freegle header bar -->
               <div class="phone-header">
-                <svg viewBox="0 0 24 24" width="14" height="14">
-                  <path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                    fill="white"
-                  />
-                </svg>
-                <span class="phone-header-title">Browse</span>
+                <img
+                  src="https://delivery.ilovefreegle.org/?filename=icon.png&w=20&output=webp&fit=inside&url=https://www.ilovefreegle.org/icon.png"
+                  alt=""
+                  width="16"
+                  height="16"
+                  class="phone-header-logo"
+                />
+                <span class="phone-header-title">Freegle</span>
               </div>
               <div class="phone-browse-grid">
                 <!-- Normal post -->
@@ -135,6 +136,21 @@
                     </div>
                   </div>
                 </div>
+                <!-- Charity Partner post -->
+                <div class="browse-card browse-card--charity">
+                  <img
+                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&h=400&fit=crop"
+                    alt="Clothes"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--wanted">WANTED</span>
+                  <div class="browse-title-overlay">
+                    <CharityBadge class="browse-charity-badge" />
+                    <div class="browse-title-text">
+                      Children's clothes ages 5-8
+                    </div>
+                  </div>
+                </div>
                 <!-- Normal post -->
                 <div class="browse-card">
                   <img
@@ -149,18 +165,31 @@
                     </div>
                   </div>
                 </div>
-                <!-- Charity Partner post -->
-                <div class="browse-card browse-card--charity">
+                <!-- Normal post -->
+                <div class="browse-card">
                   <img
-                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&h=400&fit=crop"
-                    alt="Clothes"
+                    src="https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=300&h=400&fit=crop"
+                    alt="Kitchen table"
                     class="browse-card-img"
                   />
-                  <span class="browse-tag browse-tag--wanted">WANTED</span>
+                  <span class="browse-tag browse-tag--offer">OFFER</span>
                   <div class="browse-title-overlay">
-                    <CharityBadge class="browse-charity-badge" />
                     <div class="browse-title-text">
-                      Children's clothes ages 5-8
+                      Kitchen table and 4 chairs
+                    </div>
+                  </div>
+                </div>
+                <!-- Normal post -->
+                <div class="browse-card">
+                  <img
+                    src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300&h=400&fit=crop"
+                    alt="Art supplies"
+                    class="browse-card-img"
+                  />
+                  <span class="browse-tag browse-tag--offer">OFFER</span>
+                  <div class="browse-title-overlay">
+                    <div class="browse-title-text">
+                      Art supplies - paints and brushes
                     </div>
                   </div>
                 </div>

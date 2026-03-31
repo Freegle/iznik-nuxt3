@@ -64,15 +64,13 @@ const showModal = (e) => {
   background-color: #2563eb !important;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.3em 0.5em;
-  line-height: 1;
+  gap: 0.35em;
+  padding: 0.35em 0.65em;
+  line-height: 1.2;
 }
 
 .charity-icon {
   flex-shrink: 0;
-  vertical-align: middle;
-  margin-top: -1px;
 }
 
 .size-lg {
