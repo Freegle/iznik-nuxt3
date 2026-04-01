@@ -36,6 +36,18 @@ export function useRouter() {
   }
 }
 
+// Default mock for useRoute
+export function useRoute() {
+  return {
+    params: {},
+    query: {},
+    path: '/',
+  }
+}
+
+// No-op mock for useHead (Nuxt composable for setting page head metadata)
+export function useHead() {}
+
 // Mock for twem (emoji processing) - just pass through text
 export function twem(text) {
   return text

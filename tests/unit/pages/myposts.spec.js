@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref, defineComponent, Suspense, h } from 'vue'
+import { ref, computed, defineComponent, Suspense, h } from 'vue'
 
 // Mock component imports to prevent deep Nuxt import chains
 vi.mock('~/components/VisibleWhen', () => ({
@@ -36,7 +36,9 @@ vi.mock('~/components/NewUserInfo.vue', () => ({
 // Mock stores
 const mockMessageStore = {
   myPosts: [],
+  byUserList: {},
   fetchMyPosts: vi.fn().mockResolvedValue([]),
+  fetchByUser: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/message', () => ({
@@ -45,7 +47,7 @@ vi.mock('~/stores/message', () => ({
 
 const mockSearchStore = {
   list: [],
-  fetchList: vi.fn().mockResolvedValue([]),
+  fetch: vi.fn().mockResolvedValue([]),
 }
 
 vi.mock('~/stores/search', () => ({
@@ -53,7 +55,7 @@ vi.mock('~/stores/search', () => ({
 }))
 
 vi.mock('~/stores/mobile', () => ({
-  useMobileStore: () => ({ isMobile: false }),
+  useMobileStore: () => ({ isMobile: false, isApp: false, isNative: false }),
 }))
 
 vi.mock('~/stores/tryst', () => ({
@@ -77,6 +79,7 @@ const mockMe = ref({ id: 1, displayname: 'Test User', settings: {} })
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
     me: mockMe,
+    myid: computed(() => mockMe.value?.id || null),
     myGroups: ref([]),
   }),
 }))
@@ -140,6 +143,7 @@ describe('myposts.vue loadMore', () => {
             emits: ['infinite'],
           },
           GlobalMessage: { template: '<div />' },
+          AppUpdateAvailable: { template: '<div />' },
         },
       },
     })
@@ -149,7 +153,7 @@ describe('myposts.vue loadMore', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockMe.value = { id: 1, displayname: 'Test User', settings: {} }
-    mockMessageStore.myPosts = []
+    mockMessageStore.byUserList = {}
   })
 
   it('loadMore calls loaded (not complete) when auth not hydrated', async () => {
@@ -166,7 +170,8 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore calls loaded (not complete) when posts array is empty', async () => {
-    mockMessageStore.myPosts = []
+    // byUserList[1] = undefined → posts.value = [] (empty)
+    mockMessageStore.byUserList = {}
     const wrapper = mountComponent()
     await flushPromises()
     const page = wrapper.findComponent(MyPostsPage)
@@ -179,10 +184,7 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore increments shownCount when more posts available', async () => {
-    mockMessageStore.myPosts = [
-      { id: 1, type: 'Offer' },
-      { id: 2, type: 'Offer' },
-    ]
+    mockMessageStore.byUserList = { 1: [{ id: 1, type: 'Offer' }, { id: 2, type: 'Offer' }] }
     const wrapper = mountComponent()
     await flushPromises()
     const page = wrapper.findComponent(MyPostsPage)
@@ -196,7 +198,7 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore calls complete when all posts shown', async () => {
-    mockMessageStore.myPosts = [{ id: 1, type: 'Offer' }]
+    mockMessageStore.byUserList = { 1: [{ id: 1, type: 'Offer' }] }
     const wrapper = mountComponent()
     await flushPromises()
     const page = wrapper.findComponent(MyPostsPage)
