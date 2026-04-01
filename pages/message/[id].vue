@@ -129,9 +129,8 @@
   </b-col>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
-import { ref, computed, onMounted, useHead, useRuntimeConfig } from '#imports'
+import { ref, computed, onMounted, useHead, useRuntimeConfig, useRoute } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
@@ -149,7 +148,7 @@ const messageStore = useMessageStore()
 const authStore = useAuthStore()
 
 // We don't use lazy because we want the page to be rendered for SEO.
-const id = parseInt(route.params.id)
+const id = route?.params?.id ? parseInt(route.params.id) : 0
 
 // Get showtaken query parameter
 const showtaken = route.query.showtaken
