@@ -161,14 +161,25 @@ const shownCount = ref(1)
 const loadedMore = ref(false)
 
 function loadMore(infiniteLoaderInstance) {
+  if (!me.value) {
+    // Auth hasn't hydrated yet — don't call complete() as that permanently
+    // stops the observer. Call loaded() and let it retry on next scroll.
+    infiniteLoaderInstance.loaded()
+    return
+  }
+
   shownCount.value++
 
   if (shownCount.value > posts.value.length) {
     shownCount.value = posts.value.length
-    // No more posts to load - complete infinite loading
-    infiniteLoaderInstance.complete()
+
+    if (posts.value.length === 0) {
+      // Posts haven't loaded yet — don't call complete() prematurely.
+      infiniteLoaderInstance.loaded()
+    } else {
+      infiniteLoaderInstance.complete()
+    }
   } else {
-    // More posts available - continue infinite loading
     infiniteLoaderInstance.loaded()
   }
 

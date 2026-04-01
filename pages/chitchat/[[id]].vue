@@ -474,14 +474,22 @@ function rendered() {
 }
 
 function loadMore($state) {
-  console.log('Load more', show.value, newsfeed.value.length)
   infiniteState.value = $state
 
+  if (!me.value) {
+    // Auth hasn't hydrated yet — don't call complete() as that permanently
+    // stops the observer. Call loaded() and let it retry on next scroll.
+    $state.loaded()
+    return
+  }
+
   if (show.value < newsfeed.value.length) {
-    console.log('Show another')
     show.value += 1
+  } else if (newsfeed.value.length === 0) {
+    // Feed hasn't loaded yet — don't call complete() prematurely.
+    $state.loaded()
+    return
   } else {
-    console.log('News complete')
     $state.complete()
 
     // User has scrolled to the bottom - mark all as seen immediately.
