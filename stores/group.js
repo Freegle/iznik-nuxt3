@@ -24,17 +24,29 @@ export const useGroupStore = defineStore({
       this._remember = {}
     },
     async fetchBatch(ids) {
-      // Fetch multiple groups in one API call.
+      // Fetch multiple groups in one API call, chunked to avoid URL length
+      // limits and the Go API's 50-ID cap.
+      const CHUNK_SIZE = 25
       const needFetch = ids.filter(
         (id) => !this.list[id] || !this.list[id].settings
       )
       if (needFetch.length === 0) return
 
       try {
-        const groups = await api(this.config).group.fetchBatch(needFetch)
-        if (groups && Array.isArray(groups)) {
-          for (const group of groups) {
-            this.list[group.id] = group
+        const chunks = []
+        for (let i = 0; i < needFetch.length; i += CHUNK_SIZE) {
+          chunks.push(needFetch.slice(i, i + CHUNK_SIZE))
+        }
+
+        const results = await Promise.all(
+          chunks.map((chunk) => api(this.config).group.fetchBatch(chunk))
+        )
+
+        for (const groups of results) {
+          if (groups && Array.isArray(groups)) {
+            for (const group of groups) {
+              this.list[group.id] = group
+            }
           }
         }
       } catch {
