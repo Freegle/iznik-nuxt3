@@ -1,19 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref } from 'vue'
-import MyPostsPage from '~/pages/myposts.vue'
+import { ref, defineComponent, Suspense, h } from 'vue'
 
-// Mock stores
-const mockAuthStore = {
-  user: { id: 1, settings: {} },
-  forceLogin: false,
-}
-
-vi.mock('~/stores/auth', () => ({
-  useAuthStore: () => mockAuthStore,
+// Mock component imports to prevent deep Nuxt import chains
+vi.mock('~/components/VisibleWhen', () => ({
+  default: { template: '<div><slot /></div>', props: ['at'] },
+}))
+vi.mock('~/components/SidebarLeft', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/SidebarRight', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/ExpectedRepliesWarning', () => ({
+  default: { template: '<div />', props: ['count', 'chats'] },
+}))
+vi.mock('~/components/MyPostsPostsList.vue', () => ({
+  default: {
+    template: '<div class="my-posts-list" />',
+    props: ['posts', 'postIds', 'loading', 'defaultExpanded', 'show'],
+    emits: ['load-more'],
+  },
+}))
+vi.mock('~/components/MyPostsSearchesList.vue', () => ({
+  default: { template: '<div />', props: ['searches'] },
+}))
+vi.mock('~/components/MyPostsDonationAsk.vue', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/NewUserInfo.vue', () => ({
+  default: { template: '<div />' },
 }))
 
+// Mock stores
 const mockMessageStore = {
   myPosts: [],
   fetchMyPosts: vi.fn().mockResolvedValue([]),
@@ -32,22 +52,23 @@ vi.mock('~/stores/search', () => ({
   useSearchStore: () => mockSearchStore,
 }))
 
-const mockMobileStore = {
-  isMobile: false,
-}
-
 vi.mock('~/stores/mobile', () => ({
-  useMobileStore: () => mockMobileStore,
+  useMobileStore: () => ({ isMobile: false }),
 }))
 
-const mockTrystStore = {
-  list: [],
-  fetch: vi.fn(),
-  getByUser: vi.fn(() => null),
-}
-
 vi.mock('~/stores/tryst', () => ({
-  useTrystStore: () => mockTrystStore,
+  useTrystStore: () => ({
+    list: [],
+    fetch: vi.fn(),
+    getByUser: vi.fn(() => null),
+  }),
+}))
+
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+  }),
 }))
 
 // Mock useMe
@@ -68,6 +89,7 @@ vi.mock('~/composables/useFavoritePage', () => ({
   useFavoritePage: () => ({ isFavorite: ref(false), toggleFavorite: vi.fn() }),
 }))
 
+// Mock as sync to avoid async setup
 vi.mock('~/composables/useDonationAskModal', () => ({
   useDonationAskModal: () => ({
     showDonationAskModal: ref(false),
@@ -79,69 +101,45 @@ vi.mock('~/composables/useClientLog', () => ({
   action: vi.fn(),
 }))
 
-// Mock vue-router
 vi.mock('vue-router', () => ({
   useRoute: () => ({ params: {} }),
 }))
 
-// Mock Nuxt globals
+// Nuxt macros
 globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
+globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
+
+import MyPostsPage from '~/pages/myposts.vue'
 
 describe('myposts.vue loadMore', () => {
+  // Wrap in Suspense since myposts has async setup (top-level await)
   function mountComponent() {
-    return mount(MyPostsPage, {
+    const Wrapper = defineComponent({
+      setup() {
+        return () => h(Suspense, null, { default: () => h(MyPostsPage) })
+      },
+    })
+
+    return mount(Wrapper, {
       global: {
         plugins: [createPinia()],
         stubs: {
           'client-only': { template: '<div><slot /></div>' },
-          'b-container': { template: '<div><slot /></div>', props: ['fluid'] },
+          'b-container': { template: '<div><slot /></div>' },
           'b-row': { template: '<div><slot /></div>' },
-          'b-col': {
-            template: '<div><slot /></div>',
-            props: ['cols', 'md', 'lg', 'offset-md', 'offset-lg'],
-          },
-          'b-button': {
-            template: '<button><slot /></button>',
-            props: ['variant', 'to'],
-          },
+          'b-col': { template: '<div><slot /></div>' },
           'b-tabs': { template: '<div><slot /></div>' },
-          'b-tab': {
-            template: '<div><slot /></div>',
-            props: ['title', 'active'],
-          },
-          'v-icon': { template: '<i />', props: ['icon'] },
-          VisibleWhen: { template: '<div><slot /></div>', props: ['at'] },
-          SidebarLeft: { template: '<div />' },
-          SidebarRight: { template: '<div />' },
-          ExpectedRepliesWarning: {
-            template: '<div />',
-            props: ['count', 'chats'],
-          },
-          MyPostsPostsList: {
-            template: '<div class="my-posts-list" />',
-            props: [
-              'posts',
-              'postIds',
-              'loading',
-              'defaultExpanded',
-              'show',
-            ],
-          },
-          MyPostsSearchesList: {
-            template: '<div />',
-            props: ['searches'],
-          },
-          MyPostsDonationAsk: { template: '<div />' },
-          NewUserInfo: { template: '<div />' },
+          'b-tab': { template: '<div><slot /></div>' },
+          'b-button': { template: '<button><slot /></button>' },
+          'v-icon': { template: '<i />' },
           InfiniteLoading: {
             template: '<div class="infinite-loading" />',
             props: ['identifier', 'distance'],
             emits: ['infinite'],
           },
           GlobalMessage: { template: '<div />' },
-          Suspense: { template: '<div><slot /></div>' },
         },
       },
     })
@@ -154,50 +152,58 @@ describe('myposts.vue loadMore', () => {
     mockMessageStore.myPosts = []
   })
 
-  it('loadMore calls loaded (not complete) when auth not hydrated', () => {
+  it('loadMore calls loaded (not complete) when auth not hydrated', async () => {
     mockMe.value = null
     const wrapper = mountComponent()
+    await flushPromises()
+    const page = wrapper.findComponent(MyPostsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.loaded).toHaveBeenCalled()
     expect(mockState.complete).not.toHaveBeenCalled()
   })
 
-  it('loadMore calls loaded (not complete) when posts array is empty', () => {
+  it('loadMore calls loaded (not complete) when posts array is empty', async () => {
     mockMessageStore.myPosts = []
     const wrapper = mountComponent()
+    await flushPromises()
+    const page = wrapper.findComponent(MyPostsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.loaded).toHaveBeenCalled()
     expect(mockState.complete).not.toHaveBeenCalled()
   })
 
-  it('loadMore increments shownCount when more posts available', () => {
+  it('loadMore increments shownCount when more posts available', async () => {
     mockMessageStore.myPosts = [
       { id: 1, type: 'Offer' },
       { id: 2, type: 'Offer' },
     ]
     const wrapper = mountComponent()
-    wrapper.vm.shownCount = 1
+    await flushPromises()
+    const page = wrapper.findComponent(MyPostsPage)
+    page.vm.shownCount = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
-    expect(wrapper.vm.shownCount).toBe(2)
+    expect(page.vm.shownCount).toBe(2)
     expect(mockState.loaded).toHaveBeenCalled()
   })
 
-  it('loadMore calls complete when all posts shown', () => {
+  it('loadMore calls complete when all posts shown', async () => {
     mockMessageStore.myPosts = [{ id: 1, type: 'Offer' }]
     const wrapper = mountComponent()
-    wrapper.vm.shownCount = 1
+    await flushPromises()
+    const page = wrapper.findComponent(MyPostsPage)
+    page.vm.shownCount = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.complete).toHaveBeenCalled()
   })

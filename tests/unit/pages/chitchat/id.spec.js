@@ -2,7 +2,39 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
-import ChitchatPage from '~/pages/chitchat/[[id]].vue'
+
+// Mock all component imports BEFORE the page loads to prevent Nuxt internal imports.
+vi.mock('~/components/NewsCommunityEventVolunteerSummary', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/VisibleWhen', () => ({
+  default: { template: '<div><slot /></div>', props: ['at'] },
+}))
+vi.mock('~/components/GlobalMessage', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/NoticeMessage', () => ({
+  default: {
+    template: '<div><slot /></div>',
+    props: ['variant'],
+  },
+}))
+vi.mock('~/components/AutoHeightTextarea', () => ({
+  default: { template: '<textarea />', props: ['id', 'modelValue'] },
+}))
+vi.mock('~/components/InfiniteLoading', () => ({
+  default: {
+    template: '<div class="infinite-loading" />',
+    props: ['identifier', 'forceUseInfiniteWrapper', 'distance'],
+    emits: ['infinite'],
+  },
+}))
+vi.mock('~/components/NewsThread.vue', () => ({
+  default: { template: '<div />', props: ['id', 'scrollTo', 'duplicateCount'] },
+}))
+vi.mock('~/components/MessageListUpToDate.vue', () => ({
+  default: { template: '<div />' },
+}))
 
 // Mock stores
 const mockNewsfeedStore = {
@@ -27,33 +59,20 @@ vi.mock('~/stores/newsfeed', () => ({
   useNewsfeedStore: () => mockNewsfeedStore,
 }))
 
-const mockAuthStore = {
-  user: { id: 1, settings: {} },
-  saveAndGet: vi.fn(),
-}
-
-vi.mock('~/stores/auth', () => ({
-  useAuthStore: () => mockAuthStore,
-}))
-
-const mockMiscStore = {
-  get: vi.fn(),
-  set: vi.fn(),
-}
-
 vi.mock('~/stores/misc', () => ({
-  useMiscStore: () => mockMiscStore,
+  useMiscStore: () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+  }),
 }))
-
-const mockLocationStore = {
-  fetchv2: vi.fn().mockResolvedValue({ name: 'Test Area' }),
-}
 
 vi.mock('~/stores/location', () => ({
-  useLocationStore: () => mockLocationStore,
+  useLocationStore: () => ({
+    fetchv2: vi.fn().mockResolvedValue({ name: 'Test Area' }),
+  }),
 }))
 
-// Mock useMe — start with a logged-in user
+// Mock useMe
 const mockMe = ref({ id: 1, displayname: 'Test User', settings: {} })
 
 vi.mock('~/composables/useMe', () => ({
@@ -63,14 +82,10 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
-// Mock useRoute
 vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: {},
-  }),
+  useRoute: () => ({ params: {} }),
 }))
 
-// Mock composables
 vi.mock('~/composables/useBuildHead', () => ({
   buildHead: () => ({}),
 }))
@@ -79,13 +94,13 @@ vi.mock('~/composables/useTwem', () => ({
   untwem: (msg) => msg,
 }))
 
-// Mock definePageMeta (Nuxt macro)
+// Nuxt macros
 globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
-globalThis.defineAsyncComponent = (fn) => ({
-  template: '<div />',
-})
+globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
+
+import ChitchatPage from '~/pages/chitchat/[[id]].vue'
 
 describe('chitchat/[[id]].vue loadMore', () => {
   function mountComponent() {
@@ -93,50 +108,18 @@ describe('chitchat/[[id]].vue loadMore', () => {
       global: {
         plugins: [createPinia()],
         stubs: {
-          'client-only': {
-            template: '<div><slot /></div>',
-          },
-          'b-container': { template: '<div><slot /></div>', props: ['fluid'] },
+          'client-only': { template: '<div><slot /></div>' },
+          'b-container': { template: '<div><slot /></div>' },
           'b-row': { template: '<div><slot /></div>' },
-          'b-col': {
-            template: '<div><slot /></div>',
-            props: ['cols', 'md', 'lg', 'offset-md', 'offset-lg'],
-          },
-          'b-form-select': {
-            template: '<select />',
-            props: ['modelValue', 'options', 'size'],
-          },
-          'v-icon': { template: '<i />', props: ['icon'] },
-          VisibleWhen: { template: '<div><slot /></div>', props: ['at'] },
-          GlobalMessage: { template: '<div />' },
-          NoticeMessage: {
-            template: '<div><slot /></div>',
-            props: ['variant'],
-          },
-          AutoHeightTextarea: {
-            template: '<textarea />',
-            props: ['id', 'modelValue', 'rows', 'max-rows', 'placeholder'],
-          },
-          InfiniteLoading: {
-            template: '<div class="infinite-loading" />',
-            props: ['identifier', 'forceUseInfiniteWrapper', 'distance'],
-            emits: ['infinite'],
-          },
-          NewsThread: {
-            template: '<div class="news-thread" />',
-            props: ['id', 'scrollTo', 'duplicateCount'],
-          },
-          MessageListUpToDate: { template: '<div />' },
-          NewsCommunityEventVolunteerSummary: { template: '<div />' },
-          SidebarLeft: { template: '<div />' },
-          SidebarRight: { template: '<div />' },
-          ExpectedRepliesWarning: {
-            template: '<div />',
-            props: ['count', 'chats'],
-          },
+          'b-col': { template: '<div><slot /></div>' },
+          'b-form-select': { template: '<select />' },
+          'v-icon': { template: '<i />' },
           OurUploader: { template: '<div />' },
           OurUploadedImage: { template: '<div />' },
           NuxtPicture: { template: '<div />' },
+          SidebarLeft: { template: '<div />' },
+          SidebarRight: { template: '<div />' },
+          ExpectedRepliesWarning: { template: '<div />' },
           Suspense: { template: '<div><slot /></div>' },
         },
       },

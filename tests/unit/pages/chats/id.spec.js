@@ -2,15 +2,49 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
-import ChatsPage from '~/pages/chats/[[id]].vue'
 
-// Mock dayjs
+// Mock dayjs with extend support (needed by transitive imports like useTimeFormat)
 vi.mock('dayjs', () => {
-  const mockDayjs = () => ({
+  const mockDayjs = (date) => ({
     diff: vi.fn().mockReturnValue(0),
+    format: vi.fn().mockReturnValue(''),
+    isSameOrBefore: vi.fn().mockReturnValue(false),
+    isToday: vi.fn().mockReturnValue(false),
+    fromNow: vi.fn().mockReturnValue('just now'),
   })
+  mockDayjs.extend = vi.fn()
   return { default: mockDayjs }
 })
+
+// Mock dayjs plugins to prevent import errors
+vi.mock('dayjs/plugin/advancedFormat', () => ({ default: {} }))
+vi.mock('dayjs/plugin/relativeTime', () => ({ default: {} }))
+vi.mock('dayjs/plugin/isToday', () => ({ default: {} }))
+vi.mock('dayjs/plugin/isSameOrBefore', () => ({ default: {} }))
+
+// Mock component imports to prevent deep Nuxt import chains
+vi.mock('~/components/VisibleWhen', () => ({
+  default: { template: '<div><slot /></div>', props: ['at'] },
+}))
+vi.mock('~/components/InfiniteLoading', () => ({
+  default: {
+    template: '<div class="infinite-loading" />',
+    props: ['identifier', 'forceUseInfiniteWrapper', 'distance'],
+    emits: ['infinite'],
+  },
+}))
+vi.mock('~/components/SidebarRight', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/ChatMobileNavbar.vue', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/ExternalDa.vue', () => ({
+  default: { template: '<div />' },
+}))
+vi.mock('~/components/ChatListEntry.vue', () => ({
+  default: { template: '<div />', props: ['id'] },
+}))
 
 // Mock stores
 const mockChatStore = {
@@ -26,22 +60,11 @@ vi.mock('~/stores/chat', () => ({
   useChatStore: () => mockChatStore,
 }))
 
-const mockAuthStore = {
-  user: { id: 1, settings: {} },
-  forceLogin: false,
-}
-
-vi.mock('~/stores/auth', () => ({
-  useAuthStore: () => mockAuthStore,
-}))
-
-const mockMiscStore = {
-  get: vi.fn(),
-  set: vi.fn(),
-}
-
 vi.mock('~/stores/misc', () => ({
-  useMiscStore: () => mockMiscStore,
+  useMiscStore: () => ({
+    get: vi.fn(),
+    set: vi.fn(),
+  }),
 }))
 
 // Mock useMe
@@ -58,7 +81,6 @@ vi.mock('~/composables/useBuildHead', () => ({
   buildHead: () => ({}),
 }))
 
-// Mock pinia storeToRefs
 vi.mock('pinia', async () => {
   const actual = await vi.importActual('pinia')
   return {
@@ -71,17 +93,6 @@ vi.mock('pinia', async () => {
 
 // Mock vue-router
 const mockRouteParams = ref({})
-const mockRouterPush = vi.fn()
-
-vi.mock('#imports', () => ({
-  ref,
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
@@ -89,10 +100,13 @@ vi.mock('vue-router', () => ({
   }),
 }))
 
-// Mock Nuxt globals
+// Nuxt macros
 globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
+globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
+
+import ChatsPage from '~/pages/chats/[[id]].vue'
 
 describe('chats/[[id]].vue loadMore', () => {
   function mountComponent() {
@@ -101,39 +115,17 @@ describe('chats/[[id]].vue loadMore', () => {
         plugins: [createPinia()],
         stubs: {
           'client-only': { template: '<div><slot /></div>' },
-          'b-container': { template: '<div><slot /></div>', props: ['fluid'] },
+          'b-container': { template: '<div><slot /></div>' },
           'b-row': { template: '<div><slot /></div>' },
-          'b-col': {
-            template: '<div><slot /></div>',
-            props: ['cols', 'md', 'lg', 'offset-md', 'offset-lg'],
-          },
+          'b-col': { template: '<div><slot /></div>' },
           'b-card': { template: '<div><slot /></div>' },
           'b-card-body': { template: '<div><slot /></div>' },
-          'b-form-input': { template: '<input />', props: ['modelValue'] },
-          'b-button': {
-            template: '<button><slot /></button>',
-            props: ['variant'],
-          },
-          'v-icon': { template: '<i />', props: ['icon'] },
-          VisibleWhen: { template: '<div><slot /></div>', props: ['at'] },
-          SidebarRight: { template: '<div />' },
-          ChatListEntry: {
-            template: '<div class="chat-entry" />',
-            props: ['id'],
-          },
-          ChatPane: { template: '<div />', props: ['id'] },
-          ChatMobileNavbar: { template: '<div />' },
-          ExternalDa: { template: '<div />' },
-          InfiniteLoading: {
-            template: '<div class="infinite-loading" />',
-            props: ['identifier', 'forceUseInfiniteWrapper', 'distance'],
-            emits: ['infinite'],
-          },
+          'b-form-input': { template: '<input />' },
+          'b-button': { template: '<button><slot /></button>' },
+          'v-icon': { template: '<i />' },
+          ChatPane: { template: '<div />' },
           GlobalMessage: { template: '<div />' },
-          ExpectedRepliesWarning: {
-            template: '<div />',
-            props: ['count', 'chats'],
-          },
+          ExpectedRepliesWarning: { template: '<div />' },
           Suspense: { template: '<div><slot /></div>' },
         },
       },
