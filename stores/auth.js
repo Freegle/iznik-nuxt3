@@ -339,7 +339,7 @@ export const useAuthStore = defineStore({
             if (groups.length > 0) {
               const groupStore = useGroupStore()
 
-              await Promise.all(groups.map((g) => groupStore.fetch(g.groupid)))
+              await groupStore.fetchBatch(groups.map((g) => g.groupid))
             }
 
             // Update JWT/persistent if returned (session refresh).

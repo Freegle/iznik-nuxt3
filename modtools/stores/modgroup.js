@@ -73,12 +73,15 @@ export const useModGroupStore = defineStore({
         }
 
         // Go through all my groups, load the full MT group info if need be.
-        // Do not clear our store first: this.clear()
-        // this.getting = []
+        // Batch fetch groups not yet in the store for efficiency.
         const groups = authStore.groups
         if (groups && typeof groups === 'object') {
-          for (const g of Object.values(groups)) {
-            this.fetchIfNeedBeMT(g.groupid)
+          const needFetch = Object.values(groups)
+            .map((g) => g.groupid)
+            .filter((id) => id && !this.list[id])
+
+          if (needFetch.length > 0) {
+            await this.fetchGroupsMTBatch(needFetch)
           }
         }
       } catch (e) {
@@ -153,6 +156,57 @@ export const useModGroupStore = defineStore({
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
       if (this.getting.length === 0) {
         this.received = true
+      }
+    },
+    async fetchGroupsMTBatch(ids) {
+      // Batch fetch multiple groups in one API call.
+      if (!ids || ids.length === 0) return
+
+      const authStore = useAuthStore()
+      if (!this.sessionGroups) {
+        this.sessionGroups = authStore.groups || []
+      }
+
+      try {
+        const groups = await api(this.config).group.fetchGroupsMT(
+          ids,
+          true,
+          true,
+          true,
+          true
+        )
+
+        if (groups && Array.isArray(groups)) {
+          for (const group of groups) {
+            // Set group role from auth store's groups.
+            if (this.sessionGroups) {
+              const g = this.sessionGroups.find(
+                (sg) => sg.groupid === group.id || sg.id === group.id
+              )
+              if (g) {
+                if (g.role) {
+                  group.role = g.role
+                  group.myrole = g.role
+                }
+                group.mysettings = g
+              }
+            }
+
+            // Apply cached work counts.
+            if (!group.work && this.cachedWorkData) {
+              const w = this.cachedWorkData.find((w) => w.groupid === group.id)
+              if (w) {
+                group.work = w
+              }
+            }
+
+            this.list[group.id] = group
+          }
+        }
+
+        this.received = true
+      } catch (e) {
+        console.error('fetchGroupsMTBatch failed', e.message)
       }
     },
     async listMT(params) {
