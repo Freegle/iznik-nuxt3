@@ -238,11 +238,22 @@ export default class BaseAPI {
     if (status < 200 || status >= 300) {
       const statusstr = status?.toString()
 
-      // For specific paths, we want to silently allow 401 errors and swallow them.
-      // This can happen if a login token is invalid, and we don't want to show errors to the user.
-      if (status === 401 && path.startsWith('/chat?includeClosed=true')) {
-        console.log('Silently handling 401 for includeClosed chat request')
-        return new Promise(function (resolve) {})
+      // 401 means our auth is invalid (expired JWT, deleted session, etc). We already clear auth state
+      // above (line ~202), so don't log these to Sentry — they're expected and not actionable.
+      if (status === 401) {
+        throw new APIError(
+          {
+            request: {
+              path,
+              method,
+              headers: config.headers,
+              params: config.params,
+              data: config.data,
+            },
+            response: { status, data },
+          },
+          `API Error ${method} ${path} -> status: 401`
+        )
       }
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.

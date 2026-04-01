@@ -17,10 +17,23 @@ export default class GroupAPI extends BaseAPI {
     )
   }
 
+  async fetchGroupsMT(ids, polygon, showmods, sponsors, tnkey, log) {
+    // Batch fetch multiple groups in one request.
+    return await this.$getv2(
+      '/group/' + ids.join(','),
+      { polygon, showmods, sponsors, tnkey },
+      log
+    )
+  }
+
   async fetch(id, log) {
     const group = await this.$getv2('/group/' + id, {}, log)
 
     return group
+  }
+
+  async fetchBatch(ids, log) {
+    return await this.$getv2('/group/' + ids.join(','), {}, log)
   }
 
   async fetchMessagesForGroup(id) {

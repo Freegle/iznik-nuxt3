@@ -23,6 +23,20 @@ export const useGroupStore = defineStore({
       this.allGroups = {}
       this._remember = {}
     },
+    async fetchBatch(ids) {
+      // Fetch multiple groups in one API call.
+      const needFetch = ids.filter(
+        (id) => !this.list[id] || !this.list[id].settings
+      )
+      if (needFetch.length === 0) return
+
+      const groups = await api(this.config).group.fetchBatch(needFetch)
+      if (groups && Array.isArray(groups)) {
+        for (const group of groups) {
+          this.list[group.id] = group
+        }
+      }
+    },
     async fetch(id, force) {
       if (id) {
         if (isNaN(id)) {
