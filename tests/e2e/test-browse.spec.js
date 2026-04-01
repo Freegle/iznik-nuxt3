@@ -288,12 +288,11 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Page should load successfully
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-
-    // Verify page title
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // Page should load successfully — wait for title to be set by Nuxt (SSR
+    // starts with the default app title; Vue hydration updates it to "Browse")
+    await expect(page).toHaveTitle(/Browse/, {
+      timeout: timeouts.navigation.slowPage,
+    })
 
     console.log('Browse page loaded successfully')
   })
