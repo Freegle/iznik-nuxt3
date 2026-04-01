@@ -163,7 +163,6 @@
               <infinite-loading
                 v-if="newsfeed.length"
                 :identifier="infiniteId"
-                force-use-infinite-wrapper="body"
                 :distance="infiniteDistance"
                 @infinite="loadMore"
               />
