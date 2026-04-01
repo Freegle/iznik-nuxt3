@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed, defineComponent, h, Suspense } from 'vue'
 
 // Mock dayjs with extend support (needed by transitive imports like useTimeFormat)
 vi.mock('dayjs', () => {
@@ -49,9 +49,13 @@ vi.mock('~/components/ChatListEntry.vue', () => ({
 // Mock stores
 const mockChatStore = {
   list: [],
+  listMT: [],
+  listByChatId: {},
+  showContactDetailsAskModal: ref(false),
   fetchChats: vi.fn().mockResolvedValue([]),
   fetchChat: vi.fn().mockResolvedValue({}),
   markRead: vi.fn().mockResolvedValue({}),
+  byChatId: vi.fn().mockReturnValue(null),
   clear: vi.fn(),
   unseenCount: 0,
 }
@@ -73,6 +77,7 @@ const mockMe = ref({ id: 1, displayname: 'Test User', settings: {} })
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
     me: mockMe,
+    myid: computed(() => mockMe.value?.id || null),
     myGroups: ref([]),
   }),
 }))
@@ -85,18 +90,28 @@ vi.mock('pinia', async () => {
   const actual = await vi.importActual('pinia')
   return {
     ...actual,
-    storeToRefs: () => ({
-      list: ref([]),
-    }),
+    storeToRefs: (store) => {
+      // Return reactive refs for the store properties tests need
+      return {
+        showContactDetailsAskModal: mockChatStore.showContactDetailsAskModal,
+        list: ref(store?.list || []),
+      }
+    },
   }
 })
 
-// Mock vue-router
+// Mock vue-router (for any direct vue-router imports)
 const mockRouteParams = ref({})
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
     params: mockRouteParams.value,
+    query: {},
+  }),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    currentRoute: { value: { path: '/' } },
   }),
 }))
 
@@ -109,8 +124,15 @@ globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
 import ChatsPage from '~/pages/chats/[[id]].vue'
 
 describe('chats/[[id]].vue loadMore', () => {
+  // Wrap in Suspense since chats page has async setup (top-level await)
   function mountComponent() {
-    return mount(ChatsPage, {
+    const Wrapper = defineComponent({
+      setup() {
+        return () => h(Suspense, null, { default: () => h(ChatsPage) })
+      },
+    })
+
+    return mount(Wrapper, {
       global: {
         plugins: [createPinia()],
         stubs: {
@@ -126,7 +148,7 @@ describe('chats/[[id]].vue loadMore', () => {
           ChatPane: { template: '<div />' },
           GlobalMessage: { template: '<div />' },
           ExpectedRepliesWarning: { template: '<div />' },
-          Suspense: { template: '<div><slot /></div>' },
+          'b-badge': { template: '<span><slot /></span>' },
         },
       },
     })
@@ -137,54 +159,63 @@ describe('chats/[[id]].vue loadMore', () => {
     setActivePinia(createPinia())
     mockMe.value = { id: 1, displayname: 'Test User', settings: {} }
     mockChatStore.list = []
+    mockChatStore.fetchChats = vi.fn().mockResolvedValue([])
     mockRouteParams.value = {}
   })
 
-  it('loadMore calls loaded (not complete) when auth not hydrated', () => {
+  it('loadMore calls loaded (not complete) when auth not hydrated', async () => {
     mockMe.value = null
     const wrapper = mountComponent()
+    await flushPromises()
+    const page = wrapper.findComponent(ChatsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.loaded).toHaveBeenCalled()
     expect(mockState.complete).not.toHaveBeenCalled()
   })
 
-  it('loadMore calls loaded (not complete) when chat list is empty', () => {
+  it('loadMore calls loaded (not complete) when chat list is empty', async () => {
     mockChatStore.list = []
     const wrapper = mountComponent()
+    await flushPromises()
+    const page = wrapper.findComponent(ChatsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.loaded).toHaveBeenCalled()
     expect(mockState.complete).not.toHaveBeenCalled()
   })
 
-  it('loadMore increments showChats when more chats available', () => {
+  it('loadMore increments showChats when more chats available', async () => {
     mockChatStore.list = [
       { id: 1, status: 'Active' },
       { id: 2, status: 'Active' },
       { id: 3, status: 'Active' },
     ]
     const wrapper = mountComponent()
-    wrapper.vm.showChats = 1
+    await flushPromises()
+    const page = wrapper.findComponent(ChatsPage)
+    page.vm.showChats = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
-    expect(wrapper.vm.showChats).toBe(2)
+    expect(page.vm.showChats).toBe(2)
     expect(mockState.loaded).toHaveBeenCalled()
   })
 
-  it('loadMore calls complete when all chats shown', () => {
+  it('loadMore calls complete when all chats shown', async () => {
     mockChatStore.list = [{ id: 1, status: 'Active' }]
     const wrapper = mountComponent()
-    wrapper.vm.showChats = 1
+    await flushPromises()
+    const page = wrapper.findComponent(ChatsPage)
+    page.vm.showChats = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    page.vm.loadMore(mockState)
 
     expect(mockState.complete).toHaveBeenCalled()
   })

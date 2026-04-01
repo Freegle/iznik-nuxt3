@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
@@ -103,8 +103,15 @@ globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
 import ChitchatPage from '~/pages/chitchat/[[id]].vue'
 
 describe('chitchat/[[id]].vue loadMore', () => {
+  let wrapper
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+  })
+
   function mountComponent() {
-    return mount(ChitchatPage, {
+    wrapper = mount(ChitchatPage, {
       global: {
         plugins: [createPinia()],
         stubs: {
@@ -112,7 +119,7 @@ describe('chitchat/[[id]].vue loadMore', () => {
           'b-container': { template: '<div><slot /></div>' },
           'b-row': { template: '<div><slot /></div>' },
           'b-col': { template: '<div><slot /></div>' },
-          'b-form-select': { template: '<select />' },
+          'b-form-select': { template: '<select />', props: ['modelValue', 'options'] },
           'v-icon': { template: '<i />' },
           OurUploader: { template: '<div />' },
           OurUploadedImage: { template: '<div />' },
@@ -135,7 +142,7 @@ describe('chitchat/[[id]].vue loadMore', () => {
 
   it('loadMore calls loaded (not complete) when auth not hydrated', () => {
     mockMe.value = null
-    const wrapper = mountComponent()
+    mountComponent()
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
     wrapper.vm.loadMore(mockState)
@@ -146,7 +153,7 @@ describe('chitchat/[[id]].vue loadMore', () => {
 
   it('loadMore calls loaded (not complete) when feed is empty', () => {
     mockNewsfeedStore.feed = []
-    const wrapper = mountComponent()
+    mountComponent()
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
     wrapper.vm.loadMore(mockState)
@@ -160,7 +167,7 @@ describe('chitchat/[[id]].vue loadMore', () => {
       { id: 1, userid: 1 },
       { id: 2, userid: 2 },
     ]
-    const wrapper = mountComponent()
+    mountComponent()
     wrapper.vm.show = 0
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
@@ -171,7 +178,7 @@ describe('chitchat/[[id]].vue loadMore', () => {
 
   it('loadMore calls complete when all items shown', () => {
     mockNewsfeedStore.feed = [{ id: 1, userid: 1 }]
-    const wrapper = mountComponent()
+    mountComponent()
     wrapper.vm.show = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
