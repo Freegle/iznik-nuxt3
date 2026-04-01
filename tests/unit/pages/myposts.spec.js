@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref, computed, defineComponent, Suspense, h } from 'vue'
+import { ref, computed, defineComponent, Suspense, h, nextTick } from 'vue'
+
+import MyPostsPage from '~/pages/myposts.vue'
 
 // Mock component imports to prevent deep Nuxt import chains
 vi.mock('~/components/VisibleWhen', () => ({
@@ -37,8 +39,10 @@ vi.mock('~/components/NewUserInfo.vue', () => ({
 const mockMessageStore = {
   myPosts: [],
   byUserList: {},
+  byId: vi.fn(() => null),
   fetchMyPosts: vi.fn().mockResolvedValue([]),
   fetchByUser: vi.fn().mockResolvedValue([]),
+  fetch: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/message', () => ({
@@ -47,6 +51,7 @@ vi.mock('~/stores/message', () => ({
 
 const mockSearchStore = {
   list: [],
+  fetchList: vi.fn().mockResolvedValue([]),
   fetch: vi.fn().mockResolvedValue([]),
 }
 
@@ -79,7 +84,7 @@ const mockMe = ref({ id: 1, displayname: 'Test User', settings: {} })
 vi.mock('~/composables/useMe', () => ({
   useMe: () => ({
     me: mockMe,
-    myid: computed(() => mockMe.value?.id || null),
+    myid: computed(() => mockMe.value?.id ?? null),
     myGroups: ref([]),
   }),
 }))
@@ -113,8 +118,6 @@ globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
 globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
-
-import MyPostsPage from '~/pages/myposts.vue'
 
 describe('myposts.vue loadMore', () => {
   // Wrap in Suspense since myposts has async setup (top-level await)
@@ -153,13 +156,19 @@ describe('myposts.vue loadMore', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockMe.value = { id: 1, displayname: 'Test User', settings: {} }
+    mockMessageStore.myPosts = []
     mockMessageStore.byUserList = {}
+    mockMessageStore.byId = vi.fn(() => null)
+    mockMessageStore.fetchByUser = vi.fn().mockResolvedValue([])
+    mockMessageStore.fetch = vi.fn().mockResolvedValue({})
+    mockSearchStore.fetch = vi.fn().mockResolvedValue([])
   })
 
   it('loadMore calls loaded (not complete) when auth not hydrated', async () => {
     mockMe.value = null
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(MyPostsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
@@ -170,10 +179,11 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore calls loaded (not complete) when posts array is empty', async () => {
-    // byUserList[1] = undefined → posts.value = [] (empty)
+    // byUserList empty → posts computed returns [] → don't call complete() yet
     mockMessageStore.byUserList = {}
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(MyPostsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
@@ -184,9 +194,16 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore increments shownCount when more posts available', async () => {
-    mockMessageStore.byUserList = { 1: [{ id: 1, type: 'Offer' }, { id: 2, type: 'Offer' }] }
+    // posts computed uses byUserList[myid.value] — myid is 1 in tests
+    mockMessageStore.byUserList = {
+      1: [
+        { id: 1, type: 'Offer' },
+        { id: 2, type: 'Offer' },
+      ],
+    }
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(MyPostsPage)
     page.vm.shownCount = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
@@ -198,9 +215,12 @@ describe('myposts.vue loadMore', () => {
   })
 
   it('loadMore calls complete when all posts shown', async () => {
+    // One post in byUserList; shownCount starts at 1 → after increment it
+    // exceeds list length → complete()
     mockMessageStore.byUserList = { 1: [{ id: 1, type: 'Offer' }] }
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(MyPostsPage)
     page.vm.shownCount = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
