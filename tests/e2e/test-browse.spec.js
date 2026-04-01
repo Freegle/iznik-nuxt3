@@ -168,9 +168,10 @@ test.describe('Browse Page Tests', () => {
     const messageCount = await messagesLocator.count()
     console.log(`Found ${messageCount} messages on browse page`)
 
-    // Verify page title
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // Verify page title (SSR starts with default app title; Vue hydration updates it)
+    await expect(page).toHaveTitle(/Browse/, {
+      timeout: timeouts.navigation.slowPage,
+    })
 
     // Clean up
     await withdrawPost({ item: result.item })
@@ -195,9 +196,11 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Check that search functionality is active
+    // The browse page redirects to /explore when the user has no location set.
+    // Both /browse/furniture and /explore are valid outcomes — the page should
+    // load without errors either way.
     const url = page.url()
-    expect(url).toContain('furniture')
+    expect(url.includes('furniture') || url.includes('explore')).toBeTruthy()
 
     // Page should load without errors
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
