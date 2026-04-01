@@ -206,7 +206,11 @@ export const useModGroupStore = defineStore({
 
         this.received = true
       } catch (e) {
-        console.error('fetchGroupsMTBatch failed', e.message)
+        // Batch endpoint not available yet — fall back to individual fetches.
+        console.log('fetchGroupsMTBatch falling back to individual', e.message)
+        for (const id of ids) {
+          this.fetchIfNeedBeMT(id)
+        }
       }
     },
     async listMT(params) {

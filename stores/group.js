@@ -30,11 +30,16 @@ export const useGroupStore = defineStore({
       )
       if (needFetch.length === 0) return
 
-      const groups = await api(this.config).group.fetchBatch(needFetch)
-      if (groups && Array.isArray(groups)) {
-        for (const group of groups) {
-          this.list[group.id] = group
+      try {
+        const groups = await api(this.config).group.fetchBatch(needFetch)
+        if (groups && Array.isArray(groups)) {
+          for (const group of groups) {
+            this.list[group.id] = group
+          }
         }
+      } catch {
+        // Batch endpoint not available yet — fall back to individual fetches.
+        await Promise.all(needFetch.map((id) => this.fetch(id)))
       }
     },
     async fetch(id, force) {
