@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { defineComponent, Suspense, h } from 'vue'
+
+import ProfilePage from '~/pages/profile/[id].vue'
 
 // Mock ProfileInfo to avoid deep import chains
 vi.mock('~/components/ProfileInfo', () => ({
@@ -36,11 +39,15 @@ globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
 
-import ProfilePage from '~/pages/profile/[id].vue'
-
 describe('pages/profile/[id].vue', () => {
+  // Wrap in Suspense since profile page has conditional top-level await in setup
   function mountPage() {
-    return mount(ProfilePage, {
+    const Wrapper = defineComponent({
+      setup() {
+        return () => h(Suspense, null, { default: () => h(ProfilePage) })
+      },
+    })
+    return mount(Wrapper, {
       global: {
         plugins: [createPinia()],
         stubs: {

@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { ref, computed, defineComponent, h, Suspense } from 'vue'
+import { ref, computed, defineComponent, h, Suspense, nextTick } from 'vue'
+
+import ChatsPage from '~/pages/chats/[[id]].vue'
 
 // Mock dayjs with extend support (needed by transitive imports like useTimeFormat)
 vi.mock('dayjs', () => {
@@ -58,6 +60,8 @@ const mockChatStore = {
   byChatId: vi.fn().mockReturnValue(null),
   clear: vi.fn(),
   unseenCount: 0,
+  showClosed: false,
+  searchSince: null,
 }
 
 vi.mock('~/stores/chat', () => ({
@@ -68,6 +72,8 @@ vi.mock('~/stores/misc', () => ({
   useMiscStore: () => ({
     get: vi.fn(),
     set: vi.fn(),
+    breakpoint: 'lg',
+    stickyAdRendered: false,
   }),
 }))
 
@@ -90,13 +96,10 @@ vi.mock('pinia', async () => {
   const actual = await vi.importActual('pinia')
   return {
     ...actual,
-    storeToRefs: (store) => {
-      // Return reactive refs for the store properties tests need
-      return {
-        showContactDetailsAskModal: mockChatStore.showContactDetailsAskModal,
-        list: ref(store?.list || []),
-      }
-    },
+    storeToRefs: (store) => ({
+      showContactDetailsAskModal: mockChatStore.showContactDetailsAskModal,
+      list: ref(store?.list || []),
+    }),
   }
 })
 
@@ -121,17 +124,15 @@ globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
 globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
 
-import ChatsPage from '~/pages/chats/[[id]].vue'
-
 describe('chats/[[id]].vue loadMore', () => {
-  // Wrap in Suspense since chats page has async setup (top-level await)
+  // ChatsPage has async setup (top-level await guarded by myid && process.client).
+  // Wrap in Suspense so Vue resolves the async setup and we can access wrapper vm.
   function mountComponent() {
     const Wrapper = defineComponent({
       setup() {
         return () => h(Suspense, null, { default: () => h(ChatsPage) })
       },
     })
-
     return mount(Wrapper, {
       global: {
         plugins: [createPinia()],
@@ -144,11 +145,11 @@ describe('chats/[[id]].vue loadMore', () => {
           'b-card-body': { template: '<div><slot /></div>' },
           'b-form-input': { template: '<input />' },
           'b-button': { template: '<button><slot /></button>' },
+          'b-badge': { template: '<span><slot /></span>' },
           'v-icon': { template: '<i />' },
           ChatPane: { template: '<div />' },
           GlobalMessage: { template: '<div />' },
           ExpectedRepliesWarning: { template: '<div />' },
-          'b-badge': { template: '<span><slot /></span>' },
         },
       },
     })
@@ -160,6 +161,7 @@ describe('chats/[[id]].vue loadMore', () => {
     mockMe.value = { id: 1, displayname: 'Test User', settings: {} }
     mockChatStore.list = []
     mockChatStore.fetchChats = vi.fn().mockResolvedValue([])
+    mockChatStore.byChatId = vi.fn().mockReturnValue(null)
     mockRouteParams.value = {}
   })
 
@@ -167,6 +169,7 @@ describe('chats/[[id]].vue loadMore', () => {
     mockMe.value = null
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(ChatsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
@@ -180,6 +183,7 @@ describe('chats/[[id]].vue loadMore', () => {
     mockChatStore.list = []
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(ChatsPage)
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
@@ -197,6 +201,7 @@ describe('chats/[[id]].vue loadMore', () => {
     ]
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(ChatsPage)
     page.vm.showChats = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
@@ -211,6 +216,7 @@ describe('chats/[[id]].vue loadMore', () => {
     mockChatStore.list = [{ id: 1, status: 'Active' }]
     const wrapper = mountComponent()
     await flushPromises()
+    await nextTick()
     const page = wrapper.findComponent(ChatsPage)
     page.vm.showChats = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }

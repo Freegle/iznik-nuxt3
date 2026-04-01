@@ -3,6 +3,8 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
 
+import ChitchatPage from '~/pages/chitchat/[[id]].vue'
+
 // Mock all component imports BEFORE the page loads to prevent Nuxt internal imports.
 vi.mock('~/components/NewsCommunityEventVolunteerSummary', () => ({
   default: { template: '<div />' },
@@ -100,15 +102,8 @@ globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })
 globalThis.defineAsyncComponent = (fn) => ({ template: '<div />' })
 
-import ChitchatPage from '~/pages/chitchat/[[id]].vue'
-
 describe('chitchat/[[id]].vue loadMore', () => {
   let wrapper
-
-  afterEach(() => {
-    wrapper?.unmount()
-    wrapper = null
-  })
 
   function mountComponent() {
     wrapper = mount(ChitchatPage, {
@@ -138,6 +133,11 @@ describe('chitchat/[[id]].vue loadMore', () => {
     setActivePinia(createPinia())
     mockMe.value = { id: 1, displayname: 'Test User', settings: {} }
     mockNewsfeedStore.feed = []
+  })
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
   })
 
   it('loadMore calls loaded (not complete) when auth not hydrated', () => {

@@ -112,7 +112,7 @@ describe('MyPostsPostsList', () => {
       expect(wrapper.find('.posts-container').exists()).toBe(true)
     })
 
-    it('renders active posts header with count', () => {
+    it('renders active posts count in toolbar', () => {
       const wrapper = createWrapper({
         loading: false,
         posts: [
@@ -120,7 +120,7 @@ describe('MyPostsPostsList', () => {
           { id: 2, hasoutcome: false, arrival: '2024-01-02' },
         ],
       })
-      expect(wrapper.find('.active-posts-header').exists()).toBe(true)
+      expect(wrapper.find('.toolbar-count').exists()).toBe(true)
       expect(wrapper.text()).toContain('2 active posts')
     })
 
@@ -181,7 +181,7 @@ describe('MyPostsPostsList', () => {
           { id: 2, hasoutcome: true, arrival: '2024-01-02' },
         ],
       })
-      expect(wrapper.find('.old-posts-toggle').exists()).toBe(true)
+      expect(wrapper.find('.toolbar-toggle').exists()).toBe(true)
     })
 
     it('hides old posts toggle when no old posts', () => {
@@ -211,7 +211,7 @@ describe('MyPostsPostsList', () => {
           { id: 2, hasoutcome: true, arrival: '2024-01-02' },
         ],
       })
-      const toggleBtn = wrapper.find('.toggle-btn')
+      const toggleBtn = wrapper.find('.toolbar-toggle')
       expect(wrapper.text()).toContain('Show')
       await toggleBtn.trigger('click')
       expect(wrapper.text()).toContain('Hide')
@@ -340,7 +340,9 @@ describe('MyPostsPostsList', () => {
   })
 
   describe('show prop limit', () => {
-    it('limits visible posts to show prop value', () => {
+    it('shows all active posts regardless of show prop', () => {
+      // Active posts are always shown in full (no pagination) — show prop only
+      // limits when old posts mode is active (can be hundreds of old posts).
       const wrapper = createWrapper({
         loading: false,
         posts: [
@@ -351,7 +353,22 @@ describe('MyPostsPostsList', () => {
         show: 2,
       })
       const messages = wrapper.findAll('.my-message')
-      expect(messages.length).toBe(2)
+      expect(messages.length).toBe(3)
+    })
+
+    it('limits visible posts to show prop value when old posts are shown', async () => {
+      const wrapper = createWrapper({
+        loading: false,
+        posts: [
+          { id: 1, hasoutcome: false, arrival: '2024-01-01' },
+          { id: 2, hasoutcome: true, arrival: '2024-01-02' },
+          { id: 3, hasoutcome: true, arrival: '2024-01-03' },
+        ],
+        show: 1,
+      })
+      await wrapper.find('.toolbar-toggle').trigger('click')
+      const messages = wrapper.findAll('.my-message')
+      expect(messages.length).toBe(1)
     })
   })
 

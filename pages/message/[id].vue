@@ -130,7 +130,14 @@
 </template>
 <script setup>
 import { buildHead } from '~/composables/useBuildHead'
-import { ref, computed, onMounted, useHead, useRuntimeConfig, useRoute } from '#imports'
+import {
+  ref,
+  computed,
+  onMounted,
+  useHead,
+  useRuntimeConfig,
+  useRoute,
+} from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
@@ -151,7 +158,7 @@ const authStore = useAuthStore()
 const id = route?.params?.id ? parseInt(route.params.id) : 0
 
 // Get showtaken query parameter
-const showtaken = route.query.showtaken
+const showtaken = route?.query?.showtaken
 
 const failed = ref(false)
 const error = ref(false)
