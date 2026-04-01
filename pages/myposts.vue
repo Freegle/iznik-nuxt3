@@ -143,9 +143,23 @@ watch(
     if (newMyid) {
       loading.value = true
 
-      await messageStore.fetchByUser(newMyid, false, true)
+      // Fetch active posts first — fast (no hasExpired loop over hundreds of old posts)
+      await messageStore.fetchByUser(newMyid, true, true)
+
+      // Fetch full message details for active posts and wait for them —
+      // this means MyMessage components will have data in the store at mount
+      // time, so they render immediately without waiting for IntersectionObserver.
+      const activePosts = (messageStore.byUserList[newMyid] || [])
+        .filter((p) => !p.hasoutcome)
+        .slice(0, 10)
+      if (activePosts.length > 0) {
+        await Promise.all(activePosts.map((p) => messageStore.fetch(p.id)))
+      }
 
       loading.value = false
+
+      // Fetch all posts (including old) in background — don't await
+      messageStore.fetchByUser(newMyid, false, false)
 
       // No need to wait for searches and trysts - often below the fold.
       searchStore.fetch(newMyid)
@@ -156,6 +170,17 @@ watch(
     immediate: true,
   }
 )
+
+// When the background active=false fetch updates byUserList, prefetch details
+// for any active posts that weren't returned by the active=true fetch.
+watch(posts, (newPosts) => {
+  const toFetch = newPosts.filter(
+    (p) => !p.hasoutcome && !messageStore.byId(p.id)
+  )
+  if (toFetch.length > 0) {
+    toFetch.forEach((p) => messageStore.fetch(p.id))
+  }
+})
 
 const shownCount = ref(1)
 const loadedMore = ref(false)

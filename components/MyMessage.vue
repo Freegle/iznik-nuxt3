@@ -7,254 +7,334 @@
     <div v-if="visible && message?.id">
       <div
         v-if="showOld || !message.outcomes?.length"
-        class="message-card"
+        class="message-card-border"
         :class="{
-          'message-card--offer': message.type === 'Offer',
-          'message-card--wanted': message.type === 'Wanted',
+          'message-card-border--offer': message.type === 'Offer',
+          'message-card-border--wanted': message.type === 'Wanted',
         }"
-        :data-message-id="message.id"
       >
-        <!-- Rejected notice -->
-        <notice-message v-if="rejected" class="mb-2" variant="warning">
-          <v-icon icon="exclamation-triangle" /> This post has been returned to
-          you. It is not public yet.
-        </notice-message>
+        <div class="message-card" :data-message-id="message.id">
+          <!-- Rejected notice -->
+          <notice-message v-if="rejected" class="mb-2" variant="warning">
+            <v-icon icon="exclamation-triangle" /> This post has been returned
+            to you. It is not public yet.
+          </notice-message>
 
-        <!-- Main content area — side-by-side at lg+ -->
-        <div class="content-row">
-          <div class="photo-section">
-            <!-- Photo area -->
-            <div class="photo-area">
-              <!-- Status overlays -->
-              <b-img
-                v-if="taken || received"
-                lazy
-                src="/freegled.jpg"
-                class="status-overlay"
-                alt="Completed"
-              />
-              <!-- Promised banner at top (mobile only) -->
-              <div
-                v-else-if="message.promised && !message.outcomes?.length"
-                class="promised-banner d-lg-none"
-              >
-                <div class="promised-banner-text">
-                  <v-icon icon="handshake" class="me-2" />
-                  Promised to&nbsp;<strong>{{ promisedToName }}</strong>
+          <!-- Main content area — side-by-side at lg+ -->
+          <div class="content-row">
+            <div class="photo-section">
+              <!-- Photo area -->
+              <div class="photo-area">
+                <!-- Status overlays -->
+                <b-img
+                  v-if="taken || received"
+                  lazy
+                  src="/freegled.jpg"
+                  class="status-overlay"
+                  alt="Completed"
+                />
+                <!-- Promised banner at top (mobile only) -->
+                <div
+                  v-else-if="message.promised && !message.outcomes?.length"
+                  class="promised-banner d-lg-none"
+                >
+                  <div class="promised-banner-text">
+                    <v-icon icon="handshake" class="me-2" />
+                    Promised to&nbsp;<strong>{{ promisedToName }}</strong>
+                  </div>
+                  <button class="unpromise-btn" @click.stop="unpromise">
+                    Unpromise
+                  </button>
                 </div>
-                <button class="unpromise-btn" @click.stop="unpromise">
-                  Unpromise
-                </button>
-              </div>
 
-              <!-- Photo count badge (desktop, multiple photos) -->
-              <div
-                v-if="hasPhoto && message.attachments?.length > 1"
-                class="photo-counter d-none d-lg-flex"
-              >
-                <v-icon icon="camera" class="me-1" />{{
-                  message.attachments.length
-                }}
-              </div>
+                <!-- Photo count badge (desktop, multiple photos) -->
+                <div
+                  v-if="hasPhoto && message.attachments?.length > 1"
+                  class="photo-counter d-none d-lg-flex"
+                >
+                  <v-icon icon="camera" class="me-1" />{{
+                    message.attachments.length
+                  }}
+                </div>
 
-              <!-- Photo (desktop: click opens zoom modal) -->
-              <div
-                v-if="hasPhoto"
-                class="photo-container"
-                @click.stop="showMessagePhotosModal = true"
-              >
-                <OurUploadedImage
-                  v-if="message.attachments[0]?.ouruid"
-                  :src="message.attachments[0].ouruid"
-                  :modifiers="message.attachments[0].externalmods"
-                  alt="Item Photo"
-                  class="photo-image"
-                  :width="400"
-                  :height="200"
-                />
-                <NuxtPicture
-                  v-else-if="message.attachments[0]?.externaluid"
-                  format="webp"
-                  provider="uploadcare"
-                  :src="message.attachments[0].externaluid"
-                  :modifiers="message.attachments[0].externalmods"
-                  alt="Item Photo"
-                  class="photo-image"
-                  :width="400"
-                  :height="200"
-                />
-                <ProxyImage
-                  v-else-if="message.attachments[0]?.path"
-                  class-name="photo-image"
-                  alt="Item picture"
-                  :src="message.attachments[0].path"
-                  :width="400"
-                  :height="200"
-                  fit="cover"
-                />
-              </div>
+                <!-- Photo (desktop: click opens zoom modal) -->
+                <div
+                  v-if="hasPhoto"
+                  class="photo-container"
+                  @click.stop="showMessagePhotosModal = true"
+                >
+                  <OurUploadedImage
+                    v-if="message.attachments[0]?.ouruid"
+                    :src="message.attachments[0].ouruid"
+                    :modifiers="message.attachments[0].externalmods"
+                    alt="Item Photo"
+                    class="photo-image"
+                    :width="400"
+                    :height="200"
+                  />
+                  <NuxtPicture
+                    v-else-if="message.attachments[0]?.externaluid"
+                    format="webp"
+                    provider="uploadcare"
+                    :src="message.attachments[0].externaluid"
+                    :modifiers="message.attachments[0].externalmods"
+                    alt="Item Photo"
+                    class="photo-image"
+                    :width="400"
+                    :height="200"
+                  />
+                  <ProxyImage
+                    v-else-if="message.attachments[0]?.path"
+                    class-name="photo-image"
+                    alt="Item picture"
+                    :src="message.attachments[0].path"
+                    :width="400"
+                    :height="200"
+                    fit="cover"
+                  />
+                </div>
 
-              <!-- No photo placeholder -->
-              <div
-                v-else
-                class="no-photo-placeholder"
-                :class="placeholderClass"
-              >
-                <div class="placeholder-pattern"></div>
-                <div class="icon-circle">
-                  <v-icon :icon="categoryIcon" class="placeholder-icon" />
+                <!-- No photo placeholder -->
+                <div
+                  v-else
+                  class="no-photo-placeholder"
+                  :class="placeholderClass"
+                >
+                  <div class="placeholder-pattern"></div>
+                  <div class="icon-circle">
+                    <v-icon :icon="categoryIcon" class="placeholder-icon" />
+                  </div>
+                </div>
+
+                <!-- Title overlay (mobile only) -->
+                <div class="title-overlay d-lg-none">
+                  <div class="title-row">
+                    <div class="title-content">
+                      <MessageTag
+                        :id="message.id"
+                        :inline="true"
+                        class="title-tag ps-1 pe-1"
+                      />
+                      <span class="title-subject"
+                        >{{ strippedSubject }}
+                        <b-badge
+                          v-if="message.availablenow > 1"
+                          variant="info"
+                          class="ms-1"
+                          style="font-size: 0.55em; vertical-align: middle"
+                        >
+                          {{ message.availablenow }} available
+                        </b-badge></span
+                      >
+                    </div>
+                    <div class="photo-actions">
+                      <button class="photo-action-btn" @click.stop="share">
+                        <v-icon icon="share-alt" />
+                      </button>
+                    </div>
+                  </div>
+                  <div v-if="message.area" class="info-row">
+                    <span class="location">
+                      <v-icon icon="map-marker-alt" class="me-1" />{{
+                        message.area
+                      }}
+                    </span>
+                  </div>
+                  <div class="group-row">
+                    <nuxt-link
+                      v-if="messageGroup"
+                      :to="'/explore/' + messageGroup.nameshort"
+                      class="group-link"
+                      @click.stop
+                    >
+                      {{ messageGroup.namedisplay }}
+                    </nuxt-link>
+                    <span
+                      v-if="messageGroup && timeAgoExpanded"
+                      class="group-time-separator"
+                      >·</span
+                    >
+                    <span v-if="timeAgoExpanded" class="group-time"
+                      >{{ timeAgoExpanded }} ago</span
+                    >
+                    <span class="group-time-separator">·</span>
+                    <nuxt-link
+                      :to="'/message/' + message.id"
+                      class="post-id-link"
+                      @click.stop
+                    >
+                      #{{ message.id }}
+                    </nuxt-link>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Title overlay (mobile only) -->
-              <div class="title-overlay d-lg-none">
-                <div class="title-row">
-                  <div class="title-content">
+            <!-- Desktop details panel (lg+) -->
+            <div class="desktop-details d-none d-lg-flex">
+              <!-- Title row with edit button inline -->
+              <div class="desktop-header-row">
+                <div class="desktop-title-area">
+                  <div class="desktop-title-row">
                     <MessageTag
                       :id="message.id"
                       :inline="true"
-                      class="title-tag ps-1 pe-1"
+                      class="desktop-tag"
                     />
-                    <span class="title-subject"
+                    <span class="desktop-subject"
                       >{{ strippedSubject }}
                       <b-badge
                         v-if="message.availablenow > 1"
                         variant="info"
                         class="ms-1"
-                        style="font-size: 0.55em; vertical-align: middle"
+                        style="font-size: 0.7em; vertical-align: middle"
                       >
                         {{ message.availablenow }} available
                       </b-badge></span
                     >
                   </div>
-                  <div class="photo-actions">
-                    <button class="photo-action-btn" @click.stop="share">
-                      <v-icon icon="share-alt" />
-                    </button>
+                  <div class="desktop-info">
+                    <template v-if="message.area">
+                      <v-icon icon="map-marker-alt" class="me-1" />
+                      <span>{{ message.area }}</span>
+                    </template>
+                    <template v-if="messageGroup">
+                      <span v-if="message.area" class="desktop-sep">·</span>
+                      <nuxt-link
+                        :to="'/explore/' + messageGroup.nameshort"
+                        class="desktop-group-link"
+                        @click.stop
+                      >
+                        {{ messageGroup.namedisplay }}
+                      </nuxt-link>
+                    </template>
+                    <template v-if="timeAgoExpanded">
+                      <span class="desktop-sep">·</span>
+                      <span>{{ timeAgoExpanded }} ago</span>
+                    </template>
+                    <span class="desktop-sep">·</span>
+                    <nuxt-link
+                      :to="'/message/' + message.id"
+                      class="desktop-id-link"
+                      @click.stop
+                    >
+                      #{{ message.id }}
+                    </nuxt-link>
                   </div>
                 </div>
-                <div v-if="message.area" class="info-row">
-                  <span class="location">
-                    <v-icon icon="map-marker-alt" class="me-1" />{{
-                      message.area
-                    }}
-                  </span>
-                </div>
-                <div class="group-row">
-                  <nuxt-link
-                    v-if="messageGroup"
-                    :to="'/explore/' + messageGroup.nameshort"
-                    class="group-link"
-                    @click.stop
-                  >
-                    {{ messageGroup.namedisplay }}
-                  </nuxt-link>
-                  <span
-                    v-if="messageGroup && timeAgoExpanded"
-                    class="group-time-separator"
-                    >·</span
-                  >
-                  <span v-if="timeAgoExpanded" class="group-time"
-                    >{{ timeAgoExpanded }} ago</span
-                  >
-                  <span class="group-time-separator">·</span>
-                  <nuxt-link
-                    :to="'/message/' + message.id"
-                    class="post-id-link"
-                    @click.stop
-                  >
-                    #{{ message.id }}
-                  </nuxt-link>
-                </div>
+                <button
+                  v-if="
+                    !rejected &&
+                    (!message.outcomes?.length || props.action === 'extend')
+                  "
+                  class="desktop-edit-btn"
+                  title="Edit this post"
+                  @click.stop="edit"
+                >
+                  <v-icon icon="pen" />
+                  <span class="desktop-edit-label">Edit</span>
+                </button>
+              </div>
+
+              <!-- Promised banner (desktop) -->
+              <div
+                v-if="
+                  message.promised &&
+                  !message.outcomes?.length &&
+                  !(taken || received)
+                "
+                class="desktop-promised"
+              >
+                <v-icon icon="handshake" class="me-1" />
+                Promised to&nbsp;<strong>{{ promisedToName }}</strong>
+                <button class="unpromise-btn ms-auto" @click.stop="unpromise">
+                  Unpromise
+                </button>
+              </div>
+
+              <!-- Action buttons at bottom -->
+              <div v-if="!rejected" class="desktop-actions">
+                <button
+                  v-if="message.type === 'Offer' && !taken && !withdrawn"
+                  class="action-btn action-btn--primary"
+                  title="Mark as taken"
+                  @click.stop="outcome('Taken', $event)"
+                >
+                  <v-icon icon="check" />
+                  <span>TAKEN</span>
+                </button>
+                <button
+                  v-if="message.type === 'Wanted' && !received && !withdrawn"
+                  class="action-btn action-btn--primary"
+                  title="Mark as received"
+                  @click.stop="outcome('Received', $event)"
+                >
+                  <v-icon icon="check" />
+                  <span>RECEIVED</span>
+                </button>
+                <button
+                  v-if="
+                    message.type === 'Offer' &&
+                    !taken &&
+                    !withdrawn &&
+                    !isPromised
+                  "
+                  class="action-btn action-btn--secondary"
+                  title="Promise to someone"
+                  @click.stop="openPromiseModal"
+                >
+                  <v-icon icon="handshake" />
+                  <span>Promise</span>
+                </button>
+                <button
+                  v-if="!taken && !received && !withdrawn"
+                  class="action-btn action-btn--light"
+                  title="Withdraw this post"
+                  @click.stop="outcome('Withdrawn', $event)"
+                >
+                  <v-icon icon="trash-alt" />
+                  <span>Withdraw</span>
+                </button>
+                <button
+                  v-if="message.canrepost && message.location && message.item"
+                  class="action-btn action-btn--light"
+                  title="Repost this"
+                  @click.stop="repost"
+                >
+                  <v-icon icon="sync" />
+                  <span>Repost</span>
+                </button>
+              </div>
+              <div v-else class="desktop-actions">
+                <button
+                  v-if="message.location && message.item"
+                  class="action-btn action-btn--warning"
+                  title="Edit and resend"
+                  @click.stop="repost"
+                >
+                  <v-icon icon="pen" />
+                  <span>Edit & Resend</span>
+                </button>
+                <button
+                  v-if="!withdrawn"
+                  class="action-btn action-btn--light"
+                  title="Withdraw this post"
+                  @click.stop="outcome('Withdrawn', $event)"
+                >
+                  <v-icon icon="trash-alt" />
+                  <span>Withdraw</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <!-- Desktop details panel (lg+) -->
-          <div class="desktop-details d-none d-lg-flex">
-            <!-- Edit button top-right -->
-            <button
-              v-if="
-                !rejected &&
-                (!message.outcomes?.length || props.action === 'extend')
-              "
-              class="desktop-edit-btn"
-              @click.stop="edit"
-            >
-              <v-icon icon="pen" />
-              Edit
-            </button>
-
-            <!-- Title and info -->
-            <div class="desktop-title-area">
-              <div class="desktop-title-row">
-                <MessageTag
-                  :id="message.id"
-                  :inline="true"
-                  class="desktop-tag"
-                />
-                <span class="desktop-subject"
-                  >{{ strippedSubject }}
-                  <b-badge
-                    v-if="message.availablenow > 1"
-                    variant="info"
-                    class="ms-1"
-                    style="font-size: 0.7em; vertical-align: middle"
-                  >
-                    {{ message.availablenow }} available
-                  </b-badge></span
-                >
-              </div>
-              <div class="desktop-info">
-                <v-icon icon="map-marker-alt" class="me-1" />
-                <span v-if="message.area">{{ message.area }}</span>
-                <template v-if="messageGroup">
-                  <span class="desktop-sep">·</span>
-                  <nuxt-link
-                    :to="'/explore/' + messageGroup.nameshort"
-                    class="desktop-group-link"
-                    @click.stop
-                  >
-                    {{ messageGroup.namedisplay }}
-                  </nuxt-link>
-                </template>
-                <template v-if="timeAgoExpanded">
-                  <span class="desktop-sep">·</span>
-                  <span>{{ timeAgoExpanded }} ago</span>
-                </template>
-                <span class="desktop-sep">·</span>
-                <nuxt-link
-                  :to="'/message/' + message.id"
-                  class="desktop-id-link"
-                  @click.stop
-                >
-                  #{{ message.id }}
-                </nuxt-link>
-              </div>
-            </div>
-
-            <!-- Promised banner (desktop) -->
-            <div
-              v-if="
-                message.promised &&
-                !message.outcomes?.length &&
-                !(taken || received)
-              "
-              class="desktop-promised"
-            >
-              <v-icon icon="handshake" class="me-1" />
-              Promised to&nbsp;<strong>{{ promisedToName }}</strong>
-              <button class="unpromise-btn ms-auto" @click.stop="unpromise">
-                Unpromise
-              </button>
-            </div>
-
-            <!-- Action buttons at bottom -->
-            <div v-if="!rejected" class="desktop-actions">
+          <!-- Action buttons - mobile only -->
+          <div v-if="!rejected" class="action-buttons d-lg-none">
+            <div class="action-buttons-left">
               <button
                 v-if="message.type === 'Offer' && !taken && !withdrawn"
                 class="action-btn action-btn--primary"
-                @click.stop="outcome('Taken', $event)"
+                @click="outcome('Taken', $event)"
               >
                 <v-icon icon="check" />
                 <span>TAKEN</span>
@@ -262,7 +342,7 @@
               <button
                 v-if="message.type === 'Wanted' && !received && !withdrawn"
                 class="action-btn action-btn--primary"
-                @click.stop="outcome('Received', $event)"
+                @click="outcome('Received', $event)"
               >
                 <v-icon icon="check" />
                 <span>RECEIVED</span>
@@ -275,7 +355,7 @@
                   !isPromised
                 "
                 class="action-btn action-btn--secondary"
-                @click.stop="openPromiseModal"
+                @click="openPromiseModal"
               >
                 <v-icon icon="handshake" />
                 <span>Promise</span>
@@ -283,7 +363,7 @@
               <button
                 v-if="!taken && !received && !withdrawn"
                 class="action-btn action-btn--light"
-                @click.stop="outcome('Withdrawn', $event)"
+                @click="outcome('Withdrawn', $event)"
               >
                 <v-icon icon="trash-alt" />
                 <span>Withdraw</span>
@@ -291,166 +371,100 @@
               <button
                 v-if="message.canrepost && message.location && message.item"
                 class="action-btn action-btn--light"
-                @click.stop="repost"
+                @click="repost"
               >
                 <v-icon icon="sync" />
                 <span>Repost</span>
               </button>
             </div>
-            <div v-else class="desktop-actions">
+            <div class="action-buttons-right">
               <button
-                v-if="message.location && message.item"
-                class="action-btn action-btn--warning"
-                @click.stop="repost"
+                v-if="!message.outcomes?.length || props.action === 'extend'"
+                class="action-btn action-btn--light"
+                @click="edit"
               >
                 <v-icon icon="pen" />
-                <span>Edit & Resend</span>
-              </button>
-              <button
-                v-if="!withdrawn"
-                class="action-btn action-btn--light"
-                @click.stop="outcome('Withdrawn', $event)"
-              >
-                <v-icon icon="trash-alt" />
-                <span>Withdraw</span>
+                <span>Edit</span>
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Action buttons - mobile only -->
-        <div v-if="!rejected" class="action-buttons d-lg-none">
-          <div class="action-buttons-left">
+          <!-- Rejected actions - mobile only -->
+          <div v-if="rejected" class="action-buttons d-lg-none">
             <button
-              v-if="message.type === 'Offer' && !taken && !withdrawn"
-              class="action-btn action-btn--primary"
-              @click="outcome('Taken', $event)"
+              v-if="message.location && message.item"
+              class="action-btn action-btn--warning"
+              @click="repost"
             >
-              <v-icon icon="check" />
-              <span>TAKEN</span>
+              <v-icon icon="pen" />
+              <span>Edit & Resend</span>
             </button>
             <button
-              v-if="message.type === 'Wanted' && !received && !withdrawn"
-              class="action-btn action-btn--primary"
-              @click="outcome('Received', $event)"
-            >
-              <v-icon icon="check" />
-              <span>RECEIVED</span>
-            </button>
-            <button
-              v-if="
-                message.type === 'Offer' && !taken && !withdrawn && !isPromised
-              "
-              class="action-btn action-btn--secondary"
-              @click="openPromiseModal"
-            >
-              <v-icon icon="handshake" />
-              <span>Promise</span>
-            </button>
-            <button
-              v-if="!taken && !received && !withdrawn"
+              v-if="!withdrawn"
               class="action-btn action-btn--light"
               @click="outcome('Withdrawn', $event)"
             >
               <v-icon icon="trash-alt" />
               <span>Withdraw</span>
             </button>
-            <button
-              v-if="message.canrepost && message.location && message.item"
-              class="action-btn action-btn--light"
-              @click="repost"
-            >
-              <v-icon icon="sync" />
-              <span>Repost</span>
-            </button>
           </div>
-          <div class="action-buttons-right">
-            <button
-              v-if="!message.outcomes?.length || props.action === 'extend'"
-              class="action-btn action-btn--light"
-              @click="edit"
-            >
-              <v-icon icon="pen" />
-              <span>Edit</span>
-            </button>
-          </div>
-        </div>
 
-        <!-- Rejected actions - mobile only -->
-        <div v-if="rejected" class="action-buttons d-lg-none">
-          <button
-            v-if="message.location && message.item"
-            class="action-btn action-btn--warning"
-            @click="repost"
-          >
-            <v-icon icon="pen" />
-            <span>Edit & Resend</span>
-          </button>
-          <button
-            v-if="!withdrawn"
-            class="action-btn action-btn--light"
-            @click="outcome('Withdrawn', $event)"
-          >
-            <v-icon icon="trash-alt" />
-            <span>Withdraw</span>
-          </button>
-        </div>
-
-        <!-- Replies section -->
-        <div v-if="replies?.length > 0" class="replies-section">
-          <div class="replies-header" @click="toggleExpanded">
-            <div class="replies-avatars">
-              <ProfileImage
-                v-for="(reply, index) in repliesPreview"
-                :key="'avatar-' + reply.userid"
-                :image="getUserProfile(reply.userid)?.paththumb"
-                :externaluid="getUserProfile(reply.userid)?.externaluid"
-                :ouruid="getUserProfile(reply.userid)?.ouruid"
-                :externalmods="getUserProfile(reply.userid)?.externalmods"
-                :name="getUserName(reply.userid)"
-                class="reply-avatar"
-                :style="{ zIndex: index + 1 }"
-                is-thumbnail
-                size="sm"
-              />
-              <div v-if="replies.length > 3" class="more-count">
-                +{{ replies.length - 3 }}
+          <!-- Replies section -->
+          <div v-if="replies?.length > 0" class="replies-section">
+            <div class="replies-header" @click="toggleExpanded">
+              <div class="replies-avatars">
+                <ProfileImage
+                  v-for="(reply, index) in repliesPreview"
+                  :key="'avatar-' + reply.userid"
+                  :image="getUserProfile(reply.userid)?.paththumb"
+                  :externaluid="getUserProfile(reply.userid)?.externaluid"
+                  :ouruid="getUserProfile(reply.userid)?.ouruid"
+                  :externalmods="getUserProfile(reply.userid)?.externalmods"
+                  :name="getUserName(reply.userid)"
+                  class="reply-avatar"
+                  :style="{ zIndex: index + 1 }"
+                  is-thumbnail
+                  size="sm"
+                />
+                <div v-if="replies.length > 3" class="more-count">
+                  +{{ replies.length - 3 }}
+                </div>
+              </div>
+              <div class="replies-text">
+                <span class="replies-count"
+                  >{{ replies.length }}
+                  {{ replies.length === 1 ? 'reply' : 'replies' }}</span
+                >
+                <v-icon
+                  :icon="expanded ? 'caret-up' : 'caret-down'"
+                  class="expand-icon"
+                />
               </div>
             </div>
-            <div class="replies-text">
-              <span class="replies-count"
-                >{{ replies.length }}
-                {{ replies.length === 1 ? 'reply' : 'replies' }}</span
-              >
-              <v-icon
-                :icon="expanded ? 'caret-up' : 'caret-down'"
-                class="expand-icon"
-              />
-            </div>
-          </div>
 
-          <Transition name="replies-slide">
-            <div v-if="expanded" class="replies-list">
-              <MyMessageReply
-                v-for="reply in replies"
-                :key="'reply-' + reply.id"
-                :reply="reply"
-                :chats="chats"
-                :message="message"
-                :taken="taken"
-                :received="received"
-                :withdrawn="withdrawn"
-                :closest="reply.userid === closestUser"
-                :best="reply.userid === bestRatedUser"
-                :quickest="reply.userid === quickestUser"
-              />
-            </div>
-          </Transition>
-        </div>
-        <div v-else-if="willAutoRepost" class="no-replies">
-          <p class="text-muted small">
-            No replies yet. Will auto-repost {{ canrepostatago }}.
-          </p>
+            <Transition name="replies-slide">
+              <div v-if="expanded" class="replies-list">
+                <MyMessageReply
+                  v-for="reply in replies"
+                  :key="'reply-' + reply.id"
+                  :reply="reply"
+                  :chats="chats"
+                  :message="message"
+                  :taken="taken"
+                  :received="received"
+                  :withdrawn="withdrawn"
+                  :closest="reply.userid === closestUser"
+                  :best="reply.userid === bestRatedUser"
+                  :quickest="reply.userid === quickestUser"
+                />
+              </div>
+            </Transition>
+          </div>
+          <div v-else-if="willAutoRepost" class="no-replies">
+            <p class="text-muted small">
+              No replies yet. Will auto-repost {{ canrepostatago }}.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -573,8 +587,8 @@ const {
   categoryIcon,
 } = useMessageDisplay(idRef)
 
-// Data properties
-const visible = ref(false)
+// Start visible immediately if data is already in the store (prefetched before mount)
+const visible = ref(!!messageStore.byId(props.id))
 const expanded = ref(false)
 const showOutcomeModal = ref(false)
 const outcomeType = ref(null)
@@ -805,8 +819,13 @@ function toggleExpanded() {
 
 const visibilityChanged = async (isVisible) => {
   if (isVisible) {
+    // If already cached, show immediately without waiting for batch timer
+    if (messageStore.byId(props.id)) {
+      visible.value = true
+    }
+
     const msg = await messageStore.fetch(props.id)
-    visible.value = isVisible
+    visible.value = true
 
     // Fetch group info for display
     if (msg?.groups?.length) {
@@ -946,12 +965,18 @@ onMounted(async () => {
   min-height: 1px;
 }
 
-.message-card {
-  background: white;
+/* Wrapper clips content to rounded shape — photo fills to the outer edge */
+.message-card-border {
+  position: relative;
   border-radius: var(--radius-md, 0.5rem);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  border: 2px solid $color-gray--base;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 12px;
+}
+
+.message-card {
+  background: white;
+  overflow: hidden;
 }
 
 .photo-section {
@@ -966,7 +991,6 @@ onMounted(async () => {
   @include media-breakpoint-up(lg) {
     display: flex;
     align-items: stretch;
-    max-height: 200px;
   }
 }
 
@@ -1044,38 +1068,62 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  position: relative;
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: details-panel;
 }
 
 .desktop-edit-btn {
-  position: absolute;
-  top: 10px;
-  right: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border: 1px solid var(--color-gray-400, #ced4da);
   border-radius: var(--radius-xl, 1.25rem);
   background: $color-gray--lighter;
   color: var(--color-gray-700, #495057);
   font-size: 0.8rem;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--transition-normal);
+
+  @include media-breakpoint-between(lg, xxl) {
+    padding: 4px 8px;
+
+    .desktop-edit-label {
+      display: none;
+    }
+  }
 
   &:hover {
     background: darken($color-gray--lighter, 10%);
   }
 }
 
+.desktop-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .desktop-title-area {
-  padding-right: 80px;
+  flex: 1;
+  min-width: 0;
 }
 
 .desktop-title-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  /* Below xxl the panel is narrow — reduce subject font size slightly */
+  @include media-breakpoint-between(lg, xxl) {
+    .desktop-subject {
+      font-size: 0.95rem;
+    }
+  }
 }
 
 .desktop-tag {
@@ -1094,13 +1142,14 @@ onMounted(async () => {
 }
 
 .desktop-info {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: $color-gray--normal;
   margin-top: 2px;
   display: flex;
   align-items: center;
   gap: 2px;
   flex-wrap: wrap;
+  line-height: 1.4;
 }
 
 .desktop-sep {
@@ -1139,8 +1188,8 @@ onMounted(async () => {
 
 .desktop-actions {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 5px;
+  flex-wrap: nowrap;
   margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid $color-gray--lighter;
@@ -1463,6 +1512,19 @@ onMounted(async () => {
     &:hover {
       background: darken($color-gray--lighter, 10%);
     }
+  }
+}
+
+/* Shrink action buttons when the details panel content box is narrow (must come after .action-btn base styles) */
+@container details-panel (max-width: 400px) {
+  .desktop-actions {
+    gap: 3px;
+  }
+
+  .action-btn {
+    padding: 5px 7px;
+    font-size: 0.72rem;
+    gap: 3px;
   }
 }
 

@@ -164,22 +164,6 @@ const activePosts = computed(() => {
   return posts.value.filter((post) => !post.hasoutcome)
 })
 
-const postIds = computed(() => {
-  return props.posts.map((post) => post.id)
-})
-
-watch(postIds, (newIds, oldIds) => {
-  // Fetch new messages when postIds change
-  if (oldIds && newIds.length !== oldIds.length) {
-    const newPostIds = newIds.filter((id) => !oldIds.includes(id))
-    newPostIds.forEach((id) => {
-      if (!messageStore.byId(id)) {
-        messageStore.fetch(id)
-      }
-    })
-  }
-})
-
 watch(activePosts, (newVal) => {
   // For messages which are promised and not successful, we need to trigger a fetch.  This is so
   // that we can correctly show the upcoming collections.
@@ -210,20 +194,20 @@ const visiblePosts = computed(() => {
     })
   }
 
-  const result = visiblePostList
-    .toSorted((a, b) => {
-      /* promised items first, then by most recently */
-      if (!showOldPosts.value && a.promised && !b.promised) {
-        return -1
-      } else if (!showOldPosts.value && b.promised && !a.promised) {
-        return 1
-      } else {
-        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-      }
-    })
-    .slice(0, props.show)
+  const sorted = visiblePostList.toSorted((a, b) => {
+    /* promised items first, then by most recently */
+    if (!showOldPosts.value && a.promised && !b.promised) {
+      return -1
+    } else if (!showOldPosts.value && b.promised && !a.promised) {
+      return 1
+    } else {
+      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+    }
+  })
 
-  return result
+  /* Active posts are few — show all immediately.
+     Only paginate when showing old posts (can be hundreds). */
+  return showOldPosts.value ? sorted.slice(0, props.show) : sorted
 })
 
 const upcomingTrysts = computed(() => {
@@ -365,7 +349,9 @@ const upcomingTrysts = computed(() => {
   border-radius: 20px;
   padding: 4px 10px;
   gap: 6px;
-  min-width: 180px;
+  flex: 1;
+  min-width: 0;
+  max-width: 260px;
 }
 
 .search-icon {

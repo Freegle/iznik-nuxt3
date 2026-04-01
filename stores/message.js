@@ -293,38 +293,54 @@ export const useMessageStore = defineStore({
       // If we're getting non-active messages make sure we hit the server as the cache might be of active only.
       if (!active || force || !this.byUserList[userid]) {
         messages = await promise
-        for (const message of messages) {
-          // Own messages are always treated as seen.
-          if (isOwnMessages) {
+
+        if (isOwnMessages) {
+          for (const message of messages) {
             message.unseen = false
           }
-
-          if (!message.hasoutcome) {
-            const expired = await this.hasExpired(message)
-
-            if (expired) {
-              message.hasoutcome = true
-            }
-          }
         }
-        this.byUserList[userid] = messages
-      } else if (this.byUserList[userid]) {
-        // Fetch but don't wait
-        promise.then(async (msgs) => {
-          for (const message of msgs) {
-            // Own messages are always treated as seen.
-            if (isOwnMessages) {
-              message.unseen = false
-            }
 
+        // Run hasExpired in batches, yielding between each so the UI stays
+        // responsive. Only set byUserList once all checks are done so the
+        // active-post count never shows stale/zombie posts mid-check.
+        const BATCH = 20
+        for (let i = 0; i < messages.length; i += BATCH) {
+          const batch = messages.slice(i, i + BATCH)
+          for (const message of batch) {
             if (!message.hasoutcome) {
               const expired = await this.hasExpired(message)
-
               if (expired) {
                 message.hasoutcome = true
               }
             }
           }
+          await new Promise((resolve) => setTimeout(resolve, 0))
+        }
+
+        this.byUserList[userid] = messages
+      } else if (this.byUserList[userid]) {
+        // Fetch but don't wait
+        promise.then(async (msgs) => {
+          if (isOwnMessages) {
+            for (const message of msgs) {
+              message.unseen = false
+            }
+          }
+
+          const BATCH = 20
+          for (let i = 0; i < msgs.length; i += BATCH) {
+            const batch = msgs.slice(i, i + BATCH)
+            for (const message of batch) {
+              if (!message.hasoutcome) {
+                const expired = await this.hasExpired(message)
+                if (expired) {
+                  message.hasoutcome = true
+                }
+              }
+            }
+            await new Promise((resolve) => setTimeout(resolve, 0))
+          }
+
           this.byUserList[userid] = msgs
         })
 
