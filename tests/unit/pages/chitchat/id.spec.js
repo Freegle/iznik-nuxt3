@@ -114,7 +114,11 @@ describe('chitchat/[[id]].vue loadMore', () => {
           'b-container': { template: '<div><slot /></div>' },
           'b-row': { template: '<div><slot /></div>' },
           'b-col': { template: '<div><slot /></div>' },
-          'b-form-select': { template: '<select />', props: ['modelValue', 'options'] },
+          'b-form-select': {
+            template: '<select />',
+            props: ['modelValue', 'options'],
+          },
+          'b-spinner': { template: '<span />' },
           'v-icon': { template: '<i />' },
           OurUploader: { template: '<div />' },
           OurUploadedImage: { template: '<div />' },

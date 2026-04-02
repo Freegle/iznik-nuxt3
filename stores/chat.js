@@ -371,23 +371,32 @@ export const useChatStore = defineStore({
       this.fetchMessages(chatid)
     },
     // Chat review moderation actions (approve/reject/hold/release/redact).
+    async _sendChatMT(data) {
+      // 404 means the message was already acted on (race condition with another mod).
+      // Treat it as success so the "Oh dear" page is not shown.
+      try {
+        await api(this.config).chat.sendMT(data)
+      } catch (e) {
+        if (e?.response?.status !== 404) throw e
+      }
+    },
     async approveChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'Approve' })
+      await this._sendChatMT({ id, action: 'Approve' })
     },
     async approveAllFutureChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'ApproveAllFuture' })
+      await this._sendChatMT({ id, action: 'ApproveAllFuture' })
     },
     async rejectChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'Reject' })
+      await this._sendChatMT({ id, action: 'Reject' })
     },
     async holdChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'Hold' })
+      await this._sendChatMT({ id, action: 'Hold' })
     },
     async releaseChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'Release' })
+      await this._sendChatMT({ id, action: 'Release' })
     },
     async redactChat(id) {
-      await api(this.config).chat.sendMT({ id, action: 'Redact' })
+      await this._sendChatMT({ id, action: 'Redact' })
     },
     async openChat(params) {
       let id = null
