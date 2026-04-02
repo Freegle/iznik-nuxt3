@@ -68,7 +68,7 @@
         >
           {{
             showAllCollections
-              ? 'Show less'
+              ? 'Show fewer'
               : `Show ${upcomingTrysts.length - COLLECTIONS_INITIAL} more`
           }}
         </b-button>
