@@ -51,6 +51,7 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useStdmsgStore } from '~/stores/stdmsg'
+import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
 const props = defineProps({
@@ -139,9 +140,22 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const stdmsgStore = useStdmsgStore()
+const userStore = useUserStore()
 const { checkWorkDeferGetMessages } = useModMe()
 
 const message = computed(() => messageStore.byId(props.messageid))
+
+const fromUserId = computed(() => {
+  const fu = message.value?.fromuser
+  if (!fu) return null
+  return typeof fu === 'object' ? fu.id : fu
+})
+
+function refreshFromUser() {
+  if (fromUserId.value) {
+    userStore.fetch(fromUserId.value, true)
+  }
+}
 
 watch(
   () => props.messageid,
@@ -187,6 +201,7 @@ const confirmButton = computed(() => {
 
 async function approveIt() {
   await messageStore.approve(message.value.id, groupid.value)
+  refreshFromUser()
   checkWorkDeferGetMessages()
 }
 
@@ -199,6 +214,7 @@ async function deleteConfirmed() {
     id: message.value.id,
     groupid: groupid.value,
   })
+  refreshFromUser()
   checkWorkDeferGetMessages()
 }
 
@@ -207,6 +223,7 @@ async function spamConfirmed() {
     id: message.value.id,
     groupid: groupid.value,
   })
+  refreshFromUser()
   checkWorkDeferGetMessages()
 }
 

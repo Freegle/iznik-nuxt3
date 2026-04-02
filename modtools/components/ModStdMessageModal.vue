@@ -821,6 +821,12 @@ async function process(callback) {
         console.error('Unknown stdmsg action', stdmsg.value.action)
     }
     checkWorkDeferGetMessages()
+
+    // Refresh the user's info so offer/wanted counts and posting history are up to date.
+    if (userid.value) {
+      userStore.fetch(userid.value, true)
+    }
+
     hide()
   }
   if (callback) callback()
