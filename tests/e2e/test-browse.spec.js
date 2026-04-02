@@ -227,9 +227,12 @@ test.describe('Browse Page Tests', () => {
     // Check for page content
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
 
-    // The page should load successfully (specific microvolunteering component testing would need more specific selectors)
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // The browse page redirects to /explore when the user has no location set.
+    // Both /browse and /explore are valid outcomes for a new user with no isochrone.
+    const finalUrl = page.url()
+    expect(
+      finalUrl.includes('/browse') || finalUrl.includes('/explore')
+    ).toBeTruthy()
   })
 
   test('should handle responsive behavior', async ({
