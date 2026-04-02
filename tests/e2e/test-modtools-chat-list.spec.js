@@ -47,12 +47,13 @@ test.describe('ModTools Chat List', () => {
       errors.push(error.message)
     })
 
+    // Use domcontentloaded to avoid ERR_ABORTED: Nuxt SSR auth middleware
+    // redirects unauthenticated SSR requests to /login, then login.vue fires
+    // router.push('/?noguard=true'), cancelling the original navigation.
+    // Resolving on domcontentloaded avoids the race with the auth redirect loop.
     await page.goto(`${MODTOOLS_URL}/chats`, {
       timeout: timeouts.navigation.initial,
-    })
-
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
+      waitUntil: 'domcontentloaded',
     })
 
     await dismissAllModals(page)
@@ -69,10 +70,7 @@ test.describe('ModTools Chat List', () => {
 
     await page.goto(`${MODTOOLS_URL}/chats`, {
       timeout: timeouts.navigation.initial,
-    })
-
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
+      waitUntil: 'domcontentloaded',
     })
 
     await dismissAllModals(page)

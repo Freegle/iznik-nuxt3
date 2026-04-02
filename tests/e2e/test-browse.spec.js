@@ -168,9 +168,10 @@ test.describe('Browse Page Tests', () => {
     const messageCount = await messagesLocator.count()
     console.log(`Found ${messageCount} messages on browse page`)
 
-    // Verify page title
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // Verify page title (SSR starts with default app title; Vue hydration updates it)
+    await expect(page).toHaveTitle(/Browse/, {
+      timeout: timeouts.navigation.slowPage,
+    })
 
     // Clean up
     await withdrawPost({ item: result.item })
@@ -195,9 +196,11 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Check that search functionality is active
+    // The browse page redirects to /explore when the user has no location set.
+    // Both /browse/furniture and /explore are valid outcomes — the page should
+    // load without errors either way.
     const url = page.url()
-    expect(url).toContain('furniture')
+    expect(url.includes('furniture') || url.includes('explore')).toBeTruthy()
 
     // Page should load without errors
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
@@ -224,9 +227,12 @@ test.describe('Browse Page Tests', () => {
     // Check for page content
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
 
-    // The page should load successfully (specific microvolunteering component testing would need more specific selectors)
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // The browse page redirects to /explore when the user has no location set.
+    // Both /browse and /explore are valid outcomes for a new user with no isochrone.
+    const finalUrl = page.url()
+    expect(
+      finalUrl.includes('/browse') || finalUrl.includes('/explore')
+    ).toBeTruthy()
   })
 
   test('should handle responsive behavior', async ({
@@ -288,12 +294,11 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Page should load successfully
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-
-    // Verify page title
-    const title = await page.title()
-    expect(title).toContain('Browse')
+    // Page should load successfully — wait for title to be set by Nuxt (SSR
+    // starts with the default app title; Vue hydration updates it to "Browse")
+    await expect(page).toHaveTitle(/Browse/, {
+      timeout: timeouts.navigation.slowPage,
+    })
 
     console.log('Browse page loaded successfully')
   })

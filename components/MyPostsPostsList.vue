@@ -1,17 +1,36 @@
 <template>
   <div class="my-posts-list">
-    <!-- Active posts count header -->
-    <div v-if="!loading && activePosts.length > 0" class="active-posts-header">
-      <v-icon icon="gift" class="me-2" />
-      {{ formattedActivePostsCount }}
-    </div>
-
-    <!-- Old posts toggle button -->
-    <div v-if="!loading && oldPosts.length > 0" class="old-posts-toggle">
-      <button class="toggle-btn" @click="toggleShowOldPosts">
-        <v-icon :icon="showOldPosts ? 'eye-slash' : 'eye'" class="me-2" />
-        {{ showOldPosts ? 'Hide' : 'Show' }} {{ formattedOldPostsCount }}
+    <!-- Single toolbar row: counts + old-posts toggle + search -->
+    <div v-if="!loading && posts.length > 0" class="posts-toolbar">
+      <span v-if="activePosts.length > 0" class="toolbar-count">
+        <v-icon icon="gift" class="me-1" />
+        <span class="count-full">{{ formattedActivePostsCount }}</span>
+        <span class="count-short">{{ activePosts.length }} active</span>
+      </span>
+      <button
+        v-if="oldPosts.length > 0"
+        class="toolbar-toggle"
+        @click="toggleShowOldPosts"
+      >
+        <v-icon :icon="showOldPosts ? 'eye-slash' : 'eye'" class="me-1" />
+        <span class="count-full"
+          >{{ showOldPosts ? 'Hide' : 'Show' }}
+          {{ formattedOldPostsCount }}</span
+        >
+        <span class="count-short">{{ oldPosts.length }} old</span>
       </button>
+      <div class="toolbar-search">
+        <v-icon icon="search" class="search-icon" />
+        <input
+          v-model="filterText"
+          type="text"
+          class="search-input"
+          placeholder="Filter posts…"
+        />
+        <button v-if="filterText" class="search-clear" @click="filterText = ''">
+          <v-icon icon="times" />
+        </button>
+      </div>
     </div>
 
     <!-- Upcoming collections -->
@@ -96,10 +115,13 @@ import InfiniteLoading from '~/components/InfiniteLoading.vue'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
 import { useTrystStore } from '~/stores/tryst'
+import { useAuthStore } from '~/stores/auth'
 
 const messageStore = useMessageStore()
 const userStore = useUserStore()
 const trystStore = useTrystStore()
+const authStore = useAuthStore()
+const myid = computed(() => authStore.user?.id)
 
 const props = defineProps({
   posts: { type: Array, required: true },
@@ -114,6 +136,8 @@ const emit = defineEmits(['load-more'])
 const scrollboxHeight = ref(1000)
 
 const showOldPosts = ref(false)
+const filterText = ref('')
+
 function toggleShowOldPosts() {
   showOldPosts.value = !showOldPosts.value
 }
@@ -140,22 +164,6 @@ const activePosts = computed(() => {
   return posts.value.filter((post) => !post.hasoutcome)
 })
 
-const postIds = computed(() => {
-  return props.posts.map((post) => post.id)
-})
-
-watch(postIds, (newIds, oldIds) => {
-  // Fetch new messages when postIds change
-  if (oldIds && newIds.length !== oldIds.length) {
-    const newPostIds = newIds.filter((id) => !oldIds.includes(id))
-    newPostIds.forEach((id) => {
-      if (!messageStore.byId(id)) {
-        messageStore.fetch(id)
-      }
-    })
-  }
-})
-
 watch(activePosts, (newVal) => {
   // For messages which are promised and not successful, we need to trigger a fetch.  This is so
   // that we can correctly show the upcoming collections.
@@ -175,20 +183,31 @@ const visiblePosts = computed(() => {
   let visiblePostList = showOldPosts.value ? posts.value : activePosts.value
   visiblePostList = visiblePostList || []
 
-  const result = visiblePostList
-    .toSorted((a, b) => {
-      // promised items first, then by most recently
-      if (!showOldPosts.value && a.promised && !b.promised) {
-        return -1
-      } else if (!showOldPosts.value && b.promised && !a.promised) {
-        return 1
-      } else {
-        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-      }
+  const filter = filterText.value.trim().toLowerCase()
+  if (filter) {
+    visiblePostList = visiblePostList.filter((post) => {
+      const msg = messageStore.byId(post.id)
+      if (!msg) return true /* not loaded yet — keep visible */
+      const subject = (msg.subject || '').toLowerCase()
+      const body = (msg.textbody || msg.body || '').toLowerCase()
+      return subject.includes(filter) || body.includes(filter)
     })
-    .slice(0, props.show)
+  }
 
-  return result
+  const sorted = visiblePostList.toSorted((a, b) => {
+    /* promised items first, then by most recently */
+    if (!showOldPosts.value && a.promised && !b.promised) {
+      return -1
+    } else if (!showOldPosts.value && b.promised && !a.promised) {
+      return 1
+    } else {
+      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+    }
+  })
+
+  /* Active posts are few — show all immediately.
+     Only paginate when showing old posts (can be hundreds). */
+  return showOldPosts.value ? sorted.slice(0, props.show) : sorted
 })
 
 const upcomingTrysts = computed(() => {
@@ -199,8 +218,9 @@ const upcomingTrysts = computed(() => {
     if (post.type === 'Offer' && message?.promises?.length) {
       message.promises.forEach((p) => {
         const user = userStore?.byId(p.userid)
+        const isSomeone = p.userid === myid.value
 
-        if (user) {
+        if (isSomeone || user) {
           const tryst = trystStore?.getByUser(p.userid)
 
           // If tryst.arrangedfor is in the future or within the last hour
@@ -215,7 +235,7 @@ const upcomingTrysts = computed(() => {
 
             ret.push({
               id: p.userid,
-              name: user.displayname,
+              name: isSomeone ? 'Someone' : user.displayname,
               tryst,
               trystdate: date,
               subject: message.subject,
@@ -260,43 +280,111 @@ const upcomingTrysts = computed(() => {
   }
 }
 
-.active-posts-header {
+.posts-toolbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px 16px;
+  gap: 8px;
+  padding: 8px 12px;
   margin-bottom: 12px;
   background: white;
   border: 1px solid $color-gray--light;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-count {
   color: $color-success;
   font-weight: 500;
-  font-size: 0.9rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.old-posts-toggle {
-  margin-bottom: 12px;
-}
-
-.toggle-btn {
-  display: flex;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px 16px;
-  background: white;
+}
+
+.toolbar-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: none;
   border: 1px solid $color-gray--light;
   color: var(--color-gray-600);
-  font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  border-radius: 4px;
 
   &:hover {
     background: $color-gray--lighter;
     border-color: $color-gray--base;
+  }
+}
+
+/* On wider screens show full text, hide short */
+.count-short {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .count-full {
+    display: none;
+  }
+  .count-short {
+    display: inline;
+  }
+  .posts-toolbar {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .toolbar-search {
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+.toolbar-search {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  background: $color-gray--lighter;
+  border: 1px solid $color-gray--light;
+  border-radius: 20px;
+  padding: 4px 10px;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  max-width: 260px;
+}
+
+.search-icon {
+  color: $color-gray--base;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 0.85rem;
+  width: 100%;
+  color: $color-gray--darker;
+
+  &::placeholder {
+    color: $color-gray--base;
+  }
+}
+
+.search-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  color: $color-gray--base;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+
+  &:hover {
+    color: $color-gray--normal;
   }
 }
 

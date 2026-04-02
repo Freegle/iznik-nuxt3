@@ -20,15 +20,14 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
-import { ref } from '#imports'
+import { ref, useRoute, useRouter } from '#imports'
 import { useUserStore } from '~/stores/user'
 import ProfileInfo from '~/components/ProfileInfo'
 
 const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
-const id = parseInt(route.params.id)
+const id = route?.params?.id ? parseInt(route.params.id) : 0
 const notFound = ref(false)
 
 function goBack() {

@@ -525,13 +525,24 @@ function scanChats(closed, chats) {
 function loadMore($state) {
   // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
   // we render onscreen the faster vue is to do so.
+  if (!me.value) {
+    $state.loaded()
+    return
+  }
+
   const chats = filteredChats.value
   showChats.value++
 
   if (showChats.value > chats.length) {
     showChats.value = chats.length
-    $state.complete()
-    complete.value = true
+
+    if (chats.length === 0) {
+      // Chats haven't loaded yet — don't call complete() prematurely.
+      $state.loaded()
+    } else {
+      $state.complete()
+      complete.value = true
+    }
   } else {
     $state.loaded()
   }

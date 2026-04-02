@@ -26,6 +26,9 @@ export function useRuntimeConfig() {
   }
 }
 
+// Stub for components that import useHead from #imports directly
+export function useHead() {}
+
 // Default mock for useRouter - tests can override this with vi.mock
 const mockRouterPush = () => {}
 export function useRouter() {
@@ -34,6 +37,11 @@ export function useRouter() {
     replace: mockRouterPush,
     currentRoute: { value: { path: '/' } },
   }
+}
+
+// Default mock for useRoute - returns empty route; tests override via vi.mock('#imports')
+export function useRoute() {
+  return { params: {}, query: {}, path: '/', name: 'index', fullPath: '/' }
 }
 
 // Mock for twem (emoji processing) - just pass through text

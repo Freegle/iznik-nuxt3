@@ -69,6 +69,14 @@ describe('InfiniteLoading', () => {
       expect(wrapper.props('top')).toBe(false)
     })
 
+    it('has default forceUseInfiniteWrapper of null', () => {
+      // When forceUseInfiniteWrapper is not set, the IntersectionObserver uses the
+      // viewport (root=null) as the scroll container — required for standard page
+      // scrolling where window/html is the scroller, not body.
+      const wrapper = createWrapper()
+      expect(wrapper.props('forceUseInfiniteWrapper')).toBe(null)
+    })
+
     it('accepts custom distance', () => {
       const wrapper = createWrapper({ distance: 100 })
       expect(wrapper.props('distance')).toBe(100)
