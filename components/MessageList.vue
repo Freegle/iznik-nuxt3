@@ -14,7 +14,11 @@
 
     <div
       v-if="
-        initialFetchDone && selectedSort === 'Unseen' && showCountsUnseen && me
+        initialFetchDone &&
+        !loading &&
+        selectedSort === 'Unseen' &&
+        showCountsUnseen &&
+        me
       "
     >
       <MessageListCounts
@@ -26,12 +30,14 @@
 
     <!-- Split view: unseen messages, divider, seen messages.
          Gated on initialFetchDone to prevent CLS from divider appearing then
-         disappearing as message de-duplication changes seen/unseen split.
-         Loading state is handled per-ScrollGrid below — the outer template
-         must not hide once shown, as toggling it on re-fetch causes CLS. -->
+         disappearing as message de-duplication changes seen/unseen split. -->
     <template
       v-if="
-        initialFetchDone && selectedSort === 'Unseen' && showCountsUnseen && me
+        initialFetchDone &&
+        !loading &&
+        selectedSort === 'Unseen' &&
+        showCountsUnseen &&
+        me
       "
     >
       <!-- Unseen messages grid -->
