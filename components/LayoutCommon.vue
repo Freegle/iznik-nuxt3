@@ -21,7 +21,6 @@
               'bg-white': stickyAdRendered,
             }"
           >
-            <DaDisableCTA v-if="!adRendering && stickyAdRendered" />
             <div
               class="d-flex justify-content-around w-100"
               :class="{
@@ -54,6 +53,10 @@
                 />
               </VisibleWhen>
             </div>
+            <!-- DaDisableCTA below the ad so it appears at the bottom of the sticky
+                 banner when ads render — prevents it pushing the ad content (and
+                 div.jobs-slot within it) downward, which caused CLS. -->
+            <DaDisableCTA v-if="!adRendering && stickyAdRendered" />
           </div>
         </div>
       </client-only>
