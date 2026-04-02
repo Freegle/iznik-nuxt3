@@ -19,19 +19,36 @@
 <script setup>
 import { useState, ref, onMounted } from '#imports'
 
-const TOTAL_PHOTOS = 25
+// Two groups interleaved so the grid always shows a balanced mix.
+const GROUP_A = [2, 3, 8, 9, 11, 13, 15, 19, 22, 24, 25]
+const GROUP_B = [1, 4, 5, 6, 7, 10, 12, 14, 16, 17, 18, 20, 21, 23]
+
+function shuffleArray(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 const shuffledPhotos = useState('photo-grid-shuffle', () => {
-  const indices = Array.from({ length: TOTAL_PHOTOS }, (_, i) => i + 1)
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[indices[i], indices[j]] = [indices[j], indices[i]]
+  const a = shuffleArray(GROUP_A)
+  const b = shuffleArray(GROUP_B)
+  // Interleave: group A at even positions, group B at odd positions.
+  const result = []
+  const maxLen = Math.max(a.length, b.length)
+  for (let i = 0; i < maxLen; i++) {
+    if (i < a.length) result.push(a[i])
+    if (i < b.length) result.push(b[i])
   }
-  return indices
+  return result
 })
 
 /* Render enough cells for the largest breakpoint (5 cols x 3 rows). CSS hides extras on smaller screens. */
 const photoCount = 15
+
+const TOTAL_PHOTOS = GROUP_A.length + GROUP_B.length
 
 function photoSrc(index) {
   return (

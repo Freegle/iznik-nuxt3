@@ -241,6 +241,11 @@ export const useChatStore = defineStore({
               ...this.listByChatId[id],
               ...chat,
             }
+            // If this chat isn't in the list (e.g. too old to appear in fetchChats
+            // results), add it so it can be rendered in the chat list panel.
+            if (!this.list.find((c) => c.id === id)) {
+              this.list.push(chat)
+            }
           }
         } catch (e) {
           if (e?.response?.status === 404) {
