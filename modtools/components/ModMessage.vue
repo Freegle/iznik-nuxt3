@@ -320,14 +320,6 @@
               <p class="text-muted small" />
             </div>
             <ModMessageWorry v-if="message.worry" :messageid="message.id" />
-            <b-alert
-              v-if="membership && membership.ourpostingstatus === 'SCRUTINY'"
-              variant="warning"
-              class="mt-2 mb-0 p-1 small"
-              :model-value="true"
-            >
-              This member is under scrutiny — all their posts go to pending.
-            </b-alert>
             <div v-if="expanded">
               <!-- eslint-disable-next-line -->
               <b-form-textarea v-if="editing" v-model="editmessage.textbody" rows="8" class="mb-3" />
