@@ -136,6 +136,9 @@
             <NoticeMessage v-if="error" class="mt-2">
               Sorry, this thread isn't around any more.
             </NoticeMessage>
+            <div v-else-if="id && loadingThread" class="text-center p-4">
+              <b-spinner small />
+            </div>
             <div v-else>
               <template
                 v-for="(entry, index) in newsfeedToShow"
@@ -294,6 +297,7 @@ const showGiveFind = ref(false)
 const shownGiveFind = ref(false)
 const error = ref(false)
 const threadhead = ref(null)
+const loadingThread = ref(false)
 const infiniteId = ref(new Date().getTime())
 const giveFind = ref(null)
 
@@ -487,7 +491,6 @@ function loadMore($state) {
   } else if (newsfeed.value.length === 0) {
     // Feed hasn't loaded yet — don't call complete() prematurely.
     $state.loaded()
-    return
   } else {
     $state.complete()
 
@@ -653,21 +656,28 @@ distance.value = settings?.newsfeedarea || 0
 // Fetch data if user is logged in
 if (me.value) {
   if (id) {
+    loadingThread.value = true
     // Force as there may be changes since we loaded what was in the store.
     newsfeedStore.fetch(id, true).then((newsfeed) => {
       // Mods can see deleted posts.
       if (!mod.value && (!newsfeed?.id || newsfeed?.deleted)) {
         error.value = true
-      } else if (newsfeed?.id !== newsfeed?.threadhead) {
-        threadhead.value = newsfeed.threadhead
-
+        loadingThread.value = false
+      } else if (
+        newsfeed?.threadhead &&
+        newsfeed?.id !== newsfeed?.threadhead
+      ) {
         newsfeedStore.fetch(newsfeed.threadhead).then((fetched) => {
           if (!mod.value && (!fetched?.id || fetched?.deleted)) {
             error.value = true
+          } else {
+            threadhead.value = newsfeed.threadhead
           }
+          loadingThread.value = false
         })
       } else {
         threadhead.value = id
+        loadingThread.value = false
       }
     })
   } else {

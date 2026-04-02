@@ -123,6 +123,36 @@ describe('member store', () => {
       })
     })
 
+    it('deduplicates by userid when searching across all groups', async () => {
+      // User 456 is a member of two groups — API returns two rows.
+      mockFetchMembers.mockResolvedValue({
+        members: [
+          { id: 101, userid: 456, groupid: 1, collection: 'Approved' },
+          { id: 102, userid: 456, groupid: 2, collection: 'Approved' },
+          { id: 103, userid: 789, groupid: 1, collection: 'Approved' },
+        ],
+        context: null,
+        ratings: [],
+      })
+
+      const store = useMemberStore()
+      store.config = {}
+
+      await store.fetchMembers({
+        collection: 'Approved',
+        search: 'alice',
+        groupid: 0,
+      })
+
+      // Only one entry per user — keyed by userid.
+      expect(store.list[456]).toBeTruthy()
+      expect(store.list[456].userid).toBe(456)
+      expect(store.list[789]).toBeTruthy()
+      // Should NOT have duplicate entries for user 456.
+      expect(store.list[101]).toBeUndefined()
+      expect(store.list[102]).toBeUndefined()
+    })
+
     it('does not overwrite existing entries with synthetic ones', async () => {
       const store = useMemberStore()
       store.config = {}
