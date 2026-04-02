@@ -50,13 +50,15 @@ async function navigateToMobileDetails(page, flowType) {
 
   console.log(`Navigated to mobile photos: ${page.url()}`)
 
-  // Click Next to move to the details page
-  const nextButton = page.locator('button:has-text("Next")')
-  await expect(nextButton.first()).toBeVisible({
+  // Skip the photos step (no photos needed for these tests).
+  // The "Next" button only appears when photos are present; the Skip link is
+  // always shown by PhotoUploader and calls goNext() via the @skip emit.
+  const skipLink = page.locator('a:has-text("Skip")')
+  await expect(skipLink.first()).toBeVisible({
     timeout: timeouts.ui.appearance,
   })
-  console.log('Clicking Next to proceed to details')
-  await nextButton.first().click()
+  console.log('Clicking Skip to proceed to details')
+  await skipLink.first().click()
 
   // Wait until we're on the details page
   await page.waitForURL(`**${mobileDetailsPath}`, {
