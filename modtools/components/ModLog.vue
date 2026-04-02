@@ -294,6 +294,9 @@
           <span v-else-if="log.subtype === 'PostcodeChange'">
             Postcode set to {{ log.text }}
           </span>
+          <span v-else-if="log.subtype === 'NotificationOff'">
+            Turned push notifications off
+          </span>
           <span v-else>
             <span class="text-muted"
               >Unknown log type {{ log.type }} subtype {{ log.subtype }}</span

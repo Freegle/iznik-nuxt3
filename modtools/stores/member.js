@@ -160,6 +160,19 @@ export const useMemberStore = defineStore({
             member.rawindex = this.rawindex++
             this.list[member.id] = member
           })
+        } else if (params.search && !params.groupid) {
+          // When searching across all groups, deduplicate by userid — a user
+          // can appear once per group they belong to but the card already shows
+          // all their memberships, so keep only the first entry per user.
+          const seen = {}
+          members.forEach((member) => {
+            const uid = member.userid
+            if (!seen[uid]) {
+              seen[uid] = true
+              member.rawindex = this.rawindex++
+              this.list[member.userid] = member
+            }
+          })
         } else {
           members.forEach((member) => {
             member.rawindex = this.rawindex++
