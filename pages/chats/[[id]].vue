@@ -42,7 +42,7 @@
                 stickyAdRendered,
               }"
             >
-              <div class="notda">
+              <div ref="chatlistRef" class="notda">
                 <div
                   v-if="me?.settings?.simplemail === 'None'"
                   class="text-danger text--smallest d-flex justify-content-around mb-1"
@@ -242,7 +242,7 @@ import { storeToRefs } from 'pinia'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMe } from '~/composables/useMe'
 import { useAuthStore } from '~/stores/auth'
-import { ref, useRoute, useRouter } from '#imports'
+import { ref, nextTick, useRoute, useRouter } from '#imports'
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useChatStore } from '~/stores/chat'
@@ -340,6 +340,7 @@ if (myid && process.client) {
 
 useHead(buildHead(route, runtimeConfig, title, description))
 
+const chatlistRef = ref(null)
 const showHideAllModal = ref(false)
 const minShowChats = ref(20)
 const searching = ref(false)
@@ -438,12 +439,43 @@ watch(search, (newVal, oldVal) => {
   }
 })
 
-onMounted(() => {
+onMounted(async () => {
   selectedChatId.value = null
 
   if (authStore.user) {
     const route = useRoute()
     selectedChatId.value = route.params.id ? parseInt(route.params.id) : 0
+
+    if (selectedChatId.value) {
+      // Ensure enough chats are rendered so the target chat can be scrolled
+      // to the top of the panel (needs entries below it too).
+      const SCROLL_SLACK = 50
+      let idx = filteredChats.value.findIndex(
+        (c) => c.id === selectedChatId.value
+      )
+
+      if (idx >= 0) {
+        const below = filteredChats.value.length - 1 - idx
+        if (below < SCROLL_SLACK && !chatStore.searchSince) {
+          // Not enough chats below the target to scroll it to the top of the
+          // panel. Fetch all historical chats to populate entries below it.
+          await fetchOlder()
+          idx = filteredChats.value.findIndex(
+            (c) => c.id === selectedChatId.value
+          )
+        }
+
+        if (idx >= 0) {
+          showChats.value = Math.max(showChats.value, idx + 1 + SCROLL_SLACK)
+        }
+      }
+
+      await nextTick()
+      const activeEl = chatlistRef.value?.querySelector('.chat.active')
+      if (activeEl) {
+        activeEl.scrollIntoView({ block: 'start' })
+      }
+    }
   }
 })
 

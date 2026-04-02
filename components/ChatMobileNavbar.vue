@@ -12,21 +12,8 @@
           {{ backButtonCount }}
         </b-badge>
       </div>
-      <div
-        id="other-user-group"
-        ref="expandBtnRef"
-        class="other-user-group clickme"
-        @click="toggleProfileCard"
-      >
-        <ProfileImage
-          v-if="otheruser && otheruser.info && !otheruser?.deleted"
-          :image="chat.icon"
-          :name="chat.name"
-          class="other-user-avatar"
-          is-thumbnail
-          size="md"
-        />
-        <h1 class="text-white truncate header--size5 m-0 other-user-name">
+      <div class="chat-name-area">
+        <h1 class="text-white m-0 other-user-name">
           {{ chat.name }}
         </h1>
       </div>
@@ -40,7 +27,32 @@
           unseen
         }}</b-badge>
       </button>
-      <b-dropdown no-caret variant="primary" class="userOptions">
+      <div
+        id="other-user-group"
+        ref="expandBtnRef"
+        class="other-user-group"
+        :class="{ clickme: chat.chattype === 'User2User' && otheruser?.info }"
+        @click="
+          chat.chattype === 'User2User' && otheruser?.info
+            ? toggleProfileCard()
+            : null
+        "
+      >
+        <ProfileImage
+          v-if="chat.icon"
+          :image="chat.icon"
+          :name="chat.name"
+          class="other-user-avatar"
+          is-thumbnail
+          size="lg"
+        />
+      </div>
+      <b-dropdown
+        v-if="chat.chattype === 'User2User'"
+        no-caret
+        variant="primary"
+        class="userOptions"
+      >
         <template #button-content>
           <ProfileImage
             v-if="me?.profile?.path"
@@ -67,9 +79,11 @@
       </b-dropdown>
     </div>
 
-    <!-- Profile popover -->
+    <!-- Profile popover — only for User2User where other user info is available -->
     <b-popover
-      v-if="cssReady"
+      v-if="
+        cssReady && chat.chattype === 'User2User' && otheruser && otheruser.info
+      "
       v-model="profileCardExpanded"
       target="other-user-group"
       placement="bottom"
@@ -451,14 +465,6 @@ onBeforeUnmount(() => {
   min-height: $navbar-mobile-chat-height;
   padding: 0.5rem 0.75rem;
 
-  h1 {
-    line-height: 1.3;
-    overflow: visible;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
   .expand-btn {
     display: flex;
     align-items: center;
@@ -466,6 +472,13 @@ onBeforeUnmount(() => {
     padding: 4px;
     margin-right: 0.5rem;
   }
+}
+
+.chat-name-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0 8px;
 }
 
 .nav-back-btn {
@@ -534,23 +547,32 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  padding: 4px 8px;
-  border-radius: var(--radius-xl, 1.25rem);
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 8px;
-  max-width: calc(100% - 120px);
+  flex-shrink: 0;
+  padding: 4px;
+  cursor: default;
+
+  &.clickme {
+    cursor: pointer;
+    border-radius: var(--radius-xl, 1.25rem);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
 }
 
 .other-user-avatar {
   flex-shrink: 0;
-  margin-right: 8px;
 }
 
 .other-user-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: clamp(0.75rem, 4vw, 1.2rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
 }
 
 /* Hint tip at top of profile card */
