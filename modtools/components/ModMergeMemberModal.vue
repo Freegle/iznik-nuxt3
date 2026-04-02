@@ -166,8 +166,8 @@ async function merge() {
       })
     } else {
       await authStore.merge({
-        id1: id1.value,
-        id2: id2.value,
+        id1: parseInt(id1.value),
+        id2: parseInt(id2.value),
         reason: reason.value,
       })
     }
