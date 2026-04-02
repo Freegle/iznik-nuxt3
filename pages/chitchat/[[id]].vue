@@ -663,7 +663,10 @@ if (me.value) {
       if (!mod.value && (!newsfeed?.id || newsfeed?.deleted)) {
         error.value = true
         loadingThread.value = false
-      } else if (newsfeed?.id !== newsfeed?.threadhead) {
+      } else if (
+        newsfeed?.threadhead &&
+        newsfeed?.id !== newsfeed?.threadhead
+      ) {
         newsfeedStore.fetch(newsfeed.threadhead).then((fetched) => {
           if (!mod.value && (!fetched?.id || fetched?.deleted)) {
             error.value = true
