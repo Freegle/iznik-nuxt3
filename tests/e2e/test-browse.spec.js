@@ -294,9 +294,10 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Page should load successfully — wait for title to be set by Nuxt (SSR
-    // starts with the default app title; Vue hydration updates it to "Browse")
-    await expect(page).toHaveTitle(/Browse/, {
+    // Page should load successfully. A new user with no location set will be
+    // redirected to /explore (title "Explore Freegle"); a user with a location
+    // stays on /browse (title "Browse"). Accept either.
+    await expect(page).toHaveTitle(/Browse|Explore/, {
       timeout: timeouts.navigation.slowPage,
     })
 

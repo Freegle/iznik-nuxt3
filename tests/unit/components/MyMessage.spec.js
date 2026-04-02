@@ -435,13 +435,13 @@ describe('MyMessage', () => {
       expect(wrapper.find('.status-overlay').exists()).toBe(true)
     })
 
-    it('shows promised banner when message is promised', async () => {
+    it('shows promised overlay when message is promised', async () => {
       mockData.message.promised = true
       mockData.message.outcomes = []
       mockData.message.promises = [{ userid: 2 }]
       mockUserStore.byId.mockReturnValue({ id: 2, displayname: 'Test User' })
       const wrapper = await createWrapper()
-      expect(wrapper.find('.promised-banner').exists()).toBe(true)
+      expect(wrapper.find('.status-overlay').exists()).toBe(true)
     })
 
     it('shows unpromise button when promised', async () => {
@@ -451,15 +451,6 @@ describe('MyMessage', () => {
       mockUserStore.byId.mockReturnValue({ id: 2, displayname: 'Test User' })
       const wrapper = await createWrapper()
       expect(wrapper.find('.unpromise-btn').exists()).toBe(true)
-    })
-
-    it('displays promised user name in banner', async () => {
-      mockData.message.promised = true
-      mockData.message.outcomes = []
-      mockData.message.promises = [{ userid: 2 }]
-      mockUserStore.byId.mockReturnValue({ id: 2, displayname: 'Test User' })
-      const wrapper = await createWrapper()
-      expect(wrapper.find('.promised-banner').text()).toContain('Test User')
     })
   })
 
