@@ -98,34 +98,49 @@ onMounted(() => {
     emit('complete')
   }, 15000)
 
-  if (!loggedIn.value) {
-    try {
-      // GSI script was loaded in nuxt.config.js
-      console.log('Set credentials response')
-      window.google.accounts.id.initialize({
-        client_id: clientId.value,
-        callback: handleGoogleCredentialsResponse,
-      })
-
-      console.log('Set show')
-      show.value = true
+  function initializeOneTap() {
+    if (!loggedIn.value) {
       try {
-        window.google.accounts.id.prompt(() => {
-          console.log('One Tap prompt returned')
-          emit('complete')
+        // GSI script was loaded in nuxt.config.js
+        console.log('Set credentials response')
+        window.google.accounts.id.initialize({
+          client_id: clientId.value,
+          callback: handleGoogleCredentialsResponse,
         })
+
+        console.log('Set show')
+        show.value = true
+        try {
+          window.google.accounts.id.prompt(() => {
+            console.log('One Tap prompt returned')
+            emit('complete')
+          })
+        } catch (e) {
+          console.error('One Tap error', e)
+          emit('complete')
+        }
+
+        console.log('Loaded SDK')
       } catch (e) {
-        console.error('One Tap error', e)
+        console.log('Failed to load One Tap', e)
         emit('complete')
       }
-
-      console.log('Loaded SDK')
-    } catch (e) {
-      console.log('Failed to load One Tap', e)
+    } else {
       emit('complete')
     }
+  }
+
+  if (window?.google?.accounts?.id) {
+    // GSI script already fully loaded
+    initializeOneTap()
   } else {
-    emit('complete')
+    // GSI script not yet loaded — use Google's official load callback.
+    // This is called by the GSI script itself when it finishes loading.
+    const prev = window.onGoogleLibraryLoad
+    window.onGoogleLibraryLoad = function () {
+      if (prev) prev()
+      initializeOneTap()
+    }
   }
 })
 </script>
