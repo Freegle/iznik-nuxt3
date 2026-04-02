@@ -39,17 +39,39 @@
         <v-icon icon="calendar-check" class="me-2" />Your upcoming collections
       </h3>
       <div
-        v-for="tryst in upcomingTrysts"
-        :key="'tryst-' + tryst.id"
-        class="collection-item"
+        v-for="group in visibleCollectionGroups"
+        :key="group.trystdate"
+        class="collection-group"
       >
-        <v-icon icon="calendar-alt" class="collection-icon" />
-        <div class="collection-info">
-          <span class="collection-date">{{ tryst.trystdate }}</span>
-          <span class="collection-details">
-            {{ tryst.name }} collecting <em>{{ tryst.subject }}</em>
-          </span>
+        <div class="collection-time">
+          <v-icon icon="calendar-alt" class="collection-icon" />
+          {{ group.trystdate }}
         </div>
+        <div
+          v-for="item in group.items"
+          :key="'item-' + item.id"
+          class="collection-item"
+        >
+          <em>{{ item.subject }}</em
+          ><span class="collection-who"> — {{ item.name }}</span>
+        </div>
+      </div>
+      <div
+        v-if="upcomingTrysts.length > COLLECTIONS_INITIAL"
+        class="collections-more"
+      >
+        <b-button
+          variant="link"
+          size="sm"
+          class="p-0"
+          @click="showAllCollections = !showAllCollections"
+        >
+          {{
+            showAllCollections
+              ? 'Show less'
+              : `Show ${upcomingTrysts.length - COLLECTIONS_INITIAL} more`
+          }}
+        </b-button>
       </div>
     </div>
 
@@ -253,6 +275,38 @@ const upcomingTrysts = computed(() => {
     )
   })
 })
+
+const COLLECTIONS_INITIAL = 3
+const showAllCollections = ref(false)
+
+/* Group sorted trysts by time label, then optionally slice to the first
+   COLLECTIONS_INITIAL items (across all groups) for the collapsed view. */
+const groupedCollections = computed(() => {
+  const groups = []
+  const seen = {}
+  upcomingTrysts.value.forEach((t) => {
+    if (!seen[t.trystdate]) {
+      seen[t.trystdate] = { trystdate: t.trystdate, items: [] }
+      groups.push(seen[t.trystdate])
+    }
+    seen[t.trystdate].items.push(t)
+  })
+  return groups
+})
+
+const visibleCollectionGroups = computed(() => {
+  if (showAllCollections.value) return groupedCollections.value
+  /* Slice to the first COLLECTIONS_INITIAL items across all groups */
+  let remaining = COLLECTIONS_INITIAL
+  const result = []
+  for (const group of groupedCollections.value) {
+    if (remaining <= 0) break
+    const items = group.items.slice(0, remaining)
+    result.push({ trystdate: group.trystdate, items })
+    remaining -= items.length
+  }
+  return result
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
@@ -406,39 +460,45 @@ const upcomingTrysts = computed(() => {
   margin: 0 0 12px 0;
 }
 
-.collection-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid $color-gray--lighter;
+.collection-group {
+  margin-bottom: 8px;
 
   &:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+    margin-bottom: 0;
   }
+}
+
+.collection-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: $color-gray--darker;
+  margin-bottom: 4px;
+}
+
+.collection-item {
+  padding: 2px 0 2px 22px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-bottom: none;
+}
+
+.collection-who {
+  color: var(--color-gray-600);
+}
+
+.collections-more {
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid $color-gray--lighter;
 }
 
 .collection-icon {
   color: $color-blue--bright;
   font-size: 1rem;
   margin-top: 2px;
-}
-
-.collection-info {
-  flex: 1;
-}
-
-.collection-date {
-  display: block;
-  font-weight: 600;
-  color: $color-black;
-  margin-bottom: 2px;
-}
-
-.collection-details {
-  font-size: 0.9rem;
-  color: var(--color-gray-600);
 }
 
 .posts-container {

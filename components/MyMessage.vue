@@ -33,19 +33,14 @@
                   class="status-overlay"
                   alt="Completed"
                 />
-                <!-- Promised banner at top (mobile only) -->
-                <div
+                <!-- Promised image overlay (matches browse page style) -->
+                <b-img
                   v-else-if="message.promised && !message.outcomes?.length"
-                  class="promised-banner d-lg-none"
-                >
-                  <div class="promised-banner-text">
-                    <v-icon icon="handshake" class="me-2" />
-                    Promised to&nbsp;<strong>{{ promisedToName }}</strong>
-                  </div>
-                  <button class="unpromise-btn" @click.stop="unpromise">
-                    Unpromise
-                  </button>
-                </div>
+                  lazy
+                  src="/promised.jpg"
+                  class="status-overlay"
+                  alt="Promised"
+                />
 
                 <!-- Photo count badge (desktop, multiple photos) -->
                 <div
@@ -1271,40 +1266,13 @@ onMounted(async () => {
 .status-overlay {
   position: absolute;
   z-index: 10;
-  transform: rotate(15deg);
+  transform: rotate(15deg) translate(-50%, -50%);
   top: 50%;
   left: 50%;
-  width: 40%;
-  max-width: 80px;
-  margin-left: -20%;
-  margin-top: -10%;
+  width: 60%;
+  max-width: 160px;
+  height: auto;
   pointer-events: none;
-}
-
-.promised-banner {
-  position: absolute;
-  z-index: 10;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 0.5rem 0.75rem;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 123, 255, 0.95) 0%,
-    rgba(0, 123, 255, 0.85) 100%
-  );
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-sm);
-}
-
-.promised-banner-text {
-  display: flex;
-  align-items: center;
 }
 
 .unpromise-btn {
