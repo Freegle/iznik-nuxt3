@@ -28,41 +28,41 @@ function addGotoAndVerify(page) {
 
 /**
  * Helper to navigate to the details page in the mobile flow.
- * Handles the photos -> details transition.
+ * Always goes via the mobile photos page so that a compose message is created
+ * by getOrCreateMessageId() before we reach details. Going via the desktop
+ * /give or /find page was unreliable: with a 1280px viewport the page shows
+ * the desktop layout (no mobile redirect), no "Next" button appears (message
+ * isn't valid yet), and the fallback direct-navigation to /mobile/details
+ * produces a null messageId — Vue then resets the item input to '' immediately
+ * after every fill(), causing the assertion to fail.
  */
 async function navigateToMobileDetails(page, flowType) {
-  const basePath = flowType === 'give' ? '/give' : '/find'
+  const mobilePhotosPath =
+    flowType === 'give' ? '/give/mobile/photos' : '/find/mobile/photos'
+  const mobileDetailsPath =
+    flowType === 'give' ? '/give/mobile/details' : '/find/mobile/details'
 
-  // Navigate to the flow start
-  await page.gotoAndVerify(basePath, {
+  // Go straight to the mobile photos page — this runs getOrCreateMessageId()
+  // which ensures a compose message exists in the store before we reach details.
+  await page.gotoAndVerify(mobilePhotosPath, {
     timeout: timeouts.navigation.default,
   })
 
-  await page.waitForLoadState('domcontentloaded', {
+  console.log(`Navigated to mobile photos: ${page.url()}`)
+
+  // Click Next to move to the details page
+  const nextButton = page.locator('button:has-text("Next")')
+  await expect(nextButton.first()).toBeVisible({
+    timeout: timeouts.ui.appearance,
+  })
+  console.log('Clicking Next to proceed to details')
+  await nextButton.first().click()
+
+  // Wait until we're on the details page
+  await page.waitForURL(`**${mobileDetailsPath}`, {
     timeout: timeouts.navigation.default,
   })
-
-  const currentUrl = page.url()
-  console.log(`Current URL: ${currentUrl}`)
-
-  // Look for the Next button to skip photos step (for give flow)
-  const nextButton = page.locator(
-    'button:has-text("Next"), .btn:has-text("Next"), a:has-text("Next")'
-  )
-
-  if ((await nextButton.count()) > 0) {
-    console.log('Found Next button, clicking it to skip photos')
-    await nextButton.first().click()
-    await page.waitForLoadState('domcontentloaded', {
-      timeout: timeouts.navigation.default,
-    })
-  } else {
-    // Navigate directly to details page
-    console.log('No Next button found, navigating directly to details')
-    await page.gotoAndVerify(`${basePath}/mobile/details`, {
-      timeout: timeouts.navigation.default,
-    })
-  }
+  console.log(`Now on details page: ${page.url()}`)
 }
 
 /**
@@ -150,9 +150,9 @@ test.describe('AI Illustration Tests - Give Flow', () => {
       )
     }
 
-    // Verify the item name is still in the input
-    const inputValue = await itemInput.first().inputValue()
-    expect(inputValue).toBe(testItemName)
+    // Verify the item name is still in the input (toHaveValue polls so transient
+    // Vue re-renders that briefly clear the field do not cause a false failure)
+    await expect(itemInput.first()).toHaveValue(testItemName)
     console.log('Item name preserved after blur')
 
     // Clean up - logout
@@ -269,9 +269,9 @@ test.describe('AI Illustration Tests - Find Flow', () => {
       )
     }
 
-    // Verify the item name is still in the input
-    const inputValue = await itemInput.first().inputValue()
-    expect(inputValue).toBe(testItemName)
+    // Verify the item name is still in the input (toHaveValue polls so transient
+    // Vue re-renders that briefly clear the field do not cause a false failure)
+    await expect(itemInput.first()).toHaveValue(testItemName)
     console.log('Item name preserved after blur')
 
     // Clean up - logout
@@ -412,9 +412,9 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
         )
       }
 
-      // Verify the item name is still in the input
-      const inputValue = await desktopItemInput.first().inputValue()
-      expect(inputValue).toBe(testItemName)
+      // Verify the item name is still in the input (toHaveValue polls so transient
+      // Vue re-renders that briefly clear the field do not cause a false failure)
+      await expect(desktopItemInput.first()).toHaveValue(testItemName)
       console.log('Item name preserved after blur')
 
       // Clean up - logout
@@ -584,9 +584,9 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
         )
       }
 
-      // Verify the item name is still in the input
-      const inputValue = await desktopItemInput.first().inputValue()
-      expect(inputValue).toBe(testItemName)
+      // Verify the item name is still in the input (toHaveValue polls so transient
+      // Vue re-renders that briefly clear the field do not cause a false failure)
+      await expect(desktopItemInput.first()).toHaveValue(testItemName)
       console.log('Item name preserved after blur')
 
       // Clean up - logout
