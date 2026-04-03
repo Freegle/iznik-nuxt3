@@ -44,16 +44,37 @@ test.describe('ModTools Chat Reply', () => {
     await loginViaModTools(page, modEmail)
 
     // Step 2: Navigate to the specific User2Mod chat.
-    // After loginViaModTools, the auth is in localStorage. SSR may redirect
-    // to /login first, then client-side auth bounces back. Use
-    // domcontentloaded so goto doesn't hang on the redirect chain, then
-    // wait for the textarea (which only appears once we're on the chat page
-    // and fully authenticated).
+    // The auth middleware may see authStore.user as null for the new route
+    // (store not yet hydrated) and redirect through /?noguard=true, which
+    // interrupts the goto. Retry once after the redirect settles.
     console.log('\n--- Step 2: Navigate to chat ---')
-    await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
-      timeout: timeouts.navigation.initial,
-      waitUntil: 'domcontentloaded',
-    })
+    try {
+      await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
+        timeout: timeouts.navigation.initial,
+        waitUntil: 'domcontentloaded',
+      })
+    } catch (e) {
+      if (
+        e.message &&
+        e.message.includes('interrupted by another navigation')
+      ) {
+        console.log(
+          'Navigation interrupted by auth redirect — waiting for auth to settle then retrying'
+        )
+        // Wait for the sidebar to be visible — the same signal loginViaModTools
+        // uses — to ensure the Pinia auth store is hydrated before the retry
+        // triggers a fresh SSR middleware pass.
+        await page
+          .locator('a[href="/messages/pending"]')
+          .waitFor({ state: 'visible', timeout: timeouts.navigation.slowPage })
+        await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
+          timeout: timeouts.navigation.initial,
+          waitUntil: 'domcontentloaded',
+        })
+      } else {
+        throw e
+      }
+    }
 
     await dismissAllModals(page)
 
