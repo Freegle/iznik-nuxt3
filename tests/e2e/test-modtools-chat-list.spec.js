@@ -47,14 +47,20 @@ test.describe('ModTools Chat List', () => {
       errors.push(error.message)
     })
 
-    // Use domcontentloaded to avoid ERR_ABORTED: Nuxt SSR auth middleware
-    // redirects unauthenticated SSR requests to /login, then login.vue fires
-    // router.push('/?noguard=true'), cancelling the original navigation.
-    // Resolving on domcontentloaded avoids the race with the auth redirect loop.
-    await page.goto(`${MODTOOLS_URL}/chats`, {
-      timeout: timeouts.navigation.initial,
-      waitUntil: 'domcontentloaded',
-    })
+    // ERR_ABORTED can still occur with domcontentloaded: the SSR layer sees no
+    // JWT (it's in localStorage, not cookies) and redirects to /login, aborting
+    // the original /chats request at the network level before domcontentloaded.
+    // The client-side router then hydrates auth from localStorage and navigates
+    // to /chats. Catching the abort here is intentional — the test still verifies
+    // correctness via assertNoErrors() and the pageerror listener below.
+    await page
+      .goto(`${MODTOOLS_URL}/chats`, {
+        timeout: timeouts.navigation.initial,
+        waitUntil: 'domcontentloaded',
+      })
+      .catch((e) => {
+        if (!e.message.includes('ERR_ABORTED')) throw e
+      })
 
     await dismissAllModals(page)
     await assertNoErrors(page)
@@ -68,10 +74,14 @@ test.describe('ModTools Chat List', () => {
     // Issue #26: User2Mod chats show group name instead of member name
     await loginViaModTools(page, testEnv.mod.email)
 
-    await page.goto(`${MODTOOLS_URL}/chats`, {
-      timeout: timeouts.navigation.initial,
-      waitUntil: 'domcontentloaded',
-    })
+    await page
+      .goto(`${MODTOOLS_URL}/chats`, {
+        timeout: timeouts.navigation.initial,
+        waitUntil: 'domcontentloaded',
+      })
+      .catch((e) => {
+        if (!e.message.includes('ERR_ABORTED')) throw e
+      })
 
     await dismissAllModals(page)
 

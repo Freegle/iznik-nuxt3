@@ -60,9 +60,11 @@ async function navigateToMobileDetails(page, flowType) {
   console.log('Clicking Skip to proceed to details')
   await skipLink.first().click()
 
-  // Wait until we're on the details page
+  // Wait until we're on the details page.
+  // Use domcontentloaded — the load event can be slow in CI on older hardware.
   await page.waitForURL(`**${mobileDetailsPath}`, {
     timeout: timeouts.navigation.default,
+    waitUntil: 'domcontentloaded',
   })
   console.log(`Now on details page: ${page.url()}`)
 }
