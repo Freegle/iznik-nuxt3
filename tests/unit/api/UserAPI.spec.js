@@ -47,6 +47,7 @@ let UserAPI
 describe('UserAPI', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    vi.resetModules()
     const mod = await import('~/api/UserAPI.js')
     UserAPI = mod.default
   })
@@ -58,30 +59,52 @@ describe('UserAPI', () => {
   }
 
   describe('fetchMT', () => {
-    it('does not log to Sentry when user is not found (404)', async () => {
-      // Mods frequently search for deleted or banned users — 404 is expected
-      mockFetch.mockResolvedValue([404, { ret: 3, status: 'Not found' }])
-
+    it('throws TypeError immediately for invalid (non-numeric) user ID without calling API', async () => {
+      // Invalid IDs are a client bug — fail fast rather than sending garbage to the API.
       const api = createApi()
 
-      await expect(api.fetchMT({ id: 5808978 })).rejects.toThrow()
+      await expect(api.fetchMT({ id: undefined })).rejects.toThrow(TypeError)
+      await expect(api.fetchMT({ id: 'notanumber' })).rejects.toThrow(TypeError)
 
-      expect(mockCaptureMessage).not.toHaveBeenCalled()
+      // API must not have been called at all
+      expect(mockFetch).not.toHaveBeenCalled()
     })
 
-    it('does not log to Sentry for any fetchMT error (logError suppressed)', async () => {
-      // fetchMT passes logError=false so errors are handled in the UI, not Sentry
-      mockFetch.mockResolvedValue([500, { error: 'Server error' }])
+    it('does not log to Sentry when a valid user ID returns 404 (deleted/banned user)', async () => {
+      // Mods frequently look up deleted or banned users — 404 is expected.
+      // Go returns { error: 404, message: '...' } from the global Fiber error handler.
+      mockFetch.mockResolvedValue([
+        404,
+        { error: 404, message: 'User not found' },
+      ])
 
       const api = createApi()
 
       try {
         await api.fetchMT({ id: 5808978 })
       } catch (e) {
-        // expected
+        // expected to throw
       }
 
       expect(mockCaptureMessage).not.toHaveBeenCalled()
+    })
+
+    it('does log to Sentry for unexpected server errors (500)', async () => {
+      // 500s are real problems and should surface in Sentry.
+      mockFetch.mockResolvedValue([
+        500,
+        { error: 500, message: 'Internal Server Error' },
+      ])
+
+      const api = createApi()
+
+      try {
+        await api.fetchMT({ id: 5808978 })
+      } catch (e) {
+        // expected to throw
+      }
+
+      expect(mockCaptureMessage).toHaveBeenCalled()
     })
   })
 })

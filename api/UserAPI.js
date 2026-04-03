@@ -21,11 +21,16 @@ export default class UserAPI extends BaseAPI {
 
   async fetchMT(params) {
     const { id, ...rest } = params
-    // 404 = user not found (deleted/banned) — expected, don't log to Sentry
+    if (isNaN(parseInt(id))) {
+      throw new TypeError('Invalid user ID: ' + id)
+    }
+    // 404 = user not found (deleted/banned) — expected, don't log to Sentry.
+    // Go returns { error: 404, message: '...' } for not-found; use selective
+    // suppression so unexpected 500s still surface in Sentry.
     const data = await this.$getv2(
       '/user/' + id,
       { modtools: true, ...rest },
-      false
+      (responseData) => responseData?.error !== 404
     )
     // Go returns the user directly; wrap for store compatibility
     return { user: data }
