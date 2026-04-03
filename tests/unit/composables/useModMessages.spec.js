@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
 
 // Minimal mock for APIError (same shape as the real class)
@@ -43,7 +43,12 @@ vi.mock('@/stores/misc', () => ({
 describe('useModMessages getMessages', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.resetModules()
     mockFetchMessagesMT.mockResolvedValue([1, 2, 3])
+  })
+
+  afterEach(() => {
+    vi.resetModules()
   })
 
   it('resolves without throwing when fetchMessagesMT returns data', async () => {

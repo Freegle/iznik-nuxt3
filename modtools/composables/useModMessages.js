@@ -139,7 +139,7 @@ export function setupModMessages(reset) {
     } catch (e) {
       if (e?.response?.status === 401) {
         // Session expired — BaseAPI already cleared auth state. No action needed;
-        // the auth middleware will redirect to login on the next navigation.
+        // the layout's loginStateKnown watcher will show the login modal.
         return
       }
       throw e
