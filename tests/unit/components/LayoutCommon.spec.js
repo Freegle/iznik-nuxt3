@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ref } from 'vue'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 
 const mockMiscStore = {
   stickyAdRendered: false,
@@ -96,6 +98,19 @@ describe('LayoutCommon', () => {
     it('shows DaDisableCTA after ad rendered', () => {
       // v-if="!adRendering && stickyAdRendered"
       expect(true).toBe(true)
+    })
+
+    it('places DaDisableCTA AFTER the ad container to prevent CLS', () => {
+      // CLS fix: DaDisableCTA must appear AFTER ExternalDa in the template.
+      // If it came before, the element appearing on ad render would push the
+      // ad content (and div.jobs-slot) downward, causing a measurable layout shift.
+      const src = readFileSync(
+        resolve(__dirname, '../../../components/LayoutCommon.vue'),
+        'utf-8'
+      )
+      const daDisableCtaPos = src.indexOf('DaDisableCTA')
+      const externalDaPos = src.indexOf('ExternalDa')
+      expect(daDisableCtaPos).toBeGreaterThan(externalDaPos)
     })
   })
 
