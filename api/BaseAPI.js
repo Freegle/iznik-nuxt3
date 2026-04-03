@@ -239,21 +239,10 @@ export default class BaseAPI {
       const statusstr = status?.toString()
 
       // 401 means our auth is invalid (expired JWT, deleted session, etc). We already clear auth state
-      // above (line ~202), so don't log these to Sentry — they're expected and not actionable.
+      // above (line ~202), so don't throw — that produces unhandled rejections logged to Sentry.
+      // Return a never-resolving promise instead; the auth guard will redirect to login reactively.
       if (status === 401) {
-        throw new APIError(
-          {
-            request: {
-              path,
-              method,
-              headers: config.headers,
-              params: config.params,
-              data: config.data,
-            },
-            response: { status, data },
-          },
-          `API Error ${method} ${path} -> status: 401`
-        )
+        return new Promise(function (resolve) {})
       }
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.

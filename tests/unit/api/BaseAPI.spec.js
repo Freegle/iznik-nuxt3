@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { APIError } from '~/api/APIErrors'
 
 const mockSetAuth = vi.fn()
 const mockSetUser = vi.fn()
@@ -62,44 +61,50 @@ describe('BaseAPI', () => {
   }
 
   describe('401 handling', () => {
-    it('throws APIError on 401 without logging to Sentry', async () => {
-      mockFetch.mockResolvedValue([401, {}])
-
-      const api = createApi()
-
-      await expect(api.$requestv2('GET', '/test', {})).rejects.toThrow(APIError)
-
-      expect(mockCaptureMessage).not.toHaveBeenCalled()
-    })
-
     it('clears auth state on 401', async () => {
       mockFetch.mockResolvedValue([401, {}])
 
       const api = createApi()
 
-      try {
-        await api.$requestv2('GET', '/test', {})
-      } catch (e) {
-        // expected
-      }
+      // Race: 401 should return a never-resolving promise; use timeout to confirm
+      await Promise.race([
+        api.$requestv2('GET', '/test', {}),
+        new Promise((resolve) => setTimeout(resolve, 50)),
+      ])
 
       expect(mockSetAuth).toHaveBeenCalledWith(null, null)
       expect(mockSetUser).toHaveBeenCalledWith(null)
     })
 
-    it('includes status 401 in thrown APIError', async () => {
-      mockFetch.mockResolvedValue([401, { message: 'Unauthorized' }])
+    it('does not throw on 401 — returns a never-resolving promise', async () => {
+      mockFetch.mockResolvedValue([401, {}])
 
       const api = createApi()
 
-      try {
-        await api.$requestv2('POST', '/message', { data: {} })
-        expect.fail('Should have thrown')
-      } catch (e) {
-        expect(e).toBeInstanceOf(APIError)
-        expect(e.response.status).toBe(401)
-        expect(e.message).toContain('401')
-      }
+      const sentinel = 'timeout'
+      const result = await Promise.race([
+        api.$requestv2('POST', '/message', { data: {} }).then(
+          () => 'resolved',
+          () => 'rejected'
+        ),
+        new Promise((resolve) => setTimeout(() => resolve(sentinel), 50)),
+      ])
+
+      // Should time out, not resolve or reject
+      expect(result).toBe(sentinel)
+    })
+
+    it('does not log 401 to Sentry', async () => {
+      mockFetch.mockResolvedValue([401, {}])
+
+      const api = createApi()
+
+      await Promise.race([
+        api.$requestv2('GET', '/test', {}),
+        new Promise((resolve) => setTimeout(resolve, 50)),
+      ])
+
+      expect(mockCaptureMessage).not.toHaveBeenCalled()
     })
 
     it('logs non-401 errors to Sentry', async () => {
