@@ -58,7 +58,7 @@
               <StripeDonate
                 v-else
                 :key="amount + '-' + monthly + '-stripe'"
-                :price="amount"
+                :price="parseFloat(amount)"
                 :monthly="monthly"
                 @success="succeeded"
                 @error="payPalFallback = true"
