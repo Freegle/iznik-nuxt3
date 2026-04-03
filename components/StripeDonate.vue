@@ -235,8 +235,8 @@ onMounted(async () => {
         // Don't re-throw - intent will be created lazily when user clicks a button
       }
 
-      if (!intent.value?.client_secret) {
-        console.error('Payment intent returned no client_secret', intent.value)
+      if (!intent.value?.clientSecret) {
+        console.error('Payment intent returned no clientSecret', intent.value)
       }
 
       // Check payment method availability
@@ -342,7 +342,7 @@ onMounted(async () => {
           throw e
         }
 
-        const clientSecret = res.client_secret
+        const clientSecret = res?.clientSecret
         console.log('clientSecret:', clientSecret)
 
         const { error } = await stripe.confirmPayment({
@@ -404,7 +404,7 @@ onMounted(async () => {
 
 // Create payment intent on-demand if it wasn't ready at mount time (e.g., API error).
 async function ensureIntent() {
-  if (intent.value?.client_secret) {
+  if (intent.value?.clientSecret) {
     return true
   }
 
@@ -438,7 +438,7 @@ async function ensureIntent() {
       })
     }
 
-    if (intent.value?.client_secret) {
+    if (intent.value?.clientSecret) {
       return true
     }
   } catch (e) {
@@ -459,7 +459,7 @@ async function useGooglePay() {
     }
 
     await Stripe.createGooglePay({
-      paymentIntentClientSecret: intent.value.client_secret,
+      paymentIntentClientSecret: intent.value.clientSecret,
       merchantIdentifier: 'org.ilovefreegle.direct',
       countryCode: 'GB',
       currency: 'GBP',
@@ -486,7 +486,7 @@ async function usePayPalCard() {
     }
 
     await Stripe.createPaymentSheet({
-      paymentIntentClientSecret: intent.value.client_secret,
+      paymentIntentClientSecret: intent.value.clientSecret,
       merchantDisplayName: 'Freegle',
       // Enable Apple Pay within the PaymentSheet so users can pay with
       // Apple Pay even from the card/PayPal button flow.
@@ -520,7 +520,7 @@ async function useApplePay() {
     }
 
     await Stripe.createApplePay({
-      paymentIntentClientSecret: intent.value.client_secret,
+      paymentIntentClientSecret: intent.value.clientSecret,
       paymentSummaryItems: [
         {
           label: 'Freegle Donation',
