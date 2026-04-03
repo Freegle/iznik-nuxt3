@@ -159,22 +159,27 @@ export const useModGroupStore = defineStore({
       }
     },
     async fetchGroupsMTBatch(ids) {
-      // Batch fetch multiple groups in one API call.
+      // Batch fetch multiple groups in one API call, chunked to avoid URL length limits.
       if (!ids || ids.length === 0) return
 
+      const CHUNK_SIZE = 25
       const authStore = useAuthStore()
       if (!this.sessionGroups) {
         this.sessionGroups = authStore.groups || []
       }
 
+      const chunks = []
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+        chunks.push(ids.slice(i, i + CHUNK_SIZE))
+      }
+
       try {
-        const groups = await api(this.config).group.fetchGroupsMT(
-          ids,
-          true,
-          true,
-          true,
-          true
+        const results = await Promise.all(
+          chunks.map((chunk) =>
+            api(this.config).group.fetchGroupsMT(chunk, true, true, true, true)
+          )
         )
+        const groups = results.flat().filter(Boolean)
 
         if (groups && Array.isArray(groups)) {
           for (const group of groups) {
