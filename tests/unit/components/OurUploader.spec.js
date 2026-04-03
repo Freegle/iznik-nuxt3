@@ -1192,4 +1192,46 @@ describe('OurUploader', () => {
       expect(wrapper.text()).toContain('Uploading 50%')
     })
   })
+
+  describe('upload timeout resilience', () => {
+    it('configures Tus plugin with retryDelays for mobile resilience', async () => {
+      mockIsApp.value = false
+      await createWrapper()
+      const Tus = (await import('@uppy/tus')).default
+      const tusCall = mockUppy.use.mock.calls.find((call) => call[0] === Tus)
+      expect(tusCall).toBeDefined()
+      const tusOptions = tusCall[1]
+      expect(tusOptions).toHaveProperty('retryDelays')
+      expect(Array.isArray(tusOptions.retryDelays)).toBe(true)
+      expect(tusOptions.retryDelays.length).toBeGreaterThan(0)
+    })
+
+    it('does not report Uppy timed out when upload completes within 30 seconds', async () => {
+      vi.useFakeTimers()
+      mockIsApp.value = false
+      await createWrapper()
+
+      const Sentry = await import('@sentry/browser')
+
+      const modalOpenHandler = mockUppy.on.mock.calls.find(
+        (call) => call[0] === 'dashboard:modal-open'
+      )?.[1]
+      expect(modalOpenHandler).toBeDefined()
+      modalOpenHandler()
+
+      const completeHandlers = mockUppy.on.mock.calls
+        .filter((call) => call[0] === 'complete')
+        .map((call) => call[1])
+
+      for (const handler of completeHandlers) {
+        handler({ successful: [], failed: [] })
+      }
+
+      vi.advanceTimersByTime(35000)
+
+      expect(Sentry.captureMessage).not.toHaveBeenCalledWith('Uppy timed out')
+
+      vi.useRealTimers()
+    })
+  })
 })

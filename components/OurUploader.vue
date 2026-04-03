@@ -403,6 +403,7 @@ onMounted(() => {
     .use(Tus, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       uploadDataDuringCreation: true,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
     })
     .use(Compressor)
   uppy.on('file-added', (file) => {
@@ -459,6 +460,10 @@ onMounted(() => {
   })
   uppy.on('complete', (result) => {
     console.log('Complete', result)
+    if (uppyTimer) {
+      clearTimeout(uppyTimer)
+      uppyTimer = null
+    }
   })
   uppy.on('error', (error) => {
     console.error('Upload error, retry', error)
