@@ -71,8 +71,12 @@
 
     <div :key="'nuxt2-' + bump" class="d-flex">
       <div
-        v-if="showMenu && loggedIn"
-        class="leftmenu text--medium-large-spaced"
+        v-if="showMenu"
+        :class="[
+          'leftmenu text--medium-large-spaced',
+          { invisible: !loggedIn },
+        ]"
+        :inert="!loggedIn || undefined"
       >
         <ModMenuItemLeft
           link="/"
