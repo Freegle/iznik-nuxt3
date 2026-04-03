@@ -62,7 +62,7 @@ export default class SessionAPI extends BaseAPI {
     })
   }
 
-  lostPassword(email, log) {
+  lostPassword(email, log = false) {
     return this.$postv2('/session', { action: 'LostPassword', email }, log)
   }
 
