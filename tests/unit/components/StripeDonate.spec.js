@@ -20,7 +20,8 @@ const {
 
   const mockStripeIntent = () =>
     Promise.resolve({
-      client_secret: 'test_client_secret_123',
+      id: 'pi_test_123',
+      clientSecret: 'test_client_secret_123',
     })
 
   const mockStripeSubscription = () =>
@@ -556,7 +557,7 @@ describe('StripeDonate', () => {
 
     it('refreshes session via fetchUser before creating intent in app mode', async () => {
       mockDonationStore.stripeIntent = vi.fn(() =>
-        Promise.resolve({ client_secret: 'cs_fresh' })
+        Promise.resolve({ id: 'pi_fresh', clientSecret: 'cs_fresh' })
       )
 
       const wrapper = await createWrapper()
@@ -617,7 +618,10 @@ describe('StripeDonate', () => {
         return Promise.resolve()
       })
       mockDonationStore.stripeIntent = vi.fn(() =>
-        Promise.resolve({ client_secret: 'cs_after_refresh' })
+        Promise.resolve({
+          id: 'pi_after_refresh',
+          clientSecret: 'cs_after_refresh',
+        })
       )
 
       const wrapper = await createWrapper()
