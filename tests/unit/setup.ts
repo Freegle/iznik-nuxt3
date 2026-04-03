@@ -128,6 +128,9 @@ const mockNuxtApp = {
 // Mock navigateTo
 ;(globalThis as Record<string, unknown>).navigateTo = vi.fn()
 
+// Mock defineNuxtPlugin (auto-imported by Nuxt, returns the plugin function as-is)
+;(globalThis as Record<string, unknown>).defineNuxtPlugin = (plugin: unknown) => plugin
+
 // Mock useCookie
 ;(globalThis as Record<string, unknown>).useCookie = () => ref(null)
 
