@@ -314,6 +314,9 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 500.*api\/user/, // Transient 500 on user API — app retries automatically
       /Failed to load resource: the server responded with a status of 500.*connect\.facebook\.net/, // Facebook SDK transient 500 errors
       /Refused to execute script from.*connect\.facebook\.net.*MIME type/, // Facebook SDK MIME type error when returning error page
+      /youtube\.com/i, // YouTube iframe console errors (Permissions-Policy, cross-origin, etc.) are expected
+      /Failed to load resource.*youtube/i, // YouTube resource load failures in test environment
+      /Permissions-Policy header.*interest-cohort/i, // YouTube/third-party Permissions-Policy warnings
     ]
 
     // Initialize the working copy of allowed error patterns
