@@ -62,8 +62,13 @@ export default class SessionAPI extends BaseAPI {
     })
   }
 
-  lostPassword(email, log) {
-    return this.$postv2('/session', { action: 'LostPassword', email }, log)
+  lostPassword(email) {
+    // Suppress Sentry for expected 404s (unknown email, ret:2) but still log unexpected errors (e.g. 500).
+    return this.$postv2(
+      '/session',
+      { action: 'LostPassword', email },
+      (data) => data?.ret !== 2
+    )
   }
 
   unsubscribe(email, log) {
