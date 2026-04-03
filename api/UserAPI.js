@@ -21,7 +21,12 @@ export default class UserAPI extends BaseAPI {
 
   async fetchMT(params) {
     const { id, ...rest } = params
-    const data = await this.$getv2('/user/' + id, { modtools: true, ...rest })
+    // 404 = user not found (deleted/banned) — expected, don't log to Sentry
+    const data = await this.$getv2(
+      '/user/' + id,
+      { modtools: true, ...rest },
+      false
+    )
     // Go returns the user directly; wrap for store compatibility
     return { user: data }
   }
