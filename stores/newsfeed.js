@@ -137,6 +137,31 @@ export const useNewsfeedStore = defineStore({
       this.feed = await api(this.config).news.fetch(null, distance)
       return this.feed
     },
+    async fetchOlder(distance) {
+      // Fetch posts older than the oldest item currently in the feed.
+      if (!this.feed.length) {
+        return []
+      }
+      const oldest = this.feed.reduce((min, item) =>
+        item.timestamp < min.timestamp ? item : min
+      )
+      const before = new Date(oldest.timestamp).toISOString()
+      const dist = distance ?? this.lastDistance ?? 'anywhere'
+      const older = await api(this.config).news.fetch(
+        null,
+        dist,
+        null,
+        false,
+        before
+      )
+      if (older?.length) {
+        // Append, deduplicating by id.
+        const existingIds = new Set(this.feed.map((item) => item.id))
+        const newItems = older.filter((item) => !existingIds.has(item.id))
+        this.feed = [...this.feed, ...newItems]
+      }
+      return older ?? []
+    },
     async fetch(id, force, lovelist) {
       try {
         if (!this.list[id] || force) {

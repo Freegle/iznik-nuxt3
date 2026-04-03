@@ -476,7 +476,9 @@ function rendered() {
   }
 }
 
-function loadMore($state) {
+const loadingMoreFromServer = ref(false)
+
+async function loadMore($state) {
   infiniteState.value = $state
 
   if (!me.value) {
@@ -491,12 +493,24 @@ function loadMore($state) {
   } else if (newsfeed.value.length === 0) {
     // Feed hasn't loaded yet — don't call complete() prematurely.
     $state.loaded()
-  } else {
-    $state.complete()
+  } else if (!loadingMoreFromServer.value) {
+    // All locally cached items shown — fetch more from the server.
+    loadingMoreFromServer.value = true
+    const older = await newsfeedStore.fetchOlder(distance.value)
+    loadingMoreFromServer.value = false
 
-    // User has scrolled to the bottom - mark all as seen immediately.
-    if (newsfeedStore.delayedSeenMode) {
-      newsfeedStore.markAllSeen()
+    if (older?.length) {
+      // New items were appended to the store; show the next one.
+      show.value += 1
+      $state.loaded()
+    } else {
+      // No more posts available.
+      $state.complete()
+
+      // User has scrolled to the bottom - mark all as seen immediately.
+      if (newsfeedStore.delayedSeenMode) {
+        newsfeedStore.markAllSeen()
+      }
     }
   }
 }
