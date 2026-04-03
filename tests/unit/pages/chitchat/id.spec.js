@@ -49,6 +49,7 @@ const mockNewsfeedStore = {
   fetchFeed: vi.fn().mockResolvedValue([]),
   fetch: vi.fn().mockResolvedValue({}),
   fetchCount: vi.fn().mockResolvedValue(0),
+  fetchOlder: vi.fn().mockResolvedValue([]),
   reset: vi.fn(),
   send: vi.fn(),
   byId: vi.fn(),
@@ -180,13 +181,14 @@ describe('chitchat/[[id]].vue loadMore', () => {
     expect(wrapper.vm.show).toBe(1)
   })
 
-  it('loadMore calls complete when all items shown', () => {
+  it('loadMore calls complete when all items shown', async () => {
     mockNewsfeedStore.feed = [{ id: 1, userid: 1 }]
+    mockNewsfeedStore.fetchOlder.mockResolvedValue([])
     mountComponent()
     wrapper.vm.show = 1
     const mockState = { loaded: vi.fn(), complete: vi.fn() }
 
-    wrapper.vm.loadMore(mockState)
+    await wrapper.vm.loadMore(mockState)
 
     expect(mockState.complete).toHaveBeenCalled()
   })
