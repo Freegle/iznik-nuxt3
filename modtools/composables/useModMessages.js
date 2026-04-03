@@ -133,7 +133,17 @@ export function setupModMessages(reset) {
     // params.debug = 'uMM getMessages',
     messageStore.clear()
     listingIds.value = new Set()
-    const fetchedIds = await messageStore.fetchMessagesMT(params)
+    let fetchedIds
+    try {
+      fetchedIds = await messageStore.fetchMessagesMT(params)
+    } catch (e) {
+      if (e?.response?.status === 401) {
+        // Session expired — BaseAPI already cleared auth state. No action needed;
+        // the auth middleware will redirect to login on the next navigation.
+        return
+      }
+      throw e
+    }
     if (fetchedIds) {
       fetchedIds.forEach((id) => listingIds.value.add(id))
     }
