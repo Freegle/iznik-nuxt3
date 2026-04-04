@@ -75,16 +75,26 @@ const mockRouterPush = vi.fn()
 // Use a ref so that Vue's reactivity system can track it as a computed dep
 const mockUseRouteReturnsUndefined = ref(false)
 
-vi.mock('vue-router', () => ({
-  useRoute: () => {
-    if (mockUseRouteReturnsUndefined.value) return undefined
-    return { params: mockRouteParams.value }
-  },
-  useRouter: () => ({
-    push: mockRouterPush,
-    currentRoute: { value: { path: '/members/approved/' } },
-  }),
-}))
+// Component imports useRoute/useRouter from #imports (Nuxt alias), not vue-router.
+// Use async factory so we can spread Vue's real composition API (ref, computed, etc.)
+// alongside the test-specific route/router stubs.
+vi.mock('#imports', async () => {
+  const { ref, computed, watch, onMounted } = await import('vue')
+  return {
+    ref,
+    computed,
+    watch,
+    onMounted,
+    useRoute: () => {
+      if (mockUseRouteReturnsUndefined.value) return undefined
+      return { params: mockRouteParams.value }
+    },
+    useRouter: () => ({
+      push: mockRouterPush,
+      currentRoute: { value: { path: '/members/approved/' } },
+    }),
+  }
+})
 
 // Make useRouter available globally (Nuxt auto-imports this)
 globalThis.useRouter = () => ({

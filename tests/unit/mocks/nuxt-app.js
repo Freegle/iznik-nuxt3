@@ -12,6 +12,7 @@ export {
   onBeforeUnmount,
   defineAsyncComponent,
   toRef,
+  nextTick,
 } from 'vue'
 
 export function useNuxtApp() {
