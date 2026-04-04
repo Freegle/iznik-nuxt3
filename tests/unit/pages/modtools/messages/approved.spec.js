@@ -81,22 +81,25 @@ const mockRouteParams = ref({ id: undefined, term: undefined })
 
 const mockRouterPush = vi.fn()
 
-// Mock useRoute and useRouter - note useRouter is called from within methods
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
-
-// Mock #imports for Nuxt auto-imports
-vi.mock('#imports', () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+// Component imports useRoute/useRouter from #imports (Nuxt alias), not vue-router.
+// Use async factory so we can spread Vue's real composition API (ref, computed, etc.)
+// alongside the test-specific route/router stubs.
+vi.mock('#imports', async () => {
+  const { ref, computed, watch, onMounted, nextTick } = await import('vue')
+  return {
+    ref,
+    computed,
+    watch,
+    onMounted,
+    nextTick,
+    useRoute: () => ({
+      params: mockRouteParams.value,
+    }),
+    useRouter: () => ({
+      push: mockRouterPush,
+    }),
+  }
+})
 
 // Make useRouter available globally (Nuxt auto-imports this)
 globalThis.useRouter = () => ({
