@@ -950,17 +950,31 @@ describe('OurUploader', () => {
       expect(eventNames).toContain('error')
     })
 
-    it('retries all on error', async () => {
+    it('does not call retryAll on error (TUS retryDelays handles retries)', async () => {
+      // Regression: uppy.retryAll() crashes when Uppy's internal file state has
+      // undefined entries during error handling (Sentry 7372829663).
+      // TUS retryDelays already handles retries — retryAll() is redundant and unsafe.
       mockIsApp.value = false
       await createWrapper()
       const errorHandler = mockUppy.on.mock.calls.find(
         (call) => call[0] === 'error'
       )?.[1]
 
-      if (errorHandler) {
-        errorHandler(new Error('Test error'))
-        expect(mockUppy.retryAll).toHaveBeenCalled()
-      }
+      // Simulate the crash: retryAll throws as Uppy does when files state has
+      // undefined entries (TypeError: Cannot use 'in' operator to search for
+      // 'error' in undefined).
+      mockUppy.retryAll.mockImplementation(() => {
+        throw new TypeError(
+          "Cannot use 'in' operator to search for 'error' in undefined"
+        )
+      })
+
+      // Verify the handler is actually registered (guards against vacuous pass).
+      expect(errorHandler).toBeDefined()
+      // Triggering the error event must not throw or crash the component.
+      expect(() => errorHandler(new Error('Network error'))).not.toThrow()
+      // retryAll must not be called at all.
+      expect(mockUppy.retryAll).not.toHaveBeenCalled()
     })
 
     it('registers dashboard:modal-closed listener', async () => {
