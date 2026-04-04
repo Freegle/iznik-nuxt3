@@ -533,12 +533,14 @@ export const useMessageStore = defineStore({
 
       // Fetch full message details in parallel for each ID.
       // Individual fetches may 404 if a message was deleted between listing and fetching.
+      // Suppress Sentry for expected 404s (race condition) but still log unexpected 500s.
       await Promise.all(
         messageIDs.map(async (id) => {
           try {
-            const message = await this.fetchMT({
-              id,
-            })
+            const message = await this.fetchMT(
+              { id },
+              (data) => data?.error !== 404
+            )
             if (message) {
               if (!message.subject) message.subject = ''
               this.list[message.id] = message
