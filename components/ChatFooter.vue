@@ -1056,7 +1056,7 @@ onMounted(() => {
 }
 
 :deep(textarea) {
-  transition: height 1s;
+  transition: height 0.1s;
   height: v-bind(height) !important;
   max-height: calc(50vh - 120px);
   overflow-y: auto !important;

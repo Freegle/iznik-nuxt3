@@ -214,11 +214,13 @@ async function unlove() {
 
 .story-card__image {
   margin-bottom: 1rem;
+  width: 250px;
+  height: 250px;
 }
 
 .story-card__photo {
-  max-height: 250px;
-  max-width: 250px;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
   object-fit: cover;
 }
