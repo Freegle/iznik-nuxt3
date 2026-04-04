@@ -74,8 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, watch, onMounted, useRoute } from '#imports'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
 import { useMe } from '~/composables/useMe'
@@ -127,20 +126,16 @@ const banmodal = ref(null)
 
 // Computed properties
 const id = computed(() => {
-  try {
-    const route = useRoute()
-    if (route.params && 'id' in route.params && route.params.id) {
-      return parseInt(route.params.id)
-    }
-  } catch (e) {
-    console.error('members [[term]] id', e.message)
+  const route = useRoute()
+  if (route?.params && 'id' in route.params && route.params.id) {
+    return parseInt(route.params.id)
   }
   return 0
 })
 
 const term = computed(() => {
   const route = useRoute()
-  if (route.params && 'term' in route.params && route.params.term)
+  if (route?.params && 'term' in route.params && route.params.term)
     return route.params.term
   return null
 })
