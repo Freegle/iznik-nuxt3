@@ -46,6 +46,11 @@ export const useUserStore = defineStore({
     },
     async fetchMT(params, force = false) {
       const id = parseInt(params.id)
+      if (isNaN(id)) {
+        console.log('USERUSERSTORE FETCHMT ID INVALID', params.id)
+        console.trace()
+        return
+      }
       if (!force && id && this.list[id]) {
         return this.list[id]
       }
