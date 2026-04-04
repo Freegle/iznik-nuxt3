@@ -81,6 +81,7 @@ export const useSpammerStore = defineStore({
             ...userData,
             userid: userData.id,
             spammer: {
+              id: item.id,
               collection: item.collection,
               reason: item.reason,
               added: item.added,
@@ -106,6 +107,7 @@ export const useSpammerStore = defineStore({
             id: item.userid,
             userid: item.userid,
             spammer: {
+              id: item.id,
               collection: item.collection,
               reason: item.reason,
               added: item.added,
@@ -145,6 +147,12 @@ export const useSpammerStore = defineStore({
       await fetchMe(true)
     },
     async confirm(params) {
+      if (!params.id) {
+        console.error(
+          'spammer confirm: missing spam_users.id — spammer data not loaded yet?'
+        )
+        return
+      }
       await api(this.config).spammers.patch({
         id: params.id,
         userid: params.userid,
@@ -191,6 +199,12 @@ export const useSpammerStore = defineStore({
     },
 
     async hold(params) {
+      if (!params.id) {
+        console.error(
+          'spammer hold: missing spam_users.id — spammer data not loaded yet?'
+        )
+        return
+      }
       await api(this.config).spammers.patch({
         id: params.id,
         userid: params.userid,
@@ -207,6 +221,12 @@ export const useSpammerStore = defineStore({
     },
 
     async release(params) {
+      if (!params.id) {
+        console.error(
+          'spammer release: missing spam_users.id — spammer data not loaded yet?'
+        )
+        return
+      }
       // Omitting heldby results in NULL on server.
       await api(this.config).spammers.patch({
         id: params.id,
