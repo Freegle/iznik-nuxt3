@@ -124,7 +124,10 @@ const head = buildHead(
   }
 )
 
-head.style = ['https://fonts.googleapis.com/css?family=Varela+Round']
+head.link.push({
+  rel: 'stylesheet',
+  href: 'https://fonts.googleapis.com/css?family=Varela+Round',
+})
 
 useHead(head)
 
