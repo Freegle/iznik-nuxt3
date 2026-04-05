@@ -629,6 +629,40 @@ describe('ModLog', () => {
     })
   })
 
+  describe('User logs with null/empty subtype', () => {
+    it('does not show "Unknown log type" when User subtype is null', () => {
+      const wrapper = createWrapper({
+        id: 1,
+        type: 'User',
+        subtype: null,
+        text: 'emailfrequency=0',
+      })
+      expect(wrapper.text()).not.toContain('Unknown log type')
+      expect(wrapper.text()).toContain('emailfrequency=0')
+    })
+
+    it('does not show "Unknown log type" when User subtype is empty string', () => {
+      const wrapper = createWrapper({
+        id: 1,
+        type: 'User',
+        subtype: '',
+        text: 'emailfrequency=24',
+      })
+      expect(wrapper.text()).not.toContain('Unknown log type')
+      expect(wrapper.text()).toContain('emailfrequency=24')
+    })
+
+    it('shows fallback text when User subtype is null and no text', () => {
+      const wrapper = createWrapper({
+        id: 1,
+        type: 'User',
+        subtype: null,
+      })
+      expect(wrapper.text()).not.toContain('Unknown log type')
+      expect(wrapper.text()).toContain('User activity')
+    })
+  })
+
   describe('edge cases', () => {
     it('handles log with minimal data', () => {
       const wrapper = createWrapper({

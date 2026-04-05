@@ -297,6 +297,12 @@
           <span v-else-if="log.subtype === 'NotificationOff'">
             Turned push notifications off
           </span>
+          <!-- V1 PHP creates User log entries with no subtype for self-service
+               actions (e.g. email frequency changes); show raw text rather
+               than the generic "Unknown log type" fallback. -->
+          <span v-else-if="!log.subtype">
+            {{ log.text || 'User activity' }}
+          </span>
           <span v-else>
             <span class="text-muted"
               >Unknown log type {{ log.type }} subtype {{ log.subtype }}</span
