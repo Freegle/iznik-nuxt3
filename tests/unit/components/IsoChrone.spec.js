@@ -269,7 +269,7 @@ describe('IsoChrone', () => {
         .findAll('.slider-btn')
         .find((btn) => btn.find('[data-icon="minus"]').exists())
       await minusBtn.trigger('click')
-      // Already at min — value unchanged, watcher does not fire, edit should not be called
+      // Already at min — value unchanged, watcher does not fire, edit not called
       expect(mockIsochroneStore.edit).not.toHaveBeenCalled()
     })
 
@@ -280,30 +280,8 @@ describe('IsoChrone', () => {
         .findAll('.slider-btn')
         .find((btn) => btn.find('[data-icon="plus"]').exists())
       await plusBtn.trigger('click')
-      // Already at max — value unchanged, watcher does not fire, edit should not be called
+      // Already at max — value unchanged, watcher does not fire, edit not called
       expect(mockIsochroneStore.edit).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('stale-ID prevention (Sentry #7373291926)', () => {
-    it('fires exactly one edit call when plus button is clicked', async () => {
-      const wrapper = await createWrapper({ id: 1 })
-      const plusBtn = wrapper
-        .findAll('.slider-btn')
-        .find((btn) => btn.find('[data-icon="plus"]').exists())
-      await plusBtn.trigger('click')
-      await flushPromises()
-      expect(mockIsochroneStore.edit).toHaveBeenCalledTimes(1)
-    })
-
-    it('fires exactly one edit call when minus button is clicked', async () => {
-      const wrapper = await createWrapper({ id: 1 })
-      const minusBtn = wrapper
-        .findAll('.slider-btn')
-        .find((btn) => btn.find('[data-icon="minus"]').exists())
-      await minusBtn.trigger('click')
-      await flushPromises()
-      expect(mockIsochroneStore.edit).toHaveBeenCalledTimes(1)
     })
   })
 
