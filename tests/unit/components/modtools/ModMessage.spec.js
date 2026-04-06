@@ -1015,4 +1015,86 @@ describe('ModMessage', () => {
       expect(wrapper2.text()).toContain('held by someone else')
     })
   })
+
+  describe('Wrong group warning', () => {
+    it('does not show warning when message group is in groupsnear (not necessarily first)', async () => {
+      // Message is on group 789. groupsnear returns a closer group (100) first,
+      // then group 789 second. The warning should NOT show.
+      const wrapper = mountComponent(
+        {},
+        {
+          location: {
+            name: 'SW1A 1AA',
+            lat: 51.5,
+            lng: -0.1,
+            groupsnear: [
+              { id: 100, namedisplay: 'Closer Group', ontn: true },
+              { id: 789, namedisplay: 'Test Group', ontn: true },
+            ],
+          },
+        }
+      )
+      await flushPromises()
+      expect(wrapper.text()).not.toContain('Possibly should be on')
+    })
+
+    it('shows warning when message group is not in groupsnear at all', async () => {
+      // Message is on group 789, but groupsnear returns completely different groups.
+      const wrapper = mountComponent(
+        {},
+        {
+          location: {
+            name: 'SW1A 1AA',
+            lat: 51.5,
+            lng: -0.1,
+            groupsnear: [
+              { id: 100, namedisplay: 'Distant Group', ontn: true },
+              { id: 200, namedisplay: 'Another Group', ontn: false },
+            ],
+          },
+        }
+      )
+      await flushPromises()
+      expect(wrapper.text()).toContain('Possibly should be on Distant Group')
+    })
+
+    it('shows warning via location API fallback when message.location has no groupsnear', async () => {
+      // location has no groupsnear — triggers fallback to locationStore.fetch.
+      // The fetched groupsnear does not include group 789, so warning should fire.
+      mockLocationStore.fetch.mockResolvedValue({
+        groupsnear: [{ id: 100, namedisplay: 'Other Group', ontn: true }],
+      })
+      const wrapper = mountComponent(
+        {},
+        {
+          location: { name: 'SW1A 1AA', lat: 51.5, lng: -0.1 },
+          lat: 51.5,
+          lng: -0.1,
+        }
+      )
+      await flushPromises()
+      expect(wrapper.text()).toContain('Possibly should be on Other Group')
+    })
+
+    it('does not show warning via location API fallback when message group is in fetched groupsnear', async () => {
+      // location has no groupsnear — triggers fallback.
+      // The fetched groupsnear includes group 789, so no warning.
+      mockLocationStore.fetch.mockResolvedValue({
+        groupsnear: [
+          { id: 100, namedisplay: 'Closer Group', ontn: true },
+          { id: 789, namedisplay: 'Test Group', ontn: true },
+        ],
+      })
+      const wrapper = mountComponent(
+        {},
+        {
+          location: { name: 'SW1A 1AA', lat: 51.5, lng: -0.1 },
+          lat: 51.5,
+          lng: -0.1,
+        }
+      )
+      await flushPromises()
+      expect(wrapper.text()).not.toContain('Possibly should be on')
+    })
+  })
 })

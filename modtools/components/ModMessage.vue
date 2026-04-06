@@ -129,7 +129,9 @@
               display-message-link
             />
             <div
-              v-if="homegroup && group && homegroup !== group.namedisplay"
+              v-if="
+                homegroup && group && !homegroupids.includes(parseInt(group.id))
+              "
               class="small text-danger"
             >
               Possibly should be on {{ homegroup }}
@@ -740,6 +742,7 @@ const uploading = ref(false)
 const attachments = ref([])
 const homegroup = ref(null)
 const homegroupontn = ref(false)
+const homegroupids = ref([])
 const historyGroups = reactive({})
 const editmessage = ref(false)
 
@@ -1322,6 +1325,7 @@ async function findHomeGroup() {
   if (msgGroups && msgGroups.length) {
     homegroup.value = msgGroups[0].namedisplay
     homegroupontn.value = msgGroups[0].ontn
+    homegroupids.value = msgGroups.map((g) => parseInt(g.id))
     return
   }
 
@@ -1335,6 +1339,7 @@ async function findHomeGroup() {
     if (loc && loc.groupsnear && loc.groupsnear.length) {
       homegroup.value = loc.groupsnear[0].namedisplay
       homegroupontn.value = loc.groupsnear[0].ontn
+      homegroupids.value = loc.groupsnear.map((g) => parseInt(g.id))
     }
   }
 }
