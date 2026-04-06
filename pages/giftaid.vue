@@ -27,31 +27,39 @@
         </div>
         <div v-if="giftAidAllowed" class="giftaid-form">
           <div class="giftaid-form__section">
-            <label class="giftaid-form__label" for="fullname">
-              Your full (real) name
-            </label>
-            <b-button
-              v-if="
-                me &&
-                me.displayname &&
-                !fullname &&
-                me.displayname.indexOf(' ') !== -1
-              "
-              variant="secondary"
-              size="sm"
-              class="giftaid-form__autofill"
-              @click="fullname = me.displayname"
-            >
-              Use <strong>{{ me.displayname }}</strong>
-            </b-button>
-            <b-form-input
-              id="fullname"
-              v-model="fullname"
-              name="fullname"
-              autocomplete="given-name"
-              placeholder="Your full name"
-              :state="triedToSubmit ? !nameInvalid : null"
-            />
+            <div class="giftaid-form__name-row">
+              <div class="giftaid-form__name-field">
+                <label class="giftaid-form__label" for="firstname">
+                  First name
+                </label>
+                <b-form-input
+                  id="firstname"
+                  v-model="firstname"
+                  name="firstname"
+                  autocomplete="given-name"
+                  placeholder="First name"
+                  :state="triedToSubmit ? !firstnameInvalid : null"
+                />
+              </div>
+              <div class="giftaid-form__name-field">
+                <label class="giftaid-form__label" for="lastname">
+                  Last name
+                </label>
+                <b-form-input
+                  id="lastname"
+                  v-model="lastname"
+                  name="lastname"
+                  autocomplete="family-name"
+                  placeholder="Last name"
+                  :state="triedToSubmit ? !lastnameInvalid : null"
+                />
+              </div>
+            </div>
+            <p class="giftaid-form__hint">
+              Enter your name as it appears on your tax records. If you use a
+              single name, enter it as your first name and repeat it as your
+              last name.
+            </p>
           </div>
           <div class="giftaid-form__section">
             <label class="giftaid-form__label" for="homeaddress">
@@ -221,9 +229,14 @@ const period = computed({
   },
 })
 
-const fullname = computed({
-  get: () => giftAidStore.giftaid?.fullname,
-  set: (value) => (giftAidStore.giftaid.fullname = value),
+const firstname = computed({
+  get: () => giftAidStore.giftaid?.firstname ?? null,
+  set: (value) => (giftAidStore.giftaid.firstname = value),
+})
+
+const lastname = computed({
+  get: () => giftAidStore.giftaid?.lastname ?? null,
+  set: (value) => (giftAidStore.giftaid.lastname = value),
 })
 
 const homeaddress = computed({
@@ -267,14 +280,19 @@ const valid = computed(() => {
   return (
     !giftAidAllowed.value ||
     (period.value &&
-      fullname.value &&
+      firstname.value &&
+      lastname.value &&
       homeaddress.value &&
       !emailByMistake.value)
   )
 })
 
-const nameInvalid = computed(() => {
-  return !fullname.value || !fullname.value.includes(' ')
+const firstnameInvalid = computed(() => {
+  return !firstname.value || firstname.value.trim().length === 0
+})
+
+const lastnameInvalid = computed(() => {
+  return !lastname.value || lastname.value.trim().length === 0
 })
 
 const addressInvalid = computed(() => {
@@ -365,10 +383,6 @@ async function save(callback) {
 
   if (!giftAidAllowed.value) {
     // We might need to fake up some values that the server expects.
-    if (!fullname.value) {
-      giftAidStore.giftaid.fullname = me.value.displayname
-    }
-
     if (!homeaddress.value) {
       giftAidStore.giftaid.homeaddress = 'N/A'
     }
@@ -382,7 +396,8 @@ async function save(callback) {
 async function remove(callback) {
   await giftAidStore.remove()
   period.value = 'Past4YearsAndFuture'
-  fullname.value = null
+  firstname.value = null
+  lastname.value = null
   homeaddress.value = null
   callback()
 }
@@ -454,6 +469,17 @@ function changeGiftAidToggle(val) {
     color: $color-green--darker;
     margin-bottom: 0.5rem;
     font-size: 0.95rem;
+  }
+
+  &__name-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__name-field {
+    flex: 1;
+    min-width: 0;
   }
 
   &__autofill {

@@ -26,8 +26,14 @@ export default class GiftAidAPI extends BaseAPI {
     return ret.giftaids
   }
 
-  save({ period, fullname, homeaddress }) {
-    return this.$postv2('/giftaid', { period, fullname, homeaddress })
+  save({ period, fullname, firstname, lastname, homeaddress }) {
+    return this.$postv2('/giftaid', {
+      period,
+      fullname,
+      firstname,
+      lastname,
+      homeaddress,
+    })
   }
 
   edit(
@@ -38,12 +44,16 @@ export default class GiftAidAPI extends BaseAPI {
     postcode,
     housenameornumber,
     reviewed,
-    deleted
+    deleted,
+    firstname,
+    lastname
   ) {
     const data = {
       id,
       period,
       fullname,
+      firstname,
+      lastname,
       homeaddress,
       postcode,
       housenameornumber,

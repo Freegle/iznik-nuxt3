@@ -24,6 +24,8 @@ const validGiftaid = {
   id: 123,
   userid: 456,
   fullname: 'John Smith',
+  firstname: 'John',
+  lastname: 'Smith',
   homeaddress: '123 Test Street\nTest City',
   housenameornumber: '123',
   postcode: 'AB1 2CD',
@@ -179,6 +181,18 @@ describe('ModGiftAid', () => {
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.nameInvalid).toBe(false)
       })
+
+      it('returns false when firstname and lastname are both set (even if fullname has no space)', async () => {
+        const giftaid = {
+          ...validGiftaid,
+          fullname: 'Sukarno',
+          firstname: 'Sukarno',
+          lastname: 'Sukarno',
+        }
+        const wrapper = mountComponent({ giftaidid: giftaid.id }, giftaid)
+        await wrapper.vm.$nextTick()
+        expect(wrapper.vm.nameInvalid).toBe(false)
+      })
     })
 
     describe('postcodeInvalid', () => {
@@ -268,7 +282,10 @@ describe('ModGiftAid', () => {
           '123 Test Street\nTest City',
           'AB1 2CD',
           '123',
-          false
+          false,
+          false,
+          'John',
+          'Smith'
         )
         expect(callback).toHaveBeenCalled()
       })
