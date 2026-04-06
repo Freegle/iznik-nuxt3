@@ -308,7 +308,7 @@ const email = usePreferredEmail(user)
 
 onMounted(() => {
   if (member.value) {
-    userStore.fetch(member.value.userid)
+    userStore.fetch(member.value.userid, true)
   }
 })
 

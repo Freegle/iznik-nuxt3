@@ -459,16 +459,25 @@ describe('ModMemberReview', () => {
   })
 
   describe('onMounted', () => {
+    it('fetches user with force=true to get up-to-date lastaccess', async () => {
+      // Regression: MT was showing stale lastaccess (e.g. "dormant 3 years ago")
+      // even when the member was actively chatting, because the store returned
+      // cached data. force=true ensures fresh data on every member review open.
+      mountComponent()
+      await flushPromises()
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456, true)
+    })
+
     it('fetches user when member exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456, true)
     })
 
     it('fetches user even when member.info exists', async () => {
       mountComponent()
       await flushPromises()
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456, true)
     })
   })
 
