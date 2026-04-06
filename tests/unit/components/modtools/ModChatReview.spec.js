@@ -471,6 +471,49 @@ describe('ModChatReview', () => {
     })
   })
 
+  describe('chatPov computed', () => {
+    it('returns chat.user2 for User2User chat (normal case)', () => {
+      // Default mock: byChatId returns { user1: 456, user2: 789, chattype: 'User2User' }
+      const wrapper = mountComponent()
+      expect(wrapper.vm.chatPov).toBe(789)
+    })
+
+    it('returns 0 (not null/undefined) for User2Mod community modmail where user2 is NULL in DB (Go returns 0)', () => {
+      globalThis.__mockChatStore.byChatId = vi.fn(() => ({
+        user1: 100,
+        user2: 0,
+        chattype: 'User2Mod',
+      }))
+      const wrapper = mountComponent()
+      expect(wrapper.vm.chatPov).toBe(0)
+    })
+
+    it('passes chatPov to ModChatViewButton (not per-message touserid)', () => {
+      globalThis.__mockChatStore.byChatId = vi.fn(() => ({
+        user1: 100,
+        user2: 0,
+        chattype: 'User2Mod',
+      }))
+      const wrapper = mountComponent({ touserid: 999 })
+      const viewButton = wrapper.find('.chat-view-button')
+      // chatPov should be chat.user2 (0), NOT message.touserid (999)
+      expect(viewButton.exists()).toBe(true)
+      expect(wrapper.vm.chatPov).toBe(0)
+    })
+
+    it('falls back to message.touserid when chat not found', () => {
+      globalThis.__mockChatStore.byChatId = vi.fn(() => null)
+      const wrapper = mountComponent({ touserid: 200 })
+      expect(wrapper.vm.chatPov).toBe(200)
+    })
+
+    it('returns null when chat not found and no touserid', () => {
+      globalThis.__mockChatStore.byChatId = vi.fn(() => null)
+      const wrapper = mountComponent({ touserid: undefined })
+      expect(wrapper.vm.chatPov).toBeNull()
+    })
+  })
+
   describe('edge cases', () => {
     it('handles message without group', () => {
       const wrapper = mountComponent({ group: null })

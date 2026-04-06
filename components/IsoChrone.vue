@@ -269,12 +269,10 @@ if (isochrone.value.locationid) {
 // Methods
 function increment() {
   minutes.value = Math.min(minutes.value + step.value, maxMinutes.value)
-  changeMinutes(minutes.value)
 }
 
 function decrement() {
   minutes.value = Math.max(minutes.value - step.value, minMinutes.value)
-  changeMinutes(minutes.value)
 }
 
 const me = computed(() => useAuthStore().user)

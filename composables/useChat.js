@@ -191,7 +191,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   const messageIsFromCurrentUser = computed(() => {
     // If pov is provided (support/moderator viewing chats),
     // use pov to determine which side messages appear on
-    if (pov) {
+    if (pov !== null) {
       if (chat.value?.chattype === 'User2User') {
         // Messages from user1 appear on left when pov is user1, on right otherwise
         if (pov === chat.value?.user1) {
