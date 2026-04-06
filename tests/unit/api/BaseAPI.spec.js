@@ -128,4 +128,22 @@ describe('BaseAPI', () => {
       expect(mockCaptureMessage).not.toHaveBeenCalled()
     })
   })
+
+  describe('network errors (no HTTP response)', () => {
+    it('does not log to Sentry when fetch rejects with no HTTP status (e.g. too many retries)', async () => {
+      // When fetchRetry exhausts all retries, it rejects with a plain Error (no response.status).
+      // status stays null, which should not be reported to Sentry as "status: undefined".
+      mockFetch.mockRejectedValue(new Error('Too many retries, give up'))
+
+      const api = createApi()
+
+      try {
+        await api.$requestv2('POST', '/message', { data: {} })
+      } catch (e) {
+        // expected to throw
+      }
+
+      expect(mockCaptureMessage).not.toHaveBeenCalled()
+    })
+  })
 })

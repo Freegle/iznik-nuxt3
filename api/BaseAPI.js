@@ -263,7 +263,7 @@ export default class BaseAPI {
       // decisions.
       const log = typeof logError === 'function' ? logError(data) : logError
 
-      if (log && (status !== null || statusstr !== 'Unknown')) {
+      if (log && status !== null) {
         // Sentry is only initialized on the client, so check before calling
         if (typeof Sentry?.captureMessage === 'function') {
           Sentry.captureMessage(
