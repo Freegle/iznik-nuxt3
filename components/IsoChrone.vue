@@ -268,10 +268,16 @@ if (isochrone.value.locationid) {
 
 // Methods
 function increment() {
+  // Changing minutes.value triggers the watch(minutes) watcher which calls
+  // changeMinutes. Do NOT also call changeMinutes directly here — that would
+  // fire two PATCH /isochrone requests for the same change. The first PATCH
+  // may cause the server to delete a duplicate row (duplicate-key cleanup),
+  // making the second PATCH a stale-ID 404 (Sentry issue 7373291926).
   minutes.value = Math.min(minutes.value + step.value, maxMinutes.value)
 }
 
 function decrement() {
+  // See comment on increment() above.
   minutes.value = Math.max(minutes.value - step.value, minMinutes.value)
 }
 

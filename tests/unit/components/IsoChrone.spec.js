@@ -307,6 +307,35 @@ describe('IsoChrone', () => {
     })
   })
 
+  describe('stale-ID prevention (Sentry #7373291926)', () => {
+    it('fires exactly one edit call when plus button is clicked', async () => {
+      // Regression test: increment() previously both set minutes.value AND called
+      // changeMinutes() directly. The watch(minutes) watcher also calls changeMinutes(),
+      // so this caused two isochroneStore.edit() calls — two PATCH /isochrone requests.
+      // The first PATCH can trigger server-side duplicate-key cleanup (deleting the row),
+      // making the second PATCH a 404 on a now-stale ID.
+      const wrapper = await createWrapper({ id: 1 })
+      mockIsochroneStore.edit.mockClear()
+      const plusBtn = wrapper
+        .findAll('.slider-btn')
+        .find((btn) => btn.find('[data-icon="plus"]').exists())
+      await plusBtn.trigger('click')
+      await flushPromises()
+      expect(mockIsochroneStore.edit).toHaveBeenCalledTimes(1)
+    })
+
+    it('fires exactly one edit call when minus button is clicked', async () => {
+      const wrapper = await createWrapper({ id: 1 })
+      mockIsochroneStore.edit.mockClear()
+      const minusBtn = wrapper
+        .findAll('.slider-btn')
+        .find((btn) => btn.find('[data-icon="minus"]').exists())
+      await minusBtn.trigger('click')
+      await flushPromises()
+      expect(mockIsochroneStore.edit).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('delete functionality', () => {
     it('calls delete on Remove click', async () => {
       const wrapper = await createWrapper({ id: 1 })
