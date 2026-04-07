@@ -19,7 +19,10 @@
         spamignore
         label="Ignore"
       />
-      <div v-if="member.spammer.collection === 'PendingAdd'" class="d-inline">
+      <div
+        v-if="member.spammer.collection === 'PendingAdd'"
+        class="d-flex flex-wrap gap-2"
+      >
         <ModMemberButton
           v-if="hasPermissionSpamAdmin && !member.heldby"
           :userid="member.userid"

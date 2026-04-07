@@ -259,9 +259,13 @@ const message = computed(() => chatStore.messageById(props.messageid))
 const chatPov = computed(() => {
   const chat = chatStore.byChatId(message.value?.chatid)
   if (chat) {
-    return chat.user2 ?? null
+    // Chat is loaded: use chatroom-level user2 as consistent pov across all messages.
+    // user2=0 means User2Mod (NULL in DB) — not a valid user ID, not a valid pov.
+    // || correctly skips 0; return null to let useChat.js use myid-based alignment.
+    return chat.user2 || null
   }
-  return message.value?.touserid ?? null
+  // Chat not yet loaded: fall back to per-message touserid temporarily.
+  return message.value?.touserid || null
 })
 
 const isActiveMod = computed(() => {
