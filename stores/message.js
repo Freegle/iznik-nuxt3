@@ -404,6 +404,25 @@ export const useMessageStore = defineStore({
         }
       } else {
         await this.fetch(params.id, true) // Gets message.fromuser as int not object
+
+        // Sync updated message into byUserList so that myposts reflects the
+        // latest server state (e.g. hasoutcome cleared when a future deadline
+        // is set — without this the post stays in "Old Posts" after extending).
+        const updated = this.list[params.id]
+        if (updated) {
+          for (const userId in this.byUserList) {
+            const idx = this.byUserList[userId].findIndex(
+              (m) => m.id === params.id
+            )
+            if (idx !== -1) {
+              this.byUserList[userId][idx] = {
+                ...this.byUserList[userId][idx],
+                ...updated,
+              }
+              break
+            }
+          }
+        }
       }
 
       return data
