@@ -14,15 +14,16 @@
  * Fix: patch() now syncs this.list[id] → byUserList after the re-fetch.
  *
  * Test strategy: navigate to /myposts, wait for the post to appear in the
- * Pinia store's byUserList, then use page.evaluate() to set hasoutcome=1
- * directly in the reactive store state (simulating an expired post without
- * needing the server to set it).  After the deadline PATCH the real server
- * data (hasoutcome=0/undefined) is synced into byUserList by the fixed
- * patch() method — asserting this is the key regression check.
+ * Pinia store's byUserList (accessed via the Vue 3 app instance on #__nuxt —
+ * the reliable way to reach Pinia from evaluate() in production builds), then
+ * use page.evaluate() to set hasoutcome=1 directly in the reactive store
+ * state (simulating an expired post).  After the deadline PATCH the real
+ * server data (hasoutcome=0/undefined) is synced into byUserList by the
+ * fixed patch() method — asserting this is the key regression check.
  *
- * Note: page.route() intercept is intentionally NOT used here because the
- * initial /myposts page load uses SSR (server-side fetch), which Playwright
- * cannot intercept via page.route().
+ * Note: window.__pinia is not set in production builds.  Pinia state is
+ * accessed via document.querySelector('#__nuxt').__vue_app__.config
+ * .globalProperties.$pinia.state.value instead.
  */
 
 const { test, expect } = require('./fixtures')
@@ -51,14 +52,18 @@ test.describe('Extend expired deadline', () => {
 
     // Wait for the post to appear in the Pinia store's byUserList.  This
     // confirms hydration is complete and the store is populated.
+    // Access Pinia via the Vue 3 app instance (works in production builds).
     await expect
       .poll(
         () =>
           page.evaluate((msgId) => {
-            const stores = window.__pinia?.state?.value
-            if (!stores?.message?.byUserList) return false
-            for (const userId in stores.message.byUserList) {
-              if (stores.message.byUserList[userId].find((m) => m.id === msgId))
+            const pinia =
+              document.querySelector('#__nuxt')?.__vue_app__?.config
+                ?.globalProperties?.$pinia
+            const msg = pinia?.state?.value?.message
+            if (!msg?.byUserList) return false
+            for (const userId in msg.byUserList) {
+              if (msg.byUserList[userId].find((m) => m.id === msgId))
                 return true
             }
             return false
@@ -72,14 +77,15 @@ test.describe('Extend expired deadline', () => {
     // store state.  Because Pinia state is reactive, Vue will re-render
     // myposts.vue and move the post to the "Old Posts" section.
     await page.evaluate((msgId) => {
-      const stores = window.__pinia?.state?.value
-      if (!stores?.message?.byUserList) return
-      for (const userId in stores.message.byUserList) {
-        const msg = stores.message.byUserList[userId].find(
-          (m) => m.id === msgId
-        )
-        if (msg) {
-          msg.hasoutcome = 1
+      const pinia =
+        document.querySelector('#__nuxt')?.__vue_app__?.config?.globalProperties
+          ?.$pinia
+      const msg = pinia?.state?.value?.message
+      if (!msg?.byUserList) return
+      for (const userId in msg.byUserList) {
+        const m = msg.byUserList[userId].find((m) => m.id === msgId)
+        if (m) {
+          m.hasoutcome = 1
           break
         }
       }
@@ -131,13 +137,14 @@ test.describe('Extend expired deadline', () => {
       .poll(
         () =>
           page.evaluate((msgId) => {
-            const stores = window.__pinia?.state?.value
-            if (!stores?.message?.byUserList) return null
-            for (const userId in stores.message.byUserList) {
-              const msg = stores.message.byUserList[userId].find(
-                (m) => m.id === msgId
-              )
-              if (msg !== undefined) return msg.hasoutcome ?? 0
+            const pinia =
+              document.querySelector('#__nuxt')?.__vue_app__?.config
+                ?.globalProperties?.$pinia
+            const msg = pinia?.state?.value?.message
+            if (!msg?.byUserList) return null
+            for (const userId in msg.byUserList) {
+              const m = msg.byUserList[userId].find((m) => m.id === msgId)
+              if (m !== undefined) return m.hasoutcome ?? 0
             }
             return null
           }, posted.id),
