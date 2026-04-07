@@ -14,6 +14,7 @@ vi.mock('~/composables/useMe', () => ({
 // Mock auth store
 const mockAuthStore = {
   user: null,
+  auth: { persistent: null },
 }
 vi.mock('~/stores/auth', () => ({
   useAuthStore: () => mockAuthStore,

@@ -129,9 +129,7 @@
               display-message-link
             />
             <div
-              v-if="
-                homegroup && group && !homegroupids.includes(parseInt(group.id))
-              "
+              v-if="homegroup && groupid && groupid !== homegroupids[0]"
               class="small text-danger"
             >
               Possibly should be on {{ homegroup }}

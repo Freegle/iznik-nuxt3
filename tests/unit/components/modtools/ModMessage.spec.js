@@ -1017,9 +1017,9 @@ describe('ModMessage', () => {
   })
 
   describe('Wrong group warning', () => {
-    it('does not show warning when message group is in groupsnear (not necessarily first)', async () => {
-      // Message is on group 789. groupsnear returns a closer group (100) first,
-      // then group 789 second. The warning should NOT show.
+    it('shows warning when message group is nearby but not the nearest group', async () => {
+      // Message is on group 789. groupsnear[0] is a closer group (100).
+      // Warning should show because the message is not on the nearest group.
       const wrapper = mountComponent(
         {},
         {
@@ -1035,7 +1035,7 @@ describe('ModMessage', () => {
         }
       )
       await flushPromises()
-      expect(wrapper.text()).not.toContain('Possibly should be on')
+      expect(wrapper.text()).toContain('Possibly should be on Closer Group')
     })
 
     it('shows warning when message group is not in groupsnear at all', async () => {
@@ -1076,13 +1076,33 @@ describe('ModMessage', () => {
       expect(wrapper.text()).toContain('Possibly should be on Other Group')
     })
 
-    it('does not show warning via location API fallback when message group is in fetched groupsnear', async () => {
-      // location has no groupsnear — triggers fallback.
-      // The fetched groupsnear includes group 789, so no warning.
+    it('shows warning when message group is nearby but not the nearest group', async () => {
+      // groupsnear[0] is a closer group; message is on group 789 (further away).
+      // Warning should fire because the message is not on the nearest group.
       mockLocationStore.fetch.mockResolvedValue({
         groupsnear: [
           { id: 100, namedisplay: 'Closer Group', ontn: true },
           { id: 789, namedisplay: 'Test Group', ontn: true },
+        ],
+      })
+      const wrapper = mountComponent(
+        {},
+        {
+          location: { name: 'SW1A 1AA', lat: 51.5, lng: -0.1 },
+          lat: 51.5,
+          lng: -0.1,
+        }
+      )
+      await flushPromises()
+      expect(wrapper.text()).toContain('Possibly should be on Closer Group')
+    })
+
+    it('does not show warning when message group is the nearest group', async () => {
+      // groupsnear[0] is group 789 — the message IS on the nearest group, so no warning.
+      mockLocationStore.fetch.mockResolvedValue({
+        groupsnear: [
+          { id: 789, namedisplay: 'Test Group', ontn: true },
+          { id: 100, namedisplay: 'Further Group', ontn: true },
         ],
       })
       const wrapper = mountComponent(
