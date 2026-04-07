@@ -104,6 +104,62 @@ describe('spammer store', () => {
       expect(mockMemberStore.list[200].spammer.id).toBe(99)
       expect(spammerStore.list[0].user.spammer.id).toBe(99)
     })
+
+    it('propagates heldby into member object so Hold button hides after hold', () => {
+      // Bug: addAll() was not setting item.heldby on the member object.
+      // Template uses !member.heldby to show/hide Hold/Confirm/Reject buttons.
+      // Without this fix, held entries always show Hold button again after re-fetch.
+      const spammerItem = {
+        id: 42,
+        userid: 100,
+        collection: 'PendingAdd',
+        reason: 'Sent spam',
+        added: '2026-04-04T00:00:00Z',
+        byuserid: null,
+        heldby: 999, // held by moderator with id 999
+        heldat: '2026-04-07T10:00:00Z',
+      }
+
+      mockUserStore.list[100] = {
+        id: 100,
+        displayname: 'Test User',
+        email: 'test@example.com',
+      }
+
+      spammerStore.addAll([spammerItem])
+
+      const member = mockMemberStore.list[100]
+      // member.heldby must be set so template's !member.heldby is falsy
+      // and Hold/Confirm/Reject buttons are hidden.
+      expect(member.heldby).toBe(999)
+      expect(member.spammer.heldby).toBe(999)
+      expect(member.spammer.heldat).toBe('2026-04-07T10:00:00Z')
+    })
+
+    it('sets heldby to null when entry is not held', () => {
+      const spammerItem = {
+        id: 42,
+        userid: 100,
+        collection: 'PendingAdd',
+        reason: 'Sent spam',
+        added: '2026-04-04T00:00:00Z',
+        byuserid: null,
+        heldby: null,
+        heldat: null,
+      }
+
+      mockUserStore.list[100] = {
+        id: 100,
+        displayname: 'Test User',
+        email: 'test@example.com',
+      }
+
+      spammerStore.addAll([spammerItem])
+
+      const member = mockMemberStore.list[100]
+      expect(member.heldby).toBeNull()
+      expect(member.spammer.heldby).toBeNull()
+    })
   })
 
   describe('confirm', () => {

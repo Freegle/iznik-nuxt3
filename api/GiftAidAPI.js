@@ -59,6 +59,8 @@ export default class GiftAidAPI extends BaseAPI {
       housenameornumber,
       reviewed,
       deleted,
+      firstname,
+      lastname,
     }
     return this.$patchv2('/giftaid', data)
   }

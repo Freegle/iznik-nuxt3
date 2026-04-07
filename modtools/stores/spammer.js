@@ -80,12 +80,15 @@ export const useSpammerStore = defineStore({
           item.user = {
             ...userData,
             userid: userData.id,
+            heldby: item.heldby || null,
             spammer: {
               id: item.id,
               collection: item.collection,
               reason: item.reason,
               added: item.added,
               byuserid: item.byuserid,
+              heldby: item.heldby || null,
+              heldat: item.heldat || null,
             },
           }
 
@@ -106,12 +109,15 @@ export const useSpammerStore = defineStore({
           item.user = {
             id: item.userid,
             userid: item.userid,
+            heldby: item.heldby || null,
             spammer: {
               id: item.id,
               collection: item.collection,
               reason: item.reason,
               added: item.added,
               byuserid: item.byuserid,
+              heldby: item.heldby || null,
+              heldat: item.heldat || null,
             },
           }
         }

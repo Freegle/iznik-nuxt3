@@ -478,17 +478,18 @@ describe('ModChatReview', () => {
       expect(wrapper.vm.chatPov).toBe(789)
     })
 
-    it('returns 0 (not null/undefined) for User2Mod community modmail where user2 is NULL in DB (Go returns 0)', () => {
+    it('returns null for User2Mod community modmail where user2 is NULL in DB (Go returns 0, which is not a valid user ID)', () => {
       globalThis.__mockChatStore.byChatId = vi.fn(() => ({
         user1: 100,
         user2: 0,
         chattype: 'User2Mod',
       }))
       const wrapper = mountComponent()
-      expect(wrapper.vm.chatPov).toBe(0)
+      // user2=0 is not a real user; null lets useChat.js use myid-based alignment instead
+      expect(wrapper.vm.chatPov).toBeNull()
     })
 
-    it('passes chatPov to ModChatViewButton (not per-message touserid)', () => {
+    it('does not fall through to per-message touserid when chat is loaded (uses chatroom-level pov)', () => {
       globalThis.__mockChatStore.byChatId = vi.fn(() => ({
         user1: 100,
         user2: 0,
@@ -496,9 +497,9 @@ describe('ModChatReview', () => {
       }))
       const wrapper = mountComponent({ touserid: 999 })
       const viewButton = wrapper.find('.chat-view-button')
-      // chatPov should be chat.user2 (0), NOT message.touserid (999)
+      // chat is loaded → use chat.user2 (0 → null), NOT per-message touserid (999)
       expect(viewButton.exists()).toBe(true)
-      expect(wrapper.vm.chatPov).toBe(0)
+      expect(wrapper.vm.chatPov).toBeNull()
     })
 
     it('falls back to message.touserid when chat not found', () => {
