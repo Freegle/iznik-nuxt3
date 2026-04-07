@@ -367,13 +367,19 @@ const deDuplicatedMessages = computed(() => {
   let ret = []
   const dups = []
   const ids = {}
+  const seen = new Set()
 
   filteredMessagesToShow.value
     .filter((m) => !failedIds.value.has(m.id))
     .forEach((m) => {
+      if (seen.has(m.id)) {
+        return
+      }
+
       const message = filteredMessagesInStore.value[m.id]
 
       if (!message) {
+        seen.add(m.id)
         ret.push(m)
       } else if (m.id in ids) {
         // Already got this id
