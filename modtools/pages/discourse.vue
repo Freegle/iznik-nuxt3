@@ -16,6 +16,19 @@ const { myid } = useMe()
 
 function redirect() {
   console.log('modtools discourse redirect')
+
+  // Set the Iznik-Discourse-SSO cookie so that discourse_sso.php (PHP V1) can
+  // authenticate us.  With V2 (Go API + JWT), logins never touch the PHP session,
+  // so the cookie is never set automatically.  We reconstruct it here from the
+  // persistent token in the auth store before handing off to Discourse.
+  const authStore = useAuthStore()
+  if (authStore.auth.persistent) {
+    document.cookie =
+      'Iznik-Discourse-SSO=' +
+      encodeURIComponent(JSON.stringify(authStore.auth.persistent)) +
+      '; path=/; domain=modtools.org; secure; samesite=none'
+  }
+
   window.location = 'https://discourse.ilovefreegle.org'
 }
 
