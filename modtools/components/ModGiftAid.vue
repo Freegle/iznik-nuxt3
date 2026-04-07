@@ -4,8 +4,16 @@
       <b-col cols="6" md="3" class="ps-3">
         <div>
           <b-form-input
-            v-model="editgiftaid.fullname"
+            v-model="editgiftaid.firstname"
+            class="mb-1"
             :class="{ 'border-danger': nameInvalid }"
+            placeholder="First name"
+          />
+          <b-form-input
+            v-model="editgiftaid.lastname"
+            class="mb-1"
+            :class="{ 'border-danger': nameInvalid }"
+            placeholder="Last name"
           />
           <div v-if="email">
             <!-- eslint-disable-next-line -->
@@ -106,7 +114,10 @@ const hide = ref(false)
 
 const nameInvalid = computed(() => {
   if (!editgiftaid.value) return false
-  return editgiftaid.value?.fullname.indexOf(' ') === -1
+  const { firstname, lastname, fullname } = editgiftaid.value
+  // Valid if dedicated columns are both set, or if fullname contains a space
+  if (firstname && lastname) return false
+  return !fullname || !fullname.includes(' ')
 })
 
 const postcodeInvalid = computed(() => {
@@ -127,8 +138,16 @@ const email = computed(() => {
 })
 
 function save(callback) {
-  const { id, period, fullname, homeaddress, postcode, housenameornumber } =
-    editgiftaid.value
+  const {
+    id,
+    period,
+    fullname,
+    firstname,
+    lastname,
+    homeaddress,
+    postcode,
+    housenameornumber,
+  } = editgiftaid.value
   $api.giftaid.edit(
     id,
     period,
@@ -136,7 +155,10 @@ function save(callback) {
     homeaddress,
     postcode,
     housenameornumber,
-    false
+    false,
+    false,
+    firstname,
+    lastname
   )
   callback()
 }
