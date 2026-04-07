@@ -41,6 +41,11 @@ test.describe('Extend expired deadline', () => {
     expect(posted.id).toBeTruthy()
     console.log(`Posted message id=${posted.id}`)
 
+    // Parse to number: the API returns msg.id as a number but posted.id comes
+    // from getAttribute() which always returns a string.  Strict equality would
+    // never match, so convert once here and use the numeric form everywhere.
+    const messageId = parseInt(posted.id, 10)
+
     // Intercept the client-side fetchByUser API call and mark our test post
     // as expired (hasoutcome=1).  The myposts.vue watcher uses
     // { immediate: true }, so it fires on every hydration and calls
@@ -51,7 +56,7 @@ test.describe('Extend expired deadline', () => {
       const body = await response.json()
       if (Array.isArray(body)) {
         body.forEach((msg) => {
-          if (msg.id === posted.id) msg.hasoutcome = 1
+          if (msg.id === messageId) msg.hasoutcome = 1
         })
       }
       await route.fulfill({
