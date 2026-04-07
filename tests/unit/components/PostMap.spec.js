@@ -805,6 +805,31 @@ describe('PostMap', () => {
         mockMessageStore.fetchInBounds || mockMessageStore.fetchMyGroups
       ).toBeDefined()
     })
+
+    it('excludes messages already in primary list from secondary (no duplicate IDs)', async () => {
+      // Message ID 1 is in both primary and secondary.
+      // The Set-based messageIds computed must filter it out so no duplicate key warning fires.
+      mockMessageStore.fetchMyGroups.mockResolvedValue([
+        { id: 1, lat: 52.5, lng: -1, groupid: 1, type: 'Offer' },
+      ])
+      mockMessageStore.fetchInBounds.mockResolvedValue([
+        { id: 1, lat: 52.5, lng: -1, groupid: 1, type: 'Offer' }, // duplicate
+        { id: 2, lat: 52.6, lng: -1.1, groupid: 2, type: 'Offer' },
+      ])
+
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const wrapper = await createWrapper()
+      await flushPromises()
+
+      // No Vue "Duplicate keys" warning should have fired
+      const dupKeyWarning = warnSpy.mock.calls.some((args) =>
+        args.some((a) => typeof a === 'string' && a.includes('Duplicate keys'))
+      )
+      expect(dupKeyWarning).toBe(false)
+
+      warnSpy.mockRestore()
+      wrapper.unmount()
+    })
   })
 
   describe('component cleanup', () => {

@@ -378,7 +378,7 @@ const isochroneOptions = computed(() => {
 })
 
 const messageIds = computed(() => {
-  return messageList.value.map((m) => m.id)
+  return new Set(messageList.value.map((m) => m.id))
 })
 
 const secondaryMessagesForMap = computed(() => {
@@ -390,7 +390,7 @@ const secondaryMessagesForMap = computed(() => {
     // Return anything relevant we have fetched which is not already in the primary one.
     return secondaryMessageList.value.filter((m) => {
       return (
-        !messageIds.value[m.id] &&
+        !messageIds.value.has(m.id) &&
         (!props.groupid || m.groupid === props.groupid) &&
         (props.type === 'All' || m.type === props.type)
       )
