@@ -212,6 +212,91 @@ describe('Chat message alignment (useChatMT.js — ModTools)', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Regression tests for pov=0 bug (User2Mod community modmail, DB user2=NULL)
+// ---------------------------------------------------------------------------
+// When a User2Mod chat has user2=NULL in the DB, the Go API returns user2=0.
+// The chat store's touserid hydration skips 0 (falsy), so message.touser is
+// never set either.  chatPov therefore resolves to 0 (not null).
+//
+// The old code used `if (pov)` which treats 0 as "no pov", falling through to
+// `userid === myid`.  Since the reviewing mod is never a chat participant, ALL
+// messages returned false → both sides landed on the left → looked like one
+// person talking to themselves.
+//
+// The fix is `if (pov !== null)` so that pov=0 still enters the User2Mod
+// branch (which does not use the pov value itself, only needs it to be
+// non-null to know we are in a modtools viewing context).
+
+function makeUseChatPovFn({ myid, chattype, user1, pov }) {
+  // Mirrors useChat.js useChatMessageBase messageIsFromCurrentUser.
+  // Uses the FIXED logic: if (pov !== null) instead of if (pov).
+  return function isFromCurrentUser(messageUserid) {
+    if (pov !== null) {
+      if (chattype === 'User2User') {
+        if (pov === user1) return messageUserid === user1
+        return messageUserid !== user1
+      }
+      if (chattype === 'User2Mod') {
+        return user1 !== messageUserid
+      }
+    }
+    return messageUserid === myid
+  }
+}
+
+describe('useChat.js pov-aware alignment (ModChatModal path)', () => {
+  describe('User2Mod — community modmail, pov=0 (user2=NULL in DB)', () => {
+    it('member messages left, mod messages right when pov=0', () => {
+      const fn = makeUseChatPovFn({
+        myid: 99,
+        chattype: 'User2Mod',
+        user1: 1,
+        pov: 0,
+      })
+      expect(fn(1)).toBe(false) // member → LEFT
+      expect(fn(50)).toBe(true) // mod A → RIGHT
+      expect(fn(51)).toBe(true) // mod B → RIGHT
+    })
+
+    it('pov=null falls back to myid match (normal user view)', () => {
+      const fn = makeUseChatPovFn({
+        myid: 99,
+        chattype: 'User2Mod',
+        user1: 1,
+        pov: null,
+      })
+      expect(fn(1)).toBe(false) // member → LEFT (1 !== 99)
+      expect(fn(99)).toBe(true) // reviewing user's own messages → RIGHT
+      expect(fn(50)).toBe(false) // other mod → LEFT (not myid)
+    })
+  })
+
+  describe('User2User — consistent pov=user2 from chatroom', () => {
+    it('user1 left, user2 right when pov=user2', () => {
+      const fn = makeUseChatPovFn({
+        myid: 99,
+        chattype: 'User2User',
+        user1: 1,
+        pov: 2,
+      })
+      expect(fn(1)).toBe(false) // user1 → LEFT
+      expect(fn(2)).toBe(true) // user2 → RIGHT
+    })
+
+    it('user1 right, user2 left when pov=user1', () => {
+      const fn = makeUseChatPovFn({
+        myid: 99,
+        chattype: 'User2User',
+        user1: 1,
+        pov: 1,
+      })
+      expect(fn(1)).toBe(true) // user1 → RIGHT
+      expect(fn(2)).toBe(false) // user2 → LEFT
+    })
+  })
+})
+
 // Test the MT me/otheruser computed logic with numeric user IDs from V2 API
 describe('useChatMT — me/otheruser with numeric IDs', () => {
   // Simulates the me computed from useChatMT.js

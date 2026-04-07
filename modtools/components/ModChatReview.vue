@@ -141,10 +141,7 @@
       <b-card-footer>
         <div class="d-flex flex-wrap justify-content-start">
           <template v-if="!message.widerchatreview && isActiveMod">
-            <ModChatViewButton
-              :id="message.chatid"
-              :pov="message.touserid || message.touser?.id"
-            />
+            <ModChatViewButton :id="message.chatid" :pov="chatPov" />
             <b-button
               v-if="message.held && me.id === message.held.id"
               variant="warning"
@@ -261,7 +258,10 @@ const message = computed(() => chatStore.messageById(props.messageid))
 // regardless of which direction the reviewed message was sent.
 const chatPov = computed(() => {
   const chat = chatStore.byChatId(message.value?.chatid)
-  return chat?.user2 || message.value?.touserid || message.value?.touser?.id
+  if (chat) {
+    return chat.user2 ?? null
+  }
+  return message.value?.touserid ?? null
 })
 
 const isActiveMod = computed(() => {
