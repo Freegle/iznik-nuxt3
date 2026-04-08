@@ -194,12 +194,16 @@ function getModalName(el) {
   )
 }
 
-function extractElementInfo(el) {
+export function extractElementInfo(el) {
   // Text nodes don't have .closest(); walk up to the parent element.
   if (!(el instanceof Element)) {
     el = el.parentElement
     if (!el) return null
   }
+
+  // Guard against old browsers (e.g. Android WebView pre-2016, old iOS Safari)
+  // where certain Element subtypes don't implement closest().
+  if (typeof el.closest !== 'function') return null
 
   // Find meaningful interactive element.
   const interactive = el.closest(
