@@ -46,6 +46,9 @@ export const useUserStore = defineStore({
     },
     async fetchMT(params, force = false) {
       const id = parseInt(params.id)
+      if (isNaN(id)) {
+        return
+      }
       if (!force && id && this.list[id]) {
         return this.list[id]
       }
