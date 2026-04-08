@@ -45,7 +45,13 @@
       </div>
       <div v-if="id || term">
         <p v-if="groupid && group" class="mt-1">
-          This group has {{ pluralise('member', group.membercount, true) }}.
+          <span v-if="filterLabel && memberStore.filtercount !== null">
+            {{ pluralise(filterLabel, memberStore.filtercount, true) }}
+            ({{ pluralise('member', group.membercount, true) }} total).
+          </span>
+          <span v-else>
+            This group has {{ pluralise('member', group.membercount, true) }}.
+          </span>
         </p>
         <ModMembers />
         <infinite-loading
@@ -153,6 +159,15 @@ const groupName = computed(() => {
   }
   return null
 })
+
+const filterLabels = {
+  1: 'member with notes',
+  2: 'moderator',
+  3: 'bouncing member',
+  5: 'banned member',
+  6: 'member with mod mails',
+}
+const filterLabel = computed(() => filterLabels[filter.value] || null)
 
 // Watchers
 watch(filter, (newVal) => {

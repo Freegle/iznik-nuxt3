@@ -12,6 +12,7 @@ export const useMemberStore = defineStore({
     instance: 1,
     ratings: [],
     rawindex: 0,
+    filtercount: null,
   }),
   actions: {
     init(config) {
@@ -23,6 +24,7 @@ export const useMemberStore = defineStore({
       this.instance = 1
       this.ratings = []
       this.rawindex = 0
+      this.filtercount = null
     },
     reviewHeld(params) {
       Object.keys(this.list).forEach((key) => {
@@ -94,13 +96,14 @@ export const useMemberStore = defineStore({
         params.context = params.context.id
       }
 
-      const { members, context, ratings } = await api(
+      const { members, context, ratings, filtercount } = await api(
         this.config
       ).memberships.fetchMembers(params)
 
       // console.log('fetchMembers', this.instance, instance, members.length)
 
       if (this.instance === instance) {
+        this.filtercount = filtercount
         for (let i = 0; i < members.length; i++) {
           // Ensure collection and groupid are set from params as fallback.
           if (!members[i].collection) members[i].collection = params.collection
