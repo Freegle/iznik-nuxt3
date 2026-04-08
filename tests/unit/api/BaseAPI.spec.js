@@ -16,12 +16,15 @@ vi.mock('~/stores/auth', () => ({
   }),
 }))
 
+const mockMiscStore = {
+  modtools: false,
+  online: true,
+  api: mockApiCounter,
+  waitForOnline: mockWaitForOnline,
+}
+
 vi.mock('~/stores/misc', () => ({
-  useMiscStore: () => ({
-    modtools: false,
-    api: mockApiCounter,
-    waitForOnline: mockWaitForOnline,
-  }),
+  useMiscStore: () => mockMiscStore,
 }))
 
 vi.mock('~/stores/loggingContext', () => ({
@@ -49,6 +52,7 @@ let BaseAPI
 describe('BaseAPI', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    mockMiscStore.online = true
 
     // Dynamic import after mocks are set up
     const mod = await import('~/api/BaseAPI.js')
@@ -125,6 +129,59 @@ describe('BaseAPI', () => {
       const result = await api.$requestv2('GET', '/test', {})
 
       expect(result).toEqual({ ret: 0, items: [1, 2, 3] })
+      expect(mockCaptureMessage).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('network errors (no HTTP response)', () => {
+    it('logs network failure to Sentry when online (likely server issue)', async () => {
+      mockMiscStore.online = true
+      mockFetch.mockRejectedValue(new Error('Too many retries, give up'))
+
+      const api = createApi()
+
+      try {
+        await api.$requestv2('POST', '/message', { data: {} })
+      } catch (e) {
+        // expected to throw
+      }
+
+      expect(mockCaptureMessage).toHaveBeenCalledWith(
+        expect.stringContaining('API network failure POST /message'),
+        expect.objectContaining({
+          level: 'warning',
+          tags: expect.objectContaining({ error_type: 'network' }),
+        })
+      )
+    })
+
+    it('does not log to Sentry when offline (user network problem)', async () => {
+      mockMiscStore.online = false
+      mockFetch.mockRejectedValue(new Error('Too many retries, give up'))
+
+      const api = createApi()
+
+      try {
+        await api.$requestv2('POST', '/message', { data: {} })
+      } catch (e) {
+        // expected to throw
+      }
+
+      expect(mockCaptureMessage).not.toHaveBeenCalled()
+    })
+
+    it('does not log to Sentry when page is unloading', async () => {
+      mockMiscStore.online = true
+      mockFetch.mockRejectedValue(new Error('Unloading, no retry'))
+
+      const api = createApi()
+
+      try {
+        await api.$requestv2('POST', '/message', { data: {} })
+      } catch (e) {
+        // expected to throw
+      }
+
       expect(mockCaptureMessage).not.toHaveBeenCalled()
     })
   })

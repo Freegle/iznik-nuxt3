@@ -230,6 +230,27 @@ export default class BaseAPI {
         console.log('Aborted - ignore')
         return new Promise(function (resolve) {})
       }
+
+      if (
+        status === null &&
+        !e.message.match(/.*unload.*/i) &&
+        useMiscStore().online
+      ) {
+        // Network failure with no HTTP response (e.g. retries exhausted) while the online
+        // check believes we have connectivity.  This suggests a server-side or routing
+        // problem rather than the user's network being down — worth investigating.
+        // Skip when offline (user's network is known to be down — not actionable) and
+        // when unloading (user navigated away — expected).
+        if (typeof Sentry?.captureMessage === 'function') {
+          Sentry.captureMessage(
+            `API network failure ${method} ${path}: ${e.message}`,
+            {
+              level: 'warning',
+              tags: { api_path: path, error_type: 'network' },
+            }
+          )
+        }
+      }
     } finally {
       useMiscStore().api(-1)
     }
@@ -263,7 +284,7 @@ export default class BaseAPI {
       // decisions.
       const log = typeof logError === 'function' ? logError(data) : logError
 
-      if (log && (status !== null || statusstr !== 'Unknown')) {
+      if (log && status !== null) {
         // Sentry is only initialized on the client, so check before calling
         if (typeof Sentry?.captureMessage === 'function') {
           Sentry.captureMessage(
