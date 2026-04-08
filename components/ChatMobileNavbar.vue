@@ -248,6 +248,7 @@
 </template>
 <script setup>
 import { nextTick } from 'vue'
+import { useRouter } from '#imports'
 import {
   clearNavBarTimeout,
   setNavBarHidden,

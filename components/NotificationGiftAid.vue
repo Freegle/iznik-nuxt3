@@ -20,6 +20,7 @@
 </template>
 <script setup>
 import { setupNotification } from '~/composables/useNotification'
+import { useRouter } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 
 const props = defineProps({

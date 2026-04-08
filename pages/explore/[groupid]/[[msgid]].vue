@@ -17,7 +17,7 @@
   </client-only>
 </template>
 <script setup>
-import { computed, useHead, useRuntimeConfig } from '#imports'
+import { computed, useHead, useRuntimeConfig, useRoute } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import ExploreGroup from '~/components/ExploreGroup'

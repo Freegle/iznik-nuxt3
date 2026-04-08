@@ -15,6 +15,7 @@
 
 <script setup>
 import { useModGroupStore } from '@/stores/modgroup'
+import { useRoute } from '#imports'
 const route = useRoute()
 
 const modGroupStore = useModGroupStore()

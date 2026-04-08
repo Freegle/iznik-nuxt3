@@ -23,6 +23,7 @@ import {
   defineAsyncComponent,
   definePageMeta,
   useRouter,
+  useRoute,
 } from '#imports'
 import { useMe } from '~/composables/useMe'
 import NoticeMessage from '~/components/NoticeMessage'

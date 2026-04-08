@@ -14,7 +14,7 @@
   </b-row>
 </template>
 <script setup>
-import { useHead, useRuntimeConfig } from '#imports'
+import { useHead, useRuntimeConfig, useRoute } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import DonationThank from '~/components/DonationThank.vue'
 

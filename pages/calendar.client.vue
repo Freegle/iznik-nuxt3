@@ -40,6 +40,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 
 const route = useRoute()

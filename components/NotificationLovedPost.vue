@@ -26,6 +26,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from '#imports'
 import { setupNotification } from '~/composables/useNotification'
 import { useNewsfeedStore } from '~/stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'

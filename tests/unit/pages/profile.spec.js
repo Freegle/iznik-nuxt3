@@ -24,6 +24,10 @@ vi.mock('~/stores/user', () => ({
 let mockRouteReturn = { params: { id: '123' }, query: {} }
 const mockRouter = { back: vi.fn(), push: vi.fn() }
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {
@@ -34,7 +38,9 @@ vi.mock('#imports', async () => {
   }
 })
 
-// Nuxt macros
+// Nuxt auto-imports
+globalThis.__testUseRoute = () => mockRouteReturn
+globalThis.__testUseRouter = () => mockRouter
 globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })

@@ -32,7 +32,7 @@
 </template>
 <script setup>
 import NoticeMessage from '~/components/NoticeMessage'
-import { useHead, useRuntimeConfig } from '#imports'
+import { useHead, useRuntimeConfig, useRoute } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'
 

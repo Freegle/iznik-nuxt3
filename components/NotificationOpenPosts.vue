@@ -26,6 +26,7 @@
 <script setup>
 import { computed } from 'vue'
 import pluralize from 'pluralize'
+import { useRouter } from '#imports'
 import { setupNotification } from '~/composables/useNotification'
 
 const props = defineProps({

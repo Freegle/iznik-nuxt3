@@ -31,7 +31,7 @@
 <script setup>
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
-import { ref } from '#imports'
+import { ref, useRoute, useRouter } from '#imports'
 
 const MicroVolunteeringCheckMessage = defineAsyncComponent(() =>
   import('~/components/MicroVolunteeringCheckMessage')

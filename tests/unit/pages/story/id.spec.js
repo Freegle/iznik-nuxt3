@@ -35,7 +35,28 @@ vi.mock('~/stores/stories', () => ({
 // Mutable route
 let mockRouteParams = { id: '7' }
 
-globalThis.useRoute = () => ({
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams,
+      query: {},
+      path: '/',
+      name: 'story-id',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
   params: mockRouteParams,
   query: {},
   path: '/',

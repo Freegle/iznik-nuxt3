@@ -27,7 +27,19 @@ const { mockFromuser, mockNewsfeed, mockNotificationago } = vi.hoisted(() => {
   }
 })
 
-globalThis.useRouter = () => mockRouter
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => mockRouter,
+  }
+})
+
+globalThis.__testUseRouter = () => mockRouter
 
 vi.mock('~/composables/useNotification', () => ({
   setupNotification: vi.fn(() =>

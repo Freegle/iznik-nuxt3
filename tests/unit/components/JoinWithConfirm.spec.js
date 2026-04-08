@@ -4,6 +4,10 @@ import JoinWithConfirm from '~/components/JoinWithConfirm.vue'
 
 const mockPush = vi.fn()
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', () => ({
   useRouter: () => ({
     push: mockPush,

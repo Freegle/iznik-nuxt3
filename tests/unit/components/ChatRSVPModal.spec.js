@@ -14,7 +14,19 @@ const { mockPush, mockHide, mockRsvp, mockHideChat, mockData, mockUserId } =
     mockUserId: { value: 1 },
   }))
 
-globalThis.useRouter = () => ({ push: mockPush })
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => ({ push: mockPush }),
+  }
+})
+
+globalThis.__testUseRouter = () => ({ push: mockPush })
 
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({

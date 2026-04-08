@@ -35,7 +35,29 @@ vi.mock('~/stores/volunteering', () => ({
 let mockRouteParams = { id: '42' }
 const mockRouterPush = vi.fn()
 
-globalThis.useRoute = () => ({
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams,
+      query: {},
+      path: '/',
+      name: 'volunteering-id',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+    useRouter: () => ({ push: mockRouterPush }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
   params: mockRouteParams,
   query: {},
   path: '/',
@@ -45,7 +67,7 @@ globalThis.useRoute = () => ({
   redirectedFrom: undefined,
   meta: {},
 })
-globalThis.useRouter = () => ({ push: mockRouterPush })
+globalThis.__testUseRouter = () => ({ push: mockRouterPush })
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

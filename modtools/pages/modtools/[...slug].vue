@@ -8,6 +8,7 @@
 </template>
 
 <script setup>
+import { useRoute, useRouter } from '#imports'
 const path = computed(() => {
   const route = useRoute()
   let path = ''

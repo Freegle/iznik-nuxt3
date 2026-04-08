@@ -33,8 +33,21 @@ const mockRouter = {
   push: vi.fn(),
 }
 
-globalThis.useRoute = () => mockRoute
-globalThis.useRouter = () => mockRouter
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => mockRoute,
+    useRouter: () => mockRouter,
+  }
+})
+
+globalThis.__testUseRoute = () => mockRoute
+globalThis.__testUseRouter = () => mockRouter
 
 describe('ModMenuItemLeft', () => {
   function mountModMenuItemLeft(props = {}, routeOverrides = {}) {

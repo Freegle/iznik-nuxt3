@@ -163,6 +163,7 @@
 <script setup>
 import NavbarMobilePost from './NavbarMobilePost'
 import NavbarMobileItem from './NavbarMobileItem'
+import { useRoute } from '#imports'
 import {
   clearNavBarTimeout,
   setNavBarHidden,

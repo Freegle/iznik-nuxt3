@@ -55,6 +55,7 @@
 //  - Message id/subject search changes URL <term>
 
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { useRoute, useRouter } from '#imports'
 import { useMessageStore } from '@/stores/message'
 import { setupModMessages } from '@/composables/useModMessages'
 import { useMe } from '~/composables/useMe'

@@ -38,7 +38,31 @@ vi.mock('~/stores/auth', () => ({
 const mockRouteParams = ref({ id: undefined })
 const mockRouterPush = vi.fn()
 
-globalThis.useRoute = () => ({
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams.value,
+      query: {},
+      path: '/',
+      name: 'modtools-chats',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+    useRouter: () => ({
+      push: mockRouterPush,
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
   params: mockRouteParams.value,
   query: {},
   path: '/',
@@ -48,7 +72,7 @@ globalThis.useRoute = () => ({
   redirectedFrom: undefined,
   meta: {},
 })
-globalThis.useRouter = () => ({
+globalThis.__testUseRouter = () => ({
   push: mockRouterPush,
 })
 

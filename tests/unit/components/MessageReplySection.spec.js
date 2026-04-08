@@ -76,7 +76,28 @@ vi.mock('~/constants', () => ({
   FAR_AWAY: 20,
 }))
 
-globalThis.useRoute = () => ({
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: {},
+      query: {},
+      path: '/message/1',
+      name: 'message-id',
+      fullPath: '/message/1',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
   params: {},
   query: {},
   path: '/message/1',

@@ -22,7 +22,7 @@
   </client-only>
 </template>
 <script setup>
-import { ref, onMounted, definePageMeta } from '#imports'
+import { ref, onMounted, definePageMeta, useRoute } from '#imports'
 import { useJobStore } from '~/stores/job'
 import { useClientLog } from '~/composables/useClientLog'
 import NoticeMessage from '~/components/NoticeMessage'

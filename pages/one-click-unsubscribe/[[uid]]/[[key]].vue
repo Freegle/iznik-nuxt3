@@ -11,7 +11,7 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/stores/auth'
-import { useRoute } from '#imports'
+import { useRoute, useRouter } from '#imports'
 
 const authStore = useAuthStore()
 const route = useRoute()

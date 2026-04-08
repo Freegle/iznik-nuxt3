@@ -183,6 +183,7 @@ import {
   definePageMeta,
   useHead,
   useRuntimeConfig,
+  useRoute,
 } from '#imports'
 
 definePageMeta({

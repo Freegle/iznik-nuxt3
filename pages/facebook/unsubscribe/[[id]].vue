@@ -39,6 +39,7 @@
 </template>
 <script setup>
 import { useUserStore } from '~/stores/user'
+import { useRoute } from '#imports'
 import { dateshort } from '~/composables/useTimeFormat'
 
 const userStore = useUserStore()

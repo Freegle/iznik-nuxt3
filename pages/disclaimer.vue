@@ -90,6 +90,7 @@
 </template>
 <script setup>
 import { buildHead } from '~/composables/useBuildHead'
+import { useRoute } from '#imports'
 import ExternalLink from '~/components/ExternalLink.vue'
 
 const runtimeConfig = useRuntimeConfig()

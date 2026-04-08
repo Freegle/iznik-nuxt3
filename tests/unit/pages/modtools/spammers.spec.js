@@ -21,7 +21,28 @@ const mockAuthStore = {
 }
 
 // Mock vue-router
-globalThis.useRoute = () => ({
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: {},
+      query: {},
+      path: '/spammers',
+      name: 'spammers',
+      fullPath: '/spammers',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
   params: {},
   query: {},
   path: '/spammers',

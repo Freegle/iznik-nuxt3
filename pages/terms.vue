@@ -16,6 +16,7 @@
 </template>
 <script setup>
 import { buildHead } from '~/composables/useBuildHead'
+import { useRoute } from '#imports'
 import TermsOfUse from '~/components/TermsOfUse'
 
 // Setup page head

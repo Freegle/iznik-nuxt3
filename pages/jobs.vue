@@ -65,6 +65,7 @@ import {
   onMounted,
   useHead,
   useRuntimeConfig,
+  useRoute,
 } from '#imports'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete'
 import NoticeMessage from '~/components/NoticeMessage'

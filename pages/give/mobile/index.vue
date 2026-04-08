@@ -6,6 +6,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { useRouter } from '#imports'
 
 const router = useRouter()
 

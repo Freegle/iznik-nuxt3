@@ -185,6 +185,7 @@ import {
   definePageMeta,
   useHead,
   useRuntimeConfig,
+  useRoute,
 } from '#imports'
 import InviteSomeone from '~/components/InviteSomeone'
 import { buildHead } from '~/composables/useBuildHead'

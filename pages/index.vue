@@ -119,6 +119,8 @@ import {
   nextTick,
   useHead,
   useRuntimeConfig,
+  useRoute,
+  useRouter,
 } from '#imports'
 import Api from '~/api'
 

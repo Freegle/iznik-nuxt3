@@ -179,6 +179,7 @@ import {
   nextTick,
   onMounted,
 } from 'vue'
+import { useRoute } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { milesAway } from '~/composables/useDistance'
 import { useMe } from '~/composables/useMe'

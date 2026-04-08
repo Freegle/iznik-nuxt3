@@ -15,6 +15,7 @@
 </template>
 <script setup>
 import GroupMarkerRich from './GroupMarkerRich'
+import { useRouter } from '#imports'
 
 const props = defineProps({
   group: {

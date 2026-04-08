@@ -38,7 +38,13 @@
 <script setup>
 import { buildHead } from '~/composables/useBuildHead'
 import { useStoryStore } from '~/stores/stories'
-import { ref, defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
+import {
+  ref,
+  defineAsyncComponent,
+  useHead,
+  useRuntimeConfig,
+  useRoute,
+} from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 import StoryOne from '~/components/StoryOne'
 

@@ -65,6 +65,8 @@ import {
   defineAsyncComponent,
   useRuntimeConfig,
   useHead,
+  useRoute,
+  useRouter,
 } from '#imports'
 import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'

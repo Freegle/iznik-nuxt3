@@ -57,7 +57,7 @@ import dayjs from 'dayjs'
 import { defineAsyncComponent } from 'vue'
 import { buildHead } from '~/composables/useBuildHead'
 import HelpChatFlow from '~/components/HelpChatFlow.vue'
-import { ref, computed } from '#imports'
+import { ref, computed, useRoute } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
 import { useDebugStore } from '~/stores/debug'
 

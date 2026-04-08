@@ -51,6 +51,7 @@
   </b-row>
 </template>
 <script setup>
+import { useRouter } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { timeago } from '~/composables/useTimeFormat'
 import { useMe } from '~/composables/useMe'

@@ -18,6 +18,10 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', () => ({
   useRouter: () => ({
     push: mockPush,

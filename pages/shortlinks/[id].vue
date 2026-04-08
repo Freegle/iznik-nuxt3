@@ -32,6 +32,7 @@
 <script setup>
 import { computed } from 'vue'
 import { GChart } from 'vue-google-charts'
+import { useRoute } from '#imports'
 import { useShortlinkStore } from '~/stores/shortlinks'
 
 const shortlinkStore = useShortlinkStore()

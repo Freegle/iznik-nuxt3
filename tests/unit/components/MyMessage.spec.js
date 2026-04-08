@@ -52,6 +52,10 @@ const {
 }))
 
 // Mock #imports - must be before component import takes effect
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

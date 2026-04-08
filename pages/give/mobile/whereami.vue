@@ -108,6 +108,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRouter } from '#imports'
 import PostCode from '~/components/PostCode.vue'
 import ComposeGroup from '~/components/ComposeGroup.vue'
 import NoticeMessage from '~/components/NoticeMessage.vue'

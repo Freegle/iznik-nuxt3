@@ -60,7 +60,7 @@ import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import WizardProgressCompact from '~/components/WizardProgressCompact'
 import { setup, deleteItem } from '~/composables/useCompose'
-import { onMounted, computed, watch, nextTick } from '#imports'
+import { onMounted, computed, watch, nextTick, useRoute } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
 const PostMessageTablet = defineAsyncComponent(() =>

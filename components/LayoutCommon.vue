@@ -129,6 +129,7 @@ import {
   nextTick,
 } from 'vue'
 import SomethingWentWrong from './SomethingWentWrong'
+import { useRoute } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useNuxtApp, useRuntimeConfig } from '#app'
 import { useNotificationStore } from '~/stores/notification'

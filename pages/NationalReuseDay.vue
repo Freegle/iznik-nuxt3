@@ -99,7 +99,13 @@
   </b-row>
 </template>
 <script setup>
-import { onMounted, definePageMeta, useHead, useRuntimeConfig } from '#imports'
+import {
+  onMounted,
+  definePageMeta,
+  useHead,
+  useRuntimeConfig,
+  useRoute,
+} from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import ProxyImage from '~/components/ProxyImage.vue'
 import SupportLink from '~/components/SupportLink.vue'

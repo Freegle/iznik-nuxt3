@@ -36,6 +36,7 @@
 </template>
 
 <script setup>
+import { useRoute } from '#imports'
 const tabIndex = ref(0)
 const loadGroup = ref(null)
 

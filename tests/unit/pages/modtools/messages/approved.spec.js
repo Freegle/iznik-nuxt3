@@ -81,17 +81,14 @@ const mockRouteParams = ref({ id: undefined, term: undefined })
 
 const mockRouterPush = vi.fn()
 
-// Component imports useRoute/useRouter from #imports (Nuxt alias), not vue-router.
-// Use async factory so we can spread Vue's real composition API (ref, computed, etc.)
-// alongside the test-specific route/router stubs.
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
-  const { ref, computed, watch, onMounted, nextTick } = await import('vue')
+  const actual = await vi.importActual('#imports')
   return {
-    ref,
-    computed,
-    watch,
-    onMounted,
-    nextTick,
+    ...actual,
     useRoute: () => ({
       params: mockRouteParams.value,
     }),
@@ -101,8 +98,11 @@ vi.mock('#imports', async () => {
   }
 })
 
-// Make useRouter available globally (Nuxt auto-imports this)
-globalThis.useRouter = () => ({
+// Make useRoute/useRouter available globally (Nuxt auto-imports these)
+globalThis.__testUseRoute = () => ({
+  params: mockRouteParams.value,
+})
+globalThis.__testUseRouter = () => ({
   push: mockRouterPush,
   replace: mockRouterPush,
   currentRoute: { value: { path: '/' } },

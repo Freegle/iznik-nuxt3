@@ -24,6 +24,7 @@
 </template>
 <script setup>
 import { setupNotification } from '~/composables/useNotification'
+import { useRouter } from '#imports'
 import { useNewsfeedStore } from '~/stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'
 
