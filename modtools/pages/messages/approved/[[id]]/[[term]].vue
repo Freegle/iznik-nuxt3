@@ -92,7 +92,13 @@ const loaded = ref(false)
 // Computed properties
 const id = computed(() => {
   const route = useRoute()
-  if (route?.params && 'id' in route.params && route.params.id) {
+  if (!route) {
+    console.warn(
+      'messages/approved: useRoute() returned undefined (SSR hydration race)'
+    )
+    return 0
+  }
+  if ('id' in route.params && route.params.id) {
     return parseInt(route.params.id)
   }
   return 0
