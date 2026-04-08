@@ -10,7 +10,13 @@
               "
               class="me-2"
               tag="From: "
-              :groupid="message.groupid || message.group?.id || 0"
+              :groupid="
+                message.groupid ||
+                message.group?.id ||
+                message.groupidfrom ||
+                message.groupfrom?.id ||
+                0
+              "
               @reload="reload"
             />
             <v-icon
@@ -23,7 +29,13 @@
               :userid="message.touserid || message.touser?.id"
               class="ms-2"
               tag="To: "
-              :groupid="message.groupid || message.group?.id || 0"
+              :groupid="
+                message.groupid ||
+                message.group?.id ||
+                message.groupidfrom ||
+                message.groupfrom?.id ||
+                0
+              "
               @reload="reload"
             />
           </div>

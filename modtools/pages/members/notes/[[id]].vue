@@ -14,12 +14,7 @@
         There are no comments to show at the moment.
       </NoticeMessage>
 
-      <infinite-loading
-        :key="bump"
-        force-use-infinite-wrapper="body"
-        :distance="distance"
-        @infinite="loadMore"
-      >
+      <infinite-loading :key="bump" :distance="distance" @infinite="loadMore">
         <template #no-results>
           <span />
         </template>
