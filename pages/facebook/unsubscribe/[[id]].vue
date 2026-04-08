@@ -38,7 +38,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useUserStore } from '~/stores/user'
 import { dateshort } from '~/composables/useTimeFormat'
 

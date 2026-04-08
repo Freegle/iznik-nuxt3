@@ -25,7 +25,6 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import pluralize from 'pluralize'
 import { setupNotification } from '~/composables/useNotification'
 

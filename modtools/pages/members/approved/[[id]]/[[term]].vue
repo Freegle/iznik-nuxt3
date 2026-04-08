@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, useRoute } from '#imports'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
 import { useMe } from '~/composables/useMe'

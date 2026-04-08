@@ -70,7 +70,6 @@
 </template>
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 import { useSpammerStore } from '~/stores/spammer'
 import { useModMe } from '~/composables/useModMe'

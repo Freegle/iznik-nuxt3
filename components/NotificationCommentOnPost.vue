@@ -23,7 +23,6 @@
   </div>
 </template>
 <script setup>
-import { useRouter } from 'vue-router'
 import { setupNotification } from '~/composables/useNotification'
 import { useNewsfeedStore } from '~/stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'

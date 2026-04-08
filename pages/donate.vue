@@ -175,7 +175,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'

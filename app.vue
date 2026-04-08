@@ -115,7 +115,6 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useNoticeboardStore } from './stores/noticeboard'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'

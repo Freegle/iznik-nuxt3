@@ -17,7 +17,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import NoticeMessage from '~/components/NoticeMessage'

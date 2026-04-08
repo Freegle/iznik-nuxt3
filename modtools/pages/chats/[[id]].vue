@@ -85,7 +85,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { useChatStore } from '~/stores/chat'
 

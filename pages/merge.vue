@@ -92,7 +92,6 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { ref, computed, useRuntimeConfig, defineAsyncComponent } from '#imports'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'

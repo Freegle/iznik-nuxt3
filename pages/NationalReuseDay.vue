@@ -99,7 +99,6 @@
   </b-row>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { onMounted, definePageMeta, useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import ProxyImage from '~/components/ProxyImage.vue'

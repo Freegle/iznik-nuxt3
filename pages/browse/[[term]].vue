@@ -114,7 +114,6 @@
 </template>
 <script setup>
 import dayjs from 'dayjs'
-import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
 import Wkt from 'wicket'
 import { useMessageStore } from '~/stores/message'

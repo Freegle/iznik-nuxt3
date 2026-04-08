@@ -40,7 +40,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { ref, onMounted, defineAsyncComponent } from 'vue'
 import { useMe, fetchMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'

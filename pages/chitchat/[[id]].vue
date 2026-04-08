@@ -186,7 +186,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMiscStore } from '~/stores/misc'
 import { useNewsfeedStore } from '~/stores/newsfeed'

@@ -17,7 +17,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { computed, useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'

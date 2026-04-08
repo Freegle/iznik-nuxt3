@@ -41,7 +41,6 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { useAuthStore } from '~/stores/auth'

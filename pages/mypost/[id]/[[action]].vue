@@ -46,7 +46,6 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { useGroupStore } from '~/stores/group'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMessageStore } from '~/stores/message'

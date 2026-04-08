@@ -14,7 +14,6 @@
   </l-marker>
 </template>
 <script setup>
-import { useRouter } from 'vue-router'
 import GroupMarkerRich from './GroupMarkerRich'
 
 const props = defineProps({

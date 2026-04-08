@@ -72,7 +72,6 @@
 </template>
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
 import { useJobStore } from '~/stores/job'
 import { action } from '~/composables/useClientLog'
 import ExternalLink from '~/components/ExternalLink'

@@ -59,7 +59,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import dayjs from 'dayjs'
-import { useRoute } from 'vue-router'
 import { setupModMessages } from '~/composables/useModMessages'
 import { useAuthStore } from '@/stores/auth'
 import { useMessageStore } from '@/stores/message'

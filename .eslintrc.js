@@ -15,6 +15,23 @@ module.exports = {
   rules: {
     'no-console': 'off',
 
+    // In Nuxt, useRoute/useRouter must come from #imports (or be auto-imported),
+    // not from vue-router directly. Direct vue-router imports can return undefined
+    // during SSR hydration because they bypass Nuxt's context injection.
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          {
+            name: 'vue-router',
+            importNames: ['useRoute', 'useRouter'],
+            message:
+              'Import useRoute/useRouter from #imports instead of vue-router. Direct vue-router imports can return undefined during SSR.',
+          },
+        ],
+      },
+    ],
+
     // We have a lot of legacy code which doesn't define emits.
     'vue/require-explicit-emits': 'off',
     // no-v-model-argument rule is broken for Vue3, which requires that syntax for .sync.
@@ -64,6 +81,7 @@ module.exports = {
     useLoadingIndicator: 'readonly',
     useRuntimeHook: 'readonly',
     useHead: 'readonly',
+    useRoute: 'readonly',
     useRouter: 'readonly',
     ref: 'readonly',
     computed: 'readonly',

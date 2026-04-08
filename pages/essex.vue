@@ -76,7 +76,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
 import Wkt from 'wicket'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'

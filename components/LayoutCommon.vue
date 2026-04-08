@@ -128,7 +128,6 @@ import {
   watch,
   nextTick,
 } from 'vue'
-import { useRoute } from 'vue-router'
 import SomethingWentWrong from './SomethingWentWrong'
 import { useAuthStore } from '~/stores/auth'
 import { useNuxtApp, useRuntimeConfig } from '#app'

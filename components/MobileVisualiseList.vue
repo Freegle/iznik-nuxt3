@@ -30,7 +30,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import MessageSummary from '~/components/MessageSummary'

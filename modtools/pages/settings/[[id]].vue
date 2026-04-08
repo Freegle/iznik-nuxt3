@@ -36,8 +36,6 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
-
 const tabIndex = ref(0)
 const loadGroup = ref(null)
 

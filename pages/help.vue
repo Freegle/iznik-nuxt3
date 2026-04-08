@@ -53,7 +53,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { defineAsyncComponent } from 'vue'
 import { buildHead } from '~/composables/useBuildHead'
