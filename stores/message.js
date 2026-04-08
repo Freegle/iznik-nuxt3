@@ -294,6 +294,11 @@ export const useMessageStore = defineStore({
       if (!active || force || !this.byUserList[userid]) {
         messages = await promise
 
+        // Guard against null/undefined API response (e.g. in test mocks).
+        if (!Array.isArray(messages)) {
+          messages = []
+        }
+
         if (isOwnMessages) {
           for (const message of messages) {
             message.unseen = false
