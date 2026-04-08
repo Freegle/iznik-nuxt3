@@ -64,7 +64,7 @@ test.describe('ModTools Spammer List', () => {
       const auth = JSON.parse(localStorage.getItem('auth') || '{}')
       return auth?.auth?.jwt
     })
-    if (jwt) {
+    if (jwt && testEnv.spammers) {
       for (const sid of testEnv.spammers) {
         await page.request
           .patch('http://apiv2.localhost/api/modtools/spammers', {
