@@ -63,6 +63,11 @@ export default class UserAPI extends BaseAPI {
     return await this.$getv2('/user/' + id + '/membershiphistory')
   }
 
+  async fetchReplies(id, type) {
+    const params = type ? { type } : {}
+    return await this.$getv2('/user/' + id + '/replies', params)
+  }
+
   async fetchLogins(id) {
     return await this.$getv2('/user/' + id + '/logins')
   }

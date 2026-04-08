@@ -73,6 +73,11 @@ describe('ModMemberSummary', () => {
             props: ['userid', 'modmailsonly'],
             methods: { show: vi.fn() },
           },
+          ModRepliesModal: {
+            template: '<div class="replies-modal" />',
+            props: ['userid', 'type'],
+            methods: { show: vi.fn() },
+          },
         },
         mocks: {
           pluralise: (word, count, withNumber) => {
@@ -290,6 +295,11 @@ describe('ModMemberSummary', () => {
         props: ['userid', 'modmailsonly'],
         methods: { show: vi.fn() },
       },
+      ModRepliesModal: {
+        template: '<div class="replies-modal" />',
+        props: ['userid', 'type'],
+        methods: { show: vi.fn() },
+      },
     }
 
     const mountMocks = {
@@ -344,6 +354,28 @@ describe('ModMemberSummary', () => {
       const badges = wrapper.findAll('.badge')
       await badges[2].trigger('click')
       expect(wrapper.vm.showLogsModal).toBe(true)
+    })
+
+    it('clicking replies to OFFERs badge triggers showReplies with Offer type', async () => {
+      const member = createMember({
+        info: { repliesoffer: 5, replieswanted: 3, expectedreplies: 0 },
+      })
+      const wrapper = mountComponent({ member })
+      const badges = wrapper.findAll('.badge')
+      await badges[3].trigger('click')
+      expect(wrapper.vm.showRepliesModal).toBe(true)
+      expect(wrapper.vm.replyType).toBe('Offer')
+    })
+
+    it('clicking replies to WANTEDs badge triggers showReplies with Wanted type', async () => {
+      const member = createMember({
+        info: { repliesoffer: 5, replieswanted: 3, expectedreplies: 0 },
+      })
+      const wrapper = mountComponent({ member })
+      const badges = wrapper.findAll('.badge')
+      await badges[4].trigger('click')
+      expect(wrapper.vm.showRepliesModal).toBe(true)
+      expect(wrapper.vm.replyType).toBe('Wanted')
     })
   })
 

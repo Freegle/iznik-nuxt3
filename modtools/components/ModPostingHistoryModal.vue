@@ -11,11 +11,15 @@
           There are no posts to show.
         </NoticeMessage>
         <ModGroupSelect v-model="groupid" modonly class="mb-2" />
-        <b-row v-for="message in messages" :key="message.id">
-          <b-col cols="8" sm="3">
+        <b-row
+          v-for="message in messages"
+          :key="message.id"
+          class="history-row small"
+        >
+          <b-col cols="8" sm="3" class="text-nowrap">
             <div>{{ datetimeshort(message.arrival) }}</div>
           </b-col>
-          <b-col cols="4" sm="2">
+          <b-col cols="4" sm="2" class="text-nowrap">
             <div>
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
                 message.id

@@ -79,6 +79,20 @@ describe('ModPostingHistory', () => {
               },
             },
           },
+          ModRepliesModal: {
+            template:
+              '<div class="replies-modal" v-if="visible" :data-type="type"><slot /></div>',
+            props: ['userid', 'type'],
+            emits: ['hidden'],
+            data() {
+              return { visible: false }
+            },
+            methods: {
+              show() {
+                this.visible = true
+              },
+            },
+          },
         },
       },
     })
@@ -303,6 +317,26 @@ describe('ModPostingHistory', () => {
         expect(wrapper.vm.showLogsModal).toBe(true)
       })
     })
+
+    describe('showReplies', () => {
+      it('sets replyType to Offer', () => {
+        const wrapper = mountComponent()
+        wrapper.vm.showReplies('Offer')
+        expect(wrapper.vm.replyType).toBe('Offer')
+      })
+
+      it('sets replyType to Wanted', () => {
+        const wrapper = mountComponent()
+        wrapper.vm.showReplies('Wanted')
+        expect(wrapper.vm.replyType).toBe('Wanted')
+      })
+
+      it('sets showRepliesModal to true', () => {
+        const wrapper = mountComponent()
+        wrapper.vm.showReplies('Offer')
+        expect(wrapper.vm.showRepliesModal).toBe(true)
+      })
+    })
   })
 
   describe('user interactions', () => {
@@ -346,6 +380,22 @@ describe('ModPostingHistory', () => {
       await logsButton.trigger('click')
       expect(wrapper.vm.modmailsonly).toBe(false)
       expect(wrapper.vm.showLogsModal).toBe(true)
+    })
+
+    it('clicking replies to OFFERs badge triggers showReplies with Offer type', async () => {
+      const wrapper = mountComponent()
+      const badges = wrapper.findAll('.badge')
+      await badges[3].trigger('click')
+      expect(wrapper.vm.showRepliesModal).toBe(true)
+      expect(wrapper.vm.replyType).toBe('Offer')
+    })
+
+    it('clicking replies to WANTEDs badge triggers showReplies with Wanted type', async () => {
+      const wrapper = mountComponent()
+      const badges = wrapper.findAll('.badge')
+      await badges[4].trigger('click')
+      expect(wrapper.vm.showRepliesModal).toBe(true)
+      expect(wrapper.vm.replyType).toBe('Wanted')
     })
   })
 
