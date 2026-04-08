@@ -192,6 +192,21 @@ describe('ModChatReviewUser', () => {
       await wrapper.find('button').trigger('click')
       expect(wrapper.vm.showAddCommentModal).toBe(true)
     })
+
+    it('does not render modal when groupid is 0', async () => {
+      const wrapper = mountComponent({ groupid: 0 })
+      wrapper.vm.addAComment()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.showAddCommentModal).toBe(true)
+      expect(wrapper.find('.add-modal').exists()).toBe(false)
+    })
+
+    it('renders modal when groupid is non-zero', async () => {
+      const wrapper = mountComponent({ groupid: 456 })
+      wrapper.vm.addAComment()
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('.add-modal').exists()).toBe(true)
+    })
   })
 
   describe('props', () => {

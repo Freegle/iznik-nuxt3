@@ -582,6 +582,38 @@ describe('ModChatReview', () => {
     })
   })
 
+  describe('groupid fallback to groupidfrom', () => {
+    it('passes groupidfrom to ModChatReviewUser when groupid is 0', () => {
+      const wrapper = mountComponent({
+        groupid: 0,
+        group: null,
+        groupidfrom: 555,
+        groupfrom: { id: 555, namedisplay: 'Sender Group' },
+      })
+      const reviewUsers = wrapper.findAllComponents({
+        name: 'ModChatReviewUser',
+      })
+      reviewUsers.forEach((u) => {
+        expect(u.props('groupid')).toBe(555)
+      })
+    })
+
+    it('prefers groupid over groupidfrom when both are set', () => {
+      const wrapper = mountComponent({
+        groupid: 789,
+        group: { id: 789, namedisplay: 'Recipient Group' },
+        groupidfrom: 555,
+        groupfrom: { id: 555, namedisplay: 'Sender Group' },
+      })
+      const reviewUsers = wrapper.findAllComponents({
+        name: 'ModChatReviewUser',
+      })
+      reviewUsers.forEach((u) => {
+        expect(u.props('groupid')).toBe(789)
+      })
+    })
+  })
+
   describe('edge cases', () => {
     it('handles message without group', () => {
       const wrapper = mountComponent({ group: null })
