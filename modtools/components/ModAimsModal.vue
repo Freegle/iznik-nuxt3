@@ -43,8 +43,8 @@
             local freegling by provision of Modtools promotional facilities.
           </li>
           <li>
-            Providing policies, guidance and insurance for local events to help
-            ensure the safe running of Communities.
+            Providing policies and guidance for local events to help ensure the
+            safe running of Communities.
           </li>
           <li>
             Supporting all volunteers regardless of race, gender, age,

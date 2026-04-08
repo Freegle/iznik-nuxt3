@@ -3,6 +3,7 @@ import { ref, reactive, watch, onMounted, nextTick, toRefs } from 'vue'
 export function useModDashboard(props, askfor, grouprequired = false) {
   const { $api } = useNuxtApp()
   const loading = ref(false)
+  const needsRefetch = ref(false)
   const data = reactive({})
 
   // Initialize data properties for each askfor component
@@ -11,37 +12,48 @@ export function useModDashboard(props, askfor, grouprequired = false) {
   })
 
   function maybeFetch() {
-    if (!loading.value) {
-      loading.value = true
-      nextTick(() => {
-        fetchData()
-      })
+    if (loading.value) {
+      needsRefetch.value = true
+      return
     }
+    loading.value = true
+    nextTick(() => {
+      fetchData()
+    })
   }
 
   async function fetchData() {
-    if (
-      askfor &&
-      props.start &&
-      props.end &&
-      askfor.length &&
-      (props.groupid || !grouprequired)
-    ) {
-      loading.value = true
-      const res = await $api.dashboard.fetch({
-        components: askfor,
-        start: props.start.toISOString(),
-        end: props.end.toISOString(),
-        allgroups: !props.groupid,
-        group: props.groupid > 0 ? props.groupid : null,
-        systemwide: props.groupid < 0,
-      })
+    try {
+      if (
+        askfor &&
+        props.start &&
+        props.end &&
+        askfor.length &&
+        (props.groupid || !grouprequired)
+      ) {
+        loading.value = true
+        const res = await $api.dashboard.fetch({
+          components: askfor,
+          start: props.start.toISOString(),
+          end: props.end.toISOString(),
+          allgroups: !props.groupid,
+          group: props.groupid > 0 ? props.groupid : null,
+          systemwide: props.groupid < 0,
+        })
 
-      Object.keys(res).forEach((comp) => {
-        data[comp] = res[comp]
-      })
+        Object.keys(res).forEach((comp) => {
+          data[comp] = res[comp]
+        })
+      }
+    } catch (e) {
+      console.error('Dashboard fetch failed', e)
+    } finally {
+      loading.value = false
+      if (needsRefetch.value) {
+        needsRefetch.value = false
+        maybeFetch()
+      }
     }
-    loading.value = false
   }
 
   watch(
