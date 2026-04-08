@@ -423,6 +423,11 @@ export const useMessageStore = defineStore({
               this.byUserList[userId][idx] = {
                 ...this.byUserList[userId][idx],
                 ...updated,
+                // Explicitly propagate hasoutcome from server state.
+                // Without this, a cleared outcome (server omits hasoutcome with
+                // omitempty) won't override the synthetic hasoutcome:true that
+                // fetchByUser sets, so the post stays in "Old Posts".
+                hasoutcome: updated.hasoutcome,
               }
               break
             }
