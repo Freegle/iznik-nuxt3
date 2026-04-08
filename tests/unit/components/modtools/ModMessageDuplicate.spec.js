@@ -208,7 +208,9 @@ describe('ModMessageDuplicate', () => {
             groups: [{ groupid: 456 }],
           }
         )
-        expect(wrapper.vm.duplicateLink).toBe('/messages/approved/456/123')
+        expect(wrapper.vm.duplicateLink).toBe(
+          '/messages/approved?groupid=456&msgid=123'
+        )
       })
 
       it('builds correct link with different groupid and msgid', () => {
@@ -251,7 +253,9 @@ describe('ModMessageDuplicate', () => {
         }
       )
       const link = wrapper.find('a')
-      expect(link.attributes('href')).toBe('/messages/approved/456/123')
+      expect(link.attributes('href')).toBe(
+        '/messages/approved?groupid=456&msgid=123'
+      )
     })
   })
 
