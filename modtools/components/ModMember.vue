@@ -198,7 +198,7 @@
               size="sm"
               :labels="{
                 checked: 'Notification/ChitChat On',
-                unchecked: 'Notification/ChitChat On',
+                unchecked: 'Notification/ChitChat Off',
               }"
               variant="modgreen"
               class="mb-2"

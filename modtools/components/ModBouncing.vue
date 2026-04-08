@@ -5,8 +5,13 @@
     </NoticeMessage>
     <NoticeMessage v-else variant="danger" class="mb-2">
       <p>
-        <a :href="user.email">{{ user.email }}</a> is bouncing - see logs for
-        details.
+        <a :href="user.email">{{ user.email }}</a> is bouncing<span
+          v-if="user.bouncereason"
+          >: {{ user.bouncereason }}</span
+        ><span v-else> - see logs for details</span>.
+        <span v-if="user.bounceat" class="text-muted">
+          ({{ timeago(user.bounceat) }})
+        </span>
       </p>
       <div v-if="user.role === 'Member' || supportOrAdmin">
         <p>If you think the email is valid, you can:</p>
@@ -29,6 +34,7 @@ import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
+import { timeago } from '~/composables/useTimeFormat'
 
 const props = defineProps({
   userid: {

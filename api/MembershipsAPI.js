@@ -22,12 +22,17 @@ export default class MembershipsAPI extends BaseAPI {
   async fetchMembers(params) {
     const ret = await this.$getv2('/memberships', params)
 
-    // Happiness collection returns { members, ratings }; others return an array.
+    // Happiness returns { members, ratings }; filtered returns { members, filtercount }; others return an array.
     if (ret && ret.members !== undefined) {
-      return { members: ret.members, context: null, ratings: ret.ratings || [] }
+      return {
+        members: ret.members,
+        context: null,
+        ratings: ret.ratings || [],
+        filtercount: ret.filtercount ?? null,
+      }
     }
 
-    return { members: ret, context: null, ratings: [] }
+    return { members: ret, context: null, ratings: [], filtercount: null }
   }
 
   save(event) {

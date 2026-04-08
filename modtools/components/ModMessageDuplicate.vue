@@ -69,16 +69,14 @@ const isPending = computed(() => {
 })
 
 const duplicateLink = computed(() => {
-  if (isPending.value) {
-    // Link to pending messages page with group and message to highlight.
-    return (
-      '/messages/pending?groupid=' +
-      groupid.value +
-      '&msgid=' +
-      message.value.id
-    )
-  }
-  // Link to approved messages with search term for approved duplicates.
-  return '/messages/approved/' + groupid.value + '/' + message.value.id
+  const page = isPending.value ? 'pending' : 'approved'
+  return (
+    '/messages/' +
+    page +
+    '?groupid=' +
+    groupid.value +
+    '&msgid=' +
+    message.value.id
+  )
 })
 </script>

@@ -82,6 +82,7 @@ const {
   memberTerm,
   distance,
   messages,
+  visibleMessages,
 } = modMessages
 
 // Local state (formerly data())
@@ -89,6 +90,7 @@ const chosengroupid = ref(0)
 const bump = ref(0)
 const urlOverride = ref(false)
 const loaded = ref(false)
+const highlightMsgId = ref(null)
 
 // Computed properties
 const id = computed(() => {
@@ -127,6 +129,22 @@ watch(chosengroupid, (newVal) => {
   }
 })
 
+// Scroll to highlighted message when it appears in the list.
+watch(visibleMessages, (newVal) => {
+  if (highlightMsgId.value && newVal?.length) {
+    const found = newVal.find((m) => m.id === highlightMsgId.value)
+    if (found) {
+      nextTick(() => {
+        const el = document.getElementById('msg-' + highlightMsgId.value)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          highlightMsgId.value = null
+        }
+      })
+    }
+  }
+})
+
 // Lifecycle
 onMounted(() => {
   const route = useRoute()
@@ -137,6 +155,16 @@ onMounted(() => {
   // Mark that URL explicitly set the group (even if 0 for "All").
   if (route?.params && 'id' in route.params && route.params.id !== undefined) {
     urlOverride.value = true
+  }
+  // Support query params from duplicate message links (?groupid=&msgid=).
+  if (route.query.groupid !== undefined) {
+    groupid.value = parseInt(route.query.groupid)
+    chosengroupid.value = groupid.value
+    urlOverride.value = true
+  }
+  if (route.query.msgid) {
+    highlightMsgId.value = parseInt(route.query.msgid)
+    messageTerm.value = route.query.msgid
   }
   if (route?.params && 'term' in route.params && route.params.term) {
     messageTerm.value = route.params.term
