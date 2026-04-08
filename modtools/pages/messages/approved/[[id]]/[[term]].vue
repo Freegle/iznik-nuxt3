@@ -31,7 +31,6 @@
       <ModMessages :group="group" />
       <infinite-loading
         direction="top"
-        force-use-infinite-wrapper="true"
         :distance="10"
         :identifier="bump"
         @infinite="loadMore"

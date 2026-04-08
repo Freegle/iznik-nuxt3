@@ -56,7 +56,6 @@
         <ModMembers />
         <infinite-loading
           direction="top"
-          force-use-infinite-wrapper="true"
           :distance="distance"
           :identifier="bump"
           @infinite="loadMore"
