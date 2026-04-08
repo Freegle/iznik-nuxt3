@@ -106,6 +106,18 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             return null
           }
 
+          // In modtools, 401 means session expired during a long mod session.
+          // BaseAPI already clears auth state and the login modal appears.
+          // Any of the 600+ store calls can hit this; suppress globally here
+          // rather than adding try/catch to every caller.
+          // On the main Freegle site, 401 is unexpected and should still be reported.
+          if (
+            hint?.originalException?.response?.status === 401 &&
+            useMiscStore()?.modtools
+          ) {
+            return null
+          }
+
           // Ignore crawlers, which seems to abort pre-fetching of some assets.
           const userAgent = window.navigator.userAgent?.toLowerCase()
 

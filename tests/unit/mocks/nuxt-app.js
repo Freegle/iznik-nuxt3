@@ -48,3 +48,8 @@ export function useRoute() {
 export function twem(text) {
   return text
 }
+
+// Nuxt plugin registration stub - just returns the plugin function as-is.
+export function defineNuxtPlugin(plugin) {
+  return plugin
+}
