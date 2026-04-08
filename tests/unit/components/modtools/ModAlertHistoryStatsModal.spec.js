@@ -30,6 +30,10 @@ vi.mock('vue-google-charts', () => ({
 }))
 
 // Mock pluralise helper
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

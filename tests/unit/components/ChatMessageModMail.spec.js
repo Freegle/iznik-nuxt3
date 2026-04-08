@@ -72,6 +72,10 @@ vi.mock('~/stores/misc', () => ({
   useMiscStore: () => ({ modtools: false }),
 }))
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', () => ({
   useRouter: () => ({
     push: mockRouterPush,

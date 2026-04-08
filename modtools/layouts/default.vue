@@ -262,7 +262,6 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
 import { useRouter } from '#imports'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'

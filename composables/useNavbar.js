@@ -1,4 +1,3 @@
-import { useRoute, useRouter } from 'vue-router'
 import pluralize from 'pluralize'
 import { useMiscStore } from '~/stores/misc'
 import { useNewsfeedStore } from '~/stores/newsfeed'

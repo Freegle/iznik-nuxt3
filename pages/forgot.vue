@@ -59,13 +59,14 @@
   </div>
 </template>
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
 import {
   ref,
   onMounted,
   defineAsyncComponent,
   useRuntimeConfig,
   useHead,
+  useRoute,
+  useRouter,
 } from '#imports'
 import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'

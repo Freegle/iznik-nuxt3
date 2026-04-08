@@ -44,8 +44,12 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
-import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
+import {
+  defineAsyncComponent,
+  useHead,
+  useRuntimeConfig,
+  useRoute,
+} from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 
 const ExternalLink = defineAsyncComponent(() =>

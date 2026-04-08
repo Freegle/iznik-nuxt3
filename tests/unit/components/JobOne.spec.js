@@ -31,9 +31,19 @@ vi.mock('~/stores/job', () => ({
   useJobStore: () => mockJobStore,
 }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => mockRouter,
+  }
+})
+
+globalThis.__testUseRouter = () => mockRouter
 
 vi.mock('~/composables/useClientLog', () => ({
   action: (...args) => mockAction(...args),

@@ -70,7 +70,7 @@ import { useAuthStore } from '~/stores/auth'
 import GroupSelect from '~/components/GroupSelect'
 import StoryOne from '~/components/StoryOne'
 import ScrollGrid from '~/components/ScrollGrid'
-import { useRoute, computed } from '#imports'
+import { useRoute, useRouter, computed } from '#imports'
 
 const StoryAddModal = defineAsyncComponent(() =>
   import('~/components/StoryAddModal')

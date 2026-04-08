@@ -31,6 +31,10 @@ vi.mock('~/stores/chat', () => ({
 
 // Mock router
 const mockPush = vi.fn()
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

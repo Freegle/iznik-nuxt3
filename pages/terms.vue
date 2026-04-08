@@ -15,8 +15,8 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
+import { useRoute } from '#imports'
 import TermsOfUse from '~/components/TermsOfUse'
 
 // Setup page head

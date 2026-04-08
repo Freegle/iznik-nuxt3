@@ -14,9 +14,19 @@ const mockJobStore = {
   log: vi.fn(),
 }
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => mockRouter,
+  }
+})
+
+globalThis.__testUseRouter = () => mockRouter
 
 vi.mock('~/stores/job', () => ({
   useJobStore: () => mockJobStore,

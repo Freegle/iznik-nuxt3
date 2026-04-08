@@ -22,6 +22,10 @@ vi.mock('~/stores/user', () => ({
 }))
 
 // Mock dateshort from #imports
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

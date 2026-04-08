@@ -30,6 +30,10 @@ vi.mock('@/stores/modgroup', () => ({
 }))
 
 // Mock timeformat composables
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

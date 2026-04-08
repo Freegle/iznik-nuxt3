@@ -167,7 +167,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useAddressStore } from '~/stores/address'
 import { useGiftAidStore } from '~/stores/giftaid'
 import { useAuthStore } from '~/stores/auth'
@@ -184,6 +183,7 @@ import {
   definePageMeta,
   useHead,
   useRuntimeConfig,
+  useRoute,
 } from '#imports'
 
 definePageMeta({

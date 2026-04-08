@@ -247,8 +247,8 @@
   </div>
 </template>
 <script setup>
-import { useRouter } from 'vue-router'
 import { nextTick } from 'vue'
+import { useRouter } from '#imports'
 import {
   clearNavBarTimeout,
   setNavBarHidden,

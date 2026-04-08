@@ -19,7 +19,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useChatStore } from '~/stores/chat'
-import { useRouter } from '#app'
+import { useRouter } from '#imports'
 
 const props = defineProps({
   isListItem: {

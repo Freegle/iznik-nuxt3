@@ -21,13 +21,37 @@ const mockModGroupStore = {
 }
 
 // Mock vue-router
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/admins',
-    params: {},
-    query: {},
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: {},
+      query: {},
+      path: '/admins',
+      name: 'admins',
+      fullPath: '/admins',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
+  params: {},
+  query: {},
+  path: '/admins',
+  name: 'admins',
+  fullPath: '/admins',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Mock stores
 vi.mock('~/stores/admins', () => ({

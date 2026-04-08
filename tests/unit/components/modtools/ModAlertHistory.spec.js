@@ -3,6 +3,10 @@ import { mount } from '@vue/test-utils'
 import ModAlertHistory from '~/modtools/components/ModAlertHistory.vue'
 
 // Mock datetimeshort helper
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

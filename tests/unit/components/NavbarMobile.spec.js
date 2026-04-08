@@ -79,9 +79,19 @@ const mockRoute = {
   path: '/browse',
 }
 
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => mockRoute,
+  }
+})
+
+globalThis.__testUseRoute = () => mockRoute
 
 // Mock child components
 vi.mock('~/components/NavbarMobilePost', () => ({

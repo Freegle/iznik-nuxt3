@@ -38,20 +38,41 @@ vi.mock('~/stores/auth', () => ({
 const mockRouteParams = ref({ id: undefined })
 const mockRouterPush = vi.fn()
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
 
-vi.mock('#imports', () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams.value,
+      query: {},
+      path: '/',
+      name: 'modtools-chats',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+    useRouter: () => ({
+      push: mockRouterPush,
+    }),
+  }
+})
 
-// Make useRouter available globally
-globalThis.useRouter = () => ({
+globalThis.__testUseRoute = () => ({
+  params: mockRouteParams.value,
+  query: {},
+  path: '/',
+  name: 'modtools-chats',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
+globalThis.__testUseRouter = () => ({
   push: mockRouterPush,
 })
 

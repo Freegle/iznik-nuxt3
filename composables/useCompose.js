@@ -1,4 +1,3 @@
-import { useRoute } from 'vue-router'
 import { ref, computed } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'

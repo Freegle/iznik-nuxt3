@@ -36,8 +36,8 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useStoryStore } from '~/stores/stories'
+import { useRoute } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'
 import StoryOne from '~/components/StoryOne'

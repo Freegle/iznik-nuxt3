@@ -72,19 +72,34 @@ vi.mock('~/composables/useMe', () => ({
 // Mock route params
 const mockRouteParams = ref({ id: undefined, term: undefined })
 const mockRouterPush = vi.fn()
+// Use a ref so that Vue's reactivity system can track it as a computed dep
+const mockUseRouteReturnsUndefined = ref(false)
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-    currentRoute: { value: { path: '/members/approved/' } },
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
 
-// Make useRouter available globally (Nuxt auto-imports this)
-globalThis.useRouter = () => ({
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => {
+      if (mockUseRouteReturnsUndefined.value) return undefined
+      return { params: mockRouteParams.value }
+    },
+    useRouter: () => ({
+      push: mockRouterPush,
+      currentRoute: { value: { path: '/members/approved/' } },
+    }),
+  }
+})
+
+// Make useRoute/useRouter available globally (Nuxt auto-imports these)
+globalThis.__testUseRoute = () => {
+  if (mockUseRouteReturnsUndefined.value) return undefined
+  return { params: mockRouteParams.value }
+}
+globalThis.__testUseRouter = () => ({
   push: mockRouterPush,
   currentRoute: { value: { path: '/members/approved/' } },
 })
@@ -187,6 +202,7 @@ describe('members/approved/[[id]]/[[term]].vue page', () => {
     mockRouteParams.value = { id: undefined, term: undefined }
     mockRouterPush.mockClear()
     mockMemberStore.list = {}
+    mockUseRouteReturnsUndefined.value = false
   })
 
   describe('rendering', () => {
@@ -230,6 +246,18 @@ describe('members/approved/[[id]]/[[term]].vue page', () => {
       mockRouteParams.value = { id: '123', term: 'test-search' }
       const wrapper = mountComponent()
       expect(wrapper.vm.term).toBe('test-search')
+    })
+
+    it('term returns null when useRoute() returns undefined (SSR hydration race)', async () => {
+      mockRouteParams.value = { id: undefined, term: undefined }
+      const wrapper = mountComponent()
+      await wrapper.vm.$nextTick()
+      // Simulate useRoute() returning undefined (SSR/hydration context).
+      // Using a ref so Vue's reactivity system invalidates the term computed.
+      mockUseRouteReturnsUndefined.value = true
+      await wrapper.vm.$nextTick()
+      expect(() => wrapper.vm.term).not.toThrow()
+      expect(wrapper.vm.term).toBeNull()
     })
 
     it('groupName returns group namedisplay when group exists', async () => {

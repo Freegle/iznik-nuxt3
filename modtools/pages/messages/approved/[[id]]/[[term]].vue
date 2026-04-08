@@ -55,7 +55,7 @@
 //  - Message id/subject search changes URL <term>
 
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from '#imports'
 import { useMessageStore } from '@/stores/message'
 import { setupModMessages } from '@/composables/useModMessages'
 import { useMe } from '~/composables/useMe'
@@ -93,6 +93,12 @@ const loaded = ref(false)
 // Computed properties
 const id = computed(() => {
   const route = useRoute()
+  if (!route) {
+    console.warn(
+      'messages/approved: useRoute() returned undefined (SSR hydration race)'
+    )
+    return 0
+  }
   if ('id' in route.params && route.params.id) {
     return parseInt(route.params.id)
   }
@@ -129,10 +135,10 @@ onMounted(() => {
   memberTerm.value = ''
   messageTerm.value = ''
   // Mark that URL explicitly set the group (even if 0 for "All").
-  if ('id' in route.params && route.params.id !== undefined) {
+  if (route?.params && 'id' in route.params && route.params.id !== undefined) {
     urlOverride.value = true
   }
-  if ('term' in route.params && route.params.term) {
+  if (route?.params && 'term' in route.params && route.params.term) {
     messageTerm.value = route.params.term
   }
   if (messageTerm.value) {

@@ -109,9 +109,37 @@ vi.mock('~/composables/useClientLog', () => ({
   action: vi.fn(),
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: {} }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: {},
+      query: {},
+      path: '/',
+      name: 'myposts',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'myposts',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

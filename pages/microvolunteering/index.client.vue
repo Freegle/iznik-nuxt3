@@ -163,7 +163,7 @@
 import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
-import { ref } from '#imports'
+import { ref, useRouter } from '#imports'
 import { useMe } from '~/composables/useMe'
 
 const MicroVolunteeringFacebook = defineAsyncComponent(() =>

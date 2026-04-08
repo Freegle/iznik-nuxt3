@@ -81,25 +81,28 @@ const mockRouteParams = ref({ id: undefined, term: undefined })
 
 const mockRouterPush = vi.fn()
 
-// Mock useRoute and useRouter - note useRouter is called from within methods
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
 
-// Mock #imports for Nuxt auto-imports
-vi.mock('#imports', () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams.value,
+    }),
+    useRouter: () => ({
+      push: mockRouterPush,
+    }),
+  }
+})
 
-// Make useRouter available globally (Nuxt auto-imports this)
-globalThis.useRouter = () => ({
+// Make useRoute/useRouter available globally (Nuxt auto-imports these)
+globalThis.__testUseRoute = () => ({
+  params: mockRouteParams.value,
+})
+globalThis.__testUseRouter = () => ({
   push: mockRouterPush,
   replace: mockRouterPush,
   currentRoute: { value: { path: '/' } },

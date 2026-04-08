@@ -63,7 +63,7 @@
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from '#imports'
 import ExternalLink from '~/components/ExternalLink'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'

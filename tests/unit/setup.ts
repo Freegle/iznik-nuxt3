@@ -95,7 +95,7 @@ const mockNuxtApp = {
 ;(globalThis as Record<string, unknown>).useNuxtApp = () => mockNuxtApp
 
 // Mock useRoute
-;(globalThis as Record<string, unknown>).useRoute = () => ({
+;(globalThis as Record<string, unknown>).__testUseRoute = () => ({
   params: {},
   query: {},
   path: '/',
@@ -104,12 +104,13 @@ const mockNuxtApp = {
 })
 
 // Mock useRouter
-;(globalThis as Record<string, unknown>).useRouter = () => ({
+;(globalThis as Record<string, unknown>).__testUseRouter = () => ({
   push: vi.fn(),
   replace: vi.fn(),
   go: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),
+  currentRoute: { value: { path: '/' } },
 })
 
 // Mock useRuntimeConfig

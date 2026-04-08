@@ -351,8 +351,8 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import SpinButton from './SpinButton'
+import { useRouter } from '#imports'
 import ChatButton from '~/components/ChatButton'
 import { useAuthStore } from '~/stores/auth'
 
