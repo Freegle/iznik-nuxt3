@@ -4,14 +4,17 @@ import { defineComponent, nextTick } from 'vue'
 
 const mockFetch = vi.fn()
 
-vi.mock('#imports', () => ({
-  useNuxtApp: () => ({
-    $api: {
-      dashboard: {
-        fetch: mockFetch,
-      },
+// useNuxtApp is auto-imported by Nuxt — make it available globally for tests.
+globalThis.useNuxtApp = () => ({
+  $api: {
+    dashboard: {
+      fetch: mockFetch,
     },
-  }),
+  },
+})
+
+vi.mock('#imports', () => ({
+  useNuxtApp: globalThis.useNuxtApp,
 }))
 
 describe('useModDashboard', () => {
@@ -38,8 +41,8 @@ describe('useModDashboard', () => {
     }
   }
 
-  // Helper: mount a wrapper component that calls the composable in setup(),
-  // so Vue lifecycle hooks (onMounted) actually fire.
+  // Mount a wrapper component that calls the composable in setup(),
+  // so Vue lifecycle hooks (onMounted) fire.
   function mountWithComposable(props, askfor = ['TestComp'], grouprequired) {
     let composableResult
     const Wrapper = defineComponent({
