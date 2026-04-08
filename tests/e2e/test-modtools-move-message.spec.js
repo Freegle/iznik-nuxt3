@@ -32,11 +32,16 @@ test.describe('ModTools move message', () => {
     })
 
     if (jwt && msgId) {
-      // Approve without groupid — approves on whichever group it's on
+      // Approve without groupid — approves on whichever group it's on.
+      // Go router: rg.Post("/message", PostMessage) handles all action-based
+      // mod operations (Approve, Reject, etc.).  Must use POST, not PATCH.
+      // Must call the Go API at http://apiv2.localhost directly (Playwright's
+      // page.request runs in Node.js context that can reach Docker services).
+      // Authorization is a raw JWT string — no "Bearer " prefix.
       await page.request
-        .post(`${MODTOOLS_URL}/api/message`, {
+        .post('http://apiv2.localhost/api/message', {
           data: { id: msgId, action: 'Approve' },
-          headers: { Authorization: `Bearer ${jwt}` },
+          headers: { Authorization: jwt },
         })
         .catch(() => {})
     }

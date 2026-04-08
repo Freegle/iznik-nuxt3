@@ -5,11 +5,15 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 
 const mockFetchByUser = vi.fn()
+const mockSave = vi.fn()
+const mockFetch = vi.fn()
 
 vi.mock('~/api', () => ({
   default: () => ({
     message: {
       fetchByUser: mockFetchByUser,
+      save: mockSave,
+      fetch: mockFetch,
     },
   }),
 }))
@@ -30,9 +34,77 @@ vi.mock('~/stores/isochrone', () => ({
   useIsochroneStore: () => ({}),
 }))
 
+const mockMiscStore = { modtools: false }
 vi.mock('~/stores/misc', () => ({
-  useMiscStore: () => ({}),
+  useMiscStore: () => mockMiscStore,
 }))
+
+describe('message store - patch()', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+    mockMiscStore.modtools = false
+  })
+
+  it('syncs updated message into byUserList after patching', async () => {
+    useAuthStore.mockReturnValue({ user: { id: 99 } })
+
+    const store = useMessageStore()
+
+    // Pre-populate byUserList with an expired message
+    store.byUserList[99] = [
+      { id: 1001, subject: 'Sofa', hasoutcome: true },
+      { id: 1002, subject: 'Chair', hasoutcome: false },
+    ]
+
+    // PATCH returns success; subsequent fetch returns hasoutcome=false (server cleared it)
+    mockSave.mockResolvedValue({ id: 1001 })
+    mockFetch.mockResolvedValue({
+      id: 1001,
+      subject: 'Sofa',
+      hasoutcome: false,
+    })
+
+    // Simulate what fetch() does: it puts the fetched message into this.list
+    store.list[1001] = { id: 1001, subject: 'Sofa', hasoutcome: false }
+
+    // Spy on the store's fetch method to avoid real API calls
+    const fetchSpy = vi.spyOn(store, 'fetch').mockImplementation((id) => {
+      store.list[id] = { id, subject: 'Sofa', hasoutcome: false }
+    })
+
+    await store.patch({ id: 1001, deadline: '2026-05-01' })
+
+    // The fixed patch() must sync the updated state into byUserList
+    expect(store.byUserList[99][0].hasoutcome).toBe(false)
+    // Other entries should be unaffected
+    expect(store.byUserList[99][1].hasoutcome).toBe(false)
+
+    fetchSpy.mockRestore()
+  })
+
+  it('does not touch byUserList when message is not present', async () => {
+    useAuthStore.mockReturnValue({ user: { id: 99 } })
+
+    const store = useMessageStore()
+    store.byUserList[99] = [{ id: 2001, subject: 'Other', hasoutcome: false }]
+    store.list[1001] = { id: 1001, subject: 'Sofa', hasoutcome: false }
+
+    const fetchSpy = vi.spyOn(store, 'fetch').mockImplementation((id) => {
+      store.list[id] = { id, subject: 'Sofa', hasoutcome: false }
+    })
+
+    mockSave.mockResolvedValue({ id: 1001 })
+
+    await store.patch({ id: 1001, deadline: '2026-05-01' })
+
+    // Unrelated entries unchanged
+    expect(store.byUserList[99][0].hasoutcome).toBe(false)
+    expect(store.byUserList[99].length).toBe(1)
+
+    fetchSpy.mockRestore()
+  })
+})
 
 describe('message store - fetchActivePostCount', () => {
   beforeEach(() => {

@@ -12,15 +12,22 @@ jobs:
       - name: Update FreegleDocker submodule reference
         env:
           GH_TOKEN: ${{ secrets.FREEGLE_DOCKER_TOKEN }}
+          # Pass all GitHub context values as env vars — never interpolate
+          # ${{ }} directly into the shell script body, as multi-line commit
+          # messages can contain shell metacharacters (>, ", &, etc.) that
+          # cause parse errors or unintended redirects.
+          TRIGGER_SHA: ${{ github.sha }}
+          TRIGGER_REPO: ${{ github.repository }}
+          TRIGGER_BRANCH: ${{ github.ref_name }}
+          TRIGGER_COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           echo "🔄 Updating FreegleDocker submodule reference"
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "Commit Message: ${{ github.event.head_commit.message }}"
+          echo "Repository: $TRIGGER_REPO"
+          echo "Branch: $TRIGGER_BRANCH"
+          echo "Commit: $TRIGGER_SHA"
 
           # Determine submodule name from repository
-          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          REPO_NAME=$(echo "$TRIGGER_REPO" | cut -d'/' -f2)
           echo "Submodule name: $REPO_NAME"
 
           # Clone FreegleDocker (no --depth 1 so we can rebase)
@@ -37,10 +44,10 @@ jobs:
           git submodule update "$REPO_NAME"
 
           # Update submodule to the specific commit that triggered this workflow
-          echo "Updating $REPO_NAME submodule to commit ${{ github.sha }}..."
+          echo "Updating $REPO_NAME submodule to commit $TRIGGER_SHA..."
           cd "$REPO_NAME"
-          git fetch origin "${{ github.sha }}"
-          git checkout "${{ github.sha }}"
+          git fetch origin "$TRIGGER_SHA"
+          git checkout "$TRIGGER_SHA"
           cd ..
 
           # Check if there are changes
@@ -49,13 +56,8 @@ jobs:
             exit 0
           fi
 
-          # Get first line of commit message, properly escaped
-          COMMIT_MSG=$(cat <<'COMMIT_MSG_EOF'
-          ${{ github.event.head_commit.message }}
-          COMMIT_MSG_EOF
-          )
-          # Take first line only and sanitize
-          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"' | sed 's/^[[:space:]]*//')
+          # Take first line of commit message only, sanitise for use as git message
+          COMMIT_MSG=$(printf '%s' "$TRIGGER_COMMIT_MSG" | head -1 | tr -d '"' | sed 's/^[[:space:]]*//')
 
           # Push with retry logic to handle concurrent submodule updates
           MAX_RETRIES=5
@@ -93,7 +95,7 @@ jobs:
 
             # Re-checkout the submodule to the correct commit
             cd "$REPO_NAME"
-            git checkout "${{ github.sha }}"
+            git checkout "$TRIGGER_SHA"
             cd ..
 
             # Wait before retrying (exponential backoff)

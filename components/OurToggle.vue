@@ -81,6 +81,10 @@ watch(currentValue, (newVal) => {
   --toggle-border-on: #{$color-success};
   --toggle-bg-off: #{$color-gray-4};
   --toggle-border-off: #{$color-gray-4};
+  /* Preserve green/grey distinction when disabled (read-only for non-owners) */
+  --toggle-bg-on-disabled: #{rgba($color-success, 0.55)};
+  --toggle-border-on-disabled: #{rgba($color-success, 0.55)};
+  --toggle-text-on-disabled: #fff;
 }
 
 // Size variants
@@ -108,7 +112,7 @@ watch(currentValue, (newVal) => {
 }
 
 :deep(.toggle) {
-  min-width: fit-content;
+  min-width: 5rem;
   width: fit-content;
   border-radius: 999px;
   font-weight: 500;
