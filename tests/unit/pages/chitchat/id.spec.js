@@ -218,4 +218,52 @@ describe('chitchat/[[id]].vue loadMore', () => {
 
     expect(mockState.complete).toHaveBeenCalled()
   })
+
+  it('does not hide consecutive posts from same user when message field is missing', () => {
+    // Feed summary objects from the API only have id/userid/hidden — no message field.
+    // Regression: undefined === undefined was true, so all consecutive same-user posts
+    // were wrongly grouped as "duplicates" and hidden.
+    mockNewsfeedStore.feed = [
+      { id: 3, userid: 100 },
+      { id: 2, userid: 100 },
+      { id: 1, userid: 100 },
+    ]
+    mountComponent()
+    wrapper.vm.show = 10
+
+    // All 3 posts should be visible in newsfeedToShow
+    const shown = wrapper.vm.newsfeedToShow
+    expect(shown).toHaveLength(3)
+    expect(shown.map((s) => s.id)).toEqual([3, 2, 1])
+  })
+
+  it('hides actual duplicate posts with identical message text', () => {
+    // When message IS populated and identical, duplicates should be grouped.
+    mockNewsfeedStore.feed = [
+      { id: 3, userid: 100, message: 'Hello world' },
+      { id: 2, userid: 100, message: 'Hello world' },
+      { id: 1, userid: 200, message: 'Different user' },
+    ]
+    mountComponent()
+    wrapper.vm.show = 10
+
+    const shown = wrapper.vm.newsfeedToShow
+    // Post 2 is a true duplicate of post 3 (same user, same message)
+    expect(shown).toHaveLength(2)
+    expect(shown.map((s) => s.id)).toEqual([3, 1])
+  })
+
+  it('does not hide posts from same user with different messages', () => {
+    mockNewsfeedStore.feed = [
+      { id: 3, userid: 100, message: 'First post' },
+      { id: 2, userid: 100, message: 'Second post' },
+      { id: 1, userid: 100, message: 'Third post' },
+    ]
+    mountComponent()
+    wrapper.vm.show = 10
+
+    const shown = wrapper.vm.newsfeedToShow
+    expect(shown).toHaveLength(3)
+    expect(shown.map((s) => s.id)).toEqual([3, 2, 1])
+  })
 })
