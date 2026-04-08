@@ -152,6 +152,7 @@ function goToMessage() {
   box-shadow: var(--shadow-md);
   cursor: pointer;
   background: $color-white;
+  min-width: 200px;
 
   @include media-breakpoint-up(lg) {
     max-width: 400px;
