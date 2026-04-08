@@ -2,11 +2,9 @@
   <div>
     <div class="intro-text mb-3">
       <p>
-        We know that posts with images get much more engagement, so we use
-        AI-generated stock images for posts and jobs. Because we don't want to
-        burn too many resources, we keep using the same image &mdash; we don't
-        generate a new one each time. But this means it's important that we know
-        that the image is a good one to use. Can you help?
+        Posts with images work better, so we use AI-generated images for posts
+        and jobs. We reuse the same image &mdash; we don't generate a new one
+        each time. So it's important the image is a good one. Can you help?
       </p>
     </div>
 
