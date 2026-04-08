@@ -926,6 +926,18 @@ describe('ModMessage', () => {
       expect(wrapper.text()).toContain('Account deleted')
     })
 
+    it('shows "Account deleted" badge in expanded view header when user is deleted', async () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Deleted User',
+        deleted: '2024-01-15',
+        memberships: [{ id: 789, groupid: 789 }],
+      })
+      const wrapper = mountComponent({ summary: false })
+      await wrapper.vm.$nextTick()
+      expect(wrapper.text()).toContain('Account deleted')
+    })
+
     it('shows recovery notice in expanded view when user is deleted', async () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,

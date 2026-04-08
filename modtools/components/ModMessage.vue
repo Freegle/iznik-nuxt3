@@ -163,6 +163,12 @@
                 Account deleted
               </span>
             </div>
+            <span
+              v-else-if="fromUser && fromUser.deleted"
+              class="badge bg-danger me-2 align-self-center"
+            >
+              Account deleted
+            </span>
             <div v-if="expanded" class="d-flex">
               <div class="d-flex flex-column align-content-end">
                 <b-button v-if="!editing" variant="white" @click="startEdit">
