@@ -55,7 +55,7 @@ describe('MicroVolunteeringAIImageReview', () => {
     it('shows intro text about AI images', () => {
       const wrapper = createWrapper()
       const text = wrapper.find('.intro-text').text()
-      expect(text).toContain('AI-generated stock images')
+      expect(text).toContain('AI-generated images')
       expect(text).toContain('Can you help')
     })
 
