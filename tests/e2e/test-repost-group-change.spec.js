@@ -33,12 +33,10 @@ test.describe('Repost Group Change', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Wait for my posts to load.
-    await expect(page.locator('.message-card, :text("no posts")')).toBeVisible({
-      timeout: timeouts.ui.appearance,
-    })
-
-    // Step 3: Find the rejected message (has a warning notice banner).
+    // Step 3: Wait for the rejected message card. The active=true fetch may
+    // not include Rejected messages, so this may arrive via the background
+    // active=false fetch. Wait directly for the specific card rather than a
+    // generic page-loaded check.
     const rejectedCard = page
       .locator('.message-card:has(.notice--warning)')
       .first()
