@@ -62,7 +62,6 @@ describe('useModMessages getMessages', () => {
   })
 
   it('handles a 401 APIError from fetchMessagesMT without throwing', async () => {
-    // Arrange: simulate session expiry — fetchMessagesMT throws a 401 APIError
     mockFetchMessagesMT.mockRejectedValue(
       new APIError(
         { response: { status: 401 } },
@@ -76,12 +75,10 @@ describe('useModMessages getMessages', () => {
     const { getMessages, collection } = setupModMessages()
     collection.value = 'Pending'
 
-    // getMessages() must NOT throw — it should silently absorb the 401
     await expect(getMessages()).resolves.toBeUndefined()
   })
 
   it('resets show count to 0 on 401 so UI does not show stale message count', async () => {
-    // First call succeeds — show is set to the number of messages
     mockFetchMessagesMT.mockResolvedValue([1, 2, 3])
     mockAll.value = [{ id: 1 }, { id: 2 }, { id: 3 }]
 
@@ -93,7 +90,6 @@ describe('useModMessages getMessages', () => {
     await getMessages()
     expect(show.value).toBe(3)
 
-    // Second call gets 401 — show must reset to 0
     mockFetchMessagesMT.mockRejectedValue(
       new APIError(
         { response: { status: 401 } },
