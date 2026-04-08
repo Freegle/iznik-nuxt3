@@ -54,7 +54,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useJobStore } from '~/stores/job'
 import { useMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'
@@ -66,6 +65,7 @@ import {
   onMounted,
   useHead,
   useRuntimeConfig,
+  useRoute,
 } from '#imports'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete'
 import NoticeMessage from '~/components/NoticeMessage'

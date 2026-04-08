@@ -103,7 +103,6 @@
   </div>
 </template>
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
@@ -120,6 +119,8 @@ import {
   nextTick,
   useHead,
   useRuntimeConfig,
+  useRoute,
+  useRouter,
 } from '#imports'
 import Api from '~/api'
 

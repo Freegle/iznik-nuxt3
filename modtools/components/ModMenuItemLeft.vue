@@ -12,7 +12,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from '#imports'
 import { useAuthStore } from '@/stores/auth'
 import { useModMe } from '~/composables/useModMe'
 

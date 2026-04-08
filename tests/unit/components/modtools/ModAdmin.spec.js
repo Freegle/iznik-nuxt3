@@ -40,6 +40,10 @@ vi.mock('~/composables/useModMe', () => ({
 }))
 
 // Mock timeago
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {

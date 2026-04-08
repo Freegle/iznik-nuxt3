@@ -47,6 +47,10 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => mockRuntimeConfig,
 }))
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('vue')
   return {

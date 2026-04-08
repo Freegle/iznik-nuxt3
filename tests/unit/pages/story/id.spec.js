@@ -35,9 +35,37 @@ vi.mock('~/stores/stories', () => ({
 // Mutable route
 let mockRouteParams = { id: '7' }
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: mockRouteParams }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams,
+      query: {},
+      path: '/',
+      name: 'story-id',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
+  params: mockRouteParams,
+  query: {},
+  path: '/',
+  name: 'story-id',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

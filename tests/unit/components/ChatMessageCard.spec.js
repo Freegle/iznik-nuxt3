@@ -39,6 +39,10 @@ const {
 
 const mockRouterPush = vi.fn()
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', () => ({
   useRouter: () => ({
     push: mockRouterPush,

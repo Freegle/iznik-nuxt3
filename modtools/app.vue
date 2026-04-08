@@ -6,7 +6,6 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
@@ -49,7 +48,7 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
-import { computed, watch, reloadNuxtApp } from '#imports'
+import { computed, watch, reloadNuxtApp, useRoute } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'

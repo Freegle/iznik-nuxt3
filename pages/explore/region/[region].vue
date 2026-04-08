@@ -20,9 +20,13 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
-import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
+import {
+  defineAsyncComponent,
+  useHead,
+  useRuntimeConfig,
+  useRoute,
+} from '#imports'
 import { useGroupStore } from '~/stores/group'
 
 const PostMapAndList = defineAsyncComponent(() =>

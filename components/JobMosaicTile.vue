@@ -26,7 +26,7 @@
 </template>
 <script setup>
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter } from '#imports'
 import { useJobStore } from '~/stores/job'
 import ExternalLink from '~/components/ExternalLink'
 import { JOB_ICON_COLOURS } from '~/constants'

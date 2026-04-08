@@ -15,7 +15,6 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import {
@@ -24,6 +23,7 @@ import {
   defineAsyncComponent,
   definePageMeta,
   useRouter,
+  useRoute,
 } from '#imports'
 import { useMe } from '~/composables/useMe'
 import NoticeMessage from '~/components/NoticeMessage'

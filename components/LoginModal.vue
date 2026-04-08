@@ -202,10 +202,10 @@ import {
   getCurrentInstance,
 } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 import EmailValidator from './EmailValidator'
+import { useRoute, useRouter } from '#imports'
 import { LoginError, SignUpError } from '~/api/BaseAPI'
 import { useRuntimeConfig } from '#app'
 import { useAuthStore } from '~/stores/auth'

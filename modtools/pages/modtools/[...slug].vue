@@ -8,8 +8,7 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
-
+import { useRoute, useRouter } from '#imports'
 const path = computed(() => {
   const route = useRoute()
   let path = ''

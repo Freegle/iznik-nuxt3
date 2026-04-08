@@ -12,6 +12,7 @@ export {
   onBeforeUnmount,
   defineAsyncComponent,
   toRef,
+  nextTick,
 } from 'vue'
 
 export function useNuxtApp() {
@@ -29,18 +30,21 @@ export function useRuntimeConfig() {
 // Stub for components that import useHead from #imports directly
 export function useHead() {}
 
-// Default mock for useRouter - tests can override this with vi.mock
-const mockRouterPush = () => {}
+// Default mock for useRouter - tests override via vi.mock('#imports') or globalThis
 export function useRouter() {
+  if (typeof globalThis.__testUseRouter === 'function')
+    return globalThis.__testUseRouter()
   return {
-    push: mockRouterPush,
-    replace: mockRouterPush,
+    push: () => {},
+    replace: () => {},
     currentRoute: { value: { path: '/' } },
   }
 }
 
-// Default mock for useRoute - returns empty route; tests override via vi.mock('#imports')
+// Default mock for useRoute - tests override via vi.mock('#imports') or globalThis
 export function useRoute() {
+  if (typeof globalThis.__testUseRoute === 'function')
+    return globalThis.__testUseRoute()
   return { params: {}, query: {}, path: '/', name: 'index', fullPath: '/' }
 }
 

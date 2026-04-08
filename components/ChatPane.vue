@@ -202,6 +202,7 @@ import { timeago } from '~/composables/useTimeFormat'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
+import { useRouter } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 
 const ProfileModal = defineAsyncComponent(() =>

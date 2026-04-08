@@ -348,11 +348,10 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useTeamStore } from '~/stores/team'
 import { buildHead } from '~/composables/useBuildHead'
 import ProfileImage from '~/components/ProfileImage'
-import { computed } from '#imports'
+import { computed, useRoute } from '#imports'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()

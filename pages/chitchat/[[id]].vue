@@ -186,7 +186,7 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMiscStore } from '~/stores/misc'
 import { useNewsfeedStore } from '~/stores/newsfeed'
@@ -202,14 +202,7 @@ import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import MessageListUpToDate from '~/components/MessageListUpToDate.vue'
 import { untwem } from '~/composables/useTwem'
-import {
-  ref,
-  computed,
-  watch,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-} from '#imports'
+import { useRoute } from '#imports'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')

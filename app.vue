@@ -115,7 +115,6 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { useNoticeboardStore } from './stores/noticeboard'
 import { useAuthStore } from './stores/auth'
 import { useGroupStore } from './stores/group'
@@ -147,7 +146,7 @@ import { useLogoStore } from './stores/logo'
 import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
 import { useMiscStore } from './stores/misc'
-import { computed } from '#imports'
+import { computed, useRoute } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 import { useConfigStore } from '~/stores/config'

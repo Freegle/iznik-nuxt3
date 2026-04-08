@@ -12,7 +12,7 @@
 
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 
 const route = useRoute()

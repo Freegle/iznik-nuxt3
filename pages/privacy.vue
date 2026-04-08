@@ -236,8 +236,8 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
+import { useRoute } from '#imports'
 import ExternalLink from '~/components/ExternalLink'
 
 // Setup page head

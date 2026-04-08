@@ -134,26 +134,67 @@ vi.mock('pinia', async (importOriginal) => {
 })
 
 // Mock vue-router
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/',
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
 
-// Mock runtime config
-vi.mock('#app', () => ({
-  useRuntimeConfig: () => ({
-    public: {
-      GOOGLE_CLIENT_ID: 'test-google-client-id',
-      GOOGLE_IOS_CLIENT_ID: 'test-ios-client-id',
-      FACEBOOK_APPID: 'test-facebook-appid',
-      FACEBOOK_CLIENTID: 'test-facebook-clientid',
-    },
-  }),
-}))
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: {},
+      query: {},
+      path: '/',
+      name: 'index',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+    useRouter: () => ({
+      push: mockRouterPush,
+    }),
+    useRuntimeConfig: () => ({
+      public: {
+        GOOGLE_CLIENT_ID: 'test-google-client-id',
+        GOOGLE_IOS_CLIENT_ID: 'test-ios-client-id',
+        FACEBOOK_APPID: 'test-facebook-appid',
+        FACEBOOK_CLIENTID: 'test-facebook-clientid',
+      },
+    }),
+  }
+})
+
+// #app aliases to the same file as #imports in vitest.config — share the mock
+vi.mock('#app', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRuntimeConfig: () => ({
+      public: {
+        GOOGLE_CLIENT_ID: 'test-google-client-id',
+        GOOGLE_IOS_CLIENT_ID: 'test-ios-client-id',
+        FACEBOOK_APPID: 'test-facebook-appid',
+        FACEBOOK_CLIENTID: 'test-facebook-clientid',
+      },
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'index',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
+globalThis.__testUseRouter = () => ({
+  push: mockRouterPush,
+})
 
 // Mock API
 vi.mock('~/api', () => ({

@@ -14,8 +14,8 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useRoute } from '#imports'
 const route = useRoute()
 
 const modGroupStore = useModGroupStore()

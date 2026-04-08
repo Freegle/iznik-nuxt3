@@ -60,6 +60,10 @@ vi.mock('~/stores/auth', () => ({
 // Mutable route so each test can set its own params
 let mockRouteReturn = { params: { id: '123' }, query: {} }
 
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('#imports')
   return {
@@ -71,7 +75,8 @@ vi.mock('#imports', async () => {
   }
 })
 
-// Nuxt macros
+// Nuxt auto-imports
+globalThis.__testUseRoute = () => mockRouteReturn
 globalThis.definePageMeta = vi.fn()
 globalThis.useHead = vi.fn()
 globalThis.useRuntimeConfig = () => ({ public: { BUILD_DATE: '2026-01-01' } })

@@ -3,13 +3,21 @@ import { mount } from '@vue/test-utils'
 
 import GroupMarker from '~/components/GroupMarker.vue'
 
-// Mock vue-router
+// Mock useRouter via #imports (component imports from #imports, not vue-router)
 const mockPush = vi.fn()
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => ({
+      push: mockPush,
+    }),
+  }
+})
 
 // Mock GroupMarkerRich - need to use the same relative path as the component does
 // The component at components/GroupMarker.vue imports './GroupMarkerRich'

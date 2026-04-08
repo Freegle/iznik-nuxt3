@@ -17,7 +17,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useMessageStore } from '~/stores/message'
 import { useMe } from '~/composables/useMe'

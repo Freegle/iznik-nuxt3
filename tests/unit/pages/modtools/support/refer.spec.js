@@ -34,11 +34,37 @@ vi.mock('~/composables/useMe', () => ({
 // Mock route params
 const mockRouteParams = ref({ id: undefined })
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-}))
+vi.hoisted(() => {
+  vi.resetModules()
+})
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: mockRouteParams.value,
+      query: {},
+      path: '/',
+      name: 'modtools-support-refer',
+      fullPath: '/',
+      matched: [],
+      redirectedFrom: undefined,
+      meta: {},
+    }),
+  }
+})
+
+globalThis.__testUseRoute = () => ({
+  params: mockRouteParams.value,
+  query: {},
+  path: '/',
+  name: 'modtools-support-refer',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 describe('support/refer/[[id]].vue page', () => {
   function mountComponent() {

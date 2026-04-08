@@ -106,7 +106,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter } from '#imports'
 import { useRuntimeConfig } from '#app'
 import { useComposeStore } from '~/stores/compose'
 import { useAuthStore } from '~/stores/auth'

@@ -85,17 +85,21 @@ vi.mock('~/composables/useMTBuildHead', () => ({
   buildHead: vi.fn().mockReturnValue({}),
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    fullPath: '/',
-    path: '/',
-    query: {},
-  }),
-  useRouter: () => ({
-    push: vi.fn(),
-    go: vi.fn(),
-  }),
-}))
+// useRoute is auto-imported by Nuxt (no import statement in component).
+// Provide it as a global so it's available during setup.
+vi.stubGlobal('useRoute', () => ({ fullPath: '/', path: '/', query: {} }))
+
+vi.mock('#imports', async () => {
+  const actual = await vi.importActual('#imports')
+  return {
+    ...actual,
+    useRouter: () => ({
+      push: vi.fn(),
+      go: vi.fn(),
+      currentRoute: { value: { path: '/' } },
+    }),
+  }
+})
 
 /**
  * Mounts the DefaultLayout inside Suspense (required for async setup).
