@@ -1192,4 +1192,129 @@ describe('OurUploader', () => {
       expect(wrapper.text()).toContain('Uploading 50%')
     })
   })
+
+  describe('TUS plugin retryDelays', () => {
+    it('configures retryDelays on the Uppy TUS plugin', async () => {
+      mockIsApp.value = false
+      await createWrapper()
+      const Tus = (await import('@uppy/tus')).default
+      const tusCall = mockUppy.use.mock.calls.find((c) => c[0] === Tus)
+      expect(tusCall).toBeDefined()
+      expect(tusCall[1].retryDelays).toEqual([0, 3000, 5000, 10000, 20000])
+    })
+  })
+
+  describe('error handler resilience', () => {
+    it('does not crash when retryAll() throws due to Uppy state corruption', async () => {
+      mockIsApp.value = false
+      mockUppy.retryAll.mockImplementation(() => {
+        throw new TypeError(
+          "Cannot use 'in' operator to search for 'error' in undefined"
+        )
+      })
+
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      await createWrapper()
+
+      // Find the error handler registered via uppy.on('error', ...)
+      const errorCall = mockUppy.on.mock.calls.find((c) => c[0] === 'error')
+      expect(errorCall).toBeDefined()
+      const errorHandler = errorCall[1]
+
+      // Should not throw — retryAll crash is caught
+      expect(() => errorHandler(new Error('Network failure'))).not.toThrow()
+      expect(mockUppy.retryAll).toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(
+        'retryAll() failed (Uppy state corruption)',
+        expect.any(TypeError)
+      )
+
+      consoleError.mockRestore()
+    })
+
+    it('calls retryAll() successfully when Uppy state is valid', async () => {
+      mockIsApp.value = false
+      mockUppy.retryAll.mockImplementation(() => {})
+
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      await createWrapper()
+
+      const errorCall = mockUppy.on.mock.calls.find((c) => c[0] === 'error')
+      const errorHandler = errorCall[1]
+
+      errorHandler(new Error('Temporary failure'))
+      expect(mockUppy.retryAll).toHaveBeenCalled()
+      // Only the initial "Upload error, retry" log, no corruption log
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(consoleError).toHaveBeenCalledWith(
+        'Upload error, retry',
+        expect.any(Error)
+      )
+
+      consoleError.mockRestore()
+    })
+  })
+
+  describe('timer management', () => {
+    it('clears timer on complete event', async () => {
+      vi.useFakeTimers()
+      mockIsApp.value = false
+      await createWrapper()
+
+      // Find dashboard:modal-open handler to start the timer
+      const openCall = mockUppy.on.mock.calls.find(
+        (c) => c[0] === 'dashboard:modal-open'
+      )
+      expect(openCall).toBeDefined()
+      openCall[1]() // Start the timer
+
+      // Find the complete handler and call it
+      const completeCall = mockUppy.on.mock.calls.find(
+        (c) => c[0] === 'complete'
+      )
+      expect(completeCall).toBeDefined()
+      completeCall[1]({ successful: [], failed: [] })
+
+      // Advance past timeout — Sentry should NOT fire
+      const { captureMessage } = await import('@sentry/browser')
+      vi.advanceTimersByTime(35000)
+      expect(captureMessage).not.toHaveBeenCalled()
+
+      vi.useRealTimers()
+    })
+
+    it('clears timer on error event', async () => {
+      vi.useFakeTimers()
+      mockIsApp.value = false
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      await createWrapper()
+
+      // Start the timer via modal-open
+      const openCall = mockUppy.on.mock.calls.find(
+        (c) => c[0] === 'dashboard:modal-open'
+      )
+      openCall[1]()
+
+      // Trigger error handler
+      const errorCall = mockUppy.on.mock.calls.find((c) => c[0] === 'error')
+      errorCall[1](new Error('Upload failed'))
+
+      // Advance past timeout — Sentry should NOT fire
+      const { captureMessage } = await import('@sentry/browser')
+      vi.advanceTimersByTime(35000)
+      expect(captureMessage).not.toHaveBeenCalled()
+
+      consoleError.mockRestore()
+      vi.useRealTimers()
+    })
+  })
 })
