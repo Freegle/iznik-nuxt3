@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { nextTick } from 'vue'
+import { mount, flushPromises } from '@vue/test-utils'
+import { defineComponent, nextTick } from 'vue'
 
 const mockFetch = vi.fn()
 
@@ -37,17 +38,33 @@ describe('useModDashboard', () => {
     }
   }
 
+  // Helper: mount a wrapper component that calls the composable in setup(),
+  // so Vue lifecycle hooks (onMounted) actually fire.
+  function mountWithComposable(props, askfor = ['TestComp'], grouprequired) {
+    let composableResult
+    const Wrapper = defineComponent({
+      setup() {
+        composableResult = useModDashboard(props, askfor, grouprequired)
+        return composableResult
+      },
+      render() {
+        return null
+      },
+    })
+    mount(Wrapper)
+    return composableResult
+  }
+
   it('initializes data properties to null', () => {
     const props = createProps()
-    const result = useModDashboard(props, ['TestComp'])
+    const result = mountWithComposable(props)
     expect(result.TestComp.value).toBe(null)
   })
 
   it('fetches data on mount via onMounted hook', async () => {
     const props = createProps()
-    useModDashboard(props, ['TestComp'])
-    // onMounted runs synchronously during setup in test context
-    await nextTick()
+    mountWithComposable(props)
+    await flushPromises()
     expect(mockFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         components: ['TestComp'],
@@ -58,18 +75,16 @@ describe('useModDashboard', () => {
   it('populates data from API response', async () => {
     mockFetch.mockResolvedValue({ TestComp: '{"key":"value"}' })
     const props = createProps()
-    const result = useModDashboard(props, ['TestComp'])
-    await nextTick() // onMounted
-    await nextTick() // async fetchData resolves
+    const result = mountWithComposable(props)
+    await flushPromises()
     expect(result.TestComp.value).toBe('{"key":"value"}')
   })
 
   it('resets loading to false even when API throws', async () => {
     mockFetch.mockRejectedValue(new Error('Network error'))
     const props = createProps()
-    const result = useModDashboard(props, ['TestComp'])
-    await nextTick()
-    await nextTick()
+    const result = mountWithComposable(props)
+    await flushPromises()
     expect(result.loading.value).toBe(false)
   })
 
@@ -81,26 +96,24 @@ describe('useModDashboard', () => {
     mockFetch.mockResolvedValueOnce({ TestComp: 'second-data' })
 
     const props = createProps()
-    const result = useModDashboard(props, ['TestComp'])
-    await nextTick() // onMounted triggers first fetch
+    const result = mountWithComposable(props)
+    await nextTick() // onMounted fires, fetchData starts
 
     // First fetch is in-flight. Call maybeFetch — should queue.
     result.maybeFetch()
 
     // Resolve first fetch
     resolveFirst({ TestComp: 'first-data' })
-    await nextTick()
-    await nextTick()
-    await nextTick()
+    await flushPromises()
 
-    // Second fetch should have been triggered
+    // Second fetch should have been triggered by needsRefetch
     expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 
   it('does not fetch when grouprequired and no groupid', async () => {
     const props = createProps({ groupid: null })
-    useModDashboard(props, ['TestComp'], true)
-    await nextTick()
+    mountWithComposable(props, ['TestComp'], true)
+    await flushPromises()
     expect(mockFetch).not.toHaveBeenCalled()
   })
 })
