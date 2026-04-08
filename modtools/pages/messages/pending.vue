@@ -38,7 +38,6 @@
         <ModMessages />
         <infinite-loading
           direction="top"
-          force-use-infinite-wrapper="true"
           :identifier="bump"
           @infinite="loadMore"
         >

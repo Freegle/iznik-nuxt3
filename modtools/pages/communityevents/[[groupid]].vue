@@ -13,11 +13,7 @@
       automatically.
     </NoticeMessage>
 
-    <infinite-loading
-      force-use-infinite-wrapper="body"
-      :distance="distance"
-      @infinite="loadMore"
-    >
+    <infinite-loading :distance="distance" @infinite="loadMore">
       <template #spinner>
         <Spinner :size="50" />
       </template>

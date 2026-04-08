@@ -17,7 +17,6 @@
 
         <infinite-loading
           direction="top"
-          force-use-infinite-wrapper="body"
           :distance="distance"
           :identifier="bump"
           @infinite="loadMore"
