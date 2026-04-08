@@ -79,4 +79,28 @@ describe('useModMessages getMessages', () => {
     // getMessages() must NOT throw — it should silently absorb the 401
     await expect(getMessages()).resolves.toBeUndefined()
   })
+
+  it('resets show count to 0 on 401 so UI does not show stale message count', async () => {
+    // First call succeeds — show is set to the number of messages
+    mockFetchMessagesMT.mockResolvedValue([1, 2, 3])
+    mockAll.value = [{ id: 1 }, { id: 2 }, { id: 3 }]
+
+    const { setupModMessages } = await import(
+      '~/modtools/composables/useModMessages'
+    )
+    const { getMessages, collection, show } = setupModMessages()
+    collection.value = 'Pending'
+    await getMessages()
+    expect(show.value).toBe(3)
+
+    // Second call gets 401 — show must reset to 0
+    mockFetchMessagesMT.mockRejectedValue(
+      new APIError(
+        { response: { status: 401 } },
+        'API Error GET /modtools/messages -> status: 401'
+      )
+    )
+    await getMessages()
+    expect(show.value).toBe(0)
+  })
 })
