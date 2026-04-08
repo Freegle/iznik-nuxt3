@@ -403,6 +403,7 @@ onMounted(() => {
     .use(Tus, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       uploadDataDuringCreation: true,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
     })
     .use(Compressor)
   uppy.on('file-added', (file) => {
@@ -440,7 +441,13 @@ onMounted(() => {
   uppy.on('upload', (uploadID, files) => {
     console.log('Upload started', uploadID, files)
   })
-  uppy.on('complete', uploadSuccess)
+  uppy.on('complete', (result) => {
+    if (uppyTimer) {
+      clearTimeout(uppyTimer)
+      uppyTimer = null
+    }
+    uploadSuccess(result)
+  })
   uppy.on('dashboard:modal-open', () => {
     console.log('Uploader modal is open')
     if (!uppyTimer) {
@@ -457,12 +464,17 @@ onMounted(() => {
   uppy.on('upload-success', (file, response) => {
     console.log('Upload success', file, response)
   })
-  uppy.on('complete', (result) => {
-    console.log('Complete', result)
-  })
   uppy.on('error', (error) => {
     console.error('Upload error, retry', error)
-    uppy.retryAll()
+    if (uppyTimer) {
+      clearTimeout(uppyTimer)
+      uppyTimer = null
+    }
+    try {
+      uppy.retryAll()
+    } catch (retryError) {
+      console.error('retryAll() failed (Uppy state corruption)', retryError)
+    }
   })
   uppy.on('upload-retry', (fileID) => {
     console.log('upload retried:', fileID)
