@@ -48,15 +48,21 @@ describe('ModMemberTypeSelect', () => {
       expect(wrapper.text()).toContain('Banned')
     })
 
+    it('renders Received mod mails option', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.text()).toContain('Received mod mails')
+    })
+
     it('has correct option values', () => {
       const wrapper = mountComponent()
       const options = wrapper.findAll('option')
-      expect(options.length).toBe(5)
+      expect(options.length).toBe(6)
       expect(options[0].attributes('value')).toBe('0')
       expect(options[1].attributes('value')).toBe('3')
       expect(options[2].attributes('value')).toBe('2')
       expect(options[3].attributes('value')).toBe('1')
       expect(options[4].attributes('value')).toBe('5')
+      expect(options[5].attributes('value')).toBe('6')
     })
   })
 
@@ -111,6 +117,12 @@ describe('ModMemberTypeSelect', () => {
       const wrapper = mountComponent()
       const option = wrapper.find('option[value="5"]')
       expect(option.text()).toBe('Banned')
+    })
+
+    it('value 6 corresponds to Received mod mails', () => {
+      const wrapper = mountComponent()
+      const option = wrapper.find('option[value="6"]')
+      expect(option.text()).toBe('Received mod mails')
     })
   })
 })

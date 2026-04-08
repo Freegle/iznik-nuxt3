@@ -5,6 +5,7 @@
     <option value="2">Moderation Team</option>
     <option value="1">With notes</option>
     <option value="5">Banned</option>
+    <option value="6">Received mod mails</option>
   </b-form-select>
 </template>
 <script setup>
