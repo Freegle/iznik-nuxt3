@@ -109,9 +109,16 @@ vi.mock('~/composables/useClientLog', () => ({
   action: vi.fn(),
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: {} }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'myposts',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

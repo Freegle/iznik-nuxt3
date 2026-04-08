@@ -21,13 +21,16 @@ const mockAuthStore = {
 }
 
 // Mock vue-router
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/spammers',
-    params: {},
-    query: {},
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/spammers',
+  name: 'spammers',
+  fullPath: '/spammers',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Mock stores
 vi.mock('~/stores/auth', () => ({

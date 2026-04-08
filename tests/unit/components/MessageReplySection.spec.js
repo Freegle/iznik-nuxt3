@@ -76,12 +76,16 @@ vi.mock('~/constants', () => ({
   FAR_AWAY: 20,
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/message/1',
-    query: {},
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/message/1',
+  name: 'message-id',
+  fullPath: '/message/1',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 describe('MessageReplySection', () => {
   beforeEach(() => {

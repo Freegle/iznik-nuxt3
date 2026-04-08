@@ -79,9 +79,7 @@ const mockRoute = {
   path: '/browse',
 }
 
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-}))
+globalThis.useRoute = () => mockRoute
 
 // Mock child components
 vi.mock('~/components/NavbarMobilePost', () => ({

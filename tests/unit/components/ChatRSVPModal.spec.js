@@ -14,9 +14,7 @@ const { mockPush, mockHide, mockRsvp, mockHideChat, mockData, mockUserId } =
     mockUserId: { value: 1 },
   }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: mockPush }),
-}))
+globalThis.useRouter = () => ({ push: mockPush })
 
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({

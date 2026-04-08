@@ -38,19 +38,16 @@ vi.mock('~/stores/auth', () => ({
 const mockRouteParams = ref({ id: undefined })
 const mockRouterPush = vi.fn()
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-  }),
-}))
-
-vi.mock('#imports', () => ({
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
-
-// Make useRouter available globally
+globalThis.useRoute = () => ({
+  params: mockRouteParams.value,
+  query: {},
+  path: '/',
+  name: 'modtools-chats',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 globalThis.useRouter = () => ({
   push: mockRouterPush,
 })

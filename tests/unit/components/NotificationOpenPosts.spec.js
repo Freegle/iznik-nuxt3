@@ -23,9 +23,7 @@ const { mockNotification, mockNotificationago } = vi.hoisted(() => {
   }
 })
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 vi.mock('~/composables/useNotification', () => ({
   setupNotification: vi.fn(() =>

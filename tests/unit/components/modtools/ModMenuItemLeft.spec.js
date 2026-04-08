@@ -33,10 +33,8 @@ const mockRouter = {
   push: vi.fn(),
 }
 
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-  useRouter: () => mockRouter,
-}))
+globalThis.useRoute = () => mockRoute
+globalThis.useRouter = () => mockRouter
 
 describe('ModMenuItemLeft', () => {
   function mountModMenuItemLeft(props = {}, routeOverrides = {}) {

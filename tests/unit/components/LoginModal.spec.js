@@ -134,14 +134,19 @@ vi.mock('pinia', async (importOriginal) => {
 })
 
 // Mock vue-router
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    path: '/',
-  }),
-  useRouter: () => ({
-    push: mockRouterPush,
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'index',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
+globalThis.useRouter = () => ({
+  push: mockRouterPush,
+})
 
 // Mock runtime config
 vi.mock('#app', () => ({

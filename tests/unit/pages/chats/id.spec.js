@@ -103,20 +103,24 @@ vi.mock('pinia', async () => {
   }
 })
 
-// Mock vue-router (for any direct vue-router imports)
+// Mock vue-router (for Nuxt auto-imports)
 const mockRouteParams = ref({})
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-    query: {},
-  }),
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    currentRoute: { value: { path: '/' } },
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: mockRouteParams.value,
+  query: {},
+  path: '/',
+  name: 'chats',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
+globalThis.useRouter = () => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  currentRoute: { value: { path: '/' } },
+})
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

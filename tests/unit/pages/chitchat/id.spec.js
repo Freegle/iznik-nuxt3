@@ -84,9 +84,16 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: {} }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'chitchat',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 vi.mock('~/composables/useBuildHead', () => ({
   buildHead: () => ({}),

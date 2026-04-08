@@ -35,9 +35,16 @@ vi.mock('~/stores/stories', () => ({
 // Mutable route
 let mockRouteParams = { id: '7' }
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: mockRouteParams }),
-}))
+globalThis.useRoute = () => ({
+  params: mockRouteParams,
+  query: {},
+  path: '/',
+  name: 'story-id',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 // Nuxt macros
 globalThis.definePageMeta = vi.fn()

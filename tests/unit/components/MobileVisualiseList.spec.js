@@ -70,9 +70,7 @@ const mockGroupStore = {
   fetch: vi.fn().mockResolvedValue([]),
 }
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 vi.mock('~/stores/message', () => ({
   useMessageStore: () => mockMessageStore,

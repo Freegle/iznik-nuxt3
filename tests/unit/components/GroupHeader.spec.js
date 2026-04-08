@@ -53,9 +53,7 @@ vi.mock('~/stores/auth', () => ({
   useAuthStore: () => mockAuthStore,
 }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 describe('GroupHeader', () => {
   beforeEach(() => {

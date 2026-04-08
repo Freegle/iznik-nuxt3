@@ -46,12 +46,16 @@ vi.mock('~/composables/useMe', () => ({
 const mockRouteParams = ref({ id: undefined })
 const mockRouteQuery = ref({})
 
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: mockRouteParams.value,
-    query: mockRouteQuery.value,
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: mockRouteParams.value,
+  query: mockRouteQuery.value,
+  path: '/',
+  name: 'modtools-support',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 describe('support/[[id]].vue page', () => {
   function mountComponent() {

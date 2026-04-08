@@ -5,11 +5,9 @@ import GroupMarker from '~/components/GroupMarker.vue'
 
 // Mock vue-router
 const mockPush = vi.fn()
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}))
+globalThis.useRouter = () => ({
+  push: mockPush,
+})
 
 // Mock GroupMarkerRich - need to use the same relative path as the component does
 // The component at components/GroupMarker.vue imports './GroupMarkerRich'

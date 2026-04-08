@@ -102,11 +102,16 @@ vi.mock('~/composables/useMe', () => ({
 }))
 
 // Mock useRoute
-vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    query: {},
-  }),
-}))
+globalThis.useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'modtools-messages-pending',
+  fullPath: '/',
+  matched: [],
+  redirectedFrom: undefined,
+  meta: {},
+})
 
 describe('PendingPage', () => {
   function mountComponent() {

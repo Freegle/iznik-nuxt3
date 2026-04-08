@@ -31,9 +31,7 @@ vi.mock('~/stores/job', () => ({
   useJobStore: () => mockJobStore,
 }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 vi.mock('~/composables/useClientLog', () => ({
   action: (...args) => mockAction(...args),

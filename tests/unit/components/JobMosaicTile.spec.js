@@ -14,9 +14,7 @@ const mockJobStore = {
   log: vi.fn(),
 }
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 vi.mock('~/stores/job', () => ({
   useJobStore: () => mockJobStore,

@@ -33,9 +33,7 @@ vi.mock('~/composables/useNotification', () => ({
     }),
 }))
 
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter,
-}))
+globalThis.useRouter = () => mockRouter
 
 describe('NotificationOne', () => {
   beforeEach(() => {
