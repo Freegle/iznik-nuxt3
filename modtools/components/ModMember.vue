@@ -1,5 +1,5 @@
 <template>
-  <div v-if="member">
+  <div v-if="member" class="member-card">
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>

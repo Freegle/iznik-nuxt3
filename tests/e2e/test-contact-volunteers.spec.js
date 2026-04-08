@@ -62,14 +62,21 @@ test.describe('Contact Volunteers', () => {
 
     // KEY ASSERTION: the new chat must appear as the selected/active entry in
     // the left-hand chat list.  Without the fix, a brand-new User2Mod chat has
-    // lastmsg=0 and ChatListEntry is never rendered, leaving the panel empty.
-    // The `.chat.active` div is the outer container; it must contain a
-    // ChatListEntry (which renders an anchor tag with the chat name).
-    const activeChatEntry = page.locator('.chat.active')
+    // lastmsg=0 and ChatListEntry is never rendered (the v-if was gated on
+    // lastmsg > 0 only), leaving the panel empty.
+    //
+    // We check `.chat.active .chat-entry` — the inner div rendered by
+    // ChatListEntry — rather than `.chat.active` itself.  The outer div exists
+    // in the DOM as soon as the chat appears in visibleChats, but it has zero
+    // height until ChatListEntry renders its content inside it.  The inner
+    // .chat-entry is a concrete, visible element that proves ChatListEntry ran.
+    const activeChatEntry = page.locator('.chat.active .chat-entry')
     await expect(activeChatEntry).toBeVisible({
       timeout: timeouts.ui.appearance,
     })
-    console.log('Active chat entry visible in left panel ✓')
+    console.log(
+      'Active chat entry (ChatListEntry content) visible in left panel ✓'
+    )
 
     // The chat entry should show the group name so the user knows who they're
     // talking to.

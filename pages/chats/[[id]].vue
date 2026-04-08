@@ -454,6 +454,17 @@ onMounted(async () => {
         (c) => c.id === selectedChatId.value
       )
 
+      if (idx < 0 && !chatStore.searchSince) {
+        // Selected chat is not in the current list.  This happens for brand-new
+        // User2Mod chats (latestmessage=0) which the API excludes by default.
+        // Fetch with keepChat so the API force-includes it regardless of the
+        // latestmessage filter.
+        await fetchOlder()
+        idx = filteredChats.value.findIndex(
+          (c) => c.id === selectedChatId.value
+        )
+      }
+
       if (idx >= 0) {
         const below = filteredChats.value.length - 1 - idx
         if (below < SCROLL_SLACK && !chatStore.searchSince) {
@@ -487,7 +498,11 @@ onBeforeUnmount(() => {
 
 async function fetchOlder() {
   chatStore.searchSince = '2009-09-11'
-  await chatStore.fetchChats()
+  await chatStore.fetchChats(
+    undefined,
+    undefined,
+    selectedChatId.value || undefined
+  )
   bump.value++
 }
 

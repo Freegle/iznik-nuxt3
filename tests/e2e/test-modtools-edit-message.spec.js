@@ -75,6 +75,21 @@ test.describe('ModTools Edit Message', () => {
 
     await loginViaModTools(page, testEnv.mod.email)
 
+    // Prevent the "cake" modal and aims modal from appearing — they show on first
+    // visit to /messages/pending when the misc store has no 'cakeasked' key.
+    // Fresh browser contexts (per test) always start with empty localStorage, so
+    // without this they would appear mid-test and block the Edit button click.
+    await page.evaluate(() => {
+      try {
+        const misc = JSON.parse(localStorage.getItem('misc') || '{}')
+        if (!misc.vals) misc.vals = {}
+        misc.vals.cakeasked = true
+        localStorage.setItem('misc', JSON.stringify(misc))
+      } catch (e) {
+        // Ignore — modal will be dismissed by dismissAllModals fallback
+      }
+    })
+
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
     })

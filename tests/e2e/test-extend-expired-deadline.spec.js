@@ -51,7 +51,7 @@ test.describe('Extend expired deadline', () => {
     // { immediate: true }, so it fires on every hydration and calls
     // fetchByUser client-side — this browser request is interceptable even
     // though the initial SSR fetch is not.
-    await page.route('**/apiv2/user/*/message*', async (route) => {
+    await page.route('**/api/user/*/message*', async (route) => {
       const response = await route.fetch()
       const body = await response.json()
       if (Array.isArray(body)) {
@@ -61,7 +61,7 @@ test.describe('Extend expired deadline', () => {
       }
       await route.fulfill({
         status: response.status(),
-        headers: Object.fromEntries(response.headers()),
+        headers: response.headers(),
         body: JSON.stringify(body),
       })
     })
@@ -80,6 +80,11 @@ test.describe('Extend expired deadline', () => {
 
     // Click the toggle to reveal old posts, then find our post card.
     await oldToggle.click()
+    // Scroll to bottom so old posts enter the viewport — MyMessage uses
+    // v-observe-visibility (IntersectionObserver) and only renders .message-card
+    // once the outer element is visible.  The new-user welcome section can push
+    // posts below the fold, preventing the observer from firing.
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     const postCard = page
       .locator('.message-card')
       .filter({ hasText: posted.item })
@@ -107,7 +112,7 @@ test.describe('Extend expired deadline', () => {
     // Remove the route intercept before saving so the re-fetch triggered by
     // patch() gets real server data (hasoutcome=0/undefined — the server
     // clears the Expired outcome when a future deadline is set).
-    await page.unroute('**/apiv2/user/*/message*')
+    await page.unroute('**/api/user/*/message*')
 
     // Capture the PATCH request.
     const patchPromise = page.waitForResponse(
