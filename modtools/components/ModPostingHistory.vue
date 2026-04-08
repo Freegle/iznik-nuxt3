@@ -26,18 +26,20 @@
     </b-badge>
     <b-badge
       v-if="userinfo"
-      :variant="userinfo.replies > 0 ? 'success' : 'light'"
+      :variant="userinfo.repliesoffer > 0 ? 'success' : 'light'"
       title="Recent replies to OFFERs"
-      class="me-2"
+      class="clickme me-2"
+      @click="showReplies('Offer')"
     >
       <v-icon icon="gift" class="fa-fw" /><v-icon icon="reply" class="fa-fw" />
       {{ userinfo.repliesoffer }}
     </b-badge>
     <b-badge
       v-if="userinfo"
-      :variant="userinfo.replies > 0 ? 'success' : 'light'"
+      :variant="userinfo.replieswanted > 0 ? 'success' : 'light'"
       title="Recent replies to WANTEDs"
-      class="me-2"
+      class="clickme me-2"
+      @click="showReplies('Wanted')"
     >
       <v-icon icon="search" class="fa-fw" /><v-icon
         icon="reply"
@@ -76,11 +78,19 @@
       :modmailsonly="modmailsonly"
       @hidden="showLogsModal = false"
     />
+    <ModRepliesModal
+      v-if="showRepliesModal"
+      ref="repliesModal"
+      :userid="userid"
+      :type="replyType"
+      @hidden="showRepliesModal = false"
+    />
   </span>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useUserStore } from '~/stores/user'
+import ModRepliesModal from '~/modtools/components/ModRepliesModal.vue'
 
 const props = defineProps({
   userid: {
@@ -97,11 +107,14 @@ const user = computed(() => {
 
 const history = ref(null)
 const logs = ref(null)
+const repliesModal = ref(null)
 
 const type = ref(null)
+const replyType = ref(null)
 const modmailsonly = ref(false)
 const showPostingHistoryModal = ref(false)
 const showLogsModal = ref(false)
+const showRepliesModal = ref(false)
 
 function countType(typeArg) {
   let count = 0
@@ -146,24 +159,31 @@ onMounted(() => {
   }
 })
 
-function showHistory(typeArg = null) {
+async function showHistory(typeArg = null) {
   type.value = typeArg
   showPostingHistoryModal.value = true
+  await nextTick()
   history.value?.show()
 }
 
-function showLogs() {
-  console.log('showLogs')
+async function showLogs() {
   modmailsonly.value = false
-
   showLogsModal.value = true
+  await nextTick()
   logs.value?.show()
 }
 
-function showModmails() {
+async function showModmails() {
   modmailsonly.value = true
-
   showLogsModal.value = true
+  await nextTick()
   logs.value?.show()
+}
+
+async function showReplies(typeArg = null) {
+  replyType.value = typeArg
+  showRepliesModal.value = true
+  await nextTick()
+  repliesModal.value?.show()
 }
 </script>
