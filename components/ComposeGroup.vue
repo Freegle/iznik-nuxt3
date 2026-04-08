@@ -85,25 +85,32 @@ const groupOptions = computed(() => {
 onMounted(async () => {
   // The postcode we have contains a list of groups. That list might contain groups which are no longer valid,
   // for example if they have been merged. So we want to refetch the postcode so that our store gets updated.
+  // Preserve the currently selected group across the refetch so we don't overwrite a user's choice.
   if (postcode.value) {
+    const savedGroup = composeStore.group
+
     try {
       const location = await api(runtimeConfig).location.typeahead(
         postcode.value.name
       )
 
-      composeStore.postcode = location[0]
+      composeStore.setPostcode(location[0])
     } catch (e) {
       console.error('Failed to fetch postcode', e)
     }
+
+    // Restore the group — setPostcode doesn't touch it, but the reactive
+    // cascade from changing postcode data could cause b-form-select to lose
+    // its value if the options momentarily change.
+    if (savedGroup) {
+      composeStore.group = savedGroup
+    }
   }
 
-  console.log('Fetch user')
   await authStore.fetchUser()
-  console.log('Fetched user', authStore.user, authStore.groups)
 
   // If we have a postcode with groups but no group selected, auto-select the first one.
   if (postcode.value?.groupsnear?.length && !composeStore.group) {
-    console.log('Auto-selecting first group:', postcode.value.groupsnear[0].id)
     composeStore.group = postcode.value.groupsnear[0].id
   }
 })
