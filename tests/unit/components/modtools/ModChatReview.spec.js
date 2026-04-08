@@ -339,6 +339,73 @@ describe('ModChatReview', () => {
     })
   })
 
+  describe('isActiveMod — backup mod buttons', () => {
+    it('shows all action buttons for backup mod (active=0, role=Moderator)', () => {
+      globalThis.__mockAuthStore = {
+        groups: [{ groupid: 789, role: 'Moderator', active: 0 }],
+      }
+      const wrapper = mountComponent({ widerchatreview: false, held: null })
+      const buttons = wrapper.findAll('.spin-button')
+      const expectedLabels = [
+        'Approve - Not Spam',
+        'Approve and whitelist',
+        'Hold',
+        'Delete',
+        'Spam',
+      ]
+      expectedLabels.forEach((label) => {
+        expect(
+          buttons.find((b) => b.attributes('data-label') === label)
+        ).toBeDefined()
+      })
+      expect(wrapper.find('.chat-view-button').exists()).toBe(true)
+    })
+
+    it('shows all action buttons for backup owner (active=0, role=Owner)', () => {
+      globalThis.__mockAuthStore = {
+        groups: [{ groupid: 789, role: 'Owner', active: 0 }],
+      }
+      const wrapper = mountComponent({ widerchatreview: false, held: null })
+      const buttons = wrapper.findAll('.spin-button')
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Hold')
+      ).toBeDefined()
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Delete')
+      ).toBeDefined()
+    })
+
+    it('hides mod buttons when user is not a member of the group', () => {
+      globalThis.__mockAuthStore = {
+        groups: [{ groupid: 999, role: 'Moderator', active: 1 }],
+      }
+      const wrapper = mountComponent({ widerchatreview: false, held: null })
+      const buttons = wrapper.findAll('.spin-button')
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Hold')
+      ).toBeUndefined()
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Delete')
+      ).toBeUndefined()
+      // Approve should still show (not gated by isActiveMod)
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Approve - Not Spam')
+      ).toBeDefined()
+    })
+
+    it('shows mod buttons when message has no group (isActiveMod defaults true)', () => {
+      const wrapper = mountComponent({
+        group: null,
+        widerchatreview: false,
+        held: null,
+      })
+      const buttons = wrapper.findAll('.spin-button')
+      expect(
+        buttons.find((b) => b.attributes('data-label') === 'Hold')
+      ).toBeDefined()
+    })
+  })
+
   describe('groupfrom info', () => {
     it('shows group info when groupfrom exists, otherwise shows not modded message', () => {
       expect(

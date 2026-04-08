@@ -901,6 +901,12 @@ const repost = async (e) => {
     composeStore.postcode = locs[0]
   }
 
+  // Set the group from the original message so the dropdown shows the correct
+  // group rather than falling back to groupsnear[0] or a stale localStorage value.
+  if (message.value.groups?.length > 0) {
+    composeStore.group = message.value.groups[0].groupid
+  }
+
   await composeStore.setAttachmentsForMessage(0, message.value.attachments)
   router.push(message.value.type === 'Offer' ? '/give' : '/find')
 }

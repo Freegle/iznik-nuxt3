@@ -346,6 +346,8 @@ const duplicateGroups = computed(() => {
     const isDuplicate =
       item.userid !== 0 &&
       item.userid === prev.userid &&
+      typeof item.message === 'string' &&
+      typeof prev.message === 'string' &&
       item.message === prev.message
 
     if (isDuplicate) {

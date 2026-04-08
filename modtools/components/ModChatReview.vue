@@ -272,8 +272,11 @@ const isActiveMod = computed(() => {
   const groupid = message.value?.group?.id
   if (!groupid) return true
   const membership = authStore.groups?.find((g) => g.groupid === groupid)
-  if (membership?.active === 0) return false
-  return true
+  // If we have any mod-level role on the group (Moderator/Owner), we can act on
+  // chat reviews — even if active=0 (backup mod).  The API already decided to
+  // show us this review; we should be able to take action on it.
+  if (!membership) return false
+  return membership.role === 'Moderator' || membership.role === 'Owner'
 })
 
 const emit = defineEmits(['reload'])
