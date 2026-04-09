@@ -88,6 +88,11 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => ({ public: {} }),
 }))
 
+const mockAction = vi.fn()
+vi.mock('~/composables/useClientLog', () => ({
+  action: (...args) => mockAction(...args),
+}))
+
 describe('DonationAskModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -113,8 +118,10 @@ describe('DonationAskModal', () => {
       global: {
         stubs: {
           'b-modal': {
-            template: '<div class="b-modal"><slot name="default" /></div>',
+            template:
+              '<div class="b-modal" @show="$emit(\'show\')"><slot name="default" /></div>',
             props: ['title', 'hideHeader', 'hideFooter', 'size', 'noStacking'],
+            emits: ['show'],
           },
           DonationAskStripe: {
             template: '<div class="donation-ask-stripe" />',
@@ -255,6 +262,89 @@ describe('DonationAskModal', () => {
         variant: 'test-variant',
         score: 5,
       })
+    })
+  })
+
+  describe('funnel instrumentation', () => {
+    it('logs donation_modal_open when modal show event fires', async () => {
+      mockVariant.value = 'minimal-friction-5'
+      mockGroupId.value = 42
+      const wrapper = await createWrapper()
+
+      const modal = wrapper.find('.b-modal')
+      await modal.trigger('show')
+
+      expect(mockAction).toHaveBeenCalledWith('donation_modal_open', {
+        variant: 'minimal-friction-5',
+        groupId: 42,
+      })
+    })
+
+    it('logs donation_modal_engaged after 2 seconds', async () => {
+      vi.useFakeTimers()
+      mockVariant.value = 'stripe'
+      mockGroupId.value = 10
+      const wrapper = await createWrapper()
+
+      const modal = wrapper.find('.b-modal')
+      await modal.trigger('show')
+
+      expect(mockAction).not.toHaveBeenCalledWith(
+        'donation_modal_engaged',
+        expect.anything()
+      )
+
+      vi.advanceTimersByTime(2000)
+
+      expect(mockAction).toHaveBeenCalledWith('donation_modal_engaged', {
+        variant: 'stripe',
+        groupId: 10,
+        elapsed_ms: expect.any(Number),
+      })
+
+      vi.useRealTimers()
+    })
+
+    it('logs donation_modal_dismissed on hide with timing', async () => {
+      vi.useFakeTimers()
+      mockVariant.value = 'minimal-friction-5'
+      const wrapper = await createWrapper()
+      const component = wrapper.findComponent(DonationAskModal)
+
+      const modal = wrapper.find('.b-modal')
+      await modal.trigger('show')
+
+      vi.advanceTimersByTime(1500)
+
+      component.vm.hide()
+
+      expect(mockAction).toHaveBeenCalledWith('donation_modal_dismissed', {
+        variant: 'minimal-friction-5',
+        groupId: expect.any(Number),
+        time_open_ms: expect.any(Number),
+        engaged: false,
+      })
+
+      vi.useRealTimers()
+    })
+
+    it('does not log dismissed when thankyou is showing', async () => {
+      const wrapper = await createWrapper()
+      const component = wrapper.findComponent(DonationAskModal)
+
+      const modal = wrapper.find('.b-modal')
+      await modal.trigger('show')
+
+      // Simulate successful donation
+      component.vm.thankyou = true
+
+      mockAction.mockClear()
+      component.vm.hide()
+
+      expect(mockAction).not.toHaveBeenCalledWith(
+        'donation_modal_dismissed',
+        expect.anything()
+      )
     })
   })
 })

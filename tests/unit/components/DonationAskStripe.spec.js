@@ -18,6 +18,11 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => ({ public: {} }),
 }))
 
+const mockAction = vi.fn()
+vi.mock('~/composables/useClientLog', () => ({
+  action: (...args) => mockAction(...args),
+}))
+
 vi.mock('~/stores/mobile', () => ({
   useMobileStore: () => ({
     isApp: false,
@@ -292,6 +297,58 @@ describe('DonationAskStripe', () => {
       // Verify the Stripe component rendered correctly
       // PayPal button would only show after fallback is triggered via event
       expect(wrapper.find('.stripe-donate').exists()).toBe(true)
+    })
+  })
+
+  describe('funnel instrumentation', () => {
+    it('logs donation_amount_changed when slider changes', async () => {
+      mockApi.bandit.choose.mockResolvedValue({ variant: 'minimal-friction-5' })
+      vi.useFakeTimers()
+      const wrapper = createWrapper()
+      await flushPromises()
+
+      const slider = wrapper.find('.amount-slider')
+      await slider.setValue(10)
+      await flushPromises()
+
+      vi.advanceTimersByTime(500)
+
+      expect(mockAction).toHaveBeenCalledWith('donation_amount_changed', {
+        old_amount: 5,
+        new_amount: 10,
+        input_method: 'slider',
+      })
+
+      vi.useRealTimers()
+    })
+
+    it('logs donation_payment_completed on success', async () => {
+      const wrapper = createWrapper()
+      await flushPromises()
+
+      const stripe = wrapper.findComponent({ name: 'StripeDonate' })
+      await stripe.vm.$emit('success')
+      await flushPromises()
+
+      expect(mockAction).toHaveBeenCalledWith('donation_payment_completed', {
+        amount: expect.any(Number),
+        variant: 'minimal-friction',
+      })
+    })
+
+    it('logs donation_payment_fallback when no payment methods', async () => {
+      const wrapper = createWrapper()
+      await flushPromises()
+
+      const stripe = wrapper.findComponent({ name: 'StripeDonate' })
+      await stripe.vm.$emit('no-payment-methods')
+      await flushPromises()
+
+      expect(mockAction).toHaveBeenCalledWith('donation_payment_fallback', {
+        amount: expect.any(Number),
+        variant: 'minimal-friction',
+        reason: 'no_stripe_methods',
+      })
     })
   })
 

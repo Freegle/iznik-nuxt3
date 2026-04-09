@@ -61,6 +61,7 @@ import { ref, watch, onMounted } from '#imports'
 import DonationButton from '~/components/DonationButton.vue'
 import StripeDonate from '~/components/StripeDonate.vue'
 import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 
 const emit = defineEmits(['donation-made'])
 
@@ -80,8 +81,32 @@ watch(testAmount, (newVal) => {
   selectedAmount.value = newVal
 })
 
+let amountChangeTimer = null
+
+watch(selectedAmount, (newVal, oldVal) => {
+  // Debounce — slider drags fire many values.
+  if (amountChangeTimer) {
+    clearTimeout(amountChangeTimer)
+  }
+
+  amountChangeTimer = setTimeout(() => {
+    action('donation_amount_changed', {
+      old_amount: oldVal,
+      new_amount: newVal,
+      input_method: 'slider',
+      context: 'myposts_inline',
+    })
+  }, 500)
+})
+
 // Track donation success
 async function onDonationSuccess() {
+  action('donation_payment_completed', {
+    amount: selectedAmount.value,
+    variant: variation.value,
+    context: 'myposts_inline',
+  })
+
   emit('donation-made')
 
   // Record A/B test conversion
@@ -119,6 +144,12 @@ onMounted(async () => {
     await api.bandit.shown({
       uid: 'mypostsdonation',
       variant: chosen?.variant || `${variation.value}-${testAmount.value}`,
+    })
+
+    action('donation_ask_shown', {
+      variant: variation.value,
+      default_amount: testAmount.value,
+      context: 'myposts_inline',
     })
   } catch (err) {
     console.error('Error with bandit API:', err)

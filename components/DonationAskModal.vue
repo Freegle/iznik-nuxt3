@@ -9,6 +9,7 @@
     body-class="p-3 bg-transparent overflow-visible"
     content-class="bg-transparent border-0"
     modal-class="donation-modal-stripe"
+    @show="logOpen"
   >
     <template #default>
       <div v-if="thankyou">
@@ -50,6 +51,7 @@ import { useDonationStore } from '~/stores/donations'
 import Api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { dateshort } from '~/composables/useTimeFormat'
+import { action } from '~/composables/useClientLog'
 import RateAppAsk from '~/components/RateAppAsk.vue'
 
 const groupStore = useGroupStore()
@@ -57,9 +59,54 @@ const donationStore = useDonationStore()
 const authStore = useAuthStore()
 
 const thankyou = ref(false)
+const openedAt = ref(null)
+const engagedLogged = ref(false)
+let engagedTimer = null
 
-const { modal, hide } = useOurModal()
+const { modal, hide: rawHide } = useOurModal()
 const { variant, groupId, show } = await useDonationAskModal()
+
+function logOpen() {
+  openedAt.value = Date.now()
+  engagedLogged.value = false
+
+  action('donation_modal_open', {
+    variant: variant.value,
+    groupId: groupId.value,
+  })
+
+  engagedTimer = setTimeout(() => {
+    if (openedAt.value) {
+      engagedLogged.value = true
+      action('donation_modal_engaged', {
+        variant: variant.value,
+        groupId: groupId.value,
+        elapsed_ms: Date.now() - openedAt.value,
+      })
+    }
+  }, 2000)
+}
+
+function hide() {
+  const timeOpen = openedAt.value ? Date.now() - openedAt.value : null
+
+  if (!thankyou.value) {
+    action('donation_modal_dismissed', {
+      variant: variant.value,
+      groupId: groupId.value,
+      time_open_ms: timeOpen,
+      engaged: engagedLogged.value,
+    })
+  }
+
+  if (engagedTimer) {
+    clearTimeout(engagedTimer)
+    engagedTimer = null
+  }
+
+  openedAt.value = null
+  rawHide()
+}
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {
