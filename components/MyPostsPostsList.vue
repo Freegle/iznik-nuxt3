@@ -153,7 +153,7 @@ const props = defineProps({
   show: { type: Number, required: true },
 })
 
-const emit = defineEmits(['load-more'])
+const emit = defineEmits(['load-more', 'toggle-old'])
 
 const scrollboxHeight = ref(1000)
 
@@ -162,6 +162,7 @@ const filterText = ref('')
 
 function toggleShowOldPosts() {
   showOldPosts.value = !showOldPosts.value
+  emit('toggle-old')
 }
 
 // Posts are now passed directly as props

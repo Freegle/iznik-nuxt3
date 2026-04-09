@@ -36,11 +36,13 @@
             />
 
             <MyPostsPostsList
+              :key="infiniteScrollKey"
               :posts="posts"
               :loading="loading"
               :default-expanded="posts.length <= 5"
               :show="shownCount"
               @load-more="loadMore"
+              @toggle-old="resetInfiniteScroll"
             />
 
             <MyPostsSearchesList v-if="loadedMore" />
@@ -184,6 +186,12 @@ watch(posts, (newPosts) => {
 
 const shownCount = ref(1)
 const loadedMore = ref(false)
+const infiniteScrollKey = ref(0)
+
+function resetInfiniteScroll() {
+  shownCount.value = 1
+  infiniteScrollKey.value++
+}
 
 function loadMore(infiniteLoaderInstance) {
   if (!me.value) {
