@@ -237,10 +237,10 @@ describe('ModMemberButtons', () => {
       expect(wrapper.text()).not.toContain('Hold')
     })
 
-    it('shows remove button for Approved spammers', () => {
+    it('shows remove button for confirmed spammers', () => {
       const wrapper = mountComponent({
         member: createMember({
-          spammer: { id: 222, collection: 'Approved' },
+          spammer: { id: 222, collection: 'Spammer' },
         }),
       })
       expect(wrapper.text()).toContain('Remove from spammer list')
