@@ -78,7 +78,7 @@
         />
       </div>
       <div
-        v-else-if="member.spammer.collection === 'Approved'"
+        v-else-if="member.spammer.collection === 'Spammer'"
         class="d-flex flex-wrap"
       >
         <ModMemberButton
