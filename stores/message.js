@@ -1,10 +1,7 @@
 import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
-import dayjs from 'dayjs'
 import { nextTick } from 'vue'
 import api from '~/api'
-import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
-import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/APIErrors'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -260,28 +257,6 @@ export const useMessageStore = defineStore({
       }
       return ret
     },
-    async hasExpired(message) {
-      // Consider whether the message has expired.  It's lighter load on the server to do this here rather than
-      // when querying.
-      let expired = false
-
-      const groupStore = useGroupStore()
-      const group = await groupStore.fetch(message.groupid)
-
-      const daysago = dayjs().diff(dayjs(message.arrival), 'day')
-      const maxagetoshow = group?.settings?.maxagetoshow
-        ? group.settings.maxagetoshow
-        : MESSAGE_EXPIRE_TIME
-      const reposts = group?.settings?.reposts
-        ? group.settings.reposts
-        : GROUP_REPOSTS
-      const repost = message.type === 'Offer' ? reposts.offer : reposts.wanted
-      const maxreposts = repost * (reposts.max + 1)
-      const expiretime = Math.max(maxreposts, maxagetoshow)
-      expired = daysago > expiretime
-
-      return expired
-    },
     async fetchByUser(userid, active, force) {
       let messages = []
 
@@ -305,45 +280,14 @@ export const useMessageStore = defineStore({
           }
         }
 
-        // Run hasExpired in batches, yielding between each so the UI stays
-        // responsive. Only set byUserList once all checks are done so the
-        // active-post count never shows stale/zombie posts mid-check.
-        const BATCH = 20
-        for (let i = 0; i < messages.length; i += BATCH) {
-          const batch = messages.slice(i, i + BATCH)
-          for (const message of batch) {
-            if (!message.hasoutcome) {
-              const expired = await this.hasExpired(message)
-              if (expired) {
-                message.hasoutcome = true
-              }
-            }
-          }
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        }
-
         this.byUserList[userid] = messages
       } else if (this.byUserList[userid]) {
         // Fetch but don't wait
-        promise.then(async (msgs) => {
+        promise.then((msgs) => {
           if (isOwnMessages) {
             for (const message of msgs) {
               message.unseen = false
             }
-          }
-
-          const BATCH = 20
-          for (let i = 0; i < msgs.length; i += BATCH) {
-            const batch = msgs.slice(i, i + BATCH)
-            for (const message of batch) {
-              if (!message.hasoutcome) {
-                const expired = await this.hasExpired(message)
-                if (expired) {
-                  message.hasoutcome = true
-                }
-              }
-            }
-            await new Promise((resolve) => setTimeout(resolve, 0))
           }
 
           this.byUserList[userid] = msgs

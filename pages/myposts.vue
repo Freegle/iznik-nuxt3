@@ -143,7 +143,7 @@ watch(
     if (newMyid) {
       loading.value = true
 
-      // Fetch active posts first — fast (no hasExpired loop over hundreds of old posts)
+      // Fetch active posts first — server filters expired messages
       await messageStore.fetchByUser(newMyid, true, true)
 
       // Fetch full message details for active posts and wait for them —
