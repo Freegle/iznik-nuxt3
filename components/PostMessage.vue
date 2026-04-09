@@ -200,7 +200,7 @@ const description = computed({
 const placeholder = computed(() => {
   return props.type === 'Offer'
     ? "e.g. colour, condition, size, whether it's working etc."
-    : "Explain what you're looking for, and why you'd like it."
+    : 'Size, colour, any specific requirements...'
 })
 
 function $id(type) {

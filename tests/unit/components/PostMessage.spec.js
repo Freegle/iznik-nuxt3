@@ -195,7 +195,7 @@ describe('PostMessage', () => {
       const wrapper = createWrapper({ type: 'Wanted' })
       expect(
         wrapper.find('.b-form-textarea').attributes('placeholder')
-      ).toContain('looking for')
+      ).toContain('specific requirements')
     })
   })
 

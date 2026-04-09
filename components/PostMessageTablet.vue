@@ -39,7 +39,7 @@
             {{
               type === 'Offer'
                 ? 'Any details that might help?'
-                : 'Why do you need it?'
+                : 'Tell us more about what you need:'
             }}
           </label>
           <b-form-textarea
@@ -226,7 +226,7 @@ const description = computed({
 const placeholder = computed(() => {
   return props.type === 'Offer'
     ? "e.g. colour, condition, size, whether it's working..."
-    : "Explain what you're looking for, and why you'd like it..."
+    : 'Size, colour, any specific requirements...'
 })
 
 function $id(type) {
