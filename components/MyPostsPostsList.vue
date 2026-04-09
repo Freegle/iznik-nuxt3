@@ -97,6 +97,7 @@
         </Suspense>
       </div>
       <InfiniteLoading
+        :key="infiniteKey"
         :distance="scrollboxHeight"
         @infinite="(event) => emit('load-more', event)"
       />
@@ -153,15 +154,18 @@ const props = defineProps({
   show: { type: Number, required: true },
 })
 
-const emit = defineEmits(['load-more'])
+const emit = defineEmits(['load-more', 'toggle-old'])
 
 const scrollboxHeight = ref(1000)
 
 const showOldPosts = ref(false)
 const filterText = ref('')
+const infiniteKey = ref(0)
 
 function toggleShowOldPosts() {
   showOldPosts.value = !showOldPosts.value
+  infiniteKey.value++
+  emit('toggle-old')
 }
 
 // Posts are now passed directly as props

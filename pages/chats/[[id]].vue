@@ -45,17 +45,16 @@
                 stickyAdRendered,
               }"
             >
-              <div ref="chatlistRef" class="notda">
-                <div
-                  v-if="me?.settings?.simplemail === 'None'"
-                  class="text-danger text--smallest d-flex justify-content-around mb-1"
-                >
-                  <div>
-                    Emails off. Check here regularly. Change in
-                    <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
-                  </div>
+              <div
+                v-if="me?.settings?.simplemail === 'None'"
+                class="emails-off-warning text-danger text--smallest d-flex justify-content-around"
+              >
+                <div>
+                  Emails off. Check here regularly. Change in
+                  <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
                 </div>
-                <div v-else class="mt-2"></div>
+              </div>
+              <div ref="chatlistRef" class="notda">
                 <div class="chat-toolbar">
                   <form role="search" class="search-form" @submit.prevent>
                     <label for="search-bar" class="visually-hidden"
@@ -823,6 +822,8 @@ async function searchMore() {
 
 .chatlist {
   // On mobile we substitute a different height navbar on this page.
+  // The layout provides ~60px padding-top but the navbar is 66px; add 6px to clear the overlap.
+  padding-top: 6px;
   height: calc(100vh - $navbar-mobile-chat-height);
 
   @include media-breakpoint-up(md) {
@@ -890,6 +891,13 @@ async function searchMore() {
 
   display: flex;
   flex-direction: column;
+
+  .emails-off-warning {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    background: var(--color-gray-50);
+    border-bottom: 1px solid $color-gray-3;
+  }
 
   .notda {
     flex-shrink: 1;

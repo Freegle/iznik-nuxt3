@@ -1326,6 +1326,12 @@ async function loginViaModTools(page, email, password = 'freegle') {
     state: 'visible',
     timeout: timeouts.navigation.slowPage,
   })
+
+  // Wait for the redirect chain to fully settle — without this, a subsequent
+  // page.goto() can be interrupted by a late ?noguard=true redirect.
+  await page.waitForLoadState('load', {
+    timeout: timeouts.navigation.slowPage,
+  })
   console.log('Post-login page settled')
 
   return true

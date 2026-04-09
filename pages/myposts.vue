@@ -41,6 +41,7 @@
               :default-expanded="posts.length <= 5"
               :show="shownCount"
               @load-more="loadMore"
+              @toggle-old="resetInfiniteScroll"
             />
 
             <MyPostsSearchesList v-if="loadedMore" />
@@ -143,7 +144,7 @@ watch(
     if (newMyid) {
       loading.value = true
 
-      // Fetch active posts first — fast (no hasExpired loop over hundreds of old posts)
+      // Fetch active posts first — server filters expired messages
       await messageStore.fetchByUser(newMyid, true, true)
 
       // Fetch full message details for active posts and wait for them —
@@ -184,6 +185,9 @@ watch(posts, (newPosts) => {
 
 const shownCount = ref(1)
 const loadedMore = ref(false)
+function resetInfiniteScroll() {
+  shownCount.value = 1
+}
 
 function loadMore(infiniteLoaderInstance) {
   if (!me.value) {

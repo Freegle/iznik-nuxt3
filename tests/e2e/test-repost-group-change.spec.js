@@ -33,21 +33,16 @@ test.describe('Repost Group Change', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Step 3: Wait for the rejected message card. The active=true fetch may
-    // not include Rejected messages, so this may arrive via the background
-    // active=false fetch. Wait directly for the specific card rather than a
-    // generic page-loaded check.
-    const rejectedCard = page
-      .locator('.message-card:has(.notice--warning)')
-      .first()
-    await expect(rejectedCard).toBeVisible({ timeout: timeouts.ui.appearance })
-    console.log('Found rejected message card')
-
-    // Click "Edit & Resend".
-    const editResendBtn = rejectedCard
-      .locator('button:has-text("Edit & Resend")')
+    // Step 3: Wait for a rejected message card that has "Edit & Resend".
+    // Multiple rejected messages may exist from previous test runs — pick
+    // the one with the button rather than blindly taking the first card.
+    const editResendBtn = page
+      .locator(
+        '.message-card:has(.notice--warning) button:has-text("Edit & Resend")'
+      )
       .first()
     await expect(editResendBtn).toBeVisible({ timeout: timeouts.ui.appearance })
+    console.log('Found rejected message with Edit & Resend button')
     await editResendBtn.click()
     console.log('Clicked Edit & Resend')
 
