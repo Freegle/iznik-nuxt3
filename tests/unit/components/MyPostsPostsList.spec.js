@@ -352,14 +352,10 @@ describe('MyPostsPostsList', () => {
           { id: 2, hasoutcome: true, arrival: '2024-01-02' },
         ],
       })
-      const keyBefore = wrapper.findComponent({
-        name: 'InfiniteLoading',
-      }).element
+      const elBefore = wrapper.find('.infinite-loading').element
       await wrapper.find('.toolbar-toggle').trigger('click')
-      const keyAfter = wrapper.findComponent({
-        name: 'InfiniteLoading',
-      }).element
-      expect(keyBefore).not.toBe(keyAfter)
+      const elAfter = wrapper.find('.infinite-loading').element
+      expect(elBefore).not.toBe(elAfter)
     })
   })
 
