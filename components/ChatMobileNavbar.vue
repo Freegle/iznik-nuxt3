@@ -47,36 +47,6 @@
           size="lg"
         />
       </div>
-      <b-dropdown
-        v-if="chat.chattype === 'User2User'"
-        no-caret
-        variant="primary"
-        class="userOptions"
-      >
-        <template #button-content>
-          <ProfileImage
-            v-if="me?.profile?.path"
-            :image="me.profile.path"
-            :name="me?.displayname"
-            class="m-0 inline"
-            is-thumbnail
-            size="lg"
-          />
-          <v-icon v-else icon="user" size="2x" />
-        </template>
-        <b-dropdown-item href="/settings">
-          <div class="d-flex align-items-center">
-            <v-icon icon="cog" class="menu-icon" />
-            <span class="menu-text">Settings</span>
-          </div>
-        </b-dropdown-item>
-        <b-dropdown-item @click="logout">
-          <div class="d-flex align-items-center clickme">
-            <v-icon icon="sign-out-alt" class="menu-icon" />
-            <span class="menu-text">Logout</span>
-          </div>
-        </b-dropdown-item>
-      </b-dropdown>
     </div>
 
     <!-- Profile popover — only for User2User where other user info is available -->
@@ -256,14 +226,11 @@ import {
   navBarHidden,
 } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
-import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '~/composables/useChat'
 import { timeago } from '~/composables/useTimeFormat'
 
 const router = useRouter()
-const authStore = useAuthStore()
-const me = computed(() => authStore.user)
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -287,7 +254,7 @@ const props = defineProps({
 const chatStore = useChatStore()
 const chat = chatStore.byChatId(props.id)
 
-const { online, backButtonCount, backButton, logout } = useNavbar()
+const { online, backButtonCount, backButton } = useNavbar()
 
 const { otheruser, milesaway, unseen } = await setupChat(props.id)
 
@@ -479,33 +446,47 @@ onBeforeUnmount(() => {
   min-width: 0;
   overflow: hidden;
   padding: 0 8px;
+  text-align: center;
 }
 
 .nav-back-btn {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  border-radius: var(--radius-md, 0.5rem);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
   transition: background-color var(--transition-fast);
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.3);
   }
 
   &:active {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.4);
   }
 }
 
 .back-icon {
   color: white;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .back-badge {
-  margin-left: 6px;
-  font-size: 0.65rem;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 0.6rem;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  line-height: 18px;
+  border-radius: 50%;
 }
 
 .navbar-mark-read {
@@ -604,55 +585,6 @@ onBeforeUnmount(() => {
   &:hover {
     background: darken($color-green-background, 5%);
   }
-}
-
-:deep(.userOptions .dropdown-toggle) {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin-right: 0.5rem;
-
-  &::after {
-    display: none;
-  }
-}
-
-:deep(.userOptions .dropdown-menu) {
-  background: white !important;
-  border: 1px solid $color-gray--light !important;
-  border-radius: var(--radius-sm, 0.375rem);
-  box-shadow: var(--shadow-md);
-  padding: 0;
-  min-width: 160px;
-  margin-top: 0.25rem;
-
-  .dropdown-item {
-    background: white !important;
-    color: $color-gray--darker !important;
-    padding: 0.6rem 1rem;
-    border-bottom: 1px solid $color-gray-3;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover,
-    &:focus {
-      background: $color-gray--lighter !important;
-    }
-  }
-}
-
-.menu-icon {
-  color: $color-green-background !important;
-  width: 1.1rem !important;
-  height: 1.1rem !important;
-  margin-right: 0.5rem;
-}
-
-.menu-text {
-  font-size: 0.9rem;
-  color: $color-gray--darker;
 }
 
 /* Profile popover styling */

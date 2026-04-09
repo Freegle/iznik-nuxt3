@@ -5,7 +5,10 @@
       @hidden="showContactDetailsAskModal = false"
     />
     <!-- ChatMobileNavbar replaces the default navbar only at xs/sm (when chat list is hidden) -->
-    <Teleport v-if="loggedIn && id && showMobileNavbar" to="#navbar-mobile">
+    <Teleport
+      v-if="loggedIn && id && showMobileNavbar"
+      to="#chat-navbar-portal"
+    >
       <ChatMobileNavbar v-if="chat" :id="id" />
       <div v-else class="ourBack layout fixed-top pt-1 pb-1">
         <div class="backbutton nav-back-btn">
