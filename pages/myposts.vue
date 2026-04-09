@@ -36,7 +36,6 @@
             />
 
             <MyPostsPostsList
-              :key="infiniteScrollKey"
               :posts="posts"
               :loading="loading"
               :default-expanded="posts.length <= 5"
@@ -186,11 +185,8 @@ watch(posts, (newPosts) => {
 
 const shownCount = ref(1)
 const loadedMore = ref(false)
-const infiniteScrollKey = ref(0)
-
 function resetInfiniteScroll() {
   shownCount.value = 1
-  infiniteScrollKey.value++
 }
 
 function loadMore(infiniteLoaderInstance) {

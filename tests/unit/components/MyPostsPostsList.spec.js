@@ -170,6 +170,23 @@ describe('MyPostsPostsList', () => {
       const emits = MyPostsPostsList.emits || []
       expect(emits).toContain('load-more')
     })
+
+    it('defines toggle-old emit', () => {
+      const emits = MyPostsPostsList.emits || []
+      expect(emits).toContain('toggle-old')
+    })
+
+    it('emits toggle-old when old posts toggle is clicked', async () => {
+      const wrapper = createWrapper({
+        loading: false,
+        posts: [
+          { id: 1, hasoutcome: false, arrival: '2024-01-01' },
+          { id: 2, hasoutcome: true, arrival: '2024-01-02' },
+        ],
+      })
+      await wrapper.find('.toolbar-toggle').trigger('click')
+      expect(wrapper.emitted('toggle-old')).toHaveLength(1)
+    })
   })
 
   describe('old posts toggle', () => {
@@ -325,6 +342,24 @@ describe('MyPostsPostsList', () => {
         posts: [{ id: 1, hasoutcome: false, arrival: '2024-01-01' }],
       })
       expect(wrapper.find('.infinite-loading').exists()).toBe(true)
+    })
+
+    it('remounts InfiniteLoading when old posts toggle is clicked', async () => {
+      const wrapper = createWrapper({
+        loading: false,
+        posts: [
+          { id: 1, hasoutcome: false, arrival: '2024-01-01' },
+          { id: 2, hasoutcome: true, arrival: '2024-01-02' },
+        ],
+      })
+      const keyBefore = wrapper.findComponent({
+        name: 'InfiniteLoading',
+      }).element
+      await wrapper.find('.toolbar-toggle').trigger('click')
+      const keyAfter = wrapper.findComponent({
+        name: 'InfiniteLoading',
+      }).element
+      expect(keyBefore).not.toBe(keyAfter)
     })
   })
 
