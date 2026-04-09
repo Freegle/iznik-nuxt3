@@ -101,6 +101,7 @@
         </header>
       </template>
     </client-only>
+    <div id="chat-navbar-portal" />
     <div
       v-if="ready"
       class="nuxt-layout-wrapper"
