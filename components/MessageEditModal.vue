@@ -230,7 +230,7 @@ const uploadingPhoto = computed(() => {
 const placeholder = computed(() => {
   return message && type.value === 'Offer'
     ? "e.g. colour, condition, size, whether it's working..."
-    : "Explain what you're looking for, and why you'd like it..."
+    : 'Size, colour, any specific requirements...'
 })
 
 const groupid = computed(() => {

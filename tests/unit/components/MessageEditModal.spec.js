@@ -298,7 +298,7 @@ describe('MessageEditModal', () => {
       const wrapper = createWrapper()
       const textarea = wrapper.find('.b-form-textarea')
       expect(textarea.attributes('placeholder')).toContain(
-        "what you're looking"
+        'specific requirements'
       )
     })
   })

@@ -18,6 +18,11 @@ vi.hoisted(() => {
   vi.resetModules()
 })
 
+const mockAction = vi.fn()
+vi.mock('~/composables/useClientLog', () => ({
+  action: (...args) => mockAction(...args),
+}))
+
 vi.mock('#imports', async () => {
   const actual = await vi.importActual('vue')
   return {
@@ -219,6 +224,55 @@ describe('MyPostsDonationAsk', () => {
       await flushPromises()
       // Should not throw
       expect(wrapper.emitted('donation-made')).toBeTruthy()
+    })
+  })
+
+  describe('funnel instrumentation', () => {
+    it('logs donation_ask_shown on mount', async () => {
+      createWrapper()
+      await flushPromises()
+
+      expect(mockAction).toHaveBeenCalledWith('donation_ask_shown', {
+        variant: 'minimal-friction',
+        default_amount: 2,
+        context: 'myposts_inline',
+      })
+    })
+
+    it('logs donation_amount_changed when slider changes', async () => {
+      mockApi.bandit.choose.mockResolvedValue({ variant: 'minimal-friction-2' })
+      vi.useFakeTimers()
+      const wrapper = createWrapper()
+      await flushPromises()
+
+      const slider = wrapper.find('.amount-slider')
+      await slider.setValue(5)
+      await flushPromises()
+
+      vi.advanceTimersByTime(500)
+
+      expect(mockAction).toHaveBeenCalledWith('donation_amount_changed', {
+        old_amount: 2,
+        new_amount: 5,
+        input_method: 'slider',
+        context: 'myposts_inline',
+      })
+
+      vi.useRealTimers()
+    })
+
+    it('logs donation_payment_completed on success', async () => {
+      const wrapper = createWrapper()
+      await flushPromises()
+
+      await wrapper.find('.stripe-btn').trigger('click')
+      await flushPromises()
+
+      expect(mockAction).toHaveBeenCalledWith('donation_payment_completed', {
+        amount: expect.any(Number),
+        variant: 'minimal-friction',
+        context: 'myposts_inline',
+      })
     })
   })
 

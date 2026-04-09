@@ -161,9 +161,9 @@ describe('PostMessageTablet', () => {
       expect(wrapper.text()).toContain('Any details that might help?')
     })
 
-    it('shows "Why do you need it?" for Wanted type', () => {
+    it('shows "Tell us more about what you need:" for Wanted type', () => {
       const wrapper = createWrapper({ type: 'Wanted' })
-      expect(wrapper.text()).toContain('Why do you need it?')
+      expect(wrapper.text()).toContain('Tell us more about what you need:')
     })
 
     it('shows "How many?" label for Offer type', () => {
@@ -284,7 +284,7 @@ describe('PostMessageTablet', () => {
       const wrapper = createWrapper({ type: 'Wanted' })
       const textarea = wrapper.find('.b-form-textarea')
       expect(textarea.attributes('placeholder')).toContain(
-        "what you're looking for"
+        'specific requirements'
       )
     })
   })

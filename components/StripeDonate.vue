@@ -68,6 +68,7 @@ import { uid } from '~/composables/useId'
 import { useDonationStore } from '~/stores/donations'
 import { useMobileStore } from '@/stores/mobile'
 import { useAuthStore } from '~/stores/auth'
+import { action } from '~/composables/useClientLog'
 
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
@@ -308,6 +309,11 @@ onMounted(async () => {
       console.log('Express checkout loadStart', event)
     })
     expressCheckoutElement.on('confirm', async (event) => {
+      action('donation_payment_started', {
+        amount: props.price,
+        method: event.expressPaymentType,
+      })
+
       const { submitError } = await elements.submit()
 
       if (submitError) {
@@ -454,6 +460,11 @@ async function ensureIntent() {
 
 async function useGooglePay() {
   try {
+    action('donation_payment_started', {
+      amount: props.price,
+      method: 'google_pay',
+    })
+
     if (!(await ensureIntent())) {
       return
     }
@@ -481,6 +492,11 @@ async function useGooglePay() {
 
 async function usePayPalCard() {
   try {
+    action('donation_payment_started', {
+      amount: props.price,
+      method: 'paypal_card',
+    })
+
     if (!(await ensureIntent())) {
       return
     }
@@ -515,6 +531,11 @@ async function usePayPalCard() {
 
 async function useApplePay() {
   try {
+    action('donation_payment_started', {
+      amount: props.price,
+      method: 'apple_pay',
+    })
+
     if (!(await ensureIntent())) {
       return
     }

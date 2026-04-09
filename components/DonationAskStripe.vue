@@ -112,6 +112,7 @@ import DonationBirthdayDisplay from './DonationBirthdayDisplay'
 import DonationTraditionalExtras from './DonationTraditionalExtras'
 import Api from '~/api'
 import { useMobileStore } from '~/stores/mobile'
+import { action } from '~/composables/useClientLog'
 
 const props = defineProps({
   groupid: {
@@ -193,8 +194,23 @@ watch(testAmount, (newVal) => {
   price.value = newVal
 })
 
-watch(selectedAmount, (newVal) => {
+let amountChangeTimer = null
+
+watch(selectedAmount, (newVal, oldVal) => {
   price.value = newVal
+
+  // Debounce amount change logging — user drags slider through many values.
+  if (amountChangeTimer) {
+    clearTimeout(amountChangeTimer)
+  }
+
+  amountChangeTimer = setTimeout(() => {
+    action('donation_amount_changed', {
+      old_amount: oldVal,
+      new_amount: newVal,
+      input_method: 'slider',
+    })
+  }, 500)
 })
 
 watch(otherAmount, (newVal) => {
@@ -210,6 +226,11 @@ function score(amount) {
 }
 
 async function succeeded() {
+  action('donation_payment_completed', {
+    amount: price.value,
+    variant: variation.value,
+  })
+
   score(price.value)
   emit('success')
 
@@ -231,6 +252,11 @@ async function succeeded() {
 
 function noMethods() {
   console.log('No payment methods')
+  action('donation_payment_fallback', {
+    amount: price.value,
+    variant: variation.value,
+    reason: 'no_stripe_methods',
+  })
   payPalFallback.value = true
 }
 
