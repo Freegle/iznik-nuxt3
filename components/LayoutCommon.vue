@@ -188,6 +188,7 @@ const allowAd = computed(() => {
   // We don't want to show the ad on the landing page when logged out - looks tacky.
   // Recent donors don't see ads, so don't reserve space for them (avoids CLS).
   if (recentDonor.value) return false
+  if (routePath.value === '/partnerships') return false
   return routePath.value !== '/' || loggedIn.value
 })
 // Keep constant margin - navbar is fixed position so content shouldn't shift when it hides/shows
