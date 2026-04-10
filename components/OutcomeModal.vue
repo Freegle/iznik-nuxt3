@@ -190,7 +190,6 @@
             icon-name="save"
             :label="buttonLabel"
             class="ms-2"
-            :disabled="type === 'Taken' && !tookUsers.length"
             @handle="submit"
           />
         </div>
@@ -324,15 +323,16 @@ function took(users) {
 
 async function submit(callback) {
   if (props.type === 'Taken' && !tookUsers.value.length) {
-    callback()
+    chooseError.value = true
     submittedWithNoSelectedUser.value = true
+    callback()
     return
   } else {
+    chooseError.value = false
     submittedWithNoSelectedUser.value = false
   }
 
   let complete = false
-  chooseError.value = false
 
   if (submitDisabled.value) {
     chooseError.value = true

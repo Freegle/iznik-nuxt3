@@ -166,6 +166,17 @@ describe('OutcomeBy', () => {
       expect(wrapper.find('.text-danger').exists()).toBe(true)
     })
 
+    it('applies text-danger class to select when chooseError is true', async () => {
+      const wrapper = await createWrapper({ chooseError: true })
+      const select = wrapper.find('.b-form-select')
+      expect(select.classes()).toContain('text-danger')
+    })
+
+    it('shows invalid feedback when chooseError is true', async () => {
+      const wrapper = await createWrapper({ chooseError: true })
+      expect(wrapper.text()).toContain('Please select someone')
+    })
+
     it('shows invalid feedback when invalid is true', async () => {
       const wrapper = await createWrapper({ invalid: true })
       expect(wrapper.text()).toContain('Please select someone')

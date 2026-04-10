@@ -247,10 +247,10 @@ describe('OutcomeModal', () => {
       expect(wrapper.text()).toContain('Withdraw')
     })
 
-    it('disables submit button when no users selected for Taken', () => {
+    it('does not disable submit button when no users selected for Taken', () => {
       const wrapper = createWrapper({ type: 'Taken' })
       const submitBtn = wrapper.find('.spin-button')
-      expect(submitBtn.attributes('disabled')).toBeDefined()
+      expect(submitBtn.attributes('disabled')).toBeUndefined()
     })
   })
 
@@ -403,6 +403,53 @@ describe('OutcomeModal', () => {
         const wrapper = createWrapper({ type: 'Received' })
         expect(wrapper.vm.buttonLabel).toBe('Mark as RECEIVED')
       })
+    })
+  })
+
+  describe('submit validation', () => {
+    it('sets chooseError when submitting Taken with no users selected', async () => {
+      const wrapper = createWrapper({ type: 'Taken' })
+      expect(wrapper.vm.chooseError).toBe(false)
+
+      const submitBtn = wrapper.find('.spin-button')
+      await submitBtn.trigger('click')
+
+      expect(wrapper.vm.chooseError).toBe(true)
+      expect(wrapper.vm.submittedWithNoSelectedUser).toBe(true)
+    })
+
+    it('passes chooseError to OutcomeBy component', async () => {
+      const wrapper = createWrapper({ type: 'Taken' })
+
+      const submitBtn = wrapper.find('.spin-button')
+      await submitBtn.trigger('click')
+
+      const outcomeBy = wrapper.find('.outcome-by')
+      expect(outcomeBy.exists()).toBe(true)
+      expect(wrapper.vm.chooseError).toBe(true)
+    })
+
+    it('clears chooseError when users are selected and submit is called', async () => {
+      const wrapper = createWrapper({ type: 'Taken' })
+
+      // First submit with no users to trigger error
+      const submitBtn = wrapper.find('.spin-button')
+      await submitBtn.trigger('click')
+      expect(wrapper.vm.chooseError).toBe(true)
+
+      // Now add a user and submit again
+      wrapper.vm.tookUsers = [{ userid: 1, count: 1 }]
+      await submitBtn.trigger('click')
+      expect(wrapper.vm.chooseError).toBe(false)
+    })
+
+    it('does not set chooseError for Withdrawn type', async () => {
+      const wrapper = createWrapper({ type: 'Withdrawn' })
+
+      const submitBtn = wrapper.find('.spin-button')
+      await submitBtn.trigger('click')
+
+      expect(wrapper.vm.chooseError).toBe(false)
     })
   })
 
