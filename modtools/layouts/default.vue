@@ -224,7 +224,7 @@
           v-if="supportOrAdmin"
           link="/sysadmin"
           name="SysAdmin"
-          :count="admin ? ['housekeeping'] : []"
+          :count="admin ? ['housekeeping', 'cronjobs'] : []"
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
