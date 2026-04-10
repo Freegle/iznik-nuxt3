@@ -24,10 +24,6 @@ const mockModConfigStore = {
   fetchById: vi.fn(),
 }
 
-const mockChatStore = {
-  openChatToMods: vi.fn(),
-}
-
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
 }))
@@ -38,10 +34,6 @@ vi.mock('~/stores/member', () => ({
 
 vi.mock('~/stores/modconfig', () => ({
   useModConfigStore: () => mockModConfigStore,
-}))
-
-vi.mock('~/stores/chat', () => ({
-  useChatStore: () => mockChatStore,
 }))
 
 vi.mock('~/composables/useMe', () => ({
@@ -275,7 +267,6 @@ describe('ModMember', () => {
     mockMemberStore.unban.mockResolvedValue()
     mockMemberStore.list = {}
     mockMemberStore.get.mockReturnValue(null)
-    mockChatStore.openChatToMods.mockResolvedValue(12345)
     mockModConfigStore.configs = [{ id: 1, name: 'Test Config' }]
     mockModConfigStore.configsById = { 1: { id: 1, name: 'Test Config' } }
     mockModConfigStore.fetchById.mockResolvedValue()
@@ -762,14 +753,6 @@ describe('ModMember', () => {
       await wrapper.vm.unban()
       expect(mockMemberStore.unban).toHaveBeenCalledWith(456, 789)
       expect(wrapper.vm.showUnbanModal).toBe(false)
-    })
-
-    it('showChat opens chat modal', async () => {
-      const wrapper = mountComponent()
-      await wrapper.vm.showChat()
-      expect(mockChatStore.openChatToMods).toHaveBeenCalledWith(789, 456)
-      expect(wrapper.vm.chatid).toBe(12345)
-      expect(wrapper.vm.showModChatModal).toBe(true)
     })
   })
 
