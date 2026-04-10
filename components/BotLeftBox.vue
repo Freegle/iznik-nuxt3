@@ -6,6 +6,7 @@
       <nuxt-link no-prefetch to="/privacy">Privacy</nuxt-link>
       <nuxt-link no-prefetch to="/disclaimer">Disclaimer</nuxt-link>
       <nuxt-link to="/donate">Donate</nuxt-link>
+      <nuxt-link to="/partnerships">Partnerships</nuxt-link>
       <nuxt-link to="/help">Contact</nuxt-link>
     </div>
     <div class="footer-social">

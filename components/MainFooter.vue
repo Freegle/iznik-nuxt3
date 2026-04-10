@@ -62,6 +62,14 @@
         Donate
       </nuxt-link>
       <span class="nav-divider">·</span>
+      <nuxt-link
+        no-prefetch
+        to="/partnerships"
+        class="nav-link test-footer-partnerships"
+      >
+        Partnerships
+      </nuxt-link>
+      <span class="nav-divider">·</span>
       <nuxt-link no-prefetch to="/help" class="nav-link test-footer-contact">
         Help
       </nuxt-link>

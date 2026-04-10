@@ -154,6 +154,7 @@ export default defineNuxtConfig({
           '/help': { prerender: true },
           '/maintenance': { prerender: true },
           '/mobile': { prerender: true },
+          '/partnerships': { prerender: true },
           '/privacy': { prerender: true },
           '/unsubscribe': { prerender: true },
         }

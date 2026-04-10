@@ -146,6 +146,7 @@ import {
   faFirefoxBrowser,
   faGithub,
   faInstagram,
+  faLinkedin,
   faSafari,
   faTwitter,
   faWhatsapp,
@@ -297,6 +298,7 @@ library.add(
   faFirefoxBrowser,
   faGithub,
   faInstagram,
+  faLinkedin,
   faSafari,
   faTwitter,
   faWhatsapp
