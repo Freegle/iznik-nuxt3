@@ -65,7 +65,7 @@
         </span>
         sent this
       </span>
-      <span v-if="chatmessage?.reviewrequired" class="text-danger small">
+      <span v-if="chatmessage?.reviewrequired" class="text-danger small ms-1">
         Pending review
       </span>
       <span :title="datetimeshort(chatmessage?.date)" class="ms-1">{{

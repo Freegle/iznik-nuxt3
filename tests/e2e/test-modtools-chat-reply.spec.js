@@ -44,37 +44,29 @@ test.describe('ModTools Chat Reply', () => {
     await loginViaModTools(page, modEmail)
 
     // Step 2: Navigate to the specific User2Mod chat.
-    // The auth middleware may see authStore.user as null for the new route
-    // (store not yet hydrated) and redirect through /?noguard=true, which
-    // interrupts the goto. Retry once after the redirect settles.
+    // ERR_ABORTED can occur because the SSR layer sees no JWT (it's in
+    // localStorage, not cookies) and redirects to /login, aborting the
+    // original /chats request at the network level before domcontentloaded.
+    // The client-side router then hydrates auth from localStorage and
+    // navigates to /chats. Same pattern as test-modtools-chat-list.spec.js.
     console.log('\n--- Step 2: Navigate to chat ---')
-    try {
-      await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
+    await page
+      .goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
         timeout: timeouts.navigation.initial,
         waitUntil: 'domcontentloaded',
       })
-    } catch (e) {
-      if (
-        e.message &&
-        e.message.includes('interrupted by another navigation')
-      ) {
-        console.log(
-          'Navigation interrupted by auth redirect — waiting for auth to settle then retrying'
-        )
-        // Wait for the sidebar to be visible — the same signal loginViaModTools
-        // uses — to ensure the Pinia auth store is hydrated before the retry
-        // triggers a fresh SSR middleware pass.
-        await page
-          .locator('a[href="/messages/pending"]')
-          .waitFor({ state: 'visible', timeout: timeouts.navigation.slowPage })
-        await page.goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
-          timeout: timeouts.navigation.initial,
-          waitUntil: 'domcontentloaded',
-        })
-      } else {
-        throw e
-      }
-    }
+      .catch((e) => {
+        if (!e.message.includes('ERR_ABORTED')) throw e
+        console.log('Navigation aborted by auth redirect — expected')
+      })
+
+    // Wait for the URL to settle on the chat page (client-side navigation
+    // may occur after SSR redirects).
+    await page
+      .waitForURL(`${MODTOOLS_URL}/chats/**`, {
+        timeout: timeouts.navigation.slowPage,
+      })
+      .catch(() => {})
 
     await dismissAllModals(page)
 
