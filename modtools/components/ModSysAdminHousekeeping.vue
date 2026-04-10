@@ -1,8 +1,15 @@
 <template>
   <div>
-    <h3>Housekeeping Tasks</h3>
     <p class="text-muted">
-      Browser-automated tasks managed by the Freegle Housekeeper extension.
+      These are tasks that have to be done regularly but can't easily be
+      automated on the server. Most are automated by a
+      <a
+        href="https://github.com/nicholasgasior/freegle-housekeeper"
+        target="_blank"
+      >
+        Chrome extension
+      </a>
+      running in the browser of a geek. Manual tasks need to be done by hand.
     </p>
 
     <div v-if="loading" class="text-center py-3">
@@ -17,65 +24,92 @@
       <b-table-simple hover responsive>
         <b-thead>
           <b-tr>
+            <b-th class="status-col" />
             <b-th>Task</b-th>
-            <b-th>Status</b-th>
-            <b-th>Last Run</b-th>
             <b-th>Schedule</b-th>
+            <b-th>Last Run</b-th>
+            <b-th>Next Due</b-th>
             <b-th>Summary</b-th>
           </b-tr>
         </b-thead>
         <b-tbody>
-          <b-tr
-            v-for="task in tasks"
-            :key="task.task_key"
-            :class="rowClass(task)"
-            class="clickable"
-            @click="toggleLog(task.task_key)"
-          >
-            <b-td>
-              <strong>{{ task.name }}</strong>
-              <div v-if="task.description" class="text-muted small">
-                {{ task.description }}
-              </div>
-              <b-badge v-if="task.placeholder" variant="secondary" class="ms-1">
-                Placeholder
-              </b-badge>
-            </b-td>
-            <b-td>
-              <b-badge :variant="statusVariant(task)">
-                {{ statusText(task) }}
-              </b-badge>
-            </b-td>
-            <b-td>
-              <span v-if="task.last_run_at">
-                {{ formatDate(task.last_run_at) }}
-              </span>
-              <span v-else class="text-muted">Never</span>
-            </b-td>
-            <b-td>
-              {{ formatInterval(task.interval_hours) }}
-            </b-td>
-            <b-td>
-              <span v-if="task.last_summary">{{ task.last_summary }}</span>
-              <span v-else class="text-muted">-</span>
-            </b-td>
-          </b-tr>
-          <b-tr
-            v-if="
-              expandedLog ===
-              tasks.find((t) => showingLog === t.task_key)?.task_key
-            "
-          >
-            <b-td colspan="5">
-              <div class="log-panel">
-                <h6>Task Log</h6>
-                <pre v-if="expandedLogContent" class="log-content">{{
-                  expandedLogContent
-                }}</pre>
-                <span v-else class="text-muted">No log available</span>
-              </div>
-            </b-td>
-          </b-tr>
+          <template v-for="task in tasks" :key="task.task_key">
+            <b-tr
+              :class="rowClass(task)"
+              class="task-row"
+              @click="toggleLog(task.task_key)"
+            >
+              <b-td class="status-col text-center">
+                <span
+                  v-if="!task.enabled || task.placeholder"
+                  class="text-muted fs-5"
+                  >&#8211;</span
+                >
+                <span v-else-if="isOk(task)" class="text-success fs-5"
+                  >&#10003;</span
+                >
+                <span v-else class="text-danger fs-5">&#10007;</span>
+              </b-td>
+              <b-td>
+                <strong>{{ task.name }}</strong>
+                <div v-if="task.description" class="text-muted small">
+                  {{ task.description }}
+                </div>
+                <b-badge v-if="task.placeholder" variant="info" class="ms-1">
+                  Manual
+                </b-badge>
+              </b-td>
+              <b-td>
+                {{ formatInterval(task.interval_hours) }}
+              </b-td>
+              <b-td>
+                <span v-if="task.last_run_at">
+                  {{ timeago(task.last_run_at, true) }}
+                </span>
+                <span v-else class="text-muted">Never</span>
+              </b-td>
+              <b-td>
+                <span
+                  v-if="
+                    (task.last_run_at || task.start_date) && task.interval_hours
+                  "
+                  :class="{ 'text-danger fw-bold': task.overdue }"
+                >
+                  {{ nextDue(task) }}
+                </span>
+                <span v-else class="text-muted">-</span>
+              </b-td>
+              <b-td>
+                <span v-if="task.last_summary">{{ task.last_summary }}</span>
+                <span v-else class="text-muted">-</span>
+                <b-button
+                  v-if="task.placeholder"
+                  size="sm"
+                  variant="outline-success"
+                  class="ms-2"
+                  :disabled="completing === task.task_key"
+                  @click.stop="markDone(task.task_key)"
+                >
+                  <span v-if="completing === task.task_key">...</span>
+                  <span v-else>Mark Done</span>
+                </b-button>
+              </b-td>
+            </b-tr>
+            <b-tr
+              v-if="expandedLog === task.task_key"
+              :key="task.task_key + '-log'"
+            >
+              <b-td colspan="6">
+                <div class="log-panel">
+                  <h6>Task Log</h6>
+                  <pre v-if="expandedLogContent" class="log-content">{{
+                    expandedLogContent
+                  }}</pre>
+                  <span v-else class="text-muted">No log available</span>
+                </div>
+              </b-td>
+            </b-tr>
+          </template>
         </b-tbody>
       </b-table-simple>
     </div>
@@ -84,6 +118,7 @@
 
 <script setup>
 import api from '~/api'
+import { timeago } from '~/composables/useTimeFormat'
 
 const runtimeConfig = useRuntimeConfig()
 const apiInstance = api(runtimeConfig)
@@ -91,9 +126,9 @@ const apiInstance = api(runtimeConfig)
 const loading = ref(true)
 const error = ref(null)
 const tasks = ref([])
-const showingLog = ref(null)
 const expandedLog = ref(null)
 const expandedLogContent = ref(null)
+const completing = ref(null)
 
 async function fetchTasks() {
   loading.value = true
@@ -110,61 +145,72 @@ async function fetchTasks() {
 }
 
 function toggleLog(taskKey) {
-  if (showingLog.value === taskKey) {
-    showingLog.value = null
+  if (expandedLog.value === taskKey) {
     expandedLog.value = null
     expandedLogContent.value = null
   } else {
     const task = tasks.value.find((t) => t.task_key === taskKey)
-    showingLog.value = taskKey
     expandedLog.value = taskKey
     expandedLogContent.value = task?.last_log || null
   }
 }
 
-function statusVariant(task) {
-  if (!task.enabled) return 'secondary'
-  if (task.placeholder) return 'secondary'
-  if (task.last_status === 'failure') return 'danger'
-  if (task.overdue) return 'warning'
-  if (task.last_status === 'success') return 'success'
-  return 'secondary'
-}
-
-function statusText(task) {
-  if (!task.enabled) return 'Disabled'
-  if (task.placeholder) return 'Placeholder'
-  if (!task.last_status) return 'Not run yet'
-  if (task.last_status === 'failure') return 'Failed'
-  if (task.overdue) return 'Overdue'
-  return 'OK'
+function isOk(task) {
+  if (!task.enabled || task.placeholder) return true
+  if (task.last_status === 'failure') return false
+  if (task.overdue) return false
+  return true
 }
 
 function rowClass(task) {
+  if (!task.enabled || task.placeholder) return 'text-muted'
   if (task.last_status === 'failure') return 'table-danger'
-  if (task.overdue && task.enabled && !task.placeholder) return 'table-warning'
+  if (task.overdue) return 'table-warning'
   return ''
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function nextDue(task) {
+  if (!task.interval_hours) return '-'
+
+  let deadline
+
+  if (task.last_run_at) {
+    const lastRun = new Date(task.last_run_at)
+    deadline = new Date(lastRun.getTime() + task.interval_hours * 3600000)
+  } else if (task.start_date) {
+    deadline = new Date(task.start_date)
+  } else {
+    return '-'
+  }
+
+  const now = new Date()
+
+  if (now > deadline) {
+    return 'overdue'
+  }
+
+  return timeago(deadline)
+}
+
+async function markDone(taskKey) {
+  completing.value = taskKey
+  try {
+    await apiInstance.housekeeper.completeTask(taskKey)
+    await fetchTasks()
+  } catch (e) {
+    console.error('Failed to mark task done:', e)
+  } finally {
+    completing.value = null
+  }
 }
 
 function formatInterval(hours) {
   if (!hours) return '-'
-  if (hours < 24) return `${hours}h`
+  if (hours < 24) return `Every ${hours}h`
   const days = Math.round(hours / 24)
   if (days === 7) return 'Weekly'
   if (days === 30) return 'Monthly'
-  return `${days}d`
+  return `Every ${days}d`
 }
 
 onMounted(() => {
@@ -173,8 +219,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.clickable {
+.status-col {
+  width: 30px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.task-row {
   cursor: pointer;
+}
+.task-row:hover {
+  background-color: #e9ecef !important;
+}
+.task-row.table-danger:hover {
+  background-color: #f1c0c0 !important;
+}
+.task-row.table-warning:hover {
+  background-color: #f5e0a0 !important;
 }
 .log-panel {
   padding: 8px;
