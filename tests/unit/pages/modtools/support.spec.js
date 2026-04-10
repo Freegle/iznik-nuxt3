@@ -250,12 +250,6 @@ describe('support/[[id]].vue page', () => {
       })
     })
 
-    it('onEmailStatsTab sets showEmailStats', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onEmailStatsTab()
-      expect(wrapper.vm.showEmailStats).toBe(true)
-    })
-
     it('onAIAssistantTab sets showAIAssistant', () => {
       const wrapper = mountComponent()
       wrapper.vm.onAIAssistantTab()

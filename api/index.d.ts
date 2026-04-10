@@ -26,6 +26,7 @@ import EmailTrackingAPI from './EmailTrackingAPI.js'
 import ExportAPI from './ExportAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
+import HousekeeperAPI from './HousekeeperAPI.js'
 import ImageAPI from './ImageAPI.js'
 import IsochroneAPI from './IsochroneAPI.js'
 import JobAPI from './JobAPI.js'
@@ -70,6 +71,7 @@ interface API {
   export: ExportAPI;
   giftaid: GiftAidAPI;
   group: GroupAPI;
+  housekeeper: HousekeeperAPI;
   image: ImageAPI;
   isochrone: IsochroneAPI;
   job: JobAPI;
