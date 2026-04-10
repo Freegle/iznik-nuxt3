@@ -267,13 +267,6 @@
             :groupid="groupid"
             :role="member.role"
           />
-          <!--div v-if="chatid" class="d-inline btn border">
-            <v-icon class="me-1 text-link" icon="comments" />
-            <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
-          </div-->
-          <b-button variant="white" class="me-2 mb-1" @click="showChat">
-            <v-icon icon="comments" /> View Chat
-          </b-button>
           <ChatButton
             :userid="member.userid"
             :groupid="member.groupid"
@@ -304,13 +297,6 @@
       @confirm="unban"
       @hidden="showUnbanModal = false"
     />
-    <ModChatModal
-      v-if="showModChatModal && chatid"
-      :id="chatid"
-      ref="modChatModal"
-      :pov="0"
-      @hidden="showModChatModal = false"
-    />
   </div>
 </template>
 <script setup>
@@ -318,7 +304,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
-import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
 import { usePreferredEmail } from '~/modtools/composables/usePreferredEmail'
 
@@ -349,7 +334,6 @@ const props = defineProps({
   },
 })
 
-const chatStore = useChatStore()
 const memberStore = useMemberStore()
 
 const member = computed(() => memberStore.get(props.membershipid))
@@ -360,7 +344,6 @@ const { me, myGroups } = useMe()
 const history = ref(null)
 const logs = ref(null)
 const unbanConfirm = ref(null)
-const modChatModal = ref(null)
 
 const showEmails = ref(false)
 const type = ref(null)
@@ -368,9 +351,7 @@ const showPostingHistoryModal = ref(false)
 const showLogsModal = ref(false)
 const showUnbanModal = ref(false)
 const showUnbanModalTitle = ref('')
-const showModChatModal = ref(false)
 const banned = ref(false)
-const chatid = ref(0)
 
 const groupid = computed(() => {
   return member.value?.groupid
@@ -591,15 +572,6 @@ async function unban() {
     delete m.bandate
     delete m.bannedby
   }
-}
-
-async function showChat() {
-  chatid.value = await chatStore.openChatToMods(
-    member.value?.groupid,
-    member.value?.userid
-  )
-  showModChatModal.value = true
-  modChatModal.value?.show()
 }
 </script>
 <style scoped lang="scss">
