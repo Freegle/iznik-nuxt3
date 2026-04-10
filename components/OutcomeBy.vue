@@ -51,9 +51,9 @@
         :options="userOptions(false)"
         size="lg"
         :class="'fw-bold ' + (chooseError ? 'text-danger' : '')"
-        :state="invalid ? false : null"
+        :state="chooseError || invalid ? false : null"
       />
-      <p v-if="invalid" class="invalid-feedback">
+      <p v-if="chooseError || invalid" class="invalid-feedback">
         Please select someone from the list above.
       </p>
     </div>
@@ -64,9 +64,9 @@
         :options="userOptions(true)"
         size="lg"
         :class="'fw-bold ' + (chooseError ? 'text-danger' : '')"
-        :state="invalid ? false : null"
+        :state="chooseError || invalid ? false : null"
       />
-      <p v-if="invalid" class="invalid-feedback">
+      <p v-if="chooseError || invalid" class="invalid-feedback">
         Please select someone from the list above.
       </p>
     </div>
