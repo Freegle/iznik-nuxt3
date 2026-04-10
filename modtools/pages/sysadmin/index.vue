@@ -5,7 +5,12 @@
         <!-- Housekeeping Tab -->
         <b-tab @click="onHousekeepingTab">
           <template #title>
-            <h2 class="ms-2 me-2">Housekeeping</h2>
+            <h2 class="ms-2 me-2">
+              Housekeeping
+              <b-badge v-if="admin && work?.housekeeping" variant="danger">
+                {{ work.housekeeping }}
+              </b-badge>
+            </h2>
           </template>
           <ModSysAdminHousekeeping
             v-if="showHousekeeping"
@@ -16,7 +21,12 @@
         <!-- Cron Jobs Tab -->
         <b-tab @click="onCronJobsTab">
           <template #title>
-            <h2 class="ms-2 me-2">Cron Jobs</h2>
+            <h2 class="ms-2 me-2">
+              Cron Jobs
+              <b-badge v-if="admin && work?.cronjobs" variant="danger">
+                {{ work.cronjobs }}
+              </b-badge>
+            </h2>
           </template>
           <ModSysAdminCronJobs
             v-if="showCronJobs"
@@ -55,8 +65,11 @@
 
 <script setup>
 import { useMe } from '~/composables/useMe'
+import { useAuthStore } from '@/stores/auth'
 
-const { supportOrAdmin } = useMe()
+const { supportOrAdmin, admin } = useMe()
+const authStore = useAuthStore()
+const work = computed(() => authStore.work)
 
 const route = useRoute()
 
