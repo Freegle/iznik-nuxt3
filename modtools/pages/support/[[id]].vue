@@ -84,28 +84,6 @@
             </NoticeMessage>
           </b-tab>
 
-          <!-- Outgoing Email Tab -->
-          <b-tab @click="onEmailStatsTab">
-            <template #title>
-              <h2 class="ms-2 me-2">Outgoing Email</h2>
-            </template>
-            <ModSupportEmailStats
-              v-if="showEmailStats"
-              :key="'emailstats-' + emailStatsBump"
-            />
-          </b-tab>
-
-          <!-- Incoming Email Tab -->
-          <b-tab @click="onIncomingEmailTab">
-            <template #title>
-              <h2 class="ms-2 me-2">Incoming Email</h2>
-            </template>
-            <ModSupportIncomingEmail
-              v-if="showIncomingEmail"
-              :key="'incomingemail-' + incomingEmailBump"
-            />
-          </b-tab>
-
           <!-- AI Support Helper Tab -->
           <b-tab @click="onAITab">
             <template #title>
@@ -192,10 +170,6 @@ const spamKeywordsComponent = ref(null)
 const error = ref(false)
 const messageTerm = ref(null)
 const id = ref('id' in route.params ? parseInt(route.params.id) : 0)
-const showEmailStats = ref(false)
-const emailStatsBump = ref(0)
-const showIncomingEmail = ref(false)
-const incomingEmailBump = ref(0)
 const showAIAssistant = ref(false)
 const aiAssistantBump = ref(0)
 const activeTab = ref(0)
@@ -207,10 +181,8 @@ const topTabMap = {
   user: 0,
   community: 1,
   message: 2,
-  outgoing: 3,
-  incoming: 4,
-  ai: 5,
-  spam: 6,
+  ai: 3,
+  spam: 4,
 }
 
 const communitySubTabMap = {
@@ -256,10 +228,6 @@ onMounted(() => {
             onListCommunitiesTab()
           }
         }
-      } else if (tabParam === 'outgoing') {
-        onEmailStatsTab()
-      } else if (tabParam === 'incoming') {
-        onIncomingEmailTab()
       } else if (tabParam === 'ai') {
         onAITab()
       } else if (tabParam === 'spam') {
@@ -362,17 +330,6 @@ function onAITab() {
   nextTick(() => {
     onAIAssistantTab()
   })
-}
-
-function onEmailStatsTab() {
-  // Initialize email stats when tab is clicked.
-  emailStatsBump.value = Date.now()
-  showEmailStats.value = true
-}
-
-function onIncomingEmailTab() {
-  incomingEmailBump.value = Date.now()
-  showIncomingEmail.value = true
 }
 
 function onAIAssistantTab() {

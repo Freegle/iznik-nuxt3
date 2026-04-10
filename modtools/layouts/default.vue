@@ -221,6 +221,13 @@
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
+          v-if="supportOrAdmin"
+          link="/sysadmin"
+          name="SysAdmin"
+          :count="admin ? ['housekeeping'] : []"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
           link="/settings"
           name="Settings"
           @mobilehidemenu="mobilehidemenu"
@@ -293,7 +300,7 @@ const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
 const modConfigStore = useModConfigStore()
 const persistent = authStore.auth.persistent
-const { supportOrAdmin } = useMe()
+const { supportOrAdmin, admin } = useMe()
 const {
   hasPermissionNewsletter,
   hasPermissionSpamAdmin,
