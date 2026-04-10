@@ -849,5 +849,76 @@ describe('ModMember', () => {
       // Regular user should see 6 toggles
       expect(wrapper.findAll('.our-toggle').length).toBe(6)
     })
+
+    it('hides toggles for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({
+          bandate: '2024-01-15T10:00:00Z',
+          emails: [{ id: 1, email: 'test@gmail.com', preferred: true }],
+        }),
+      })
+      expect(wrapper.findAll('.our-toggle').length).toBe(0)
+    })
+  })
+
+  describe('banned member simplified view', () => {
+    it('hides settings group for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.find('.settings-group').exists()).toBe(false)
+    })
+
+    it('hides moderation status for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.find('.mod-moderation').exists()).toBe(false)
+    })
+
+    it('hides ModMemberButtons for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.find('.mod-member-buttons').exists()).toBe(false)
+    })
+
+    it('hides ModRole for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({
+          bandate: '2024-01-15T10:00:00Z',
+          role: 'Member',
+        }),
+      })
+      expect(wrapper.find('.mod-role').exists()).toBe(false)
+    })
+
+    it('still shows chat button for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.find('.chat-button').exists()).toBe(true)
+    })
+
+    it('still shows unban button for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.text()).toContain('Unban')
+    })
+
+    it('still shows member summary for banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: '2024-01-15T10:00:00Z' }),
+      })
+      expect(wrapper.find('.mod-member-summary').exists()).toBe(true)
+    })
+
+    it('shows settings group for non-banned member', () => {
+      const wrapper = mountComponent({
+        member: createMember({ bandate: null }),
+      })
+      expect(wrapper.find('.settings-group').exists()).toBe(true)
+    })
   })
 })
