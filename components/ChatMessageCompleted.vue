@@ -20,9 +20,6 @@
         <div v-if="emessage" class="completed-text mt-2">
           <span class="preline forcebreak">{{ emessage }}</span>
         </div>
-        <div v-else class="text-muted small mt-1">
-          This is an automated message.
-        </div>
       </div>
     </div>
 
@@ -45,9 +42,6 @@
         </notice-message>
         <div v-if="emessage" class="completed-text mt-2">
           <span class="preline forcebreak">{{ emessage }}</span>
-        </div>
-        <div v-else class="text-muted small mt-1">
-          This is an automated message.
         </div>
       </div>
     </div>

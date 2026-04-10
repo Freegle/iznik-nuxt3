@@ -999,4 +999,57 @@ describe('MyMessage', () => {
       expect(editBtn.find('.v-icon').exists()).toBe(true)
     })
   })
+
+  describe('Action auto-open', () => {
+    it('auto-opens outcome modal with Withdrawn type for withdraw action', async () => {
+      const wrapper = await createWrapper({ action: 'withdraw' })
+      expect(wrapper.vm.showOutcomeModal).toBe(true)
+      expect(wrapper.vm.outcomeType).toBe('Withdrawn')
+    })
+
+    it('auto-opens outcome modal with Taken type for completed action on Offer', async () => {
+      mockData.message.type = 'Offer'
+      const wrapper = await createWrapper({ action: 'completed' })
+      expect(wrapper.vm.showOutcomeModal).toBe(true)
+      expect(wrapper.vm.outcomeType).toBe('Taken')
+    })
+
+    it('auto-opens outcome modal with Received type for completed action on Wanted', async () => {
+      mockData.message.type = 'Wanted'
+      const wrapper = await createWrapper({ action: 'completed' })
+      expect(wrapper.vm.showOutcomeModal).toBe(true)
+      expect(wrapper.vm.outcomeType).toBe('Received')
+    })
+
+    it('calls repost for repost action', async () => {
+      mockData.message.canrepost = true
+      mockData.message.location = { name: 'AB1 2CD' }
+      mockData.message.item = { name: 'Test item' }
+      mockData.message.attachments = []
+      await createWrapper({ action: 'repost' })
+      expect(mockComposeStore.clearMessages).toHaveBeenCalled()
+      expect(mockComposeStore.setMessage).toHaveBeenCalled()
+    })
+
+    it('redirects to /myposts when outcome modal closes for withdraw action', async () => {
+      const wrapper = await createWrapper({ action: 'withdraw' })
+      wrapper.vm.onOutcomeHidden()
+      expect(wrapper.vm.showOutcomeModal).toBe(false)
+      expect(mockRouterPush).toHaveBeenCalledWith('/myposts')
+    })
+
+    it('redirects to /myposts when outcome modal closes for completed action', async () => {
+      const wrapper = await createWrapper({ action: 'completed' })
+      wrapper.vm.onOutcomeHidden()
+      expect(mockRouterPush).toHaveBeenCalledWith('/myposts')
+    })
+
+    it('does not redirect when outcome modal closes without action', async () => {
+      const wrapper = await createWrapper()
+      wrapper.vm.showOutcomeModal = true
+      wrapper.vm.onOutcomeHidden()
+      expect(wrapper.vm.showOutcomeModal).toBe(false)
+      expect(mockRouterPush).not.toHaveBeenCalled()
+    })
+  })
 })

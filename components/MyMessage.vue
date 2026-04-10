@@ -474,7 +474,7 @@
         :id="id"
         :type="outcomeType"
         @outcome="bump++"
-        @hidden="showOutcomeModal = false"
+        @hidden="onOutcomeHidden"
       />
       <MessageShareModal
         v-if="showShareModal"
@@ -838,6 +838,14 @@ const outcome = (type, e) => {
   outcomeType.value = type
 }
 
+const onOutcomeHidden = () => {
+  showOutcomeModal.value = false
+
+  if (props.action === 'withdraw' || props.action === 'completed') {
+    router.push('/myposts')
+  }
+}
+
 const share = (e) => {
   if (e) {
     e.preventDefault()
@@ -951,6 +959,18 @@ onMounted(async () => {
   if (props.action === 'extend') {
     await messageStore.fetch(props.id, true)
     showEditModal.value = true
+  }
+
+  // Auto-open outcome modal for withdraw/completed actions
+  if (props.action === 'withdraw') {
+    outcomeType.value = 'Withdrawn'
+    showOutcomeModal.value = true
+  } else if (props.action === 'completed') {
+    const msg = message.value || (await messageStore.fetch(props.id, true))
+    outcomeType.value = msg?.type === 'Offer' ? 'Taken' : 'Received'
+    showOutcomeModal.value = true
+  } else if (props.action === 'repost') {
+    repost()
   }
 })
 </script>
