@@ -4,17 +4,30 @@ import { mount, flushPromises } from '@vue/test-utils'
 import ModSysAdminHousekeeping from '~/modtools/components/ModSysAdminHousekeeping.vue'
 
 const mockFetchTasks = vi.fn()
+const mockCompleteTask = vi.fn()
 
 vi.mock('~/api', () => ({
   default: () => ({
     housekeeper: {
       fetchTasks: mockFetchTasks,
+      completeTask: mockCompleteTask,
     },
   }),
 }))
 
 vi.mock('#app', () => ({
   useRuntimeConfig: () => ({ public: { apiUrl: 'http://test' } }),
+}))
+
+vi.mock('~/composables/useTimeFormat', () => ({
+  timeago: vi.fn((val) => {
+    if (!val) return ''
+    const d = new Date(val)
+    const diffMs = Date.now() - d.getTime()
+    const diffH = Math.floor(diffMs / 3600000)
+    if (diffH < 24) return `${diffH} hours ago`
+    return `${Math.floor(diffH / 24)} days ago`
+  }),
 }))
 
 const sampleTasks = [
@@ -84,6 +97,11 @@ describe('ModSysAdminHousekeeping', () => {
             template: '<span class="badge" :class="variant"><slot /></span>',
             props: ['variant'],
           },
+          'b-button': {
+            template:
+              '<button :class="variant" :disabled="disabled" @click="$emit(\'click\', $event)"><slot /></button>',
+            props: ['variant', 'size', 'disabled'],
+          },
           'b-spinner': { template: '<div class="spinner" />' },
         },
       },
@@ -91,7 +109,7 @@ describe('ModSysAdminHousekeeping', () => {
   }
 
   it('shows spinner while loading', () => {
-    mockFetchTasks.mockReturnValue(new Promise(() => {})) // never resolves
+    mockFetchTasks.mockReturnValue(new Promise(() => {}))
     const wrapper = mountComponent()
     expect(wrapper.find('.spinner').exists()).toBe(true)
   })
@@ -106,7 +124,7 @@ describe('ModSysAdminHousekeeping', () => {
     expect(wrapper.text()).toContain('Failed Task')
   })
 
-  it('shows correct status badges', async () => {
+  it('shows Manual badge for placeholder tasks', async () => {
     mockFetchTasks.mockResolvedValue(sampleTasks)
     const wrapper = mountComponent()
     await flushPromises()
@@ -114,9 +132,30 @@ describe('ModSysAdminHousekeeping', () => {
     const badges = wrapper.findAll('.badge')
     const badgeTexts = badges.map((b) => b.text())
 
-    expect(badgeTexts).toContain('OK')
-    expect(badgeTexts).toContain('Placeholder')
-    expect(badgeTexts).toContain('Failed')
+    expect(badgeTexts).toContain('Manual')
+  })
+
+  it('shows Mark Done button for placeholder tasks', async () => {
+    mockFetchTasks.mockResolvedValue(sampleTasks)
+    const wrapper = mountComponent()
+    await flushPromises()
+
+    const buttons = wrapper.findAll('button')
+    const markDoneBtn = buttons.find((b) => b.text().includes('Mark Done'))
+    expect(markDoneBtn).toBeTruthy()
+  })
+
+  it('shows grey dash for disabled/placeholder tasks, tick for OK, cross for failed', async () => {
+    mockFetchTasks.mockResolvedValue(sampleTasks)
+    const wrapper = mountComponent()
+    await flushPromises()
+
+    // facebook-deletion is OK → green tick
+    expect(wrapper.findAll('.text-success').length).toBeGreaterThanOrEqual(1)
+    // paypal-giving-fund is placeholder → grey dash
+    expect(wrapper.findAll('.text-muted.fs-5').length).toBeGreaterThanOrEqual(1)
+    // failed-task → red cross
+    expect(wrapper.findAll('.text-danger').length).toBeGreaterThanOrEqual(1)
   })
 
   it('shows summary text for tasks with results', async () => {
@@ -151,7 +190,7 @@ describe('ModSysAdminHousekeeping', () => {
 
     expect(wrapper.text()).toContain('Weekly') // 168h
     expect(wrapper.text()).toContain('Monthly') // 720h
-    expect(wrapper.text()).toContain('1d') // 24h
+    expect(wrapper.text()).toContain('Every 1d') // 24h
   })
 
   it('highlights failed tasks with danger row class', async () => {

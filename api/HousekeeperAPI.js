@@ -8,4 +8,8 @@ export default class HousekeeperAPI extends BaseAPI {
   fetchCronJobs() {
     return this.$getv2('/housekeeper/cronjobs')
   }
+
+  completeTask(taskKey) {
+    return this.$postv2(`/housekeeper/tasks/${taskKey}/complete`)
+  }
 }

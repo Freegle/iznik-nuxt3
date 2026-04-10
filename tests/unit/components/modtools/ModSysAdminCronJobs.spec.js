@@ -17,16 +17,28 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => ({ public: { apiUrl: 'http://test' } }),
 }))
 
+vi.mock('~/composables/useTimeFormat', () => ({
+  timeago: vi.fn((val) => {
+    if (!val) return ''
+    const d = new Date(val)
+    const diffMs = Date.now() - d.getTime()
+    const diffH = Math.floor(diffMs / 3600000)
+    if (diffH < 24) return `${diffH} hours ago`
+    return `${Math.floor(diffH / 24)} days ago`
+  }),
+}))
+
 const sampleCronJobs = [
   {
     command: 'deploy:watch',
     name: 'Deployment Watcher',
     description: 'Detects code updates and auto-refreshes application',
     schedule: 'Every minute',
+    interval_minutes: 1,
     category: 'System',
     active: true,
-    last_run_at: '2026-04-10T10:00:00Z',
-    last_finished_at: '2026-04-10T10:00:01Z',
+    last_run_at: new Date(Date.now() - 5000).toISOString(),
+    last_finished_at: new Date(Date.now() - 4000).toISOString(),
     last_exit_code: 0,
     last_output: 'Version unchanged',
   },
@@ -35,6 +47,7 @@ const sampleCronJobs = [
     name: 'Chat: User to User',
     description: 'Sends email notifications for user-to-user chat messages',
     schedule: 'Every minute',
+    interval_minutes: 1,
     category: 'Email — Chat',
     active: true,
     last_run_at: null,
@@ -47,6 +60,7 @@ const sampleCronJobs = [
     name: 'CPI Data Update',
     description: 'Fetches UK CPI inflation data from ONS',
     schedule: 'Monthly',
+    interval_minutes: 43200,
     category: 'Data',
     active: true,
     last_run_at: '2026-04-01T04:00:00Z',
@@ -94,12 +108,10 @@ describe('ModSysAdminCronJobs', () => {
     const wrapper = mountComponent()
     await flushPromises()
 
-    // Should have category labels
     expect(wrapper.text()).toContain('System')
     expect(wrapper.text()).toContain('Email — Chat')
     expect(wrapper.text()).toContain('Data')
 
-    // Should be a single table, not multiple
     const tables = wrapper.findAll('table')
     expect(tables).toHaveLength(1)
   })
@@ -114,28 +126,27 @@ describe('ModSysAdminCronJobs', () => {
     expect(wrapper.text()).toContain('Every minute')
   })
 
-  it('shows last run time when available', async () => {
+  it('shows Never for jobs that have not run', async () => {
     mockFetchCronJobs.mockResolvedValue(sampleCronJobs)
     const wrapper = mountComponent()
     await flushPromises()
 
-    // deploy:watch has a last_run_at
-    expect(wrapper.text()).toContain('Apr')
-    // mail:chat:user2user has no last_run_at
     expect(wrapper.text()).toContain('Never')
   })
 
-  it('shows correct status badges', async () => {
+  it('shows tick for OK jobs and cross for problems', async () => {
     mockFetchCronJobs.mockResolvedValue(sampleCronJobs)
     const wrapper = mountComponent()
     await flushPromises()
 
-    const badges = wrapper.findAll('.badge')
-    const badgeTexts = badges.map((b) => b.text())
+    const text = wrapper.text()
 
-    expect(badgeTexts).toContain('Active') // deploy:watch, exit code 0
-    expect(badgeTexts).toContain('Not run yet') // mail:chat:user2user, no last_run
-    expect(badgeTexts).toContain('Failed') // data:update-cpi, exit code 1
+    // deploy:watch is OK (exit code 0) → should have tick character
+    // data:update-cpi has exit code 1 → should have cross character
+    // mail:chat:user2user never run → should have cross character
+    // Check the status indicators render (tick = ✓, cross = ✗)
+    expect(text).toContain('\u2713') // tick
+    expect(text).toContain('\u2717') // cross
   })
 
   it('highlights failed jobs with danger row class', async () => {
@@ -153,14 +164,12 @@ describe('ModSysAdminCronJobs', () => {
     const wrapper = mountComponent()
     await flushPromises()
 
-    // Click deploy:watch row
-    const rows = wrapper.findAll('tr.clickable')
+    const rows = wrapper.findAll('tr.job-row')
     const deployRow = rows.find((r) => r.text().includes('deploy:watch'))
     await deployRow.trigger('click')
 
     expect(wrapper.text()).toContain('Version unchanged')
 
-    // Click again to close
     await deployRow.trigger('click')
     expect(wrapper.text()).not.toContain('Version unchanged')
   })

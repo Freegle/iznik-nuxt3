@@ -158,6 +158,11 @@ describe('ModSettingsPersonal', () => {
       expect(wrapper.text()).toContain('Moderation Notifications (Backup)')
     })
 
+    it('renders play beep toggle', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.text()).toContain('Play Beep')
+    })
+
     it('renders show as volunteer toggle', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Show me as a volunteer')
@@ -288,6 +293,33 @@ describe('ModSettingsPersonal', () => {
         delete mockMe.settings.backupmodnotifs
         const wrapper = mountComponent()
         expect(wrapper.vm.backupmodnotifs).toBe(12)
+      })
+    })
+
+    describe('beep', () => {
+      it('returns true when playbeep setting is true', () => {
+        mockMe.settings.playbeep = true
+        const wrapper = mountComponent()
+        expect(wrapper.vm.beep).toBe(true)
+      })
+
+      it('returns false when playbeep setting is false', () => {
+        mockMe.settings.playbeep = false
+        const wrapper = mountComponent()
+        expect(wrapper.vm.beep).toBe(false)
+      })
+
+      it('returns true when playbeep setting is not set (default)', () => {
+        delete mockMe.settings.playbeep
+        const wrapper = mountComponent()
+        expect(wrapper.vm.beep).toBe(true)
+      })
+
+      it('calls saveSetting when set', async () => {
+        const wrapper = mountComponent()
+        wrapper.vm.beep = false
+        await flushPromises()
+        expect(mockAuthStore.saveAndGet).toHaveBeenCalled()
       })
     })
 
@@ -426,8 +458,8 @@ describe('ModSettingsPersonal', () => {
   })
 
   describe('toggle interactions', () => {
-    it('toggles showme setting', async () => {
-      mockMe.settings.showmod = true
+    it('toggles beep setting', async () => {
+      mockMe.settings.playbeep = true
       const wrapper = mountComponent()
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles.length).toBeGreaterThan(0)
@@ -437,8 +469,8 @@ describe('ModSettingsPersonal', () => {
       expect(mockAuthStore.saveAndGet).toHaveBeenCalled()
     })
 
-    it('toggles modnotifnewsfeed setting', async () => {
-      mockMe.settings.modnotifnewsfeed = true
+    it('toggles showme setting', async () => {
+      mockMe.settings.showmod = true
       const wrapper = mountComponent()
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles.length).toBeGreaterThan(1)
@@ -448,12 +480,23 @@ describe('ModSettingsPersonal', () => {
       expect(mockAuthStore.saveAndGet).toHaveBeenCalled()
     })
 
-    it('toggles enterAddsNewLine setting', async () => {
+    it('toggles modnotifnewsfeed setting', async () => {
+      mockMe.settings.modnotifnewsfeed = true
       const wrapper = mountComponent()
       const toggles = wrapper.findAll('.our-toggle')
       expect(toggles.length).toBeGreaterThan(2)
 
       await toggles[2].trigger('click')
+      await flushPromises()
+      expect(mockAuthStore.saveAndGet).toHaveBeenCalled()
+    })
+
+    it('toggles enterAddsNewLine setting', async () => {
+      const wrapper = mountComponent()
+      const toggles = wrapper.findAll('.our-toggle')
+      expect(toggles.length).toBeGreaterThan(3)
+
+      await toggles[3].trigger('click')
       await flushPromises()
       expect(mockMiscStore.set).toHaveBeenCalled()
     })
@@ -463,6 +506,7 @@ describe('ModSettingsPersonal', () => {
     it('handles empty settings object', () => {
       mockMe.settings = {}
       const wrapper = mountComponent()
+      expect(wrapper.vm.beep).toBe(true) // default
       expect(wrapper.vm.showme).toBe(true) // default
       expect(wrapper.vm.modnotifnewsfeed).toBe(true) // default
       expect(wrapper.vm.modnotifs).toBe(4) // default

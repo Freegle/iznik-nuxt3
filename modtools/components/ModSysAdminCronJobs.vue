@@ -1,7 +1,8 @@
 <template>
   <div>
-    <h3>Scheduled Jobs</h3>
-    <p class="text-muted">Laravel batch jobs that run on a schedule.</p>
+    <p class="text-muted">
+      These jobs run automatically on the server on a schedule.
+    </p>
 
     <div v-if="loading" class="text-center py-3">
       <b-spinner />
@@ -11,66 +12,74 @@
       <b-table-simple hover responsive small>
         <b-thead>
           <b-tr>
+            <b-th class="status-col" />
             <b-th>Job</b-th>
             <b-th>Description</b-th>
             <b-th>Schedule</b-th>
             <b-th>Last Run</b-th>
-            <b-th>Status</b-th>
+            <b-th>Next Due</b-th>
           </b-tr>
         </b-thead>
         <b-tbody>
           <template v-for="(jobs, category) in groupedJobs" :key="category">
             <b-tr class="category-row">
-              <b-td colspan="5">
+              <b-td colspan="6">
                 <strong class="category-label">{{ category }}</strong>
               </b-td>
             </b-tr>
-            <b-tr
-              v-for="job in jobs"
-              :key="job.command"
-              :class="rowClass(job)"
-              class="clickable"
-              @click="toggleLog(job.command)"
-            >
-              <b-td>
-                <code>{{ job.command }}</code>
-              </b-td>
-              <b-td>{{ job.description }}</b-td>
-              <b-td>
-                <span class="text-nowrap">{{ job.schedule }}</span>
-              </b-td>
-              <b-td>
-                <span v-if="job.last_run_at" class="text-nowrap">
-                  {{ formatDate(job.last_run_at) }}
-                </span>
-                <span v-else class="text-muted">Never</span>
-              </b-td>
-              <b-td>
-                <b-badge :variant="statusVariant(job)">
-                  {{ statusText(job) }}
-                </b-badge>
-              </b-td>
-            </b-tr>
-            <b-tr
-              v-if="
-                expandedCommand &&
-                jobs.some((j) => j.command === expandedCommand)
-              "
-              :key="category + '-log'"
-            >
-              <b-td colspan="5">
-                <div class="log-panel">
-                  <h6>Output Log</h6>
-                  <pre v-if="expandedOutput" class="log-content">{{
-                    expandedOutput
-                  }}</pre>
-                  <span v-else class="text-muted">
-                    No output captured. Background commands write to /dev/null
-                    by default.
+            <template v-for="job in jobs" :key="job.command">
+              <b-tr
+                :class="rowClass(job)"
+                class="job-row"
+                @click="toggleLog(job.command)"
+              >
+                <b-td class="status-col text-center">
+                  <span v-if="isOk(job)" class="text-success fs-5"
+                    >&#10003;</span
+                  >
+                  <span v-else class="text-danger fs-5">&#10007;</span>
+                </b-td>
+                <b-td>
+                  <code>{{ job.command }}</code>
+                </b-td>
+                <b-td>{{ job.description }}</b-td>
+                <b-td>
+                  <span class="text-nowrap">{{ job.schedule }}</span>
+                </b-td>
+                <b-td>
+                  <span v-if="job.last_run_at" class="text-nowrap">
+                    {{ timeago(job.last_run_at, true) }}
                   </span>
-                </div>
-              </b-td>
-            </b-tr>
+                  <span v-else class="text-muted">Never</span>
+                </b-td>
+                <b-td>
+                  <span
+                    v-if="job.last_run_at && job.interval_minutes"
+                    class="text-nowrap"
+                    :class="{ 'text-danger fw-bold': isOverdue(job) }"
+                  >
+                    {{ nextDue(job) }}
+                  </span>
+                  <span v-else class="text-muted">-</span>
+                </b-td>
+              </b-tr>
+              <b-tr
+                v-if="expandedCommand === job.command"
+                :key="job.command + '-log'"
+              >
+                <b-td colspan="6">
+                  <div class="log-panel">
+                    <h6>Output Log</h6>
+                    <pre v-if="expandedOutput" class="log-content">{{
+                      expandedOutput
+                    }}</pre>
+                    <span v-else class="text-muted">
+                      No output captured yet.
+                    </span>
+                  </div>
+                </b-td>
+              </b-tr>
+            </template>
           </template>
         </b-tbody>
       </b-table-simple>
@@ -80,6 +89,7 @@
 
 <script setup>
 import api from '~/api'
+import { timeago } from '~/composables/useTimeFormat'
 
 const runtimeConfig = useRuntimeConfig()
 const apiInstance = api(runtimeConfig)
@@ -111,18 +121,19 @@ function toggleLog(command) {
   }
 }
 
-function statusVariant(job) {
-  if (!job.active) return 'secondary'
-  if (job.last_exit_code !== null && job.last_exit_code !== 0) return 'danger'
-  if (job.last_run_at) return 'success'
-  return 'secondary'
+function isOk(job) {
+  if (!job.active) return true
+  if (job.last_exit_code !== null && job.last_exit_code !== 0) return false
+  if (!job.last_run_at) return false
+  if (isOverdue(job)) return false
+  return true
 }
 
-function statusText(job) {
-  if (!job.active) return 'Disabled'
-  if (job.last_exit_code !== null && job.last_exit_code !== 0) return 'Failed'
-  if (job.last_run_at) return 'Active'
-  return 'Not run yet'
+function isOverdue(job) {
+  if (!job.last_run_at || !job.interval_minutes) return false
+  const lastRun = new Date(job.last_run_at)
+  const deadline = new Date(lastRun.getTime() + job.interval_minutes * 60000)
+  return new Date() > deadline
 }
 
 function rowClass(job) {
@@ -131,16 +142,24 @@ function rowClass(job) {
   return ''
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function nextDue(job) {
+  if (!job.last_run_at || !job.interval_minutes) return '-'
+  const lastRun = new Date(job.last_run_at)
+  const deadline = new Date(lastRun.getTime() + job.interval_minutes * 60000)
+  const now = new Date()
+
+  if (now > deadline) {
+    return 'overdue'
+  }
+
+  // For very short intervals, show minutes remaining instead of vague "a few seconds"
+  const remainMs = deadline - now
+  const remainMins = Math.ceil(remainMs / 60000)
+  if (remainMins <= 5) {
+    return remainMins <= 1 ? '~1m' : `~${remainMins}m`
+  }
+
+  return timeago(deadline)
 }
 
 async function fetchCronJobs() {
@@ -169,8 +188,19 @@ onMounted(() => {
 .category-label {
   color: #2e7d32;
 }
-.clickable {
+.status-col {
+  width: 30px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.job-row {
   cursor: pointer;
+}
+.job-row:hover {
+  background-color: #e9ecef !important;
+}
+.job-row.table-danger:hover {
+  background-color: #f1c0c0 !important;
 }
 .log-panel {
   padding: 8px;

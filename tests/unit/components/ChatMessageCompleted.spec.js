@@ -130,10 +130,10 @@ describe('ChatMessageCompleted', () => {
       expect(wrapper.text()).toContain('Custom completion message')
     })
 
-    it('shows automated message note when no emessage', () => {
+    it('does not show message text when no emessage', () => {
       mockData.emessage = null
       const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('This is an automated message.')
+      expect(wrapper.find('.completed-text').exists()).toBe(false)
     })
   })
 

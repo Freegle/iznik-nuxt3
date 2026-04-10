@@ -90,7 +90,7 @@
           </b-button>
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <div class="border border-info p-1 flex-grow-1 me-1">
+          <div v-if="!isBanned" class="border border-info p-1 flex-grow-1 me-1">
             <SettingsGroup
               v-if="groupid"
               :emailfrequency="member.emailfrequency"
@@ -162,7 +162,7 @@
             </div>
           </div>
         </div>
-        <div v-if="user && user.id && !isTN && !isLJ">
+        <div v-if="user && user.id && !isTN && !isLJ && !isBanned">
           <hr />
           <div class="d-flex justify-content-between flex-wrap">
             <OurToggle
@@ -254,6 +254,7 @@
       </b-card-body>
       <b-card-footer class="d-flex justify-content-between flex-wrap">
         <ModMemberButtons
+          v-if="!isBanned"
           :membershipid="member.id"
           :modconfigid="configid"
           :actions="footeractions"
@@ -262,7 +263,7 @@
           class="d-flex justify-content-between justify-content-md-end flex-grow-1"
         >
           <ModRole
-            v-if="groupid && member.role"
+            v-if="groupid && member.role && !isBanned"
             :userid="member.userid"
             :groupid="groupid"
             :role="member.role"
@@ -352,6 +353,7 @@ const showLogsModal = ref(false)
 const showUnbanModal = ref(false)
 const showUnbanModalTitle = ref('')
 const banned = ref(false)
+const isBanned = computed(() => Boolean(member.value?.bandate))
 
 const groupid = computed(() => {
   return member.value?.groupid
