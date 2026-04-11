@@ -1329,9 +1329,7 @@ async function loginViaModTools(page, email, password = 'freegle') {
 
   // Wait for the redirect chain to fully settle — without this, a subsequent
   // page.goto() can be interrupted by a late ?noguard=true redirect.
-  // Use networkidle (no requests for 500ms) rather than load, because
-  // client-side navigateTo('/?noguard=true') can fire after the load event.
-  await page.waitForLoadState('networkidle', {
+  await page.waitForLoadState('load', {
     timeout: timeouts.navigation.slowPage,
   })
   console.log('Post-login page settled')
