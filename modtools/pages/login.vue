@@ -21,9 +21,12 @@ const authStore = useAuthStore()
 
 const me = computed(() => authStore.user)
 const loginError = ref(null)
+const hasRedirected = ref(false)
 
 function redirectIfLoggedIn() {
+  if (hasRedirected.value) return
   if (me.value && me.value.id) {
+    hasRedirected.value = true
     const returnPath = route.query?.return || '/'
     console.log(
       'login.vue: redirecting to',
