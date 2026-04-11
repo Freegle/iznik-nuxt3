@@ -224,7 +224,11 @@
           v-if="supportOrAdmin"
           link="/sysadmin"
           name="SysAdmin"
-          :count="admin ? ['housekeeping', 'cronjobs'] : []"
+          :count="
+            supportOrAdmin
+              ? ['housekeeping', 'cronjobs', 'emailin', 'emailout']
+              : []
+          "
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
@@ -300,7 +304,7 @@ const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
 const modConfigStore = useModConfigStore()
 const persistent = authStore.auth.persistent
-const { supportOrAdmin, admin } = useMe()
+const { supportOrAdmin } = useMe()
 const {
   hasPermissionNewsletter,
   hasPermissionSpamAdmin,
