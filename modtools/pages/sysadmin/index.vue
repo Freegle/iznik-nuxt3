@@ -7,7 +7,10 @@
           <template #title>
             <h2 class="ms-2 me-2">
               Housekeeping
-              <b-badge v-if="admin && work?.housekeeping" variant="danger">
+              <b-badge
+                v-if="supportOrAdmin && work?.housekeeping"
+                variant="danger"
+              >
                 {{ work.housekeeping }}
               </b-badge>
             </h2>
@@ -23,7 +26,7 @@
           <template #title>
             <h2 class="ms-2 me-2">
               Cron Jobs
-              <b-badge v-if="admin && work?.cronjobs" variant="danger">
+              <b-badge v-if="supportOrAdmin && work?.cronjobs" variant="danger">
                 {{ work.cronjobs }}
               </b-badge>
             </h2>
@@ -37,7 +40,12 @@
         <!-- Outgoing Email Tab -->
         <b-tab @click="onEmailStatsTab">
           <template #title>
-            <h2 class="ms-2 me-2">Outgoing Email</h2>
+            <h2 class="ms-2 me-2">
+              Outgoing Email
+              <b-badge v-if="supportOrAdmin && work?.emailout" variant="danger">
+                !
+              </b-badge>
+            </h2>
           </template>
           <ModSupportEmailStats
             v-if="showEmailStats"
@@ -48,7 +56,12 @@
         <!-- Incoming Email Tab -->
         <b-tab @click="onIncomingEmailTab">
           <template #title>
-            <h2 class="ms-2 me-2">Incoming Email</h2>
+            <h2 class="ms-2 me-2">
+              Incoming Email
+              <b-badge v-if="supportOrAdmin && work?.emailin" variant="danger">
+                !
+              </b-badge>
+            </h2>
           </template>
           <ModSupportIncomingEmail
             v-if="showIncomingEmail"
@@ -67,7 +80,7 @@
 import { useMe } from '~/composables/useMe'
 import { useAuthStore } from '@/stores/auth'
 
-const { supportOrAdmin, admin } = useMe()
+const { supportOrAdmin } = useMe()
 const authStore = useAuthStore()
 const work = computed(() => authStore.work)
 
