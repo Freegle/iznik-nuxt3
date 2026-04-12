@@ -48,12 +48,10 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
-import { computed, watch, reloadNuxtApp, useRoute } from '#imports'
+import { computed } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
-
-const route = useRoute()
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -156,21 +154,13 @@ emailTrackingStore.init(runtimeConfig)
 
 miscStore.modtools = true
 
-const loginCount = computed(() => {
-  return authStore.loginCount
-})
-
-watch(loginCount, async () => {
-  if (!route.query.k) {
-    await reloadNuxtApp({
-      force: true,
-      persistState: false,
-    })
-  }
-})
-
 // u/k impersonation login is handled in modtools/pages/login.vue.
-// The auth middleware redirects to /login with u/k preserved in query params.
+// The default layout navigates to /login with u/k preserved in query params.
+
+// NOTE: No loginCount watcher / reloadNuxtApp here. The layout handles
+// login state changes via loginStateKnown watcher + bump (same as Freegle).
+// The previous reloadNuxtApp mechanism caused race conditions with Playwright
+// navigation because the async reload fired after waitForLoadState('load').
 
 if (process.client) {
   if (typeof window !== 'undefined') {

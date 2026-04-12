@@ -47,12 +47,8 @@ test.describe('ModTools Chat List', () => {
       errors.push(error.message)
     })
 
-    // ERR_ABORTED can still occur with domcontentloaded: the SSR layer sees no
-    // JWT (it's in localStorage, not cookies) and redirects to /login, aborting
-    // the original /chats request at the network level before domcontentloaded.
-    // The client-side router then hydrates auth from localStorage and navigates
-    // to /chats. Catching the abort here is intentional — the test still verifies
-    // correctness via assertNoErrors() and the pageerror listener below.
+    // Navigate to chats page. ERR_ABORTED can occur if the page aborts a
+    // request during initial load — catch it and verify correctness below.
     await page
       .goto(`${MODTOOLS_URL}/chats`, {
         timeout: timeouts.navigation.initial,
@@ -62,8 +58,7 @@ test.describe('ModTools Chat List', () => {
         if (!e.message.includes('ERR_ABORTED')) throw e
       })
 
-    // Wait for the URL to settle on /chats (client-side navigation may occur after SSR
-    // redirects to /login and then auth hydrates from localStorage).
+    // Wait for the URL to settle on /chats
     await page
       .waitForURL(`${MODTOOLS_URL}/chats**`, {
         timeout: timeouts.navigation.slowPage,

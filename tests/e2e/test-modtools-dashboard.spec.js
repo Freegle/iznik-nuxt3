@@ -46,15 +46,20 @@ test.describe('ModTools Dashboard', () => {
       timeout: timeouts.navigation.initial,
     })
 
+    await dismissAllModals(page)
+
     const groupSelect = page.locator('#communitieslist')
     await expect(groupSelect).toBeVisible({
       timeout: timeouts.navigation.slowPage,
     })
 
-    // The group dropdown should have at least one group option (value !== '0')
+    // The group dropdown should have at least one group option (value !== '0').
+    // Dismiss modals on each poll iteration — the cake modal can appear after
+    // initial page load and blocks checkWork from fetching groups.
     await expect
       .poll(
         async () => {
+          await dismissAllModals(page)
           const options = await groupSelect.locator('option').all()
           let groupCount = 0
           for (const option of options) {
