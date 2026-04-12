@@ -470,13 +470,17 @@ const showblock = () => {
 }
 
 const showInfo = () => {
-  // MT: Navigate to member page instead of showing profile modal
-  navigateTo(
-    '/members/approved/' +
-      (chat.value.groupid || chat.value.group?.id) +
-      '/' +
-      (chat.value.otheruid || chat.value.user1)
-  )
+  // MT: Navigate to member page instead of showing profile modal.
+  // Only navigate if there's a real other user (not for User2Mod where mod is user1).
+  const uid = chat.value.otheruid
+  if (uid) {
+    navigateTo(
+      '/members/approved/' +
+        (chat.value.groupid || chat.value.group?.id) +
+        '/' +
+        uid
+    )
+  }
 }
 
 const report = () => {

@@ -423,7 +423,7 @@ describe('ModChatHeader', () => {
       expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/789/456')
     })
 
-    it('showInfo uses otheruid over user1', async () => {
+    it('showInfo uses otheruid only, not user1 fallback', async () => {
       mockChat.value = createChat({
         groupid: 111,
         otheruid: 500,
@@ -433,6 +433,20 @@ describe('ModChatHeader', () => {
       const inner = getInner(wrapper)
       inner.vm.showInfo()
       expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/111/500')
+    })
+
+    it('showInfo does not navigate when otheruid is 0 (User2Mod where mod is user1)', async () => {
+      mockChat.value = createChat({
+        chattype: 'User2Mod',
+        groupid: 111,
+        otheruid: 0,
+        user1: 456,
+      })
+      mockOtheruser.value = null
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      inner.vm.showInfo()
+      expect(mockNavigateTo).not.toHaveBeenCalled()
     })
 
     it('markRead calls chatStore.markRead and fetchChat', async () => {
