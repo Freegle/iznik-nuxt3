@@ -1313,6 +1313,12 @@ async function loginViaModTools(page, email, password = 'freegle') {
     state: 'visible',
     timeout: timeouts.navigation.slowPage,
   })
+
+  // Ensure the reloadNuxtApp page reload is fully complete — without this,
+  // a subsequent page.goto() can be interrupted by the still-settling reload.
+  await page.waitForLoadState('load', {
+    timeout: timeouts.navigation.slowPage,
+  })
   console.log('Post-login page settled')
 
   return true
