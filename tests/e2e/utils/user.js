@@ -1304,22 +1304,14 @@ async function loginViaModTools(page, email, password = 'freegle') {
   })
   console.log('Login modal closed — login successful')
 
-  // After login, app.vue's loginCount watcher triggers reloadNuxtApp({ force: true }),
-  // causing a full page reload. Do NOT call page.evaluate() or other raw JS execution
-  // here — the reload destroys the execution context and those calls will fail.
-  // Playwright locators auto-retry across navigations, so just wait for the
-  // sidebar nav which confirms the authenticated layout rendered after reload.
+  // Wait for the authenticated layout to render — the sidebar nav confirms login.
+  // No full page reload happens (reloadNuxtApp was removed from app.vue);
+  // the layout re-renders via loginStateKnown watcher + bump.
   await page.locator('a[href="/messages/pending"]').waitFor({
     state: 'visible',
     timeout: timeouts.navigation.slowPage,
   })
-
-  // Ensure the reloadNuxtApp page reload is fully complete — without this,
-  // a subsequent page.goto() can be interrupted by the still-settling reload.
-  await page.waitForLoadState('load', {
-    timeout: timeouts.navigation.slowPage,
-  })
-  console.log('Post-login page settled')
+  console.log('Authenticated layout rendered')
 
   return true
 }
