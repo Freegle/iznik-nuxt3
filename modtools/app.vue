@@ -48,14 +48,7 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
-import {
-  computed,
-  watch,
-  reloadNuxtApp,
-  useRoute,
-  onMounted,
-  nextTick,
-} from '#imports'
+import { computed, watch, reloadNuxtApp, useRoute, onMounted } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
@@ -171,11 +164,10 @@ const loginCount = computed(() => {
 // The default layout navigates to /login with u/k preserved in query params.
 
 if (process.client) {
-  // Defer loginCount watcher until after mount + nextTick so it doesn't
-  // fire on Pinia persistence hydration (which restores loginCount from
-  // localStorage, looking like a 0→N change on every SSR page load).
-  onMounted(async () => {
-    await nextTick()
+  // Reload the page after login. loginCount is NOT persisted (removed from
+  // auth store pick list) so this only fires on actual login, not on
+  // SSR hydration. Deferred to onMounted as an extra guard.
+  onMounted(() => {
     watch(loginCount, async () => {
       if (!route.query.k) {
         await reloadNuxtApp({
