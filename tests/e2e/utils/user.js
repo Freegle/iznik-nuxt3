@@ -1239,9 +1239,13 @@ async function loginViaModTools(page, email, password = 'freegle') {
 
   console.log(`Starting ModTools login for: ${email}`)
 
-  // Navigate to ModTools root — the layout shows LoginModal when not authenticated
+  // Navigate to ModTools root — the layout shows LoginModal when not authenticated.
+  // Use waitUntil: 'networkidle' to ensure Vue hydration and any post-load API
+  // calls complete before interacting. Without this, the execution context can
+  // be destroyed mid-evaluate in CI where containers are slower.
   await page.goto(`${modtoolsBaseUrl}/`, {
     timeout: timeouts.navigation.initial,
+    waitUntil: 'networkidle',
   })
 
   // Wait for the login modal to appear (shown by the default layout)
