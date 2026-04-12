@@ -1240,14 +1240,25 @@ async function loginViaModTools(page, email, password = 'freegle') {
   console.log(`Starting ModTools login for: ${email}`)
 
   // Navigate to ModTools root — the layout shows LoginModal when not authenticated.
-  // Use domcontentloaded to avoid waiting for images/fonts, then let Playwright's
-  // auto-retry locators handle waiting for hydration to complete. This avoids both
-  // networkidle (background polling prevents it) and the "Execution context
-  // destroyed" error from page.waitForFunction during Vue hydration.
-  await page.goto(`${modtoolsBaseUrl}/`, {
-    timeout: timeouts.navigation.initial,
-    waitUntil: 'domcontentloaded',
-  })
+  // In CI, Vue hydration can destroy the execution context during page.goto,
+  // causing "Execution context was destroyed" errors through the logger proxy.
+  // Retry once if this happens — the second attempt lands on the hydrated page.
+  try {
+    await page.goto(`${modtoolsBaseUrl}/`, {
+      timeout: timeouts.navigation.initial,
+      waitUntil: 'domcontentloaded',
+    })
+  } catch (e) {
+    if (e.message?.includes('Execution context was destroyed')) {
+      console.log('Context destroyed during goto (hydration race), retrying')
+      await page.goto(`${modtoolsBaseUrl}/`, {
+        timeout: timeouts.navigation.initial,
+        waitUntil: 'domcontentloaded',
+      })
+    } else {
+      throw e
+    }
+  }
 
   // Wait for the login modal's email field to be visible — this confirms both
   // that Vue has hydrated and the modal is rendered. Playwright locators
