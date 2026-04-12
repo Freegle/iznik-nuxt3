@@ -245,4 +245,78 @@ test.describe('ModTools Spammer List', () => {
     expect(badResponses).toHaveLength(0)
     expect(pageErrors).toHaveLength(0)
   })
+
+  test('Reject button sends DELETE with valid id (no 400)', async ({
+    page,
+    testEnv,
+  }) => {
+    // This test covers the bug where member.spammer?.id was undefined
+    // because the enriched spammer object was overwritten by a boolean,
+    // causing DELETE to send {id: null} and get a 400 "Missing id".
+
+    await loginViaModTools(page, testEnv.mod.email)
+
+    // Reset test spammers to PendingAdd with no hold so Reject button is visible.
+    const jwt = await page.evaluate(() => {
+      const auth = JSON.parse(localStorage.getItem('auth') || '{}')
+      return auth?.auth?.jwt
+    })
+    if (jwt && testEnv.spammers) {
+      for (const sid of testEnv.spammers) {
+        await page.request
+          .patch('http://apiv2.localhost/api/modtools/spammers', {
+            data: { id: sid, collection: 'PendingAdd', heldby: null },
+            headers: { Authorization: jwt },
+          })
+          .catch(() => {})
+      }
+    }
+
+    const pageErrors = []
+    const badResponses = []
+    page.on('pageerror', (err) => pageErrors.push(err.message))
+    page.on('response', (resp) => {
+      if (resp.url().includes('/spammers') && resp.status() >= 400) {
+        badResponses.push({ url: resp.url(), status: resp.status() })
+      }
+    })
+
+    // Capture DELETE request bodies to verify id is included.
+    const deleteBodies = []
+    page.on('request', (req) => {
+      if (req.method() === 'DELETE' && req.url().includes('/spammers')) {
+        try {
+          deleteBodies.push(JSON.parse(req.postData() || '{}'))
+        } catch {
+          deleteBodies.push({})
+        }
+      }
+    })
+
+    await goToSpammersPage(page)
+
+    // Click the Reject button on a PendingAdd entry.
+    const rejectBtn = page
+      .locator('.member-card button:has-text("Reject add to spammer list")')
+      .first()
+    await expect(rejectBtn).toBeVisible({ timeout: timeouts.ui.appearance })
+    await rejectBtn.click()
+
+    // Wait for the DELETE request to be sent.
+    await expect
+      .poll(() => deleteBodies.length, {
+        message: 'Waiting for DELETE /spammers request',
+        timeout: timeouts.api.slowApi,
+      })
+      .toBeGreaterThan(0)
+
+    // Verify the request body contains a valid spam_users.id.
+    const body = deleteBodies[0]
+    expect(body.id).toBeTruthy()
+    expect(testEnv.spammers).toContain(body.id)
+
+    // No 400 or other error responses.
+    expect(badResponses).toHaveLength(0)
+    expect(pageErrors).toHaveLength(0)
+  })
 })

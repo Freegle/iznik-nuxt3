@@ -186,6 +186,20 @@ describe('ModMemberButtons', () => {
       expect(wrapper.text()).toContain('Confirm add to spammer list')
     })
 
+    it('does not render spam buttons when spammer is boolean true (store data race)', () => {
+      // The user store can overwrite the enriched spammer object with a
+      // boolean.  The spam computed must guard against this so template
+      // accesses like spam.id don't fail.
+      const wrapper = mountComponent({
+        member: createMember({
+          spammer: true,
+        }),
+      })
+      expect(wrapper.text()).not.toContain('Confirm add to spammer list')
+      expect(wrapper.text()).not.toContain('Remove from spammer list')
+      expect(wrapper.text()).not.toContain('Hold')
+    })
+
     it('shows spamignore button when spamignore prop is true', () => {
       const wrapper = mountComponent({
         member: createMember({
@@ -237,10 +251,10 @@ describe('ModMemberButtons', () => {
       expect(wrapper.text()).not.toContain('Hold')
     })
 
-    it('shows remove button for Approved spammers', () => {
+    it('shows remove button for confirmed spammers', () => {
       const wrapper = mountComponent({
         member: createMember({
-          spammer: { id: 222, collection: 'Approved' },
+          spammer: { id: 222, collection: 'Spammer' },
         }),
       })
       expect(wrapper.text()).toContain('Remove from spammer list')

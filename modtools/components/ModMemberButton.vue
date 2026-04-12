@@ -214,17 +214,27 @@ async function spamConfirmAction() {
 }
 
 async function spamRequestRemove() {
-  await spammerStore.requestremove({
-    id: props.spammerid,
-    userid: props.userid,
-  })
+  try {
+    await spammerStore.requestremove({
+      id: props.spammerid,
+      userid: props.userid,
+    })
+  } catch (e) {
+    console.error('spamRequestRemove failed:', e)
+    throw e
+  }
 }
 
 async function spamRemove() {
-  await spammerStore.remove({
-    id: props.spammerid,
-    userid: props.userid,
-  })
+  try {
+    await spammerStore.remove({
+      id: props.spammerid,
+      userid: props.userid,
+    })
+  } catch (e) {
+    console.error('spamRemove failed:', e)
+    throw e
+  }
 }
 
 async function spamSafelist() {
@@ -274,50 +284,55 @@ async function releaseIt() {
 }
 
 async function click(callback) {
-  if (props.approve) {
-    await approveIt()
-  } else if (props.delete) {
-    await deleteIt()
-  } else if (props.spamreport) {
-    await spamReport()
-  } else if (props.spamconfirm) {
-    await spamConfirmAction()
-  } else if (props.spamrequestremove) {
-    await spamRequestRemove()
-  } else if (props.spamremove) {
-    await spamRemove()
-  } else if (props.spamsafelist) {
-    await spamSafelist()
-  } else if (props.spamhold) {
-    await spamHold()
-  } else if (props.spamignore) {
-    // spamIgnore - not implemented in original
-  } else if (props.release) {
-    console.log('Release')
-    await releaseIt()
-  } else if (props.reviewhold) {
-    await reviewHoldIt()
-  } else if (props.reviewrelease) {
-    await reviewReleaseIt()
-  } else {
-    // We want to show a modal.
-    stdmsgId.value = null
-    stdmsgAction.value = null
+  try {
+    if (props.approve) {
+      await approveIt()
+    } else if (props.delete) {
+      await deleteIt()
+    } else if (props.spamreport) {
+      await spamReport()
+    } else if (props.spamconfirm) {
+      await spamConfirmAction()
+    } else if (props.spamrequestremove) {
+      await spamRequestRemove()
+    } else if (props.spamremove) {
+      await spamRemove()
+    } else if (props.spamsafelist) {
+      await spamSafelist()
+    } else if (props.spamhold) {
+      await spamHold()
+    } else if (props.spamignore) {
+      // spamIgnore - not implemented in original
+    } else if (props.release) {
+      console.log('Release')
+      await releaseIt()
+    } else if (props.reviewhold) {
+      await reviewHoldIt()
+    } else if (props.reviewrelease) {
+      await reviewReleaseIt()
+    } else {
+      // We want to show a modal.
+      stdmsgId.value = null
+      stdmsgAction.value = null
 
-    if (props.leave) {
-      stdmsgAction.value = 'Leave Member'
-    } else if (props.stdmsgid) {
-      // We have a standard message.  Fetch it into the store.
-      await stdmsgStore.fetch(props.stdmsgid)
-      stdmsgId.value = props.stdmsgid
+      if (props.leave) {
+        stdmsgAction.value = 'Leave Member'
+      } else if (props.stdmsgid) {
+        // We have a standard message.  Fetch it into the store.
+        await stdmsgStore.fetch(props.stdmsgid)
+        stdmsgId.value = props.stdmsgid
+      }
+
+      showStdMsgModal.value = true
+      stdmodal.value?.show()
+      await nextTick()
+      stdmodal.value?.fillin()
     }
-
-    showStdMsgModal.value = true
-    stdmodal.value?.show()
-    await nextTick()
-    stdmodal.value?.fillin()
+  } catch (e) {
+    console.error('ModMemberButton action failed:', e)
+  } finally {
+    if (callback) callback()
   }
-  if (callback) callback()
   emit('pressed')
 }
 </script>
