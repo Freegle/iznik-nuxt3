@@ -266,7 +266,20 @@ async function loadMore($state) {
     }
     context.value = messageStore.context
 
-    if (currentCount === Object.keys(messageStore.list).length) {
+    const newCount = Object.keys(messageStore.list).length
+    if (currentCount === newCount) {
+      console.log('InfiniteScroll complete:', {
+        collection: collection.value,
+        groupid: groupid.value,
+        currentCount,
+        newCount,
+        fetchedIds: fetchedIds?.length ?? 0,
+        contextBefore: params.context,
+        contextAfter: messageStore.context,
+        limit: params.limit,
+        shown: show.value,
+        messagesLen: messages.value.length,
+      })
       $state.complete()
     } else {
       $state.loaded()

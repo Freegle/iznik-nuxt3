@@ -15,6 +15,7 @@ const mockClear = vi.fn()
 const mockFetchMessagesMT = vi.fn()
 const mockAll = ref([])
 const mockGetByGroup = vi.fn(() => [])
+const mockStoreContext = ref(null)
 
 vi.mock('~/stores/message', () => ({
   useMessageStore: () => ({
@@ -25,6 +26,13 @@ vi.mock('~/stores/message', () => ({
       return mockAll.value
     },
     getByGroup: mockGetByGroup,
+    get context() {
+      return mockStoreContext.value
+    },
+    set context(v) {
+      mockStoreContext.value = v
+    },
+    list: {},
   }),
 }))
 
@@ -76,6 +84,25 @@ describe('useModMessages getMessages', () => {
     collection.value = 'Pending'
 
     await expect(getMessages()).resolves.toBeUndefined()
+  })
+
+  it('syncs pagination context after getMessages so loadMore continues', async () => {
+    const paginationCtx = { Date: 1700000000, ID: 42 }
+    mockFetchMessagesMT.mockImplementation(() => {
+      mockStoreContext.value = paginationCtx
+      return Promise.resolve([1, 2, 3])
+    })
+    mockAll.value = [{ id: 1 }, { id: 2 }, { id: 3 }]
+
+    const { setupModMessages } = await import(
+      '~/modtools/composables/useModMessages'
+    )
+    const { getMessages, collection, context } = setupModMessages()
+    collection.value = 'Approved'
+    await getMessages()
+
+    // context ref should be synced from the store so loadMore() can paginate.
+    expect(context.value).toEqual(paginationCtx)
   })
 
   it('resets show count to 0 on 401 so UI does not show stale message count', async () => {
