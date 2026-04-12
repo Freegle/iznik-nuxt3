@@ -395,10 +395,11 @@ watch(
 )
 
 watch(
-  () => loginStateKnown,
+  loginStateKnown,
   (newVal) => {
-    if (newVal.value) {
-      // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+    if (newVal && loggedIn.value) {
+      // We now know that we have logged in. We rendered the page originally
+      // as logged out. Re-render to make it reflect that.
       bump.value++
     }
   },

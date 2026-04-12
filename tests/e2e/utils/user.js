@@ -1239,12 +1239,12 @@ async function loginViaModTools(page, email, password = 'freegle') {
 
   console.log(`Starting ModTools login for: ${email}`)
 
-  // Navigate to ModTools root — it redirects unauthenticated users to /login
+  // Navigate to ModTools root — the layout shows LoginModal when not authenticated
   await page.goto(`${modtoolsBaseUrl}/`, {
     timeout: timeouts.navigation.initial,
   })
 
-  // Wait for the login modal to appear
+  // Wait for the login modal to appear (shown by the default layout)
   const loginModal = page.locator('#loginModal')
   await loginModal.first().waitFor({
     state: 'visible',
@@ -1316,20 +1316,22 @@ async function loginViaModTools(page, email, password = 'freegle') {
   })
   console.log('Login modal closed — login successful')
 
+  // Clean up any orphaned modal backdrops left behind when v-if removed
+  // the LoginModal from DOM without going through Bootstrap's hide sequence.
+  await page.evaluate(() => {
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
+    document.body.classList.remove('modal-open')
+    document.body.style.removeProperty('overflow')
+    document.body.style.removeProperty('padding-right')
+  })
+
   // Wait for auth to persist to localStorage
   await waitForAuthPersistence(page)
 
-  // After login, login.vue redirects to /?noguard=true which hydrates the
-  // auth store. Wait for the sidebar nav to appear — this confirms the redirect
-  // chain has fully settled and the authenticated layout is rendered.
+  // Wait for the sidebar nav to appear — this confirms the authenticated
+  // layout is fully rendered (no redirect chain involved).
   await page.locator('a[href="/messages/pending"]').waitFor({
     state: 'visible',
-    timeout: timeouts.navigation.slowPage,
-  })
-
-  // Wait for the redirect chain to fully settle — without this, a subsequent
-  // page.goto() can be interrupted by a late ?noguard=true redirect.
-  await page.waitForLoadState('load', {
     timeout: timeouts.navigation.slowPage,
   })
   console.log('Post-login page settled')

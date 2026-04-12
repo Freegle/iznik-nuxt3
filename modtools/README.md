@@ -16,7 +16,7 @@ These files/directories are present in /modtools:
 * components/* - Extend and add to the base components
 * composables/* - Extend and add to the base composables
 * layouts/* - ModTools layouts
-* middleware/* - `authuser.global.ts` provides user authentication for most routes
+* middleware/* - Route middleware (authentication handled by default layout via LoginModal)
 * pages/* - Generally replaces the base pages
 * public/* - ModTools-specific icons and eg `alert.wav`
 * stores/* - Extend and add to the base stores
