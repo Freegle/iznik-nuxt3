@@ -44,11 +44,7 @@ test.describe('ModTools Chat Reply', () => {
     await loginViaModTools(page, modEmail)
 
     // Step 2: Navigate to the specific User2Mod chat.
-    // ERR_ABORTED can occur because the SSR layer sees no JWT (it's in
-    // localStorage, not cookies) and redirects to /login, aborting the
-    // original /chats request at the network level before domcontentloaded.
-    // The client-side router then hydrates auth from localStorage and
-    // navigates to /chats. Same pattern as test-modtools-chat-list.spec.js.
+    // ERR_ABORTED can occur if the page aborts a request during initial load.
     console.log('\n--- Step 2: Navigate to chat ---')
     await page
       .goto(`${MODTOOLS_URL}/chats/${u2mChatId}`, {
@@ -57,11 +53,10 @@ test.describe('ModTools Chat Reply', () => {
       })
       .catch((e) => {
         if (!e.message.includes('ERR_ABORTED')) throw e
-        console.log('Navigation aborted by auth redirect — expected')
+        console.log('Navigation aborted — expected')
       })
 
-    // Wait for the URL to settle on the chat page (client-side navigation
-    // may occur after SSR redirects).
+    // Wait for the URL to settle on the chat page.
     await page
       .waitForURL(`${MODTOOLS_URL}/chats/**`, {
         timeout: timeouts.navigation.slowPage,

@@ -395,10 +395,11 @@ watch(
 )
 
 watch(
-  () => loginStateKnown,
+  loginStateKnown,
   (newVal) => {
-    if (newVal.value) {
-      // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+    if (newVal && loggedIn.value) {
+      // We now know that we have logged in. We rendered the page originally
+      // as logged out. Re-render to make it reflect that.
       bump.value++
     }
   },
@@ -416,11 +417,17 @@ onMounted(async () => {
   }
 
   // If not logged in then show loginModal and force it to stay open.
-  // But if u/k params are present, the login page handles authentication —
-  // don't show the login modal as it would conflict.
+  // But if u/k params are present, navigate to /login to handle impersonation —
+  // login.vue processes u/k params and redirects back after auth.
   const me = authStore.user
   if (!me || !me.id) {
-    if (!route.query?.u || !route.query?.k) {
+    if (route.query?.u && route.query?.k) {
+      const returnPath = route.path
+      router.push({
+        path: '/login',
+        query: { u: route.query.u, k: route.query.k, return: returnPath },
+      })
+    } else {
       authStore.forceLogin = true
       loginModal.value?.show()
     }

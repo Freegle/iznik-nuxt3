@@ -1239,34 +1239,25 @@ async function loginViaModTools(page, email, password = 'freegle') {
 
   console.log(`Starting ModTools login for: ${email}`)
 
-  // Navigate to ModTools root — it redirects unauthenticated users to /login
+  // Navigate to ModTools root — the layout shows LoginModal when not authenticated.
   await page.goto(`${modtoolsBaseUrl}/`, {
     timeout: timeouts.navigation.initial,
+    waitUntil: 'domcontentloaded',
   })
 
-  // Wait for the login modal to appear
+  // Wait for the login modal's email field to be visible — this confirms both
+  // that Vue has hydrated and the modal is rendered. Playwright locators
+  // auto-retry across navigation/hydration, unlike page.waitForFunction.
   const loginModal = page.locator('#loginModal')
-  await loginModal.first().waitFor({
+  const emailField = loginModal
+    .locator('input[type="email"], input[name="email"]')
+    .first()
+  await emailField.waitFor({
     state: 'visible',
-    timeout: timeouts.ui.appearance,
+    timeout: timeouts.navigation.slowPage,
   })
 
   const fullnameField = page.locator('#fullname, input[name="fullname"]')
-
-  // Wait for modal form to be ready (email + password fields present)
-  await page.waitForFunction(
-    () => {
-      const emailEl = document.querySelector(
-        'input[type="email"], input[name="email"]'
-      )
-      const passwordEl = document.querySelector(
-        'input[type="password"], input[name="password"]'
-      )
-      return emailEl && passwordEl
-    },
-    null,
-    { timeout: timeouts.ui.appearance }
-  )
 
   // Switch to login mode if in signup mode (fullname field visible)
   const fullnameVisible = await fullnameField.isVisible().catch(() => false)
@@ -1291,10 +1282,7 @@ async function loginViaModTools(page, email, password = 'freegle') {
     timeout: timeouts.ui.appearance,
   })
 
-  // Fill credentials
-  const emailField = page
-    .locator('input[type="email"], input[name="email"]')
-    .first()
+  // Fill credentials — emailField already declared above (scoped to loginModal)
   const passwordField = page
     .locator('input[type="password"], input[name="password"]')
     .first()
@@ -1316,20 +1304,13 @@ async function loginViaModTools(page, email, password = 'freegle') {
   })
   console.log('Login modal closed — login successful')
 
-  // Wait for auth to persist to localStorage
-  await waitForAuthPersistence(page)
-
-  // After login, login.vue redirects to /?noguard=true which hydrates the
-  // auth store. Wait for the sidebar nav to appear — this confirms the redirect
-  // chain has fully settled and the authenticated layout is rendered.
+  // After login, app.vue's loginCount watcher triggers reloadNuxtApp({ force: true }),
+  // causing a full page reload. Do NOT call page.evaluate() or other raw JS execution
+  // here — the reload destroys the execution context and those calls will fail.
+  // Playwright locators auto-retry across navigations, so just wait for the
+  // sidebar nav which confirms the authenticated layout rendered after reload.
   await page.locator('a[href="/messages/pending"]').waitFor({
     state: 'visible',
-    timeout: timeouts.navigation.slowPage,
-  })
-
-  // Wait for the redirect chain to fully settle — without this, a subsequent
-  // page.goto() can be interrupted by a late ?noguard=true redirect.
-  await page.waitForLoadState('load', {
     timeout: timeouts.navigation.slowPage,
   })
   console.log('Post-login page settled')

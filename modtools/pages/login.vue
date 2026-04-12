@@ -6,7 +6,7 @@
     <div v-else-if="loginError" class="p-2 text-danger">
       Login failed: {{ loginError }}
     </div>
-    <div v-else class="p-2">Please login</div>
+    <div v-else class="p-2">Logging in...</div>
   </div>
 </template>
 
@@ -34,43 +34,40 @@ function redirectIfLoggedIn() {
       'user:',
       me.value.displayname
     )
-    // Use router.push (not window.location.href) to stay within the SPA.
-    // A full page reload would lose the in-memory auth state, causing the
-    // auth middleware to redirect back to /login before fetchUser completes.
-    router.push({ path: returnPath, query: { noguard: true } })
+    router.push(returnPath)
   }
 }
 
 onMounted(async () => {
-  console.log(
-    'login.vue onMounted',
-    'u=',
-    route.query?.u,
-    'k=',
-    route.query?.k?.substring(0, 5)
-  )
-
-  // Handle u/k link login (impersonation).
-  // The auth middleware redirects here with u/k preserved in query params.
+  // This page handles u/k link login (impersonation) only.
+  // Normal login is handled by the default layout's LoginModal.
   if (route.query?.u && route.query?.k) {
+    console.log(
+      'login.vue onMounted u/k login',
+      'u=',
+      route.query.u,
+      'k=',
+      route.query.k?.substring(0, 5)
+    )
     try {
       await authStore.clearRelated()
-      console.log('login.vue: calling authStore.login with u/k')
       await authStore.login({
         u: route.query.u,
         k: route.query.k,
       })
-      console.log('login.vue: login done, user=', authStore.user?.displayname)
+      console.log(
+        'login.vue: u/k login done, user=',
+        authStore.user?.displayname
+      )
     } catch (e) {
       console.error('u/k login failed', e)
       loginError.value = e?.message || String(e)
     }
   }
 
-  // Redirect if already logged in (normal flow or after u/k login above)
   redirectIfLoggedIn()
 })
 
-// Also watch reactively in case fetchUser completes after onMounted
+// Watch reactively in case fetchUser completes after onMounted
 watch(me, redirectIfLoggedIn)
 </script>

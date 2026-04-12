@@ -54,6 +54,67 @@ test.describe('ModTools Edits Flow', () => {
     })
     console.log(`Posted: id=${posted.id}, item=${posted.item}`)
 
+    // Step 1b: Approve the message and set user as moderated so the edit
+    // creates a review record. Edit reviews are only created when:
+    // (a) the message is Approved, and (b) the editor's posting status is Moderated.
+    // Use Playwright's request API (not page.evaluate fetch) to avoid CORS issues.
+    console.log('\n--- Step 1b: Approve message via API ---')
+    const groupId = testEnv.group.id
+
+    // Login as mod to get JWT via V2 API
+    const loginResp = await page.request.post(
+      'http://apiv2.localhost/api/session',
+      {
+        data: { email: modEmail, password: 'freegle' },
+      }
+    )
+    const loginData = await loginResp.json()
+    console.log(`Mod login: jwt=${loginData.jwt ? 'present' : 'missing'}`)
+    expect(loginData.jwt).toBeTruthy()
+    const modJwt = loginData.jwt
+
+    // Approve the message via V2 API (same endpoint the frontend uses)
+    const approveResp = await page.request.post(
+      'http://apiv2.localhost/api/message',
+      {
+        data: {
+          action: 'Approve',
+          id: Number(posted.id),
+          groupid: Number(groupId),
+        },
+        headers: { Authorization: modJwt },
+      }
+    )
+    console.log(`Approve status: ${approveResp.status()}`)
+    expect(approveResp.ok()).toBeTruthy()
+
+    // Get the message to find the poster's user ID via V2 API
+    const msgResp = await page.request.get(
+      `http://apiv2.localhost/api/message/${posted.id}`,
+      {
+        headers: { Authorization: modJwt },
+      }
+    )
+    const msgData = await msgResp.json()
+    const fromUserId = msgData?.fromuser
+    console.log(`Message fromuser: ${fromUserId}`)
+    expect(fromUserId).toBeTruthy()
+
+    // Set the poster's posting status to MODERATED on this group
+    const memberResp = await page.request.patch(
+      `http://apiv2.localhost/api/memberships`,
+      {
+        data: {
+          userid: Number(fromUserId),
+          groupid: Number(groupId),
+          ourPostingStatus: 'MODERATED',
+        },
+        headers: { Authorization: modJwt },
+      }
+    )
+    console.log(`Set moderated status: ${memberResp.status()}`)
+    console.log('Message approved and user set to moderated')
+
     // Step 2: Edit the message on My Posts page.
     console.log('\n--- Step 2: Edit message on My Posts ---')
     await expect(page).toHaveURL(/\/myposts/, {
@@ -110,12 +171,34 @@ test.describe('ModTools Edits Flow', () => {
     })
     await dismissAllModals(page)
 
-    // Check for edits — try selecting groups with work counts if needed
+    // Select the test group explicitly — edits work counts may not appear
+    // in the dropdown, so we can't rely on selecting groups with "(N)".
+    const testGroupName = testEnv.group.name
+    let selectedGroup = false
+    const options = await groupSelect.locator('option').all()
+    for (const option of options) {
+      const text = await option.textContent()
+      const value = await option.getAttribute('value')
+      if (value && value !== '0' && text.includes(testGroupName)) {
+        console.log(`Selecting test group: ${text} (value=${value})`)
+        await groupSelect.selectOption(value)
+        selectedGroup = true
+        break
+      }
+    }
+    if (!selectedGroup) {
+      console.log(
+        `Test group "${testGroupName}" not found in dropdown, using All Communities`
+      )
+    }
+
+    // Poll for edits to appear — the edit review may take a moment to propagate
     let pollAttempts = 0
     await expect
       .poll(
         async () => {
           pollAttempts++
+          await dismissAllModals(page)
           const bodyText = await page.textContent('body')
           const hasNoMessages = bodyText.includes(
             'There are no messages at the moment'
@@ -125,34 +208,12 @@ test.describe('ModTools Edits Flow', () => {
             console.log(
               `Poll #${pollAttempts}: noMessages=${hasNoMessages}, URL=${page.url()}`
             )
-            // List available groups
-            const options = await groupSelect.locator('option').all()
-            const groupTexts = []
-            for (const opt of options.slice(0, 5)) {
-              groupTexts.push(await opt.textContent())
-            }
-            console.log(`Groups: ${groupTexts.join(' | ')}`)
           }
 
-          if (!hasNoMessages) {
-            return true
-          }
-
-          // Try selecting a group with edits work count
-          const options = await groupSelect.locator('option').all()
-          for (const option of options) {
-            const text = await option.textContent()
-            const value = await option.getAttribute('value')
-            if (value && value !== '0' && /\(\d+\)/.test(text)) {
-              console.log(`Selecting group: ${text}`)
-              await groupSelect.selectOption(value)
-              return false // will re-poll
-            }
-          }
-          return false
+          return !hasNoMessages
         },
         {
-          message: 'Waiting for edit to appear on edits page',
+          message: `Waiting for edit to appear on edits page (group: ${testGroupName})`,
           timeout: timeouts.navigation.slowPage,
         }
       )
