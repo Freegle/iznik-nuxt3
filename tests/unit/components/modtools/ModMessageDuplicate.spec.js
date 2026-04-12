@@ -195,9 +195,7 @@ describe('ModMessageDuplicate', () => {
             groups: [{ groupid: 456 }],
           }
         )
-        expect(wrapper.vm.duplicateLink).toBe(
-          '/messages/pending?groupid=456&msgid=123'
-        )
+        expect(wrapper.vm.duplicateLink).toBe('/messages/pending/456/123')
       })
 
       it('returns approved messages link for approved message', () => {
@@ -208,9 +206,7 @@ describe('ModMessageDuplicate', () => {
             groups: [{ groupid: 456 }],
           }
         )
-        expect(wrapper.vm.duplicateLink).toBe(
-          '/messages/approved?groupid=456&msgid=123'
-        )
+        expect(wrapper.vm.duplicateLink).toBe('/messages/approved/456/123')
       })
 
       it('builds correct link with different groupid and msgid', () => {
@@ -222,9 +218,7 @@ describe('ModMessageDuplicate', () => {
             groups: [{ groupid: 111 }],
           }
         )
-        expect(wrapper.vm.duplicateLink).toBe(
-          '/messages/pending?groupid=111&msgid=999'
-        )
+        expect(wrapper.vm.duplicateLink).toBe('/messages/pending/111/999')
       })
     })
   })
@@ -239,9 +233,7 @@ describe('ModMessageDuplicate', () => {
         }
       )
       const link = wrapper.find('a')
-      expect(link.attributes('href')).toBe(
-        '/messages/pending?groupid=456&msgid=123'
-      )
+      expect(link.attributes('href')).toBe('/messages/pending/456/123')
     })
 
     it('links to correct approved URL', () => {
@@ -253,9 +245,7 @@ describe('ModMessageDuplicate', () => {
         }
       )
       const link = wrapper.find('a')
-      expect(link.attributes('href')).toBe(
-        '/messages/approved?groupid=456&msgid=123'
-      )
+      expect(link.attributes('href')).toBe('/messages/approved/456/123')
     })
   })
 
