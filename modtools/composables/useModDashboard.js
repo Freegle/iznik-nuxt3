@@ -57,17 +57,7 @@ export function useModDashboard(props, askfor, grouprequired = false) {
   }
 
   watch(
-    () => props.groupid,
-    () => maybeFetch()
-  )
-
-  watch(
-    () => props.start,
-    () => maybeFetch()
-  )
-
-  watch(
-    () => props.end,
+    () => [props.groupid, props.start, props.end],
     () => maybeFetch()
   )
 

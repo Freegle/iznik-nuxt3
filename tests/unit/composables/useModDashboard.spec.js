@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { defineComponent, nextTick } from 'vue'
+import { defineComponent, nextTick, reactive } from 'vue'
 
 const mockFetch = vi.fn()
 
@@ -118,5 +118,20 @@ describe('useModDashboard', () => {
     mountWithComposable(props, ['TestComp'], true)
     await flushPromises()
     expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('fires only one fetch when start and end change together', async () => {
+    const props = reactive(createProps())
+    mountWithComposable(props)
+    await flushPromises()
+    mockFetch.mockClear()
+
+    // Simulate the Update button: both start and end change in the same tick.
+    props.start = new Date('2026-02-01')
+    props.end = new Date('2026-02-28')
+    await flushPromises()
+
+    // Combined watcher should batch both changes into a single fetch.
+    expect(mockFetch).toHaveBeenCalledTimes(1)
   })
 })
