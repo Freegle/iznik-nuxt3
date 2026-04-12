@@ -170,6 +170,31 @@ describe('ModMenuItemLeft', () => {
       expect(wrapper.find('.badge-danger').exists()).toBe(false)
     })
 
+    it('does not show badge when count is empty array (non-admin sysadmin)', () => {
+      // When a non-admin views SysAdmin, count is [] — no badge should show
+      // even if work contains sysadmin-related counts.
+      mockAuthStore.work = { housekeeping: 2, cronjobs: 1, emailin: 1 }
+      const wrapper = mountModMenuItemLeft({
+        count: [],
+      })
+      expect(wrapper.find('.badge-danger').exists()).toBe(false)
+    })
+
+    it('shows badge for sysadmin count types when admin', () => {
+      // Admin users get count=['housekeeping','cronjobs','emailin','emailout']
+      mockAuthStore.work = {
+        housekeeping: 2,
+        cronjobs: 1,
+        emailin: 0,
+        emailout: 0,
+      }
+      const wrapper = mountModMenuItemLeft({
+        count: ['housekeeping', 'cronjobs', 'emailin', 'emailout'],
+      })
+      expect(wrapper.find('.badge-danger').exists()).toBe(true)
+      expect(wrapper.text()).toContain('3')
+    })
+
     it('applies correct variant to count badge', () => {
       const wrapper = mountModMenuItemLeft({
         count: ['pending'],

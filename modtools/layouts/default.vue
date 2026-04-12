@@ -225,9 +225,7 @@
           link="/sysadmin"
           name="SysAdmin"
           :count="
-            supportOrAdmin
-              ? ['housekeeping', 'cronjobs', 'emailin', 'emailout']
-              : []
+            admin ? ['housekeeping', 'cronjobs', 'emailin', 'emailout'] : []
           "
           @mobilehidemenu="mobilehidemenu"
         />
@@ -304,7 +302,7 @@ const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
 const modConfigStore = useModConfigStore()
 const persistent = authStore.auth.persistent
-const { supportOrAdmin } = useMe()
+const { supportOrAdmin, admin } = useMe()
 const {
   hasPermissionNewsletter,
   hasPermissionSpamAdmin,

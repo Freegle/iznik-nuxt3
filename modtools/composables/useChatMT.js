@@ -21,20 +21,15 @@ function useChatSharedMT(chatId) {
     return chatId ? chatStore.byChatId(chatId) : null
   })
 
-  // MT: Handle otheruser for User2Mod chats where otheruid may not be set
+  // MT: Handle otheruser — the member on the other side of the chat.
+  // For User2Mod chats where the mod IS user1 (they contacted the group),
+  // otheruid is cleared to 0 by the API and user1 is the mod themselves —
+  // don't fall back to showing the mod's own profile.
   const otheruser = computed(() => {
-    let otheruid = chat.value?.otheruid
-    let user = null
+    const otheruid = chat.value?.otheruid
+    if (!otheruid) return null
 
-    if (!otheruid) {
-      otheruid = chat.value?.user1
-    }
-
-    if (otheruid) {
-      user = userStore.byId(otheruid)
-    }
-
-    return user
+    return userStore.byId(otheruid)
   })
 
   return {
