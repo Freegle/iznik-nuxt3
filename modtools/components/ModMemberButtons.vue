@@ -78,7 +78,7 @@
         />
       </div>
       <div
-        v-else-if="member.spammer.collection === 'Approved'"
+        v-else-if="member.spammer.collection === 'Spammer'"
         class="d-flex flex-wrap"
       >
         <ModMemberButton
@@ -245,7 +245,13 @@ function hasCollection(coll) {
 
 const approved = computed(() => hasCollection('Approved'))
 
-const spam = computed(() => member.value.spammer)
+const spam = computed(() => {
+  const s = member.value.spammer
+  // The spammer store writes an enriched object {id, collection, ...} but the
+  // user store can overwrite it with a boolean (true).  Only return the object
+  // form so that template accesses like spam.id / spam.collection work.
+  return s && typeof s === 'object' ? s : null
+})
 
 const validActions = computed(() => {
   // The standard messages we show depend on the valid ones for this type of member.
