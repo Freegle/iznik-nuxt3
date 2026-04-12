@@ -149,6 +149,9 @@ export function setupModMessages(reset) {
       fetchedIds.forEach((id) => listingIds.value.add(id))
     }
 
+    // Sync pagination context so loadMore() continues from where getMessages() left off.
+    context.value = messageStore.context
+
     // Force them to show.
     let msgs
 
