@@ -1240,37 +1240,28 @@ async function loginViaModTools(page, email, password = 'freegle') {
   console.log(`Starting ModTools login for: ${email}`)
 
   // Navigate to ModTools root — the layout shows LoginModal when not authenticated.
-  // Wait for 'load' then wait for the login modal — this avoids networkidle
-  // (which never resolves due to background polling) and avoids interacting
-  // before Vue hydration completes.
+  // Use domcontentloaded to avoid waiting for images/fonts, then let Playwright's
+  // auto-retry locators handle waiting for hydration to complete. This avoids both
+  // networkidle (background polling prevents it) and the "Execution context
+  // destroyed" error from page.waitForFunction during Vue hydration.
   await page.goto(`${modtoolsBaseUrl}/`, {
     timeout: timeouts.navigation.initial,
-    waitUntil: 'load',
+    waitUntil: 'domcontentloaded',
   })
 
-  // Wait for the login modal to appear (shown by the default layout)
+  // Wait for the login modal's email field to be visible — this confirms both
+  // that Vue has hydrated and the modal is rendered. Playwright locators
+  // auto-retry across navigation/hydration, unlike page.waitForFunction.
   const loginModal = page.locator('#loginModal')
-  await loginModal.first().waitFor({
+  const emailField = loginModal
+    .locator('input[type="email"], input[name="email"]')
+    .first()
+  await emailField.waitFor({
     state: 'visible',
-    timeout: timeouts.ui.appearance,
+    timeout: timeouts.navigation.slowPage,
   })
 
   const fullnameField = page.locator('#fullname, input[name="fullname"]')
-
-  // Wait for modal form to be ready (email + password fields present)
-  await page.waitForFunction(
-    () => {
-      const emailEl = document.querySelector(
-        'input[type="email"], input[name="email"]'
-      )
-      const passwordEl = document.querySelector(
-        'input[type="password"], input[name="password"]'
-      )
-      return emailEl && passwordEl
-    },
-    null,
-    { timeout: timeouts.ui.appearance }
-  )
 
   // Switch to login mode if in signup mode (fullname field visible)
   const fullnameVisible = await fullnameField.isVisible().catch(() => false)
@@ -1295,10 +1286,7 @@ async function loginViaModTools(page, email, password = 'freegle') {
     timeout: timeouts.ui.appearance,
   })
 
-  // Fill credentials
-  const emailField = page
-    .locator('input[type="email"], input[name="email"]')
-    .first()
+  // Fill credentials — emailField already declared above (scoped to loginModal)
   const passwordField = page
     .locator('input[type="password"], input[name="password"]')
     .first()
