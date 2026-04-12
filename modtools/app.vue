@@ -48,7 +48,14 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
-import { computed, watch, reloadNuxtApp, useRoute } from '#imports'
+import {
+  computed,
+  watch,
+  reloadNuxtApp,
+  useRoute,
+  onMounted,
+  nextTick,
+} from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
@@ -160,19 +167,25 @@ const loginCount = computed(() => {
   return authStore.loginCount
 })
 
-watch(loginCount, async () => {
-  if (!route.query.k) {
-    await reloadNuxtApp({
-      force: true,
-      persistState: false,
-    })
-  }
-})
-
 // u/k impersonation login is handled in modtools/pages/login.vue.
 // The default layout navigates to /login with u/k preserved in query params.
 
 if (process.client) {
+  // Defer loginCount watcher until after mount + nextTick so it doesn't
+  // fire on Pinia persistence hydration (which restores loginCount from
+  // localStorage, looking like a 0→N change on every SSR page load).
+  onMounted(async () => {
+    await nextTick()
+    watch(loginCount, async () => {
+      if (!route.query.k) {
+        await reloadNuxtApp({
+          force: true,
+          persistState: false,
+        })
+      }
+    })
+  })
+
   if (typeof window !== 'undefined') {
     // There's a bug https://github.com/nuxt/framework/issues/3141 which causes route to stop working.
     const messages = [
