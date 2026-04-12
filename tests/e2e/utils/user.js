@@ -1240,25 +1240,10 @@ async function loginViaModTools(page, email, password = 'freegle') {
   console.log(`Starting ModTools login for: ${email}`)
 
   // Navigate to ModTools root — the layout shows LoginModal when not authenticated.
-  // In CI, Vue hydration can destroy the execution context during page.goto,
-  // causing "Execution context was destroyed" errors through the logger proxy.
-  // Retry once if this happens — the second attempt lands on the hydrated page.
-  try {
-    await page.goto(`${modtoolsBaseUrl}/`, {
-      timeout: timeouts.navigation.initial,
-      waitUntil: 'domcontentloaded',
-    })
-  } catch (e) {
-    if (e.message?.includes('Execution context was destroyed')) {
-      console.log('Context destroyed during goto (hydration race), retrying')
-      await page.goto(`${modtoolsBaseUrl}/`, {
-        timeout: timeouts.navigation.initial,
-        waitUntil: 'domcontentloaded',
-      })
-    } else {
-      throw e
-    }
-  }
+  await page.goto(`${modtoolsBaseUrl}/`, {
+    timeout: timeouts.navigation.initial,
+    waitUntil: 'domcontentloaded',
+  })
 
   // Wait for the login modal's email field to be visible — this confirms both
   // that Vue has hydrated and the modal is rendered. Playwright locators
@@ -1319,20 +1304,11 @@ async function loginViaModTools(page, email, password = 'freegle') {
   })
   console.log('Login modal closed — login successful')
 
-  // Clean up any orphaned modal backdrops left behind when v-if removed
-  // the LoginModal from DOM without going through Bootstrap's hide sequence.
-  await page.evaluate(() => {
-    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
-    document.body.classList.remove('modal-open')
-    document.body.style.removeProperty('overflow')
-    document.body.style.removeProperty('padding-right')
-  })
-
-  // Wait for auth to persist to localStorage
-  await waitForAuthPersistence(page)
-
-  // Wait for the sidebar nav to appear — this confirms the authenticated
-  // layout is fully rendered (no redirect chain involved).
+  // After login, app.vue's loginCount watcher triggers reloadNuxtApp({ force: true }),
+  // causing a full page reload. Do NOT call page.evaluate() or other raw JS execution
+  // here — the reload destroys the execution context and those calls will fail.
+  // Playwright locators auto-retry across navigations, so just wait for the
+  // sidebar nav which confirms the authenticated layout rendered after reload.
   await page.locator('a[href="/messages/pending"]').waitFor({
     state: 'visible',
     timeout: timeouts.navigation.slowPage,
