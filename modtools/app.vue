@@ -170,7 +170,7 @@ watch(loginCount, async () => {
 })
 
 // u/k impersonation login is handled in modtools/pages/login.vue.
-// The auth middleware redirects to /login with u/k preserved in query params.
+// The default layout navigates to /login with u/k preserved in query params.
 
 if (process.client) {
   if (typeof window !== 'undefined') {
